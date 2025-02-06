@@ -1,0 +1,108 @@
+from typing import Union
+from monai.data import MetaTensor 
+import torch 
+from src.prompt_generators.prompt_generators import HeuristicSpatialPromptGenerator
+import logging 
+
+logger = logging.getLogger(__name__)
+
+class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
+        '''
+        Class which can be used to take the image, Optional(prior segmentation information) and ground truth in order to generate an interaction state dictionary for each 
+        interaction state throughout the iterative refinement process for any given MODE image/gt/pred/prompt-configuration set.
+
+        The abstraction can be used to set distinct prompting mechanisms for initialisations and iterative refinement also. 
+
+
+
+        Interaction state is defined as a dict which contains the following key:value pairs:
+            
+            Image - A dictionary separated by the datatype: 1) Path to the image, 2) MetaTensor of the image itself.
+            
+            Refinement Prompt - A nested dictionary, separated by prompt type (points, scribbles, bbox). The prompts are each a dictionary with'
+
+            1) Currently supported list[torch] format:
+        
+                Points: List of torch tensors each with shape 1 x N_dim (N_dims = number of image dimensions)
+                Point Labels: List of torch tensors each with shape 1 (Values = class-integer code value for the given point: e.g. 0, 1, 2, 3...)
+                Scribbles: Nested list of scribbles (N_sp), each scribble is a list of torch tensors with shape [1 x N_dim] denoting the positional coordinate.
+                
+                Bbox: List of N_box torch tensors shaped [1 x 2 * N_dim] (Extreme points of the bbox with order [i_min, j_min, k_min, i_max, j_max, k_max] where ijk = RAS convention) 
+                Bbox Labels: List of N_box torch tensors, each with shape 1 (Values = class-integer code value for the given point)
+                
+                Scribbles Labels: List of torch tensors, each with shape 1 (Values = class-integer code value for the given point: e.g. 0, 1, 2, 3... )
+
+            2) Currently supported Dict format. 
+                Points: Dictionary of class separated (by class label name) nested list of lists, each with length N_dims. 
+                Scribbles: Dictionary of class separated (by class label name) 3-fold nested list of lists: [Scribble Level List[Point Coordinate List[i,j,k]]]
+                Bbox: Dictionary of class separated (by class label name) 3-fold nested list of list [Box-level[List of length 2 * N_dim, with each sublist of length N_dims]]. 
+                Each sublist denotes the extreme value of the points with order [i_min, j_min, k_min, i_max, j_max, k_max], where ijk=RAS convention. 
+                
+
+            Propagated Prompt - A nested dictionary, separated by:
+                1) Discretised prediction maps which the application has provided.
+                2) Channelwise logit maps which correspond to that which the application has provided.
+                
+                Each contains a dictionary separated by the datatype format for representing them:
+                    1) Path to the file 2) MetaTensor form.
+
+                3) Extra input arguments that needs to be stored in memory for future inference passes, defined by the user's application! This will be pulled from the
+                    output_data dictionary generateed from the inference app call with the "optional_memory" key. 
+                    
+                    E.g., prompt feature embeddings, image feature embeddings.
+
+         
+        '''
+        
+        def __init__(self,
+                    prompt_methods: dict[str, dict],
+                    config_labels_dict: dict,
+                    ):
+
+            super().__init__(prompt_methods=prompt_methods, config_labels_dict=config_labels_dict)
+            
+        def __call__(self, 
+                    image: Union[torch.Tensor, MetaTensor],
+                    gt: Union[torch.Tensor, MetaTensor],
+                    prev_output_data: Union[dict, None], 
+                    ):
+            '''
+            Input:
+            
+            Image, in Torch tensor or MetaTensor format loaded in the native UI domain.
+            
+            GT, in Torch tensor or MetaTensor format loaded in the native UI domain. 
+            
+            Prev Output Data: A dictionary from the prior inference call output, two related fields here - discretised segmentation and multi-channel (channel first) 
+            logits maps (background is a class).  
+
+            Returns:
+            Interaction state dictionary for the current iteration for which the call has been made.
+            '''
+
+            input_data = {'image': image,
+                    'gt': gt,
+                    'prev_output_data': prev_output_data
+                    }
+            
+            interaction_torch_format, interaction_labels_torch_format, interaction_dict_format = self.generate_prompt(input_data)
+
+            interaction_state_dict = {
+                'image'
+                'interaction_torch_format': interaction_torch_format,
+                'interaction_labels_torch_format': interaction_labels_torch_format,
+                'interaction_dict_format': interaction_dict_format,
+                'prev_logits_path': prev_output_data['logits']['path'],
+                'prev_logits_metatensor': prev_output_data['logits']['metatensor'],
+                'prev_seg_path': prev_output_data['pred']['path'],
+                'prev_seg_metatensor': prev_output_data['pred']['metatensor'],
+                'optional_memory': prev_output_data['optional_memory']
+            }
+
+            return interaction_state_dict 
+
+# def interaction_state_metrics(self, metric_parametrisation):
+#         '''
+#         Function which takes the prompts, ground truth and generates the parametrisation for any parameter-dependent metrics specified in the experimental setup.
+#         '''
+#         pass  

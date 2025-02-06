@@ -1,0 +1,1 @@
+#This bash script is intended for running any planners required for the application. E.g. heuristic planners developed in a similar manner to nnU-Net.
