@@ -7,19 +7,19 @@ import logging
 import sys
 import torch
 import os
-from front_back_interact import front_back_checker
+from front_back_interact import front_back_processor
 from src.data.interaction_state_construct import HeuristicInteractionState 
 
 
 logger = logging.getLogger(__name__)
 
-class front_end_simulator(front_back_checker):
+class front_end_simulator:
     '''
     This class serves as an "interface" for the pseudo-ui with operations such as: 
     
     Loading the imaging data in the "UI" domain,
     Generating prompts in the "UI" domain, 
-    Storing the interaction states through the iterative segmentation process,
+    Storing the interaction states through the iterative segmentation process with configured interaction memory params,
     Saving the segmentation states throughout the iterative segmentation process
     Computing and storing the metrics throughout the iterative segmentation process
 
@@ -31,37 +31,52 @@ class front_end_simulator(front_back_checker):
 
     NOTE: Orientation convention is always assumed to be RAS! 
 
-        image: A dictionary containing a path & a pre-loaded (UI) metatensor object {'path':image_path, 'metatensor':image_metatensor_obj} 
+        image: A dictionary containing a path & a pre-loaded (UI) metatensor object 
+        {'path':image_path, 
+        'metatensor':image_metatensor_obj
+        'meta_dict': image_meta_dictionary}
+
         model: A string denoting the inference "mode" being simulated, has three options: 
                 1) Automatic Segmentation, denoted: 'IS_autoseg' 
                 2) Interactive Initialisation: 'IS_inter_init'
                 3) Interactive Editing: 'IS_inter_edit'
 
-        IM: A dictionary containing the set of interaction states. Keys = Edit iter num.
+        IM: A dictionary containing the set of interaction states. Keys = Inference iter num (0, 1, ...).
+        
         NOTE: For initialisations, IM = None 
 
-        NOTE: Users must pre-define the set of interaction states required with the following argument:
+        NOTE: Experimental config must pre-define the set of interaction states required with the following argument:
             {'keep_init': bool,
-            'inter_memory_len': int
+            'memory_len': int
             }         
 
-        Within IM (NOTE: logits, prev_):    
+        Within each state in IM (NOTE: logits, prev_):    
         
         prev_logits: A dictionary containing: {
-                'paths': list of paths, to each individual logits map, in the same order as provided by output CHWD logits map}
+                'paths': list of paths, to each individual logits map (1HWD), in the same order as provided by output CHWD logits map}
                 'metatensor': Non-modified metatensor/numpy array/torch tensor that is forward-propagated from the prior output (CHWD).
                 'logits_meta_dict': Non-modified meta dictionary that is forward propagated.
                 }
         prev_pred: A dictionary containing: {
-                'paths': list of paths, to each individual logits map, in the same order as provided by output CHWD logits map}
-                'metatensor': Non-modified metatensor/numpy array/torch tensor that is forward-propagated from the prior output (CHWD).
-                'logits_meta_dict': Non-modified meta dictionary that is forward propagated.
+                'path': path}
+                'metatensor': Non-modified metatensor/numpy array/torch tensor that is forward-propagated from the prior output (1HWD).
+                'pred_meta_dict': Non-modified meta dictionary that is forward propagated.
                 }
         prev_optional_memory: A dictionary containing any extra information that the application would like to forward propagate
         which is not currently provided.
 
-    
-    Must generate the output in a dict format with the following fields:
+        Refinement prompt information: See `<https://github.com/ParhomEsmaeili/IS_Validate/blob/main/src/data/interaction_state_construct.py>`
+
+        interaction_torch_format: A prompt-type separated dictionary containing the prompt information in list[torch.tensor] format 
+            {'interactions':dict[prompt_type_str[list[torch.tensor]]],
+            'interaction_labels':dict[prompt_type_str[list[torch.tensor]]],
+            }
+        interaction_dict_format: A prompt-type separated dictionary containing the prompt info in class separated dict format
+            (where each prompt spatial coord is represented as a sublist).  
+            dict[prompt_type_str[class[list[list]]]]
+
+
+    Inference app must generate the output in a dict format with the following fields:
 
     NOTE: Checks will be put in place to ensure that image resolution, spacing, orientation will be matching & otherwise 
     the code will be non-functional.
@@ -72,6 +87,8 @@ class front_end_simulator(front_back_checker):
         
         pred: MetaTensor/numpy/torch object containing the discretised prediction (shape 1HWD)
         pred_meta_dict: Meta information corresponding to the header of the prediction (must match the input image header)
+
+    NOTE: Optional to include the "optional_memory" field also, for any extra arguments they would like to store in IM.
 
     '''
     def __init__(self, 
@@ -84,7 +101,8 @@ class front_end_simulator(front_back_checker):
         
         args: Dictionary containing the information required for performing the experiment, e.g.: 
         class_label_config dictionary, "use mode" specific prompt generation config dictionary, 
-        inference run configs (e.g., modes, number of refinement iterations), metrics being computed, etc.
+        inference run configs (e.g., modes, number of refinement iterations), metrics being computed, interaction memory storage,
+        etc.
 
         TODO: Add a full exhaustive list of the dictionary fields.
 

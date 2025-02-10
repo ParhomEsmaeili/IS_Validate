@@ -9,7 +9,9 @@ logger = logging.getLogger(__name__)
 class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
         '''
         Class which can be used to take the image, Optional(prior segmentation information) and ground truth in order to generate an interaction state dictionary for each 
-        interaction state throughout the iterative refinement process for any given MODE image/gt/pred/prompt-configuration set.
+        interaction state throughout the iterative refinement process for any given:
+        
+        infer-MODE,image/gt/pred/prompt-configuration set.
 
         The abstraction can be used to set distinct prompting mechanisms for initialisations and iterative refinement also. 
 
@@ -44,7 +46,7 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
                 2) Channelwise logit maps which correspond to that which the application has provided.
                 
                 Each contains a dictionary separated by the datatype format for representing them:
-                    1) Path to the file 2) MetaTensor form.
+                    1) Path(s) to the file(s) 2) Original forward propagated form for the array (Meta dictionary too)
 
                 3) Extra input arguments that needs to be stored in memory for future inference passes, defined by the user's application! This will be pulled from the
                     output_data dictionary generateed from the inference app call with the "optional_memory" key. 
@@ -88,8 +90,10 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
             interaction_torch_format, interaction_labels_torch_format, interaction_dict_format = self.generate_prompt(input_data)
 
             interaction_state_dict = {
-                'interaction_torch_format': interaction_torch_format,
-                'interaction_labels_torch_format': interaction_labels_torch_format,
+                'interaction_torch_format':{
+                    'interactions': interaction_torch_format,
+                    'interaction_labels': interaction_labels_torch_format,
+                },
                 'interaction_dict_format': interaction_dict_format,
                 'logits':{
                     'prev_logits_path': prev_output_data['logits']['path'],

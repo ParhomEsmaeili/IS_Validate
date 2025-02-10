@@ -18,27 +18,31 @@ class BasicSpatialPromptGenerator(PromptReformatter):
 
         Inputs:
 
-        sim_methods: Simulation methods for each prompt.
+        sim_methods: Simulation methods used for generating each prompt.
         
         A nested dictionary first separated by the prompt type (e.g. points, scribbles, bbox).
 
-        Within each prompt type, the dictionary contains key:value pairs containing the list of prompting strategies being used for prompt simulation. 
+        Within each prompt type, another dictionary contains key:value pairs containing the list of prompting strategies being used for prompt simulation. 
         This dictionary has the flexibility to permit combinations of strategies. 
+
+        NOTE: Instances where a specific prompt type is not being used, will require that the list be a NoneType arg instead.
+        The prompt generated will also be a NoneType argument for the given prompts also!
 
         config_labels_dict: A dictionary mapping the class labels to the class integer codes. 
 
-        (OPTIONAL) prompt_build_params: A nested dictionary with key:value pairs containing the build arguments for each corresponding strategy implemented. 
-        Same structure as prompt_methods
+        (OPTIONAL) sim_build_params: A nested dictionary with key:value pairs containing the build arguments for each corresponding strategy implemented. 
+        Same structure as prompt_methods as they must correspond together!
 
-        Can also be a Nonetype, in which case there is no information required for building the prompters (e.g., parameter free/variable free)
+        NOTE: Can also be a Nonetype, in which case there is no information required for building the prompters
+        (e.g., parameter free/variable free, or if there is no prompt of that type being used)
 
         (OPTIONAL)prompt_mixture: A nested dict denoting a strategy for mixing prompt simulation across intra and inter-prompting strategies.
 
             Has structure: dict('inter_prompt':dict[prompt cross-interaction permutations, mixture_args/None], 
                                 'intra_prompt': dict[prompt_type_str : dict[prompt_method cross-interaction permutations str, mixture_args/None])
 
-        Can optionally can be Nonetype (i.e., fully  independent) simulation of prompts (inter and intra-prompt strategy). Hence they will be generated with no consideration
-        of prompting inter-dependencies.
+        Can optionally can be Nonetype (i.e., fully  independently assumed prompt generation) simulation of prompts (inter and intra-prompt strategy). 
+        Hence they will be generated with no consideration of prompting inter-dependencies.
     
         '''
         super().__init__(config_labels_dict)
@@ -71,14 +75,13 @@ class BasicSpatialPromptGenerator(PromptReformatter):
             Scribbles Labels: List of torch tensors, each with shape 1 (Values = class-integer code value for the given point: e.g. 0, 1, 2, 3... )
             Bbox: List of N_box torch tensors shaped [1 x 2 * N_dim] (Extreme points of the bbox with order [i_min, j_min, k_min, i_max, j_max, k_max] where ijk = RAS convention) 
             Bbox Labels: List of N_box torch tensors, each with shape 1 (Values = class-integer code value for the given point)
-            Label config: Dictionary which denotes the class-integer code mapping.
+
         
         2) Currently supported Dict format 
             Points: Dictionary of class separated (by class label name) nested list of lists, each with length N_dims. 
             Scribbles: Dictionary of class separated (by class label name) 3-fold nested list of lists: [Scribble Level List[Point Coordinate List[i,j,k]]]
             Bbox: Dictionary of class separated (by class label name) 3-fold nested list of list [Box-level[List of length 2 * N_dim, with each sublist of length N_dims]]. 
             Each sublist denotes the extreme value of the points with order [i_min, j_min, k_min, i_max, j_max, k_max], where ijk=RAS convention. 
-            Label Config: Dictionary which denotes the class-integer code mapping.
         '''
 
         #We reformat the prompt coord & label information:
@@ -101,9 +104,10 @@ class BasicSpatialPromptGenerator(PromptReformatter):
 
         gt: Torch tensor OR Metatensor containing the ground truth map in RAS orientation, but otherwise in the native image domain (no pre-processing other than RAS re-orientation).
         image: Torch tensor OR Metatensor containing the image in the native image domain (no pre-processing applied other than re-orientation in RAS)
-        prev_seg: Optionally a Metatensor containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
+        prev_pred: Optionally a Metatensor/torch tensor/npy array containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
         '''
         
+        raise NotImplementedError('Need to add a handler depending on the datatype of the "prev_pred" argument')
         p_torch_format, plabels_torch_format = self.interactive_prompter(data) 
         p_dict_format = self.reformat_to_dict(p_torch_format, plabels_torch_format)
 
@@ -113,18 +117,21 @@ class BasicSpatialPromptGenerator(PromptReformatter):
 
 class HeuristicSpatialPromptGenerator(BasicSpatialPromptGenerator):
     def __init__(self, 
-                prompt_methods:dict[str,dict], 
+                sim_methods:dict[str,dict], 
                 config_labels_dict: dict[str, int], 
                 *args, 
                 **kwargs):
         
-        super().__init__(sim_methods=prompt_methods, 
+        super().__init__(sim_methods=sim_methods, 
                         config_labels_dict=config_labels_dict,
                         *args, 
                         **kwargs) 
     
     def build_prompt_generator(self, 
-                               prompt_methods: dict, 
-                               prompt_build_params: Union[dict, None], 
+                               sim_methods: dict, 
+                               sim_build_params: Union[dict, None], 
                                prompt_mixture_params:  Union[dict, None]):
         pass 
+
+if __name__=='__main__':
+    HeuristicSpatialPromptGenerator(sim_methods={'points':['Random'], 'scribbles':None, 'bbox':None})
