@@ -15,10 +15,18 @@ General Inputs:
 
 All of the following are in pseudo-ui native image space:
 
+data: This is a dictionary which contains the following information:
 gt: Metatensor, or torch tensor or numpy array containing the ground truth mask.
-pred: Metatensor, or torch tensor, or numpy array containing the prediction mask from the prior inference call.
 img: Metatensor, or torch tensor, or numpy array containing the image.
 
+prev_output_data: (Optional) Dictionary containing the information from the prior inference calls 
+OR NONETYPE (for init modes).
+
+Contains the following fields:
+    pred: A dict, which contains a subfield "metatensor", with a 1HWD Metatensor, or torch tensor containing the prediction mask from the prior inference call.
+    logits: A dict, which contains a subfield "metatensor", with a CHWD Metatensor, or torch tensor for the logits map from the prior inference call.
+
+    
 generated_prompts: Contains field for each given prompt type:
 
     prompt: A list of the currently existing placed spatial prompts for the current iteration.

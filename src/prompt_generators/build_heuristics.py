@@ -51,7 +51,7 @@ class BuildHeuristic:
 
             #TODO: Implement the code for prompt mixture methods.
 
-    def independent_iterate_heuristics(self, gt, logits, pred, img):
+    def independent_iterate_heuristics(self, data: dict):
         '''
         This function implements the process of iterating through the prompt-gen heuristics to simulate prompts, while 
         checking for redundancies between prompts which are assumed to be VALID. 
@@ -88,7 +88,7 @@ class BuildHeuristic:
                     #we have an error raised, and skip.
 
                     try:
-                        generated_prompts, generated_prompt_labels = heur(gt, logits, pred, img, generated_prompts, generated_prompt_labels, self.heuristic_params[ptype][heur])
+                        generated_prompts, generated_prompt_labels = heur(data, generated_prompts, generated_prompt_labels, self.heuristic_params[ptype][heur])
                     
                     except:
                         continue 
@@ -96,12 +96,7 @@ class BuildHeuristic:
 
     def __call__(self, data):
         
-        gt = data['gt']
-        img = data['img']
-        pred = data['pred']['metatensor']
-        logits = data['logits']['metatensor']
-
         if not self.heuristic_mixtures:
-            prompts_torch_format, prompt_labels_torch_format = self.independent_iterate_heuristics(gt, logits, pred, img)
+            prompts_torch_format, prompt_labels_torch_format = self.independent_iterate_heuristics(data)
             
         return prompts_torch_format, prompt_labels_torch_format 
