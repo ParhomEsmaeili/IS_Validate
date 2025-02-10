@@ -13,30 +13,82 @@ from src.data.interaction_state_construct import HeuristicInteractionState
 
 logger = logging.getLogger(__name__)
 
-#Split input request formats to the "app backend" according to the format used for extracting the previous segmentation masks (e.g. path, or tensor based)
-#Then need to split request formats according whether full end-to-end is provided or not by the app.
-
-
 class front_end_simulator(front_back_checker):
     '''
-    This class serves as the pseudo-ui with operations such as: 
+    This class serves as an "interface" for the pseudo-ui with operations such as: 
     
     Loading the imaging data in the "UI" domain,
     Generating prompts in the "UI" domain, 
     Storing the interaction states through the iterative segmentation process,
-    Saving the segmentation states for each image?
+    Saving the segmentation states throughout the iterative segmentation process
+    Computing and storing the metrics throughout the iterative segmentation process
 
 
     etc.
 
-    Inputs: 
     
-    Initialised inference application which can be called using an input request.
+    Input request dictionary for application contains the following input fields:
+
+    NOTE: Orientation convention is always assumed to be RAS! 
+
+        image: A dictionary containing a path & a pre-loaded (UI) metatensor object {'path':image_path, 'metatensor':image_metatensor_obj} 
+        model: A string denoting the inference "mode" being simulated, has three options: 
+                1) Automatic Segmentation, denoted: 'IS_autoseg' 
+                2) Interactive Initialisation: 'IS_inter_init'
+                3) Interactive Editing: 'IS_inter_edit'
+
+        IM: A dictionary containing the set of interaction states. Keys = Edit iter num.
+        NOTE: For initialisations, IM = None 
+
+        NOTE: Users must pre-define the set of interaction states required with the following argument:
+            {'keep_init': bool,
+            'inter_memory_len': int
+            }         
+
+        Within IM (NOTE: logits, prev_):    
+        
+        prev_logits: A dictionary containing: {
+                'paths': list of paths, to each individual logits map, in the same order as provided by output CHWD logits map}
+                'metatensor': Non-modified metatensor/numpy array/torch tensor that is forward-propagated from the prior output (CHWD).
+                'logits_meta_dict': Non-modified meta dictionary that is forward propagated.
+                }
+        prev_pred: A dictionary containing: {
+                'paths': list of paths, to each individual logits map, in the same order as provided by output CHWD logits map}
+                'metatensor': Non-modified metatensor/numpy array/torch tensor that is forward-propagated from the prior output (CHWD).
+                'logits_meta_dict': Non-modified meta dictionary that is forward propagated.
+                }
+        prev_optional_memory: A dictionary containing any extra information that the application would like to forward propagate
+        which is not currently provided.
+
+    
+    Must generate the output in a dict format with the following fields:
+
+    NOTE: Checks will be put in place to ensure that image resolution, spacing, orientation will be matching & otherwise 
+    the code will be non-functional.
+
+        logits: MetaTensor/numpy/torch object, multi-channel logits map (CHWD), where C = Number of Classes
+        
+        logits_meta_dict: Meta information in dict format,  ('affine must match the input-image metatensor's affine info)
+        
+        pred: MetaTensor/numpy/torch object containing the discretised prediction (shape 1HWD)
+        pred_meta_dict: Meta information corresponding to the header of the prediction (must match the input image header)
 
     '''
     def __init__(self, 
                 infer_app, 
                 args: dict):
+        '''
+        Inputs: 
+    
+        infer_app: Initialised inference application which can be called to process an input request.
+        
+        args: Dictionary containing the information required for performing the experiment, e.g.: 
+        class_label_config dictionary, "use mode" specific prompt generation config dictionary, 
+        inference run configs (e.g., modes, number of refinement iterations), metrics being computed, etc.
+
+        TODO: Add a full exhaustive list of the dictionary fields.
+
+        '''
         
         self.infer_app = infer_app
         self.args = args
@@ -51,12 +103,16 @@ class front_end_simulator(front_back_checker):
         This function initialises the class objects which can generate the interaction states for use in inference.
         '''
         if self.args['prompt_procedure_type'].title() == 'Heuristic':
-            # self.autoseg_state_generator = None  The Autosegmentation states do not require any interaction state generators since they contain no interaction.
+            # self.autoseg_state_generator = None  
+            # The Autosegmentation state does not require any interaction state generators since they contain no 
+            # interaction. All information for the autosegmentation state will be provided with just an image input.
+
             self.inter_init_generator = HeuristicInteractionState(
-                mode='Interactive Init'
+                methods=self.args['inter_init_prompt_config'],
+                config_labels_dict=self.args['config_labels_dict']
             )
             self.inter_edit_generator = HeuristicInteractionState(
-                mode='Interactive Edit'
+                methods=self.args['inter_edit_prompt_config']
             )
         else:
             raise ValueError('The selected prompt generation algorithm is not supported')
@@ -91,13 +147,13 @@ class front_end_simulator(front_back_checker):
             if previous_output != None:
                 raise ValueError('The previous output should not exist for initialisation')
             
-            request = {'model': 'IS_interactive_init', 'class_configs': self.args['class_label_configs']}
+            request = {'model': 'IS_inter_init', 'class_configs': self.args['class_label_configs']}
 
         elif inference_mode.title() == 'Interactive Edit':
             if previous_output == None:
                 raise ValueError('There must be a dictionary containing the outputs of the prior inference call!')
             
-            request = {'model': 'IS_interactive_edit', 'class_configs': self.args['class_label_configs']}
+            request = {'model': 'IS_inter_edit', 'class_configs': self.args['class_label_configs']}
         else:
             raise ValueError('The inference mode is invalid for app request generation!')
 

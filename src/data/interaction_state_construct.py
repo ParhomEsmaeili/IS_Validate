@@ -88,16 +88,20 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
             interaction_torch_format, interaction_labels_torch_format, interaction_dict_format = self.generate_prompt(input_data)
 
             interaction_state_dict = {
-                'image'
                 'interaction_torch_format': interaction_torch_format,
                 'interaction_labels_torch_format': interaction_labels_torch_format,
                 'interaction_dict_format': interaction_dict_format,
-                'prev_logits_path': prev_output_data['logits']['path'],
-                'prev_logits_metatensor': prev_output_data['logits']['metatensor'],
-                'prev_seg_path': prev_output_data['pred']['path'],
-                'prev_seg_metatensor': prev_output_data['pred']['metatensor'],
+                'logits':{
+                    'prev_logits_path': prev_output_data['logits']['path'],
+                    'prev_logits_metatensor': prev_output_data['logits']['metatensor']
+                },
+                'prev_pred':{
+                    'prev_pred_path': prev_output_data['pred']['path'],
+                    'prev_pred_metatensor': prev_output_data['pred']['metatensor'],
+                },
                 'optional_memory': prev_output_data['optional_memory']
             }
+
 
             return interaction_state_dict 
 
