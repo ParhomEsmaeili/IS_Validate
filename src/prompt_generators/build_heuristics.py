@@ -8,8 +8,9 @@ generation, and it should also permit for probabilistic measures potentially whe
 multinomial trial for deciding which prompt heuristics to use for a given instance (i.e. the flexibility to not use 
 all prompt methods at ALL times. Also intended for performing any checks required on the generated prompts (e.g. removing repeats?))
 '''
-
-from prompt_generators.heuristic_generator_utils import base_registry, mixture_registry
+import os
+import sys
+from src.prompt_generators.heuristic_generator_utils import base_registry, mixture_registry
 from random import shuffle 
 
 class BuildHeuristic:
@@ -37,9 +38,12 @@ class BuildHeuristic:
             for prompt_type, heuristics in self.heuristics.items():
                 prompt_heur_fns = dict() 
                 
-                for heuristic in heuristics: 
-                    prompt_heur_fns[heuristic] = base_registry[prompt_type][heuristic]()
-
+                if heuristics: #If heuristic is not a NoneType/I.e. if config exists
+                    for heuristic in heuristics: 
+                        prompt_heur_fns[heuristic] = base_registry[prompt_type][heuristic]
+                else:
+                    prompt_heur_fns = None 
+                
                 heur_fn_dict[prompt_type] = prompt_heur_fns
             return heur_fn_dict 
         else:
@@ -47,7 +51,7 @@ class BuildHeuristic:
 
             #TODO: Implement the code for prompt mixture methods.
 
-    def independent_iterate_heuristics(self, gt, pred, img):
+    def independent_iterate_heuristics(self, gt, logits, pred, img):
         '''
         This function implements the process of iterating through the prompt-gen heuristics to simulate prompts, while 
         checking for redundancies between prompts which are assumed to be VALID. 
@@ -84,15 +88,20 @@ class BuildHeuristic:
                     #we have an error raised, and skip.
 
                     try:
-                        generated_prompts, generated_prompt_labels = heur(gt, pred, img, generated_prompts, generated_prompt_labels, self.heuristic_params[ptype][heur])
+                        generated_prompts, generated_prompt_labels = heur(gt, logits, pred, img, generated_prompts, generated_prompt_labels, self.heuristic_params[ptype][heur])
                     
                     except:
                         continue 
         return generated_prompts, generated_prompt_labels
 
-    def __call__(self, gt, pred, img):
+    def __call__(self, data):
+        
+        gt = data['gt']
+        img = data['img']
+        pred = data['pred']['metatensor']
+        logits = data['logits']['metatensor']
 
         if not self.heuristic_mixtures:
-            prompts_torch_format, prompt_labels_torch_format = self.independent_iterate_heuristics(gt, pred, img)
+            prompts_torch_format, prompt_labels_torch_format = self.independent_iterate_heuristics(gt, logits, pred, img)
             
         return prompts_torch_format, prompt_labels_torch_format 

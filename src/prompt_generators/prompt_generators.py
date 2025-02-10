@@ -3,9 +3,11 @@ from abc import abstractmethod
 import torch
 import os
 import sys
-# sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from prompt_generators.prompt_reformat_utils import PromptReformatter
-from prompt_generators.build_heuristics import BuildHeuristic
+import numpy as np
+from monai.data import MetaTensor 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from src.prompt_generators.prompt_reformat_utils import PromptReformatter
+from src.prompt_generators.build_heuristics import BuildHeuristic
 import logging 
 
 logger = logging.getLogger(__name__)
@@ -116,11 +118,39 @@ class BasicSpatialPromptGenerator(PromptReformatter):
 
         gt: Torch tensor OR Metatensor containing the ground truth map in RAS orientation, but otherwise in the native image domain (no pre-processing other than RAS re-orientation).
         image: Torch tensor OR Metatensor containing the image in the native image domain (no pre-processing applied other than re-orientation in RAS)
-        prev_pred: Optionally a Metatensor/torch tensor/npy array containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
+        
+        prev_output_data: (NOTE: OPTIONAL) output dictionary from the inference call which has been post-processed 
+        in the pseudo-ui front-end.
+       
+        Two relevant fields contained are the: 
+            pred: A dictionary containing 3 subfields:
+                1) "path": Path to the prediction file (Not Relevant)
+                And two relevant subfields
+                2) "metatensor" A Metatensor or torch tensor containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
+                3) "meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
+            
+            logits:
+                1) "paths": List of paths to the prediction file (Not Relevant)
+                And two relevant subfields
+                2) "metatensor" A Metatensor or torch tensor containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
+                3) "meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
+             
         '''
         
-        raise NotImplementedError('Need to add a handler depending on the datatype of the "prev_pred" argument')
+        if not isinstance(data['gt'], torch.Tensor) and not isinstance(data['gt'], MetaTensor):
+            raise TypeError('The ground truth must belong to the torch tensor, or monai MetaTensor datatype')
+
+        if not isinstance(data['image'], torch.Tensor) and not isinstance(data['image'], MetaTensor):
+            raise TypeError('The image must belong to the torch tensor, or monai MetaTensor datatype')
+        
+        if not isinstance(data['pred']['metatensor'], torch.Tensor) and not isinstance(data['pred']['metatensor'], MetaTensor):
+            raise TypeError('The pred must belong to the torch tensor, or monai MetaTensor datatype')
+        
+        if not isinstance(data['logits']['metatensor'], torch.Tensor) and not isinstance(data['logits']['metatensor'], MetaTensor):
+            raise TypeError('The logits must belong to the torch tensor, or monai MetaTensor datatype')
+        
         p_torch_format, plabels_torch_format = self.interactive_prompter(data) 
+        raise NotImplementedError('The reformatter has not been implemented yet!')
         p_dict_format = self.reformat_to_dict(p_torch_format, plabels_torch_format)
 
         return p_torch_format, plabels_torch_format, p_dict_format
@@ -140,18 +170,19 @@ class HeuristicSpatialPromptGenerator(BasicSpatialPromptGenerator):
                         prompt_mixture_params=prompt_mixture_params
                         ) 
     
-    def build_prompt_generator(self, 
+    def build_prompt_generator(self,
+                               config_labels_dict:dict[str, int], 
                                sim_methods: dict, 
                                sim_build_params: Union[dict, None], 
                                prompt_mixture_params:  Union[dict, None]):
         
-        return BuildHeuristic(config_labels_dict=self.config_labels_dict, 
+        return BuildHeuristic(config_labels_dict=config_labels_dict, 
                             heuristics=sim_methods, 
                             heuristic_params=sim_build_params,
                             heuristic_mixtures=prompt_mixture_params)
 
 if __name__=='__main__':
-    generator = HeuristicSpatialPromptGenerator(sim_methods={'points':['Random'], 'scribbles':None, 'bbox':None},
+    generator = HeuristicSpatialPromptGenerator(sim_methods={'points':['uniform_random'], 'scribbles':None, 'bbox':None},
                                     config_labels_dict={'tumour':1, 'background':0},
                                     sim_build_params=None, #{'points':None, 'scribbles':None, 'bbox':None},
                                     prompt_mixture_params=None)

@@ -54,12 +54,12 @@ class front_end_simulator:
         
         prev_logits: A dictionary containing: {
                 'paths': list of paths, to each individual logits map (1HWD), in the same order as provided by output CHWD logits map}
-                'metatensor': Non-modified metatensor/numpy array/torch tensor that is forward-propagated from the prior output (CHWD).
+                'metatensor': Non-modified metatensor/torch tensor that is forward-propagated from the prior output (CHWD).
                 'logits_meta_dict': Non-modified meta dictionary that is forward propagated.
                 }
         prev_pred: A dictionary containing: {
                 'path': path}
-                'metatensor': Non-modified metatensor/numpy array/torch tensor that is forward-propagated from the prior output (1HWD).
+                'metatensor': Non-modified metatensor/torch tensor that is forward-propagated from the prior output (1HWD).
                 'pred_meta_dict': Non-modified meta dictionary that is forward propagated.
                 }
         prev_optional_memory: A dictionary containing any extra information that the application would like to forward propagate
@@ -81,11 +81,11 @@ class front_end_simulator:
     NOTE: Checks will be put in place to ensure that image resolution, spacing, orientation will be matching & otherwise 
     the code will be non-functional.
 
-        logits: MetaTensor/numpy/torch object, multi-channel logits map (CHWD), where C = Number of Classes
+        logits: MetaTensor/torch object, multi-channel logits map (CHWD), where C = Number of Classes
         
         logits_meta_dict: Meta information in dict format,  ('affine must match the input-image metatensor's affine info)
         
-        pred: MetaTensor/numpy/torch object containing the discretised prediction (shape 1HWD)
+        pred: MetaTensor/torch object containing the discretised prediction (shape 1HWD)
         pred_meta_dict: Meta information corresponding to the header of the prediction (must match the input image header)
 
     NOTE: Optional to include the "optional_memory" field also, for any extra arguments they would like to store in IM.
