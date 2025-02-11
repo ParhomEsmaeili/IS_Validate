@@ -98,7 +98,8 @@ class PromptReformatter:
                 return self.scribble_reformat(prompts, prompts_labels)
             elif prompt_type.title() == 'Bboxes':
                 return self.bbox_reformat(prompts, prompts_labels)
-
+            else:
+                raise NotImplementedError('The currently selected prompt type is not supported')
 
 if __name__ == '__main__':
     config_labels_dict = {'tumor':1, 'background':0}
