@@ -14,8 +14,8 @@ logger = logging.getLogger(__name__)
 
 class BasicSpatialPromptGenerator(PromptReformatter):
     def __init__(self,
-                sim_methods: dict[str, dict],
                 config_labels_dict: dict,
+                sim_methods: dict[str, dict],
                 sim_build_params: Optional[dict[str, dict]] = None,
                 prompt_mixture_params: Optional[dict[str,dict]] = None,
                 ):
@@ -24,18 +24,17 @@ class BasicSpatialPromptGenerator(PromptReformatter):
 
         Inputs:
 
-        sim_methods: Simulation methods used for generating each prompt. Must always provide for all params, put NONE in the value for 
-        instances where a prompting method is not being used for a given prompt.
+        config_labels_dict: A dictionary mapping the class labels to the class integer codes. 
+
+        sim_methods: Simulation methods used for generating each prompt. Must always provide for all prompt types.
         
         A nested dictionary first separated by the prompt type (e.g. points, scribbles, bbox).
 
         Within each prompt type, another dictionary contains key:value pairs containing the list of prompting strategies being used for prompt simulation. 
         This dictionary has the flexibility to permit combinations of strategies. 
 
-        NOTE: Instances where a specific prompt type is not being used, will require that the list be a NoneType arg instead.
-        The prompt generated will also be a NoneType argument for the given prompts also!
-
-        config_labels_dict: A dictionary mapping the class labels to the class integer codes. 
+        NOTE: Instances where a specific prompt type is not being used, will require that the value be a NoneType arg instead.
+        The prompts generated will also be a NoneType argument for the given prompts also!
 
         (OPTIONAL) sim_build_params: A twice nested dictionary, for each prompt strategy within a prompt type it contains 
         a dictionary of build arguments for each corresponding strategy implemented. 
@@ -44,6 +43,7 @@ class BasicSpatialPromptGenerator(PromptReformatter):
         NOTE: Can also be a Nonetype, in which case there is no information required for building the prompters
         (e.g., parameter free/variable free, or if there is no prompt of that type being used)
 
+        
         (OPTIONAL)prompt_mixture: A twice nested dict denoting a strategy for mixing prompt simulation across intra
         and inter-prompting strategies. The mixture args are a dictionary for each corresponding pairing of cross-interactions.
 
@@ -145,14 +145,15 @@ class BasicSpatialPromptGenerator(PromptReformatter):
         if not isinstance(data['image'], torch.Tensor) and not isinstance(data['image'], MetaTensor):
             raise TypeError('The image must belong to the torch tensor, or monai MetaTensor datatype')
         
-        if not isinstance(data['pred']['metatensor'], torch.Tensor) and not isinstance(data['pred']['metatensor'], MetaTensor):
-            raise TypeError('The pred must belong to the torch tensor, or monai MetaTensor datatype')
-        
-        if not isinstance(data['logits']['metatensor'], torch.Tensor) and not isinstance(data['logits']['metatensor'], MetaTensor):
-            raise TypeError('The logits must belong to the torch tensor, or monai MetaTensor datatype')
+        if not data['prev_output_data'] is None:
+            #We run this check for the instance where the "prev_output_data" exists (i.e. for refinement iters)
+            if not isinstance(data['pred']['metatensor'], torch.Tensor) and not isinstance(data['pred']['metatensor'], MetaTensor):
+                raise TypeError('The previous pred must belong to the torch tensor, or monai MetaTensor datatype')
+            
+            if not isinstance(data['logits']['metatensor'], torch.Tensor) and not isinstance(data['logits']['metatensor'], MetaTensor):
+                raise TypeError('The previous logits must belong to the torch tensor, or monai MetaTensor datatype')
         
         p_torch_format, plabels_torch_format = self.interactive_prompter(data) 
-        raise NotImplementedError('The reformatter has not been implemented yet!')
         p_dict_format = self.reformat_to_dict(p_torch_format, plabels_torch_format)
 
         return p_torch_format, plabels_torch_format, p_dict_format

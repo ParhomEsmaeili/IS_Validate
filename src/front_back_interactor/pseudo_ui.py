@@ -43,25 +43,28 @@ class front_end_simulator:
 
         IM: A dictionary containing the set of interaction states. Keys = Inference iter num (0, 1, ...).
         
-        NOTE: For initialisations, IM = None 
+        NOTE: For initialisations, IM = {} 
 
         NOTE: Experimental config must pre-define the set of interaction states required with the following argument:
+            im_config = 
             {'keep_init': bool,
-            'memory_len': int
+            'memory_len': int (this denotes the retained memory backwards, -1 denotes full memory, otherwise it 
+            denotes the memory retained relative to the "current" iter)
             }         
 
-        Within each state in IM (NOTE: logits, prev_):    
+        Within each interaction state in IM:    
         
         prev_logits: A dictionary containing: {
                 'paths': list of paths, to each individual logits map (1HWD), in the same order as provided by output CHWD logits map}
-                'metatensor': Non-modified metatensor/torch tensor that is forward-propagated from the prior output (CHWD).
-                'logits_meta_dict': Non-modified meta dictionary that is forward propagated.
+                'prev_logits_metatensor': Non-modified metatensor/torch tensor that is forward-propagated from the prior output (CHWD).
+                'prev_logits_meta_dict': Non-modified meta dictionary that is forward propagated.
                 }
         prev_pred: A dictionary containing: {
                 'path': path}
-                'metatensor': Non-modified metatensor/torch tensor that is forward-propagated from the prior output (1HWD).
-                'pred_meta_dict': Non-modified meta dictionary that is forward propagated.
+                'prev_pred_metatensor': Non-modified metatensor/torch tensor that is forward-propagated from the prior output (1HWD).
+                'prev_pred_meta_dict': Non-modified meta dictionary that is forward propagated.
                 }
+
         prev_optional_memory: A dictionary containing any extra information that the application would like to forward propagate
         which is not currently provided.
 
@@ -75,6 +78,8 @@ class front_end_simulator:
             (where each prompt spatial coord is represented as a sublist).  
             dict[prompt_type_str[class[list[list]]]]
 
+
+            -------------------------------------------------------------------------------------------------------
 
     Inference app must generate the output in a dict format with the following fields:
 
@@ -115,7 +120,13 @@ class front_end_simulator:
 
     
 
-  
+    def app_output_processor(self):
+        '''
+        Makes use of the output processor class. This will tie together several functionalities such as 
+        massaging the output data dictionary, writing the segmentations, computing the metrics etc.
+        '''
+        pass 
+
     def prompt_gen_initialiser(self):
         '''
         This function initialises the class objects which can generate the interaction states for use in inference.
@@ -147,7 +158,7 @@ class front_end_simulator:
         
         We use the following convention, for Automatic Init: 'IS_autoseg', Interactive Init: 'IS_interactive_init', Interactive Edit: 'IS_interactive_edit'.
 
-        This value will be stored under the "App_Type" key in the input request. 
+        This value will be stored under the "model" key in the input request. 
 
 
         Inputs:
