@@ -66,8 +66,8 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
             '''
            
             '''
-            super().__init__(sim_methods=prompt_configs['methods'], 
-                            config_labels_dict=config_labels_dict,
+            super().__init__(config_labels_dict=config_labels_dict,
+                            sim_methods=prompt_configs['methods'], 
                             sim_build_params=prompt_configs['build_params'],
                             prompt_mixture_params=prompt_configs['mixture_params'])
             
