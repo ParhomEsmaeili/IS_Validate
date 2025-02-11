@@ -84,11 +84,11 @@ class BasicSpatialPromptGenerator(PromptReformatter):
         1) Currently supported list[torch] formats:
         
             Points: List of torch tensors each with shape 1 x N_dim (N_dims = number of image dimensions)
-            Points Labels: List of torch tensors each with shape 1 (Values = class-integer code value for the given point: e.g. 0, 1, 2, 3...)
+            Points_labels: List of torch tensors each with shape 1 (Values = class-integer code value for the given point: e.g. 0, 1, 2, 3...)
             Scribbles: Nested list of scribbles (N_sp), each scribble is a list of torch tensors with shape [1 x N_dim] denoting the positional coordinate.
-            Scribbles Labels: List of torch tensors, each with shape 1 (Values = class-integer code value for the given point: e.g. 0, 1, 2, 3... )
-            Bboxes: List of N_box torch tensors shaped [1 x 2 * N_dim] (Extreme points of the bbox with order [i_min, j_min, k_min, i_max, j_max, k_max] where ijk = RAS convention) 
-            Bboxes Labels: List of N_box torch tensors, each with shape 1 (Values = class-integer code value for the given point)
+            Scribbles_labels: List of torch tensors, each with shape 1 (Values = class-integer code value for the given point: e.g. 0, 1, 2, 3... )
+            Bboxes: Nested list of N_box torch tensors, each is a list with 2*N_dim tensors of shape [1 x N_dim] (Extreme points of the bbox with order [i_min, j_min, k_min, i_max, j_max, k_max] where ijk = RAS convention) 
+            Bboxes_labels: List of N_box torch tensors, each with shape 1 (Values = class-integer code value for the given point)
 
         
         2) Currently supported Dict format 
@@ -98,7 +98,7 @@ class BasicSpatialPromptGenerator(PromptReformatter):
             Each sublist denotes the extreme value of the points with order [i_min, j_min, k_min, i_max, j_max, k_max], where ijk=RAS convention. 
         '''
 
-        #We reformat the prompt coord & label information:
+        #We reformat the prompt coord & label information into a dictionary format:
          
         prompt_dict_format = dict()
 
@@ -107,7 +107,8 @@ class BasicSpatialPromptGenerator(PromptReformatter):
             prompts_labels = torch_format_labels[prompt_type]
 
             prompt_dict_format[prompt_type] = self.reformat_prompts(prompt_type, prompts, prompts_labels)    
-    
+
+        return prompt_dict_format 
         
     def generate_prompt(self, data: dict):
         

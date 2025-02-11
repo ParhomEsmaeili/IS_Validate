@@ -29,18 +29,16 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
             1) Currently supported list[torch] format:
         
                 Points: List of torch tensors each with shape 1 x N_dim (N_dims = number of image dimensions)
-                Point Labels: List of torch tensors each with shape 1 (Values = class-integer code value for the given point: e.g. 0, 1, 2, 3...)
+                Points_labels: List of torch tensors each with shape 1 (Values = class-integer code value for the given point: e.g. 0, 1, 2, 3...)
                 Scribbles: Nested list of scribbles (N_sp), each scribble is a list of torch tensors with shape [1 x N_dim] denoting the positional coordinate.
+                Scribbles_labels: List of torch tensors, each with shape 1 (Values = class-integer code value for the given point: e.g. 0, 1, 2, 3... )
+                Bboxes: Nested List of N_box torch tensors, each with 2*N_dim tensors of shape [1 x N_dim] (Extreme points of the bbox with order [i_min, j_min, k_min, i_max, j_max, k_max] where ijk = RAS convention) 
+                Bboxes_labels: List of N_box torch tensors, each with shape 1 (Values = class-integer code value for the given point)
                 
-                Bbox: List of N_box torch tensors shaped [1 x 2 * N_dim] (Extreme points of the bbox with order [i_min, j_min, k_min, i_max, j_max, k_max] where ijk = RAS convention) 
-                Bbox Labels: List of N_box torch tensors, each with shape 1 (Values = class-integer code value for the given point)
-                
-                Scribbles Labels: List of torch tensors, each with shape 1 (Values = class-integer code value for the given point: e.g. 0, 1, 2, 3... )
-
             2) Currently supported Dict format. 
                 Points: Dictionary of class separated (by class label name) nested list of lists, each with length N_dims. 
                 Scribbles: Dictionary of class separated (by class label name) 3-fold nested list of lists: [Scribble Level List[Point Coordinate List[i,j,k]]]
-                Bbox: Dictionary of class separated (by class label name) 3-fold nested list of list [Box-level[List of length 2 * N_dim, with each sublist of length N_dims]]. 
+                Bboxes: Dictionary of class separated (by class label name) 3-fold nested list of list [Box-level[List of length 2 * N_dim, with each sublist of length N_dims]]. 
                 Each sublist denotes the extreme value of the points with order [i_min, j_min, k_min, i_max, j_max, k_max], where ijk=RAS convention. 
                 
 
@@ -78,8 +76,9 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
             
             GT, in Torch tensor or MetaTensor format loaded in the native UI domain. 
             
-            Prev Output Data: A dictionary from the prior inference call output, two related fields here - discretised segmentation and multi-channel (channel first) 
-            logits maps (background is a class).  
+            Prev Output Data: A dictionary from the prior inference call output:
+            
+            Two related fields here - discretised segmentation and multi-channel (channel first) logits maps (background is a class).  
 
             Returns:
             Interaction state dictionary for the current iteration for which the call has been made.
