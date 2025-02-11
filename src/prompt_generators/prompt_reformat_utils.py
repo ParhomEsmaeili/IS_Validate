@@ -156,3 +156,4 @@ if __name__ == '__main__':
     print(reformatter_class.reformat_prompts('scribbles', scribbles_3, scribbles_lb_3))
     print(reformatter_class.reformat_prompts('bboxes', bboxs_3, bboxs_lb_3))
     
+    print(reformatter_class.reformat_prompts('granularity', points_1, points_lb_1))
