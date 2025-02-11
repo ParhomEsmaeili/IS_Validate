@@ -72,7 +72,7 @@ class front_end_simulator:
 
         interaction_torch_format: A prompt-type separated dictionary containing the prompt information in list[torch.tensor] format 
             {'interactions':dict[prompt_type_str[list[torch.tensor]]],
-            'interaction_labels':dict[prompt_type_str[list[torch.tensor]]],
+            'interactions_labels':dict[prompt_type_str[list[torch.tensor]]],
             }
         interaction_dict_format: A prompt-type separated dictionary containing the prompt info in class separated dict format
             (where each prompt spatial coord is represented as a sublist).  

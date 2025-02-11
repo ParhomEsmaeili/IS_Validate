@@ -68,8 +68,8 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
             '''
             super().__init__(sim_methods=prompt_configs['methods'], 
                             config_labels_dict=config_labels_dict,
-                            sim_build_params=prompt_configs[''],
-                            prompt_mixture_params=prompt_configs[''])
+                            sim_build_params=prompt_configs['build_params'],
+                            prompt_mixture_params=prompt_configs['mixture_params'])
             
         def __call__(self, 
                     image: Union[torch.Tensor, MetaTensor],

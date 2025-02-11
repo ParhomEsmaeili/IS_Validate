@@ -162,13 +162,13 @@ class BasicSpatialPromptGenerator(PromptReformatter):
 
 class HeuristicSpatialPromptGenerator(BasicSpatialPromptGenerator):
     def __init__(self, 
+                config_labels_dict: dict[str, int],
                 sim_methods:dict[str,dict], 
-                config_labels_dict: dict[str, int],  
                 sim_build_params:Optional[dict[str, dict]] = None,
                 prompt_mixture_params:Optional[dict[str,dict]]=None):
         
-        super().__init__(sim_methods=sim_methods, 
-                        config_labels_dict=config_labels_dict,
+        super().__init__(config_labels_dict=config_labels_dict,
+                        sim_methods=sim_methods, 
                         sim_build_params=sim_build_params,
                         prompt_mixture_params=prompt_mixture_params
                         ) 
