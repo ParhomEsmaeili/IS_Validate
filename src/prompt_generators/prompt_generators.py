@@ -24,7 +24,8 @@ class BasicSpatialPromptGenerator(PromptReformatter):
 
         Inputs:
 
-        sim_methods: Simulation methods used for generating each prompt.
+        sim_methods: Simulation methods used for generating each prompt. Must always provide for all params, put NONE in the value for 
+        instances where a prompting method is not being used for a given prompt.
         
         A nested dictionary first separated by the prompt type (e.g. points, scribbles, bbox).
 
@@ -87,14 +88,14 @@ class BasicSpatialPromptGenerator(PromptReformatter):
             Points_labels: List of torch tensors each with shape 1 (Values = class-integer code value for the given point: e.g. 0, 1, 2, 3...)
             Scribbles: Nested list of scribbles (N_sp), each scribble is a list of torch tensors with shape [1 x N_dim] denoting the positional coordinate.
             Scribbles_labels: List of torch tensors, each with shape 1 (Values = class-integer code value for the given point: e.g. 0, 1, 2, 3... )
-            Bboxes: Nested list of N_box torch tensors, each is a list with 2*N_dim tensors of shape [1 x N_dim] (Extreme points of the bbox with order [i_min, j_min, k_min, i_max, j_max, k_max] where ijk = RAS convention) 
+            Bboxes: List of N_box torch tensors, each tensor is a 1 x 2*N_dim shape (Extreme points of the bbox with order [i_min, j_min, k_min, i_max, j_max, k_max] where ijk = RAS convention) 
             Bboxes_labels: List of N_box torch tensors, each with shape 1 (Values = class-integer code value for the given point)
 
         
         2) Currently supported Dict format 
             Points: Dictionary of class separated (by class label name) nested list of lists, each with length N_dims. 
             Scribbles: Dictionary of class separated (by class label name) 3-fold nested list of lists: [Scribble Level List[Point Coordinate List[i,j,k]]]
-            Bboxes: Dictionary of class separated (by class label name) 3-fold nested list of list [Box-level[List of length 2 * N_dim, with each sublist of length N_dims]]. 
+            Bboxes: Dictionary of class separated (by class label name) 2-fold nested list of list [Box-level[List of length 2 * N_dim]]. 
             Each sublist denotes the extreme value of the points with order [i_min, j_min, k_min, i_max, j_max, k_max], where ijk=RAS convention. 
         '''
 

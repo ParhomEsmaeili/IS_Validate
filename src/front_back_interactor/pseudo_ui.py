@@ -130,7 +130,8 @@ class front_end_simulator:
                 config_labels_dict=self.args['config_labels_dict']
             )
             self.inter_edit_generator = HeuristicInteractionState(
-                methods=self.args['inter_edit_prompt_config']
+                methods=self.args['inter_edit_prompt_config'],
+                config_labels_dict=self.args['config_labels_dict']
             )
         else:
             raise ValueError('The selected prompt generation algorithm is not supported')
