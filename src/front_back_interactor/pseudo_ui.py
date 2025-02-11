@@ -40,10 +40,13 @@ class front_end_simulator:
                 1) Automatic Segmentation, denoted: 'IS_autoseg' 
                 2) Interactive Initialisation: 'IS_inter_init'
                 3) Interactive Editing: 'IS_inter_edit'
-
-        IM: A dictionary containing the set of interaction states. Keys = Inference iter num (0, 1, ...).
         
-        NOTE: For initialisations, IM = {} 
+        class_configs: A dictionary containing the class label - class integer code mapping relationship being used.
+
+        im: An interaction memory dictionary containing the set of interaction states. 
+        Keys = Edit inference iter num (0 = init, 1, ...).
+        
+        NOTE: For automatic initialisations, IM = {}
 
         NOTE: Experimental config must pre-define the set of interaction states required with the following argument:
             im_config = 
@@ -105,8 +108,18 @@ class front_end_simulator:
         infer_app: Initialised inference application which can be called to process an input request.
         
         args: Dictionary containing the information required for performing the experiment, e.g.: 
-        class_label_config dictionary, "use mode" specific prompt generation config dictionary, 
-        inference run configs (e.g., modes, number of refinement iterations), metrics being computed, interaction memory storage,
+        
+        config_labels_dict: Dictionary mapping class labels and integer codes.
+        
+        inter_init_prompt_config (and inter_edit_prompt_config): "use mode" specific prompt generation config dictionary, 
+        
+        inference run configs: (e.g., modes, number of refinement iterations)
+        
+        metrics configs: metrics being computed, heuristic configs for parameter-dependent metrics, etc.
+        
+        interaction memory configs: configs for how the interaction states will be stored to be passed through for
+        the infer_app call. 
+
         etc.
 
         TODO: Add a full exhaustive list of the dictionary fields.
@@ -147,11 +160,23 @@ class front_end_simulator:
         else:
             raise ValueError('The selected prompt generation algorithm is not supported')
         
+    def im_handler(self,
+                infer_mode: str,
+                im:dict):
+        if infer_mode.title() == 'Interactive Init':
+            self.inter_init_generator
+        elif infer_mode.title() == 'Interactive Edit':
+            self.inter_edit_generator 
+        else:
+            raise ValueError('The inference mode provided for the ')
     def app_request_generator(self,
                             inference_mode: str,
+                            edit_num: int,
+                            interaction_memory: Optional[dict] =  None, 
                             previous_output: Optional[dict] = None):
         '''
-        This function generates the app request (i.e. the input dictionary to the application).
+        This function generates the app request (i.e. the input dictionary to the application) which is intended 
+        to be called in the iterator.
 
         Each request comes with field containing the app_(sub)name also: I.e., Autosegmentation, Interactive Init, Interactive Edit. Users can provide three separate
         apps, or just repeat the same but it should be packaged in a manner such that the input request will be channeled appropriately for their requirements.
@@ -164,26 +189,55 @@ class front_end_simulator:
         Inputs:
 
         inference_mode - The mode in which the application is being used, therefore queried in the request.
-        previous_output - (Optional) The output dictionary from the prior iteration of inference (for editing modes). 
+        edit_num - The editing iteration number (0, 1, ...)
+        interaction_memory - The currently existing interaction memory 
+        previous_output - (Optional) The post-processed output dictionary from the prior iteration of inference (for editing modes). 
+        
+        Returns:
+
+        input_request - The input request for input to the app inference call.
+        interaction_memory - The updated interaction memory for tracking.
         '''
 
         if inference_mode.title() == 'Automatic Init':
             if previous_output != None: #We choose an explicit check of Nonetype for the if statement
                 raise ValueError('The previous output should not exist for initialisation')
             
-            request = {'model': 'IS_autoseg', 'class_configs': self.args['class_label_configs']}
+            im = {}
+            request = {
+                'model':'IS_autoseg', 
+                'class_configs': self.args['configs_label_dict'],
+                'im': im
+                }
+            
+            return request, im
 
         elif inference_mode.title() == 'Interactive Init':
             if previous_output != None:
                 raise ValueError('The previous output should not exist for initialisation')
             
-            request = {'model': 'IS_inter_init', 'class_configs': self.args['class_label_configs']}
+            im = {} 
 
+            request = {
+                'model': 'IS_inter_init', 
+                'class_configs': self.args['configs_label_dict'],
+                'im': im
+                }
+            return request, im 
+        
         elif inference_mode.title() == 'Interactive Edit':
             if previous_output == None:
                 raise ValueError('There must be a dictionary containing the outputs of the prior inference call!')
             
-            request = {'model': 'IS_inter_edit', 'class_configs': self.args['class_label_configs']}
+            self.im_handler(inference_mode, interaction_memory)
+
+
+            request = {
+                'model': 'IS_inter_edit', 
+                'class_configs': self.args['configs_label_dict'],
+                'im':im
+                }
+            return request, im
         else:
             raise ValueError('The inference mode is invalid for app request generation!')
 

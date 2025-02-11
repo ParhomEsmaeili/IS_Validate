@@ -17,16 +17,16 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
         This can be dependent on use-mode, hence the class will be initialised for each use interactive use mode separately        
         according to the provided prompt-configuration set.
 
-        NOTE: Assumption that will be made is that at least one prompt must be generated across the classes. Users 
-        would not otherwise interact with a system?
+        NOTE: Assumption that will be made is that at least one prompt must be generated across the classes for
+        interactive modes. Users would not otherwise interact with a system?
         
         Interaction state is defined as a dict which contains the following key:value pairs:
             
             Image - A dictionary separated by the datatype: 1) Path to the image, 2) MetaTensor of the image itself.
             
-            Refinement Prompt - A nested dictionary, separated by prompt type (points, scribbles, bbox). The prompts are each a dictionary with'
+            Prompts (currently supports points, scribbles, bbox). The prompts are each a dictionary with'
 
-            1) Currently supported list[torch] format:
+            1) Currently supported list[torch] formats:
         
                 Points: List of torch tensors each with shape 1 x N_dim (N_dims = number of image dimensions)
                 Points_labels: List of torch tensors each with shape 1 (Values = class-integer code value for the given point: e.g. 0, 1, 2, 3...)
@@ -34,6 +34,9 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
                 Scribbles_labels: List of torch tensors, each with shape 1 (Values = class-integer code value for the given point: e.g. 0, 1, 2, 3... )
                 Bboxes: List of N_box torch tensors, each tensor is a 1 x 2*N_dim shape (Extreme points of the bbox with order [i_min, j_min, k_min, i_max, j_max, k_max] where ijk = RAS convention) 
                 Bboxes_labels: List of N_box torch tensors, each with shape 1 (Values = class-integer code value for the given point)
+
+                Placed within the "interaction_torch_format" with two subdicts "interactions" the prompts spatial coords info,
+                and "interactions_labels" the corresponding labels for the prompts. 
 
             2) Currently supported Dict format. 
                 Points: Dictionary of class separated (by class label name) nested list of lists, each with length N_dims. 
@@ -43,17 +46,18 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
                 
             NOTE: In instances where a prompt type is not being simulated, the value will be a Nonetype. 
 
-            Propagated Prompt - A nested dictionary, separated by:
-                1) Discretised prediction maps which the application has provided.
-                2) Channelwise logit maps which correspond to that which the application has provided.
-                
+            
+            1) Discretised prediction maps which the application has provided.
+            2) Channelwise logit maps which correspond to that which the application has provided.
+            
                 Each contains a dictionary separated by the datatype format for representing them:
-                    1) Path(s) to the file(s) 2) Original forward propagated form for the array (Meta dictionary too)
-
-                3) Extra input arguments that needs to be stored in memory for future inference passes, defined by the user's application! This will be pulled from the
-                    output_data dictionary generateed from the inference app call with the "optional_memory" key. 
+                    1) Path(s) to the file(s) 2) Original forward propagated form for the array 
+                    3) Meta dictionary for the array
                     
-                    E.g., prompt feature embeddings, image feature embeddings.
+            3) Extra input arguments that needs to be stored in memory for future inference passes, defined by the user's application! This will be pulled from the
+                output_data dictionary generateed from the inference app call with the "optional_memory" key. 
+                    
+                E.g., prompt feature embeddings, image feature embeddings.
 
          
         '''
@@ -71,8 +75,13 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
                             sim_build_params=prompt_configs['build_params'],
                             prompt_mixture_params=prompt_configs['mixture_params'])
             
-        def __call__(self, 
+            self.init_modes = ['Autoseg', 'Interactive Init'] 
+            self.edit_modes = ['Interactive Edit']
+
+        def generate_is(
+                    self, 
                     image: Union[torch.Tensor, MetaTensor],
+                    infer_mode: str,
                     gt: Union[torch.Tensor, MetaTensor],
                     prev_output_data: Union[dict, None], 
                     ):
@@ -91,12 +100,41 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
             Interaction state dictionary for the current iteration for which the call has been made.
             '''
 
-            input_data = {'image': image,
+            generator_input_data = {'image': image,
                     'gt': gt,
                     'prev_output_data': prev_output_data
                     }
             
-            interaction_torch_format, interaction_labels_torch_format, interaction_dict_format = self.generate_prompt(input_data)
+            if infer_mode in self.init_modes:
+                prev_output_data = {
+                'prev_logits':{
+                    'paths': None,
+                    'prev_logits_metatensor': None,
+                    'prev_logits_meta_dict': None
+                },
+                'prev_pred':{
+                    'path': None,
+                    'prev_pred_metatensor': None,
+                    'prev_pred_meta_dict': None
+                },
+                'optional_memory': None
+                }
+            elif infer_mode in self.edit_modes:
+                pass #In this case we just take the existing dict which should contain the aforementioned fields populated.
+
+
+            #Generation of the prompts:
+            if infer_mode.title() == 'Interactive Init':
+                interaction_torch_format, interaction_labels_torch_format, interaction_dict_format = self.generate_prompt(generator_input_data)
+            elif infer_mode.title() == 'Interactive Edit':
+                 interaction_torch_format, interaction_labels_torch_format, interaction_dict_format = self.generate_prompt(generator_input_data)
+            elif infer_mode.title() in 'Autoseg':
+                interaction_torch_format, interaction_labels_torch_format, interaction_dict_format = None, None, None
+                #We create a dummy with Nonetype values for instances where we are using the autoseg mode. This is
+                #only intended for instances where optional memory is required.
+            else:
+                raise ValueError('The inference mode inputted is not valid!')
+            
 
             interaction_state_dict = {
                 'interaction_torch_format':{
