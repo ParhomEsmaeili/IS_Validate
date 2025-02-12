@@ -125,17 +125,17 @@ class BasicSpatialPromptGenerator(PromptReformatter):
         in the pseudo-ui front-end.
        
         Two relevant fields for prompt generation contained are the: 
-            prev_pred: A dictionary containing 3 subfields:
+            pred: A dictionary containing 3 subfields:
                 1) "path": Path to the prediction file (Not Relevant)
                 And two relevant subfields
-                2) "metatensor" A Metatensor or torch tensor containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
-                3) "meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
+                2) "pred_metatensor" A Metatensor or torch tensor containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
+                3) "pred_meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
             
-            prev_logits:
+            logits:
                 1) "paths": List of paths to the prediction file (Not Relevant)
                 And two potentially relevant subfields
-                2) "prev_logits_metatensor" A Metatensor or torch tensor containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
-                3) "prev_logits_meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
+                2) "logits_metatensor" A Metatensor or torch tensor containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
+                3) "logits_meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
              
         '''
         
@@ -147,10 +147,10 @@ class BasicSpatialPromptGenerator(PromptReformatter):
         
         if not data['prev_output_data'] is None:
             #We run this check for the instance where the "prev_output_data" exists (i.e. for refinement iters)
-            if not isinstance(data['pred']['prev_pred_metatensor'], torch.Tensor) and not isinstance(data['pred']['prev_pred_metatensor'], MetaTensor):
+            if not isinstance(data['pred']['pred_metatensor'], torch.Tensor) and not isinstance(data['pred']['pred_metatensor'], MetaTensor):
                 raise TypeError('The previous pred must belong to the torch tensor, or monai MetaTensor datatype')
             
-            if not isinstance(data['logits']['prev_logits_metatensor'], torch.Tensor) and not isinstance(data['logits']['prev_logits_metatensor'], MetaTensor):
+            if not isinstance(data['logits']['logits_metatensor'], torch.Tensor) and not isinstance(data['logits']['logits_metatensor'], MetaTensor):
                 raise TypeError('The previous logits must belong to the torch tensor, or monai MetaTensor datatype')
         
         p_torch_format, plabels_torch_format = self.interactive_prompter(data) 
