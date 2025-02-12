@@ -75,10 +75,15 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
                             sim_build_params=prompt_configs['build_params'],
                             prompt_mixture_params=prompt_configs['mixture_params'])
             
-            self.init_modes = ['Autoseg', 'Interactive Init'] 
+            self.init_modes = ['Interactive Init'] 
             self.edit_modes = ['Interactive Edit']
 
-        def generate_is(
+        def data_management(self,
+                            prev_output_data: Union[dict, None]):
+            '''
+            Function which handles the 
+            '''
+        def __call__(
                     self, 
                     image: Union[torch.Tensor, MetaTensor],
                     infer_mode: str,
@@ -100,10 +105,21 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
             Interaction state dictionary for the current iteration for which the call has been made.
             '''
 
-            generator_input_data = {'image': image,
-                    'gt': gt,
-                    'prev_output_data': prev_output_data
-                    }
+
+            generator_input_data = {
+                'image': image,
+                'gt': gt,
+                'prev_output_data': prev_output_data
+                }
+            
+            #Generation of the prompts:
+            if infer_mode.title() == 'Interactive Init' or infer_mode.title() == 'Interactive Edit':
+                interaction_torch_format, interaction_labels_torch_format, interaction_dict_format = self.generate_prompt(generator_input_data)
+            else:
+                raise ValueError('The inference mode inputted is not valid!')
+            
+            #Here we perform a sleight of hand, to reformat the prev_output data for the interaction state defn.
+            #since there will be no information regarding the prev_output_data for initialisation. 
             
             if infer_mode in self.init_modes:
                 prev_output_data = {
@@ -117,25 +133,9 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
                     'prev_pred_metatensor': None,
                     'prev_pred_meta_dict': None
                 },
-                'optional_memory': None
+                'prev_optional_memory': None
                 }
-            elif infer_mode in self.edit_modes:
-                pass #In this case we just take the existing dict which should contain the aforementioned fields populated.
-
-
-            #Generation of the prompts:
-            if infer_mode.title() == 'Interactive Init':
-                interaction_torch_format, interaction_labels_torch_format, interaction_dict_format = self.generate_prompt(generator_input_data)
-            elif infer_mode.title() == 'Interactive Edit':
-                 interaction_torch_format, interaction_labels_torch_format, interaction_dict_format = self.generate_prompt(generator_input_data)
-            elif infer_mode.title() in 'Autoseg':
-                interaction_torch_format, interaction_labels_torch_format, interaction_dict_format = None, None, None
-                #We create a dummy with Nonetype values for instances where we are using the autoseg mode. This is
-                #only intended for instances where optional memory is required.
-            else:
-                raise ValueError('The inference mode inputted is not valid!')
             
-
             interaction_state_dict = {
                 'interaction_torch_format':{
                     'interactions': interaction_torch_format,

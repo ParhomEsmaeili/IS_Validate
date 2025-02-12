@@ -9,7 +9,7 @@ import torch
 import os
 from front_back_interact import front_back_processor
 from src.data.interaction_state_construct import HeuristicInteractionState 
-
+from src.general_utils.cleanup import im_cleanup
 
 logger = logging.getLogger(__name__)
 
@@ -44,10 +44,8 @@ class front_end_simulator:
         class_configs: A dictionary containing the class label - class integer code mapping relationship being used.
 
         im: An interaction memory dictionary containing the set of interaction states. 
-        Keys = Edit inference iter num (0 = init, 1, ...).
+        Keys = Infer mode + optionally (for Edit) the inference iter num (1, ...).
         
-        NOTE: For automatic initialisations, IM = {}
-
         NOTE: Experimental config must pre-define the set of interaction states required with the following argument:
             im_config = 
             {'keep_init': bool,
@@ -109,18 +107,19 @@ class front_end_simulator:
         
         args: Dictionary containing the information required for performing the experiment, e.g.: 
         
-        config_labels_dict: Dictionary mapping class labels and integer codes.
-        
-        inter_init_prompt_config (and inter_edit_prompt_config): "use mode" specific prompt generation config dictionary, 
-        
-        inference run configs: (e.g., modes, number of refinement iterations)
-        
-        metrics configs: metrics being computed, heuristic configs for parameter-dependent metrics, etc.
-        
-        interaction memory configs: configs for how the interaction states will be stored to be passed through for
-        the infer_app call. 
+            config_labels_dict: Dictionary mapping class labels and integer codes.
+            
+            inter_init_prompt_config (and inter_edit_prompt_config): "use mode" specific prompt generation config dictionary, 
+            
+            inference run configs: (e.g., modes, number of refinement iterations)
+            
+            metrics configs: metrics being computed, prompt generation configs for parameter-dependent metrics, etc.
+            
+            interaction memory configs: configs for how the interaction states will be stored to be passed through for
+            the infer_app call: contains fields 'keep_init' and 'im_len' (former denotes the treatment of init interaction
+            state, while im_len denotes the edit memory)
 
-        etc.
+            etc.
 
         TODO: Add a full exhaustive list of the dictionary fields.
 
@@ -140,7 +139,7 @@ class front_end_simulator:
         '''
         pass 
 
-    def prompt_gen_initialiser(self):
+    def input_prompt_gen_initialiser(self):
         '''
         This function initialises the class objects which can generate the interaction states for use in inference.
         '''
@@ -159,21 +158,81 @@ class front_end_simulator:
             )
         else:
             raise ValueError('The selected prompt generation algorithm is not supported')
+    
+    def metric_prompt_gen_initialiser(self):
+        '''
+        Function intended for initialising the prompt generators for the metric computation.
+        '''
+        pass 
+
+    def metric_im_handler(self):
+        '''
+        Function intended for interaction memory handling, but for instances where the generated data is used for metric
+        computation.
+        '''
+
+    def input_im_handler(self,
+                data_instance: dict, 
+                infer_config: dict,
+                im:Union[dict, None],
+                prev_output_data: Union[dict, None],
+                ):
+        '''
+        Function which handles the interaction memory dict for the input information. Takes the following args:
+
+        data_instance - A dictionary containing the set of information with respect to the image, and ground truth, 
+        required for the request generation + interaction state generation:
+
+            Contains the following fields:
+
+                'image': dict - A dictionary containing the following subfields
+                    'path': path to the image 
+                    'metatensor': Loaded MetaTensor in RAS orientation (pseudo-UI native domain)
+                    'meta_dict': MetaTensor's meta_dict
+                
+                'label': dict - A dictionary containing the sam subfields as the image! Not one-hot encoded for the MetaTensors!
+
+        infer_config: Dict - A dictionary containing two subfields:
+            'mode': str - The mode that the inference call will be made for (Automatic Init, Interactive Init, Interactive Edit)
+            'edit num': Union[int, None] - The current edit's iteration number.
         
-    def im_handler(self,
-                infer_mode: str,
-                im:dict):
-        if infer_mode.title() == 'Interactive Init':
-            self.inter_init_generator
-        elif infer_mode.title() == 'Interactive Edit':
-            self.inter_edit_generator 
-        else:
-            raise ValueError('The inference mode provided for the ')
-    def app_request_generator(self,
-                            inference_mode: str,
-                            edit_num: int,
-                            interaction_memory: Optional[dict] =  None, 
-                            previous_output: Optional[dict] = None):
+        im: Union[Dict, None] - An optional dictionary containing the existing interaction memory (None for inits)
+        prev_output_data: Union[Dict, None] - An optional dictionary containing the post-processed output data from prior
+        iteration's inference call.
+
+        Returns:
+        The updated interaction memory, with any post-processing implemented for cleanup (if activated)
+        '''
+        
+        if infer_config['mode'].title() == 'Automatic Init':
+            im = {'Automatic Init': None}
+
+        elif infer_config['mode'].title() == 'Interactive Init':
+            im = {'Interactive Init': self.inter_init_generator(
+                image=data_instance['image']['metatensor'], 
+                mode=infer_config['mode'], 
+                gt=data_instance['label']['metatensor'], 
+                prev_output_data=prev_output_data)} 
+
+
+        elif infer_config['mode'].title() == 'Interactive Edit':
+            im[f'Interactive Edit Iter {infer_config["edit_num"]}'] = self.inter_edit_generator(
+                image=data_instance['image']['metatensor'],
+                mode=infer_config['mode'],
+                gt=data_instance['label']['metatensor'],
+                prev_output_data=prev_output_data
+            )
+            #Here we implement the optional use of memory clipping in instances where memory concerns may exist.
+
+            im = im_cleanup(self.args['is_seg_tmp'], self.args['tmp_dir_path'], self.args['im_config'], im, infer_config)
+        
+        return im 
+
+    def infer_app_request_generator(self,
+                            data_instance: dict,
+                            infer_call_config: dict,
+                            im: Union[dict, None], 
+                            prev_output_data: Union[dict, None]):
         '''
         This function generates the app request (i.e. the input dictionary to the application) which is intended 
         to be called in the iterator.
@@ -188,22 +247,46 @@ class front_end_simulator:
 
         Inputs:
 
-        inference_mode - The mode in which the application is being used, therefore queried in the request.
-        edit_num - The editing iteration number (0, 1, ...)
-        interaction_memory - The currently existing interaction memory 
-        previous_output - (Optional) The post-processed output dictionary from the prior iteration of inference (for editing modes). 
+        data_instance - A dictionary containing the set of information with respect to the image, and ground truth, 
+        required for the request generation + interaction state generation:
+
+            Contains the following fields:
+
+                'image': dict - A dictionary containing the following subfields
+                    'path': path to the image 
+                    'metatensor': Loaded MetaTensor in RAS orientation (pseudo-UI native domain)
+                    'meta_dict': MetaTensor's meta_dict
+                
+                'label': dict - A dictionary containing the sam subfields as the image! Not one-hot encoded for the MetaTensors!
+            
         
+        infer_call_config: A dict providing info about the current infer call, contains
+         
+            mode - The mode in which the application is being used, therefore queried in the request, and the
+        
+            edit_num - The editing iteration number (0, 1, ...)
+        
+        im - (Optional) The currently existing interaction memory or NoneType (For initialisations) 
+        
+        prev_output_data - (Optional) The post-processed output dictionary from the prior iteration of inference (for editing modes). 
+        or NoneType. 
+
         Returns:
 
-        input_request - The input request for input to the app inference call.
-        interaction_memory - The updated interaction memory for tracking.
+        request - The input request dictionary for input to the app inference call.
+        im - The updated interaction memory dict for tracking.
         '''
 
-        if inference_mode.title() == 'Automatic Init':
-            if previous_output != None: #We choose an explicit check of Nonetype for the if statement
+        if infer_call_config['mode'].title() == 'Automatic Init':
+            if prev_output_data is not None: #We choose an explicit check of Nonetype for the if statement
                 raise ValueError('The previous output should not exist for initialisation')
             
-            im = {}
+            im = self.input_im_handler(
+                data_instance=data_instance, 
+                infer_config=infer_call_config, 
+                im=None, 
+                prev_output_data=None)
+
             request = {
                 'model':'IS_autoseg', 
                 'class_configs': self.args['configs_label_dict'],
@@ -212,11 +295,16 @@ class front_end_simulator:
             
             return request, im
 
-        elif inference_mode.title() == 'Interactive Init':
-            if previous_output != None:
+        elif infer_call_config['mode'].title() == 'Interactive Init':
+            if prev_output_data is not None: #We choose an explicit check of Nonetype for the if statement
                 raise ValueError('The previous output should not exist for initialisation')
             
-            im = {} 
+            im = self.input_im_handler(
+                data_instance=data_instance, 
+                infer_config=infer_call_config, 
+                im=None, 
+                prev_output_data=None) 
+
 
             request = {
                 'model': 'IS_inter_init', 
@@ -225,12 +313,16 @@ class front_end_simulator:
                 }
             return request, im 
         
-        elif inference_mode.title() == 'Interactive Edit':
-            if previous_output == None:
+        elif infer_call_config['mode'].title() == 'Interactive Edit':
+            if prev_output_data is None:
                 raise ValueError('There must be a dictionary containing the outputs of the prior inference call!')
             
-            self.im_handler(inference_mode, interaction_memory)
-
+            im = self.input_im_handler(
+                data_instance=data_instance,
+                infer_config=infer_call_config,
+                im=im,
+                prev_output_data=prev_output_data
+            )
 
             request = {
                 'model': 'IS_inter_edit', 
