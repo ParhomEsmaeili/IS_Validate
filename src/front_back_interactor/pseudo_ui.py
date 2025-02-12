@@ -87,11 +87,11 @@ class front_end_simulator:
     NOTE: Checks will be put in place to ensure that image resolution, spacing, orientation will be matching & otherwise 
     the code will be non-functional.
 
-        logits: MetaTensor/torch object, multi-channel logits map (CHWD), where C = Number of Classes
+        logits_metatensor: MetaTensor/torch object, multi-channel logits map (CHWD), where C = Number of Classes
         
         logits_meta_dict: Meta information in dict format,  ('affine must match the input-image metatensor's affine info)
         
-        pred: MetaTensor/torch object containing the discretised prediction (shape 1HWD)
+        pred_metatensor: MetaTensor/torch object containing the discretised prediction (shape 1HWD)
         pred_meta_dict: Meta information corresponding to the header of the prediction (must match the input image header)
 
     NOTE: Optional to include the "optional_memory" field also, for any extra arguments they would like to store in IM.

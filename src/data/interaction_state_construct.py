@@ -78,11 +78,6 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
             self.init_modes = ['Interactive Init'] 
             self.edit_modes = ['Interactive Edit']
 
-        def data_management(self,
-                            prev_output_data: Union[dict, None]):
-            '''
-            Function which handles the 
-            '''
         def __call__(
                     self, 
                     image: Union[torch.Tensor, MetaTensor],
@@ -120,20 +115,20 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
             
             #Here we perform a sleight of hand, to reformat the prev_output data for the interaction state defn.
             #since there will be no information regarding the prev_output_data for initialisation. 
-            
+
             if infer_mode in self.init_modes:
                 prev_output_data = {
-                'prev_logits':{
+                'logits':{
                     'paths': None,
-                    'prev_logits_metatensor': None,
-                    'prev_logits_meta_dict': None
+                    'logits_metatensor': None,
+                    'logits_meta_dict': None
                 },
-                'prev_pred':{
+                'pred':{
                     'path': None,
-                    'prev_pred_metatensor': None,
-                    'prev_pred_meta_dict': None
+                    'pred_metatensor': None,
+                    'pred_meta_dict': None
                 },
-                'prev_optional_memory': None
+                'optional_memory': None
                 }
             
             interaction_state_dict = {
@@ -144,15 +139,15 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
                 'interaction_dict_format': interaction_dict_format,
                 'prev_logits':{
                     'paths': prev_output_data['logits']['path'],
-                    'prev_logits_metatensor': prev_output_data['logits']['metatensor'],
+                    'prev_logits_metatensor': prev_output_data['logits']['logits_metatensor'],
                     'prev_logits_meta_dict': prev_output_data['logits']['logits_meta_dict']
                 },
                 'prev_pred':{
                     'path': prev_output_data['pred']['path'],
-                    'prev_pred_metatensor': prev_output_data['pred']['metatensor'],
+                    'prev_pred_metatensor': prev_output_data['pred']['pred_metatensor'],
                     'prev_pred_meta_dict': prev_output_data['pred']['pred_meta_dict']
                 },
-                'optional_memory': prev_output_data['optional_memory']
+                'prev_optional_memory': prev_output_data['optional_memory']
             }
 
 
