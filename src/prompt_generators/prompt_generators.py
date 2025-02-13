@@ -36,25 +36,46 @@ class BasicSpatialPromptGenerator(PromptReformatter):
         NOTE: Instances where a specific prompt type is not being used, will require that the value be a NoneType arg instead.
         The prompts generated will also be a NoneType argument for the given prompts also!
 
-        (OPTIONAL) sim_build_params: A twice nested dictionary, for each prompt strategy within a prompt type it contains 
-        a dictionary of build arguments for each corresponding strategy implemented. 
+        
+
+
+        
+        (OPTIONAL) sim_build_params: A twice nested dictionary, for each prompt strategy within a prompt type it 
+        contains a dictionary of build arguments for each corresponding strategy implemented. 
+
         Almost the same structure as prompt_methods, as they must correspond together!
 
         NOTE: Can also be a Nonetype, in which case there is no information required for building the prompters
         (e.g., parameter free/variable free, or if there is no prompt of that type being used)
 
+        NOTE: Child classes where the prompt generation method may be the same across prompt types
+        e.g. prompt generation D.L models, will necessitate that the prompt mixture argument denotes the strategy for
+        cross-interaction (e.g., conditioning the model with a prompt prior, or passing all prompt-type requests concurrently 
+        through). NOTE: However, prompt-type & method specific args can still be passed through in the build_params.
         
+
+
+
+
+
         (OPTIONAL)prompt_mixture: A twice nested dict denoting a strategy for mixing prompt simulation across intra
         and inter-prompting strategies. The mixture args are a dictionary for each corresponding pairing of cross-interactions.
 
-        This prompt mixture arg will control whether prompt-methods will interact/condition one another during the 
+        This prompt mixture arg will control whether/how prompt-methods will interact/condition one another during the 
         simulation. 
 
-            Has structure: dict('inter_prompt':dict[prompt cross-interaction permutations, mixture_args/None], 
-                                'intra_prompt': dict[prompt_type_str : dict[prompt_strategy cross-interaction permutations str, mixture_args/None])
+            Has structure: dict('inter_prompt':dict[tuple(prompt cross-interaction combinations), mixture_args/None], 
+                                'intra_prompt': dict[prompt_type_str : dict[tuple(prompt_strategy cross-interaction combinations), mixture_args/None])
+            
+            Tuple can provide an immutable set of combinations
+
+            NOTE: Downstream use will likely necessitate the use of set logic to verify combinations as the tuple 
+            is immutable. Verification likely will entail the following: Generate set of potential combinations from
+            prompt_types (or strategy), cross-reference with the corresponding dict item by converting key into set.
+
 
         Can optionally can be Nonetype (i.e., fully  independently assumed prompt generation) simulation of prompts (inter and intra-prompt strategy). 
-        Hence they will be generated with no consideration of prompting inter-dependencies.
+        Hence they will be generated with no consideration of prompting intra and inter-dependencies.
     
         '''
         super().__init__(config_labels_dict)
@@ -78,21 +99,28 @@ class BasicSpatialPromptGenerator(PromptReformatter):
         pass
     
     
-    def reformat_to_dict(self, torch_format_prompts: dict, torch_format_labels):
+    def reformat_to_dict(self, torch_format_prompts: dict, torch_format_labels: dict):
         '''
         This function converts the torch format prompts into a dictionary format. Assumed convention:
-
-        1) Currently supported list[torch] formats:
-        
+    
+        a) 'interactions":
             Points: List of torch tensors each with shape 1 x N_dim (N_dims = number of image dimensions)
-            Points_labels: List of torch tensors each with shape 1 (Values = class-integer code value for the given point: e.g. 0, 1, 2, 3...)
             Scribbles: Nested list of scribbles (N_sp), each scribble is a list of torch tensors with shape [1 x N_dim] denoting the positional coordinate.
-            Scribbles_labels: List of torch tensors, each with shape 1 (Values = class-integer code value for the given point: e.g. 0, 1, 2, 3... )
             Bboxes: List of N_box torch tensors, each tensor is a 1 x 2*N_dim shape (Extreme points of the bbox with order [i_min, j_min, k_min, i_max, j_max, k_max] where ijk = RAS convention) 
+        
+        b) 'interactions_labels'
+
+            Points_labels: List of torch tensors each with shape 1 (Values = class-integer code value for the given point: e.g. 0, 1, 2, 3...)
+            Scribbles_labels: List of torch tensors, each with shape 1 (Values = class-integer code value for the given point: e.g. 0, 1, 2, 3... )
             Bboxes_labels: List of N_box torch tensors, each with shape 1 (Values = class-integer code value for the given point)
 
+        "interactions" contains the prompts spatial coords info, and "interactions_labels" the corresponding
+        labels for the prompts. 
         
-        2) Currently supported Dict format 
+        Returns:
+
+        Currently supported Dict format:
+         
             Points: Dictionary of class separated (by class label name) nested list of lists, each with length N_dims. 
             Scribbles: Dictionary of class separated (by class label name) 3-fold nested list of lists: [Scribble Level List[Point Coordinate List[i,j,k]]]
             Bboxes: Dictionary of class separated (by class label name) 2-fold nested list of list [Box-level[List of length 2 * N_dim]]. 
@@ -118,8 +146,8 @@ class BasicSpatialPromptGenerator(PromptReformatter):
 
         data: Dictionary which contains the following fields:
 
-        gt: Torch tensor OR Metatensor containing the ground truth map in RAS orientation, but otherwise in the native image domain (no pre-processing other than RAS re-orientation).
         image: Torch tensor OR Metatensor containing the image in the native image domain (no pre-processing applied other than re-orientation in RAS)
+        gt: Torch tensor OR Metatensor containing the ground truth map in RAS orientation, but otherwise in the native image domain (no pre-processing other than RAS re-orientation).
         
         prev_output_data: (NOTE: OPTIONAL) output dictionary from the inference call which has been post-processed 
         in the pseudo-ui front-end.

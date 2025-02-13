@@ -14,29 +14,34 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
         Class which can be used to take the image, Optional(prior segmentation information) and ground truth in order to generate an interaction state dictionary for each 
         interaction state throughout the iterative refinement process for any given prompt configuration provided:
         
-        This can be dependent on use-mode, hence the class will be initialised for each use interactive use mode separately        
+        This can be dependent on use-mode, hence the class can be initialised for each use interactive use mode separately        
         according to the provided prompt-configuration set.
 
         NOTE: Assumption that will be made is that at least one prompt must be generated across the classes for
-        interactive modes. Users would not otherwise interact with a system?
+        interactive modes. Users would not otherwise interact with a system!
         
         Interaction state is defined as a dict which contains the following key:value pairs:
             
             Image - A dictionary separated by the datatype: 1) Path to the image, 2) MetaTensor of the image itself.
             
-            Prompts (currently supports points, scribbles, bbox). The prompts are each a dictionary with'
+            Prompts (currently supports points, scribbles, bbox). The prompts and labels provided with
+            two types of formats:
 
-            1) Currently supported list[torch] formats:
+            1) list[torch] formats, key = 'interactions_torch_format' This is a dictionary with two subdicts:
         
-                Points: List of torch tensors each with shape 1 x N_dim (N_dims = number of image dimensions)
-                Points_labels: List of torch tensors each with shape 1 (Values = class-integer code value for the given point: e.g. 0, 1, 2, 3...)
-                Scribbles: Nested list of scribbles (N_sp), each scribble is a list of torch tensors with shape [1 x N_dim] denoting the positional coordinate.
-                Scribbles_labels: List of torch tensors, each with shape 1 (Values = class-integer code value for the given point: e.g. 0, 1, 2, 3... )
-                Bboxes: List of N_box torch tensors, each tensor is a 1 x 2*N_dim shape (Extreme points of the bbox with order [i_min, j_min, k_min, i_max, j_max, k_max] where ijk = RAS convention) 
-                Bboxes_labels: List of N_box torch tensors, each with shape 1 (Values = class-integer code value for the given point)
+                a) 'interactions":
+                    Points: List of torch tensors each with shape 1 x N_dim (N_dims = number of image dimensions)
+                    Scribbles: Nested list of scribbles (N_sp), each scribble is a list of torch tensors with shape [1 x N_dim] denoting the positional coordinate.
+                    Bboxes: List of N_box torch tensors, each tensor is a 1 x 2*N_dim shape (Extreme points of the bbox with order [i_min, j_min, k_min, i_max, j_max, k_max] where ijk = RAS convention) 
+                
+                b) 'interactions_labels'
 
-                Placed within the "interaction_torch_format" with two subdicts "interactions" the prompts spatial coords info,
-                and "interactions_labels" the corresponding labels for the prompts. 
+                    Points_labels: List of torch tensors each with shape 1 (Values = class-integer code value for the given point: e.g. 0, 1, 2, 3...)
+                    Scribbles_labels: List of torch tensors, each with shape 1 (Values = class-integer code value for the given point: e.g. 0, 1, 2, 3... )
+                    Bboxes_labels: List of N_box torch tensors, each with shape 1 (Values = class-integer code value for the given point)
+
+                "interactions" contains the prompts spatial coords info, and "interactions_labels" the corresponding
+                labels for the prompts. 
 
             2) Currently supported Dict format. 
                 Points: Dictionary of class separated (by class label name) nested list of lists, each with length N_dims. 
@@ -44,11 +49,11 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
                 Bboxes: Dictionary of class separated (by class label name) 2-fold nested list of list [Box-level[List of length 2 * N_dim]]. 
                 Each sublist denotes the extreme value of the points with order [i_min, j_min, k_min, i_max, j_max, k_max], where ijk=RAS convention. 
                 
-            NOTE: In instances where a prompt type is not being simulated, the value will be a Nonetype. 
+            NOTE: In instances where a prompt type is not being simulated, the corresponding values will be a Nonetype. 
 
             
-            1) Discretised prediction maps which the application has provided.
-            2) Channelwise logit maps which correspond to that which the application has provided.
+            prev_pred: Info for the discretised prediction maps which the application has provided.
+            prev_logits: Channelwise logit maps which correspond to that which the application has provided.
             
                 Each contains a dictionary separated by the datatype format for representing them:
                     1) Path(s) to the file(s) 2) Original forward propagated form for the array 

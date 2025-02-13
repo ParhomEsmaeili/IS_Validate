@@ -9,7 +9,9 @@ prompt simulation call.
 
 
 Possible heuristic arguments include: probability of execution, multi-class related variables (e.g. how they may interact),
-multi-component related variables, etc, probability of executing a heuristic which samples a mistaken point.
+multi-component related variables, etc, probability of executing a heuristic which samples a mistaken point. It should also permit for probabilistic measures potentially where we may want to run a bernoulli trial or
+multinomial trial for deciding which prompt heuristics to use for a given instance (i.e. the flexibility to not use 
+all prompt methods at ALL times. Also intended for performing any checks required on the generated prompts (e.g. removing repeats?))
 
 General Inputs:
 

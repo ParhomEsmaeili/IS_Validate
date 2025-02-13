@@ -257,7 +257,7 @@ class front_end_simulator:
                     'metatensor': Loaded MetaTensor in RAS orientation (pseudo-UI native domain)
                     'meta_dict': MetaTensor's meta_dict
                 
-                'label': dict - A dictionary containing the sam subfields as the image! Not one-hot encoded for the MetaTensors!
+                'label': dict - A dictionary containing the same subfields as the image! Not one-hot encoded for the MetaTensors!
             
         
         infer_call_config: A dict providing info about the current infer call, contains
