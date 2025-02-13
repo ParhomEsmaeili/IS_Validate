@@ -128,10 +128,6 @@ class front_end_simulator:
         self.infer_app = infer_app
         self.args = args
 
-        super().__init__()
-
-    
-
     def app_output_processor(self):
         '''
         Makes use of the output processor class. This will tie together several functionalities such as 
@@ -146,14 +142,16 @@ class front_end_simulator:
         if self.args['prompt_procedure_type'].title() == 'Heuristic':
             # self.autoseg_state_generator = None  
             # The Autosegmentation state does not require any interaction state generators since they contain no 
-            # interaction. All information for the autosegmentation state will be provided with just an image input.
+            # interaction. All information for the autosegmentation state will be provided manually.
 
             self.inter_init_generator = HeuristicInteractionState(
-                methods=self.args['inter_init_prompt_config'],
+                device=self.args['device'],
+                prompt_configs=self.args['inter_init_prompt_config'],
                 config_labels_dict=self.args['config_labels_dict']
             )
             self.inter_edit_generator = HeuristicInteractionState(
-                methods=self.args['inter_edit_prompt_config'],
+                device=self.args['device'],
+                prompt_configs=self.args['inter_edit_prompt_config'],
                 config_labels_dict=self.args['config_labels_dict']
             )
         else:

@@ -32,7 +32,7 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
                 a) 'interactions":
                     Points: List of torch tensors each with shape 1 x N_dim (N_dims = number of image dimensions)
                     Scribbles: Nested list of scribbles (N_sp), each scribble is a list of torch tensors with shape [1 x N_dim] denoting the positional coordinate.
-                    Bboxes: List of N_box torch tensors, each tensor is a 1 x 2*N_dim shape (Extreme points of the bbox with order [i_min, j_min, k_min, i_max, j_max, k_max] where ijk = RAS convention) 
+                    Bboxes: List of N_box torch tensors, each tensor is a 1 x 2*N_dim shape (Extrema of the bbox with order [i_min, j_min, k_min, i_max, j_max, k_max] where ijk = RAS convention) 
                 
                 b) 'interactions_labels'
 
@@ -49,7 +49,7 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
                 Bboxes: Dictionary of class separated (by class label name) 2-fold nested list of list [Box-level[List of length 2 * N_dim]]. 
                 Each sublist denotes the extreme value of the points with order [i_min, j_min, k_min, i_max, j_max, k_max], where ijk=RAS convention. 
                 
-            NOTE: In instances where a prompt type is not being simulated, the corresponding values will be a Nonetype. 
+            NOTE: In instances where a prompt type is not at all being (or was not for a given iter) simulated, the corresponding values will be a Nonetype. 
 
             
             prev_pred: Info for the discretised prediction maps which the application has provided.
@@ -68,14 +68,25 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
         '''
         
         def __init__(self,
+                    device: str,
                     prompt_configs: dict,
                     config_labels_dict: dict,
                     ):
 
             '''
-           
+            inputs:
+
+            device: The device which the prompt generation computations will be implemented on.
+            
+            prompt_configs: The configurations for the simulation methods (for each prompt type), the build params,
+            and the prompt mixture params. 
+            
+            config_labels_dict: The dictionary mapping the class label and the integer-codes.
+
             '''
-            super().__init__(config_labels_dict=config_labels_dict,
+            super().__init__(
+                            device=device,
+                            config_labels_dict=config_labels_dict,
                             sim_methods=prompt_configs['methods'], 
                             sim_build_params=prompt_configs['build_params'],
                             prompt_mixture_params=prompt_configs['mixture_params'])
