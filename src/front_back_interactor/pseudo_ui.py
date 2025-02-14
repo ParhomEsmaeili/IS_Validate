@@ -108,6 +108,8 @@ class front_end_simulator:
         infer_app: Initialised inference application which can be called to process an input request.
         
         args: Dictionary containing the information required for performing the experiment, e.g.: 
+
+            random_seed: The int denoting the seed being used for this instance of validation. 
         
             config_labels_dict: Dictionary mapping class labels and integer codes.
             
@@ -310,6 +312,7 @@ class front_end_simulator:
                 prev_output_data=None)
 
             request = {
+                'image': data_instance['image'],
                 'model':'IS_autoseg', 
                 'class_configs': self.args['configs_label_dict'],
                 'im': im
@@ -329,6 +332,7 @@ class front_end_simulator:
 
 
             request = {
+                'image': data_instance['image'],
                 'model': 'IS_inter_init', 
                 'class_configs': self.args['configs_label_dict'],
                 'im': im
@@ -347,6 +351,7 @@ class front_end_simulator:
             )
 
             request = {
+                'image': data_instance['image'],
                 'model': 'IS_inter_edit', 
                 'class_configs': self.args['configs_label_dict'],
                 'im':im
@@ -354,13 +359,7 @@ class front_end_simulator:
             return request, im
         else:
             raise ValueError('The inference mode is invalid for app request generation!')
-
-        raise NotImplementedError('The implementation for the app request generator is incomplete.')
-    
-        #TODO: 
-        # Merge the base template for the request with the interaction state output into one dictionary
-        # Merge the FSIM dictionary into the request also.
-        return request 
+        
     def iterative_loop(self, dataset):
         '''
         Dataset object which can be iterated through, performs a set of load transforms when called. 
