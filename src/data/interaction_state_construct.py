@@ -69,6 +69,7 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
         
         def __init__(self,
                     device: str,
+                    use_mem:bool, 
                     prompt_configs: dict,
                     config_labels_dict: dict,
                     ):
@@ -78,6 +79,9 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
 
             device: The device which the prompt generation computations will be implemented on.
             
+            use_mem: A bool denoting whether the interaction memory should be used as part of prompt generation (I.E is the "UI" 
+            refreshing or accumulating prompts)
+
             prompt_configs: The configurations for the simulation methods (for each prompt type), the build params,
             and the prompt mixture params. 
             
@@ -86,6 +90,7 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
             '''
             super().__init__(
                             device=device,
+                            use_mem=use_mem,
                             config_labels_dict=config_labels_dict,
                             sim_methods=prompt_configs['methods'], 
                             sim_build_params=prompt_configs['build_params'],
@@ -99,18 +104,23 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
                     image: Union[torch.Tensor, MetaTensor],
                     infer_mode: str,
                     gt: Union[torch.Tensor, MetaTensor],
-                    prev_output_data: Union[dict, None], 
+                    prev_output_data: Union[dict, None],
+                    im: Union[dict, None]
                     ):
             '''
             Input:
             
             Image, in Torch tensor or MetaTensor format loaded in the native UI domain.
             
+            Infer_mode, a string denoting the inference mode for which we are simulating prompts.
+
             GT, in Torch tensor or MetaTensor format loaded in the native UI domain. 
             
-            Prev Output Data: A dictionary from the prior inference call output:
-            
+            Prev Output Data: An optional dictionary from the prior inference call output:
+        
             Two related fields here - discretised segmentation and multi-channel (channel first) logits maps (background is a class).  
+
+            im: An optional dictionary containing the set of retained interaction states (or NONE). 
 
             Returns:
             Interaction state dictionary for the current iteration for which the call has been made.
@@ -120,7 +130,8 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
             generator_input_data = {
                 'image': image,
                 'gt': gt,
-                'prev_output_data': prev_output_data
+                'prev_output_data': prev_output_data,
+                'im':im
                 }
             
             #Generation of the prompts:

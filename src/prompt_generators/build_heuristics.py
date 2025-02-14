@@ -1,25 +1,18 @@
-
-'''
-This file is intended to wrap the heuristic-based generator utilities into a callable class. Primary intention is to
-maintain a tidy codebase, and to ensure that a mixture of prompt generation can be organised.
-
-It permits calling functions for mixing together the prompts after the fact, and for heuristics which implement mixtures
-of the prompts during generation. 
-
-'''
 import os
 import sys
+from typing import Union 
+
 from src.prompt_generators.heuristic_generator_utils import mixture_class_registry, base_fncs_registry
-from random import shuffle 
 
 class BuildHeuristic:
 
     def __init__(self,
-                device,
-                config_labels_dict,
-                heuristics,
-                heuristic_params,
-                heuristic_mixtures 
+                device:str,
+                use_mem:bool,
+                config_labels_dict:dict,
+                heuristics:dict,
+                heuristic_params: Union[dict, None],
+                heuristic_mixtures: Union[dict, None] 
                 ):
         
         '''
@@ -28,7 +21,10 @@ class BuildHeuristic:
 
         Inputs:
 
-        device: The device which the computations will be implemented on for gpu (or cpu) processing.
+        device: str - The device which the computations will be implemented on for gpu (or cpu) processing.
+
+        use_mem: A bool - Denotes whether the interaction memory dictionary will be used so that stored memory
+        is being retained/used to filter the error regions for prompt generation.
 
         config_labels_dict: A dictionary mapping the class labels to the class integer codes. 
 
@@ -85,6 +81,7 @@ class BuildHeuristic:
         Hence they will be generated with no consideration of prompting intra and inter-dependencies.
         '''
         self.device = device 
+        self.use_mem = use_mem 
         self.config_labels_dict = config_labels_dict
         self.heuristics = heuristics 
         self.heuristic_params = heuristic_params
@@ -150,7 +147,8 @@ class BuildHeuristic:
                 config_labels_dict=self.config_labels_dict,
                 build_args=self.heuristic_params,
                 heur_fn_dict=heur_fn_dict,                                
-                device=self.device)
+                device=self.device,
+                use_mem=self.use_mem)
         else:
             raise NotImplementedError('Implement the code for initialising prompt mixture methods.')
             '''
@@ -249,11 +247,11 @@ class BuildHeuristic:
                 2) "logits_metatensor" A Metatensor or torch tensor containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
                 3) "logits_meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
         
-                
+        im: Optional dictionary containing the interaction memory from the prior interaction states.      
 
         Returns: 
 
-        Both outputs are in the list[torch] format denoted in: `<https://github.com/ParhomEsmaeili/IS_Validate/blob/main/src/data/interaction_state_construct.py>` 
+        Both outputs are in the list[torch] format denoted in: `<https://github.com/IS_Validate/blob/main/src/data/interaction_state_construct.py>` 
 
         prompts_torch_format: dict - A dictionary, separated by the prompt-type, which contains the prompt spatial information
         for the selected prompt types in the prompt generation config.  
@@ -262,7 +260,7 @@ class BuildHeuristic:
         labels for the corresponding prompts (or NoneTypes for the empty prompts!). 
         '''
         if not self.heuristic_mixtures:
-            prompts_torch_format, prompts_labels_torch_format = self.independent_iterate_heuristics(data)
+            prompts_torch_format, prompts_labels_torch_format = self.extract_prompts(data)
         
         elif self.heuristic_mixtures:
 

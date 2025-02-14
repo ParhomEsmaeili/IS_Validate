@@ -69,7 +69,7 @@ class front_end_simulator:
         prev_optional_memory: A dictionary containing any extra information that the application would like to forward propagate
         which is not currently provided.
 
-        Refinement prompt information: See `<https://github.com/ParhomEsmaeili/IS_Validate/blob/main/src/data/interaction_state_construct.py>`
+        Refinement prompt information: See `<https://github.com/IS_Validate/blob/main/src/data/interaction_state_construct.py>`
 
         interaction_torch_format: A prompt-type separated dictionary containing the prompt information in list[torch.tensor] format 
             {'interactions':dict[prompt_type_str[list[torch.tensor]]],
@@ -146,11 +146,13 @@ class front_end_simulator:
 
             self.inter_init_generator = HeuristicInteractionState(
                 device=self.args['device'],
+                use_mem=self.args['use_mem_generator'],
                 prompt_configs=self.args['inter_init_prompt_config'],
                 config_labels_dict=self.args['config_labels_dict']
             )
             self.inter_edit_generator = HeuristicInteractionState(
                 device=self.args['device'],
+                use_mem=self.args['use_mem_generator'],
                 prompt_configs=self.args['inter_edit_prompt_config'],
                 config_labels_dict=self.args['config_labels_dict']
             )
@@ -210,7 +212,8 @@ class front_end_simulator:
                 image=data_instance['image']['metatensor'], 
                 mode=infer_config['mode'], 
                 gt=data_instance['label']['metatensor'], 
-                prev_output_data=prev_output_data)} 
+                prev_output_data=prev_output_data, 
+                im=None)} 
 
 
         elif infer_config['mode'].title() == 'Interactive Edit':
@@ -218,7 +221,8 @@ class front_end_simulator:
                 image=data_instance['image']['metatensor'],
                 mode=infer_config['mode'],
                 gt=data_instance['label']['metatensor'],
-                prev_output_data=prev_output_data
+                prev_output_data=prev_output_data,
+                im=im
             )
             #Here we implement the optional use of memory clipping in instances where memory concerns may exist.
 

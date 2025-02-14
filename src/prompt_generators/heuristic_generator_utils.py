@@ -3,6 +3,8 @@ import numpy as np
 import os
 import sys
 from abc import abstractmethod
+from random import shuffle 
+
 
 '''
 This file contains all of the prompt generation classes for each of the heuristics that may be used as part of the 
@@ -37,7 +39,7 @@ one prompt is placed)
 
 
 
-General Inputs:
+General Call Inputs:
 
 All of the following are in pseudo-ui native image space:
 
@@ -53,6 +55,7 @@ data: This is a dictionary which contains the following information:
         pred: A dict, which contains a subfield "pred_metatensor", with a 1HWD Metatensor, or torch tensor containing the prediction mask from the prior inference call.
         logits: A dict, which contains a subfield "logits_metatensor", with a CHWD Metatensor, or torch tensor for the logits map from the prior inference call.
 
+    'im': (Optional) Dictionary containing the interaction memory from prior iterations of interaction. 
     
 generated_prompts: Contains field for each given prompt type:
 
@@ -121,12 +124,14 @@ class PseudoMixture(BasicValidOnlyMixture):
             config_labels_dict: dict,
             build_args: dict,
             heur_fn_dict: dict,
-            device: str):
+            device: str,
+            use_mem: bool):
         
         self.configs_labels_dict = config_labels_dict
         self.heur_build_args = build_args
         self.heur_fn_dict = heur_fn_dict
         self.device = device 
+        self.use_mem = use_mem
 
         #Priority list for the independent fusion strategy, it bins the prompt types into distinct groups of priority
         #each sublist has items equal in priority.

@@ -176,7 +176,9 @@ class BasicSpatialPromptGenerator(PromptReformatter):
                 And two potentially relevant subfields
                 2) "logits_metatensor" A Metatensor or torch tensor containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
                 3) "logits_meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
-             
+        
+        im: (NOTE: OPTIONAL) the interaction memory dictionary as defined in
+        `<https://github.com/IS_Validate/blob/main/src/front_back_interactor/pseudo_ui.py>`   
         '''
         
         if not isinstance(data['gt'], torch.Tensor) and not isinstance(data['gt'], MetaTensor):
@@ -193,6 +195,10 @@ class BasicSpatialPromptGenerator(PromptReformatter):
             if not isinstance(data['logits']['logits_metatensor'], torch.Tensor) and not isinstance(data['logits']['logits_metatensor'], MetaTensor):
                 raise TypeError('The previous logits must belong to the torch tensor, or monai MetaTensor datatype')
         
+        if data['im'] is not None:
+            if isinstance(data['im'], dict):
+                raise TypeError('The interaction memory must be a dict if it is not a NoneType')
+            
         p_torch_format, plabels_torch_format = self.interactive_prompter(data) 
         p_dict_format = self.reformat_to_dict(p_torch_format, plabels_torch_format)
 
@@ -203,6 +209,7 @@ class BasicSpatialPromptGenerator(PromptReformatter):
 class HeuristicSpatialPromptGenerator(BasicSpatialPromptGenerator):
     def __init__(self,
                 device: str,
+                use_mem: bool,
                 config_labels_dict: dict[str, int],
                 sim_methods:dict[str,dict], 
                 sim_build_params:Optional[dict[str, dict]] = None,
@@ -210,6 +217,7 @@ class HeuristicSpatialPromptGenerator(BasicSpatialPromptGenerator):
         
         super().__init__(
                         device=device,
+                        use_mem=use_mem,
                         config_labels_dict=config_labels_dict,
                         sim_methods=sim_methods, 
                         sim_build_params=sim_build_params,
@@ -217,7 +225,8 @@ class HeuristicSpatialPromptGenerator(BasicSpatialPromptGenerator):
                         ) 
     
     def build_prompt_generator(self,
-                               device: str, 
+                               device: str,
+                               use_mem:bool, 
                                config_labels_dict:dict[str, int], 
                                sim_methods: dict, 
                                sim_build_params: Union[dict, None], 
@@ -225,6 +234,7 @@ class HeuristicSpatialPromptGenerator(BasicSpatialPromptGenerator):
         
         return BuildHeuristic(
                             device=device,
+                            use_mem=use_mem,
                             config_labels_dict=config_labels_dict, 
                             heuristics=sim_methods, 
                             heuristic_params=sim_build_params,
