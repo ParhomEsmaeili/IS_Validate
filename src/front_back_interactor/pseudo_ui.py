@@ -6,6 +6,8 @@ from typing import Callable, Sequence, Union, Optional
 import logging
 import sys
 import torch
+import random
+import numpy as np
 import os
 from front_back_interact import front_back_processor
 from src.data.interaction_state_construct import HeuristicInteractionState 
@@ -128,6 +130,24 @@ class front_end_simulator:
         self.infer_app = infer_app
         self.args = args
 
+        self.init_seeds(seed=self.args['random_seed'])
+
+    def init_seeds(self, seed): #, cuda_deterministic=True):
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+        
+        #TODO: Once containerisation is implemented, we can re-implement this functionality for instances where a DL model may be used for
+        # prompt generation
+
+        # if cuda_deterministic:
+        #     cudnn.deterministic = True 
+        #     cudnn.benchmark = False
+        # else:
+        #     cudnn.deterministic=False 
+        #     cudnn.benchmark=True 
     def app_output_processor(self):
         '''
         Makes use of the output processor class. This will tie together several functionalities such as 

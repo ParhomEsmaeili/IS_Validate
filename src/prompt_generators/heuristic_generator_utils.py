@@ -145,19 +145,22 @@ class PseudoMixture(BasicValidOnlyMixture):
         #We shuffle the valid_ptypes list randomly within the priority list bracket for prompt diversity.
         #(e.g., downstream apps may not necessarily treat scribble points, and standard points the same in their model)
 
-            shuffle(valid_ptypes) 
+            #We create a random permutation of integers from 0 to len(sublist) - 1.
+            indices = torch.randperm(range(len(sublist))).to(int) 
+            #shuffled sublist:
+            shuffled_sublist = [sublist[i] for i in indices]
 
-            for heur in ptype_heurs:
-                    #Here we will simulate the prompts for the given prompt type, across classes in task,
-                    #according to the heuristics + build provided. 
-                    # 
-                    # If there are no empty voxels left for prompt placement, we have an error raised, and skip.
+            # for heur in ptype_heurs:
+            #         #Here we will simulate the prompts for the given prompt type, across classes in task,
+            #         #according to the heuristics + build provided. 
+            #         # 
+            #         # If there are no empty voxels left for prompt placement, we have an error raised, and skip.
 
-                    try:
-                        generated_prompts, generated_prompt_labels = heur(data, generated_prompts, generated_prompt_labels, self.heuristic_params[ptype][heur])
+            #         try:
+            #             generated_prompts, generated_prompt_labels = heur(data, generated_prompts, generated_prompt_labels, self.heuristic_params[ptype][heur])
                     
-                    except:
-                        continue 
+            #         except:
+            #             continue 
     def __call__(self, valid_ptypes, data, generated_prompts, generated_prompt_labels):
         pass 
 
