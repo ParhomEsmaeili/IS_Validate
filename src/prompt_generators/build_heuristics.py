@@ -186,8 +186,10 @@ class BuildHeuristic:
             OR NONETYPE (for init modes).
 
             Contains the following fields:
-                pred: A dict, which contains a subfield "pred_metatensor", with a 1HWD Metatensor, or torch tensor containing the prediction mask from the prior inference call.
-                logits: A dict, which contains a subfield "logits_metatensor", with a CHWD Metatensor, or torch tensor for the logits map from the prior inference call.
+                pred: A dict, which contains a subfield "metatensor", with a 1HWD Metatensor, or torch tensor 
+                containing the discretised prediction mask from the prior inference call.
+                logits: A dict, which contains a subfield "metatensor", with a CHWD Metatensor, or torch tensor 
+                containing the logits map from the prior inference call.
 
         '''
 
@@ -238,14 +240,14 @@ class BuildHeuristic:
             pred: A dictionary containing 3 subfields:
                 1) "path": Path to the prediction file (Not Relevant)
                 And two relevant subfields
-                2) "pred_metatensor" A Metatensor or torch tensor containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
-                3) "pred_meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
+                2) "metatensor" A Metatensor or torch tensor containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
+                3) "meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
             
             logits:
                 1) "paths": List of paths to the prediction file (Not Relevant)
                 And two potentially relevant subfields
-                2) "logits_metatensor" A Metatensor or torch tensor containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
-                3) "logits_meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
+                2) "metatensor" A Metatensor or torch tensor containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
+                3) "meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
         
         im: Optional dictionary containing the interaction memory from the prior interaction states.      
 

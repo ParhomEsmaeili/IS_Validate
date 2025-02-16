@@ -52,8 +52,8 @@ data: This is a dictionary which contains the following information:
     OR NONETYPE (for init modes).
 
     Contains the following fields:
-        pred: A dict, which contains a subfield "pred_metatensor", with a 1HWD Metatensor, or torch tensor containing the prediction mask from the prior inference call.
-        logits: A dict, which contains a subfield "logits_metatensor", with a CHWD Metatensor, or torch tensor for the logits map from the prior inference call.
+        pred: A dict, which contains a subfield "metatensor", with a 1HWD Metatensor, or torch tensor containing the prediction mask from the prior inference call.
+        logits: A dict, which contains a subfield "metatensor", with a CHWD Metatensor, or torch tensor for the logits map from the prior inference call.
 
     'im': (Optional) Dictionary containing the interaction memory from prior iterations of interaction. 
     

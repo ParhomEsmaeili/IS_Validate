@@ -91,20 +91,22 @@ class front_end_simulator:
     NOTE: Checks will be put in place to ensure that image resolution, spacing, orientation will be matching & otherwise 
     the code will be non-functional.
 
-        logits_metatensor: MetaTensor or torch object, multi-channel logits map (CHWD), where C = Number of Classes (channel first format)
+        logits_metatensor: MetaTensor or torch object, ((torch.float dtype)), multi-channel logits map (CHWD), where C = Number of Classes (channel first format)
         
         logits_meta_dict: Meta information in dict format,  ('affine must match the input-image metatensor's affine info)
         
-        pred_metatensor: MetaTensor or torch object containing the discretised prediction (shape 1HWD)
+        pred_metatensor: MetaTensor or torch tensor object ((torch.int dtype)) containing the discretised prediction (shape 1HWD)
         pred_meta_dict: Meta information in dict format, which corresponds to the header of the prediction (affine array must match the input image's meta-info)
 
         NOTE: The meta dictionaries will be expected to contain a key:item pair denoted as "affine", containing the 
-        affine array required for saving the segmentations in ITK format. 
+        affine array required for saving the segmentations in ITK format.
+        
+        NOTE: The affine must be a torch tensor.
 
-    NOTE: These variables must be stored/provided on cpu. 
+    NOTE: These outputs must be stored/provided on cpu. 
 
-    NOTE: Optional to include the "optional_memory" field also, for any extra arguments they would like to store in IM.
-
+    NOTE: Optional to include the "optional_memory" field also, for any extra arguments app would like to store in IM.
+        if not required, put a None for the value of this item.
     '''
     def __init__(self, 
                 infer_app, 
@@ -217,7 +219,7 @@ class front_end_simulator:
                 'image': dict - A dictionary containing the following subfields
                     'path': path to the image 
                     'metatensor': Loaded MetaTensor in RAS orientation (pseudo-UI native domain)
-                    'meta_dict': MetaTensor's meta_dict
+                    'meta_dict': MetaTensor's meta_dict, contains the original affine array, and the pseudo-ui affine array
                 
                 'label': dict - A dictionary containing the sam subfields as the image! Not one-hot encoded for the MetaTensors!
 
@@ -286,7 +288,7 @@ class front_end_simulator:
                 'image': dict - A dictionary containing the following subfields
                     'path': path to the image 
                     'metatensor': Loaded MetaTensor in RAS orientation (pseudo-UI native domain)
-                    'meta_dict': MetaTensor's meta_dict
+                    'meta_dict': MetaTensor's meta_dict, contains the affine array.
                 
                 'label': dict - A dictionary containing the same subfields as the image! Not one-hot encoded for the MetaTensors!
             

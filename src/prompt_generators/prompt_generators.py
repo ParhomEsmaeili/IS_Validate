@@ -168,14 +168,14 @@ class BasicSpatialPromptGenerator(PromptReformatter):
             pred: A dictionary containing 3 subfields:
                 1) "path": Path to the prediction file (Not Relevant)
                 And two relevant subfields
-                2) "pred_metatensor" A Metatensor or torch tensor containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
-                3) "pred_meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
+                2) "metatensor" A Metatensor or torch tensor containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
+                3) "meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
             
             logits:
                 1) "paths": List of paths to the prediction file (Not Relevant)
                 And two potentially relevant subfields
-                2) "logits_metatensor" A Metatensor or torch tensor containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
-                3) "logits_meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
+                2) "metatensor" A Metatensor or torch tensor containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
+                3) "meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
         
         im: (NOTE: OPTIONAL) the interaction memory dictionary as defined in
         `<https://github.com/IS_Validate/blob/main/src/front_back_interactor/pseudo_ui.py>`   
@@ -189,10 +189,10 @@ class BasicSpatialPromptGenerator(PromptReformatter):
         
         if not data['prev_output_data'] is None:
             #We run this check for the instance where the "prev_output_data" exists (i.e. for refinement iters)
-            if not isinstance(data['pred']['pred_metatensor'], torch.Tensor) and not isinstance(data['pred']['pred_metatensor'], MetaTensor):
+            if not isinstance(data['pred']['metatensor'], torch.Tensor) and not isinstance(data['pred']['metatensor'], MetaTensor):
                 raise TypeError('The previous pred must belong to the torch tensor, or monai MetaTensor datatype')
             
-            if not isinstance(data['logits']['logits_metatensor'], torch.Tensor) and not isinstance(data['logits']['logits_metatensor'], MetaTensor):
+            if not isinstance(data['logits']['metatensor'], torch.Tensor) and not isinstance(data['logits']['metatensor'], MetaTensor):
                 raise TypeError('The previous logits must belong to the torch tensor, or monai MetaTensor datatype')
         
         if data['im'] is not None:

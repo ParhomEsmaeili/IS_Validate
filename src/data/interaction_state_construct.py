@@ -147,13 +147,13 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
                 prev_output_data = {
                 'logits':{
                     'paths': None,
-                    'logits_metatensor': None,
-                    'logits_meta_dict': None
+                    'metatensor': None,
+                    'meta_dict': None
                 },
                 'pred':{
                     'path': None,
-                    'pred_metatensor': None,
-                    'pred_meta_dict': None
+                    'metatensor': None,
+                    'meta_dict': None
                 },
                 'optional_memory': None
                 }
@@ -165,14 +165,14 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
                 },
                 'interaction_dict_format': interaction_dict_format,
                 'prev_logits':{
-                    'paths': prev_output_data['logits']['path'],
-                    'prev_logits_metatensor': prev_output_data['logits']['logits_metatensor'],
-                    'prev_logits_meta_dict': prev_output_data['logits']['logits_meta_dict']
+                    'paths': prev_output_data['logits']['paths'],
+                    'metatensor': prev_output_data['logits']['metatensor'],
+                    'meta_dict': prev_output_data['logits']['meta_dict']
                 },
                 'prev_pred':{
                     'path': prev_output_data['pred']['path'],
-                    'prev_pred_metatensor': prev_output_data['pred']['pred_metatensor'],
-                    'prev_pred_meta_dict': prev_output_data['pred']['pred_meta_dict']
+                    'metatensor': prev_output_data['pred']['metatensor'],
+                    'meta_dict': prev_output_data['pred']['meta_dict']
                 },
                 'prev_optional_memory': prev_output_data['optional_memory']
             }
