@@ -32,18 +32,85 @@ class OutputProcessor:
 
         #List of fields in the output dictionary that must be on cpu. Each item is in tuple format, index=depth of dict.
         self.cpu_fields = [('logits'), ('logits_meta_dict', 'affine'), ('pred'), ('pred_meta_dict')] 
+    
+    def extractor(self, x: dict, y: tuple[Union[tuple,str, int]]): 
+        '''
+        This general purpose function is adapted from a lambda function which iterates through the dict using the tuple, 
+        where the order/index denotes the depth. 
+        
+        Once tuple is empty it stops (also for NoneType it stops, i.e. just returns the current dict.) and returns the
+        item from the provided tuple path. 
+
+        Inputs: 
+            x - A dictionary which is populated and will be extracted from
+            y - A tuple consisting of the iterative path through the nested dict.
+        '''
+
+        if not isinstance(y, tuple):
+            raise TypeError('y - path in dict must be a tuple')
+        
+        if y: #If y exists and we are iterating through it still:
+            if not isinstance(x, dict):
+                raise TypeError('x must be a dictionary')
+            if x == {}:
+                raise ValueError('The input dict must be populated otherwise we cannot extract anything.')
+            else:
+                return self.extractor(x[y[0]], y[1:]) 
+        else:
+            return x  
+         
+    def dict_path_modif(self, x: dict, y: tuple[Union[tuple, str, int]], item):
+        '''
+        This function takes a dictionary (can be nested), and a tuple path, and replaces the value at the given tuple path
+        with the provided item.
+
+        Optionally can be used to populate a dictionary also according to a tuple path.
+        NOTE: Use of a tuple with length 1 requires that the tuple be inserted as (path, ) 
+
+        inputs:
+        x - A dictionary which is populated and will have the item modified.
+        y - A tuple path, which can consist of specific immutable datatypes (e.g. tuple, str, int) supported by dicts.
+        item - Any item, which is being placed in dictionary x, with path y. 
+
+        '''
+        if not isinstance(x, dict):
+            raise TypeError('The input arg for dict must be a dictionary')
+        if not isinstance(y, tuple):
+            raise TypeError('The input arg for the tuple path must be a tuple')
+        # if not item:
+        #     raise ValueError('The item cannot be a NoneType')  #NOTE: If an item is not provided then error is raised when calling func.
+        # if x == {}:
+        #     raise ValueError('The input dict must be populated.')
+
+        #Recursively iterating through the dictionary using the tuple path.
+        if len(y) > 1:
+            x[y[0]] = self.dict_path_modif(x[y[0]], y[1:], item)
+            return x 
+        elif len(y) == 1:
+            x[y[0]] = item
+            return x  
+        else:
+            raise ValueError('The input tuple must at least be length 1.')
+
+             
+        # return x
         
     def check_device(self, 
                     data_dict: dict, 
-                    key: str):
+                    data_info: tuple[Union[str, tuple, int]]):
 
-        if data_dict[key].get_device() != -1:
-            warnings.warn(f'Careful, the dict item: {key} should be stored on cpu device.')
+        item = self.extractor(data_dict, data_info)
+
+        if item.get_device() != -1:
+            warnings.warn(f'Careful, the dict: \n {data_dict} \n has item at path: \n {data_info} \n which should be stored on cpu device.')
             #If not on cpu, place it on cpu.
-            data_dict.update({key:data_dict[key].to(device='cpu')})
-            #Debug check.
-            if data_dict[key].get_device() != -1:
-                raise Exception(f'The output field {key} was not correctly processed to be placed on cpu during output processing')
+            item = item.to(device='cpu')
+            # data_dict.update({key:data_dict[key].to(device='cpu')})
+            data_dict = self.dict_path_modif(data_dict, data_info, item)
+
+            # Debug check.
+            if self.extractor(data_dict, data_info).get_device() != -1:
+                raise Exception(f'The output field {data_info} was not correctly processed to be placed on cpu during output processing')
             
         return data_dict 
 
@@ -83,15 +150,12 @@ class OutputProcessor:
         #intended use case is for checking if a tensor is channel-first by comparison to one that is,
         # but can be used to check num_spatial dims too)
 
-        extractor = lambda x,y : extractor(x[y[0]], y[1:]) if y else x 
-        #Iterates through the dict using the tuple, once tuple is empty it stops (also for NoneType it stops) 
-
         try: 
-            x = extractor(reference_dict, reference_info)
+            x = self.extractor(reference_dict, reference_info)
         except:
             raise Exception['The reference dict did not have the right structure, or the tuple provided did not']
         try:
-            y = extractor(data_dict, data_info)
+            y = self.extractor(data_dict, data_info)
         except:
             raise Exception['The data dict did not have the right structure, or the tuple provided did not.']
         
@@ -118,3 +182,21 @@ class OutputProcessor:
         The metadata will be assessed through comparison of the affine array in the meta_dict to that which was 
         provided in the input request.
         '''
+
+
+if __name__ == '__main__':
+    check_class = OutputProcessor('dummy', 'dummy', 'dummy', 'dummy')
+
+    #Setting some dummy variables.
+    testing_dict = {'hi':{'hey':1, 'hello':2, 'bye':3}}
+    testing_tuple = ('hi', 'hey')
+    testing_tuple_len1 = ('hi',)
+
+    #Testing the item extraction function from a dict using a tuple path:
+    print(check_class.extractor(testing_dict, testing_tuple))
+    print(check_class.extractor(testing_dict, testing_tuple_len1))
+    # print(check_class.extractor({}, testing_tuple))
+
+    #Testing the dict path modification function:
+    print(check_class.dict_path_modif(testing_dict, testing_tuple, 40))
+    print(check_class.dict_path_modif(testing_dict, testing_tuple_len1, 40))
