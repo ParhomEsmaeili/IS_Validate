@@ -162,7 +162,7 @@ class BasicSpatialPromptGenerator(PromptReformatter):
         gt: Torch tensor OR Metatensor containing the ground truth map in RAS orientation, but otherwise in the native image domain (no pre-processing other than RAS re-orientation).
         
         prev_output_data: (NOTE: OPTIONAL) output dictionary from the inference call which has been post-processed 
-        in the pseudo-ui front-end.
+        in the processor called in the pseudo-ui front-end.
        
         Two relevant fields for prompt generation contained are the: 
             pred: A dictionary containing 3 subfields:

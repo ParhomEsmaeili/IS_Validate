@@ -1,10 +1,15 @@
-import tempfile 
+# import tempfile
+import shutil  
 import os 
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 import torch
 import numpy as np
 import logging
 import warnings 
 from typing import Optional, Union
+# from src.general_utils.writer import Writer 
+# from src.general_utils.post import Restored
 
 logger = logging.getLogger(__name__)
 
@@ -23,19 +28,21 @@ class OutputProcessor:
     '''
     def __init__(
       self,
-      save_dir:str,
+      base_save_dir:str,
+      temp_save_dir:str,
       config_labels_dict:dict[str,int],
       perm_seg:bool = True,
       save_prompts:bool = False,
     ):
 
-        self.save_dir = save_dir 
+        self.base_save_dir = base_save_dir 
+        self.temp_save_dir = temp_save_dir
         self.class_configs_dict = config_labels_dict 
         self.perm_seg = perm_seg
         self.save_prompt = save_prompts
 
         #List of paths in the output dictionary that must be on cpu. Each item is in tuple format, index=depth of dict.
-        self.check_cpu_info = [('logits'), ('logits_meta_dict', 'affine'), ('pred'), ('pred_meta_dict', 'affine')] 
+        self.check_cpu_info = [('logits',), ('logits', 'meta_dict', 'affine'), ('pred',), ('pred','meta_dict', 'affine')] 
        
         #Dictionary containing the reference dict (paths), output_dict (paths) and the corresponding checks being examined.
 
@@ -67,9 +74,29 @@ class OutputProcessor:
                 'reference_paths':(('image', 'meta_dict', 'affine'),),
                 'output_paths':(('logits', 'meta_dict', 'affine'),),
                 'checks': (('check_torch_match',),),
-            } 
+            }         
+        }
 
-            
+        # If writing to a permanent seg. use a namedtemporaryfile which closes. 
+        # Else: use a namedtemporaryfile which does not close. NOTE:Make these modifications in the writer?
+        #IT SHOULD ALSO TAKE THE TEMPFILE DIR PROVIDED.
+
+        # if self.perm_seg:
+        #     raise NotImplementedError('Implement the writer such that it takes the config for the namedtempfile correctly')
+        #     #TODO: Populate the writer class with the correct initialisation.
+        #     self.perm_imwriter = Writer()
+        # else:
+        #     raise NotImplementedError('Implement the writer such that it takes the appropriate config for the tempfiles which do not delete, etc. etc.')
+        #     self.temp_imwriter = Writer() 
+
+
+        #if self.save_prompts:
+            # raise NotImplementedError('No dummy class provided for saving prompts')
+
+        #Dict of info regarding the dict-paths for each filepath being placed after the segmentations have been saved.
+        self.reformat_dict_info = {
+            'logits': ('logits','paths'), 
+            'pred': ('pred','path'),
         }
     def extractor(self, x: dict, y: tuple[Union[tuple,str, int]]): 
         '''
@@ -217,6 +244,16 @@ class OutputProcessor:
         that which was provided in the input request's affine array in the image meta dictionary.
 
         '''
+        #Performing an explicit check that the optional memory item is provided, even if it is a NoneType. Not required
+        #for the other fields as they have an expected structure, and any deviations will be flagged through exceptions being 
+        #thrown.
+
+        try:
+            output_data['optional_memory']
+        except:
+            warnings.warn('The optional_memory key must be included in the output dictionary, even as a NoneType')
+            output_data['optional_memory'] = None 
+
         #Performing the checks that the pred, logits, and their meta dict's affine array are on cpu. (or placing them on cpu)
         for field in self.check_cpu_info:
             output_data = self.check_device(output_data, field)
@@ -234,16 +271,103 @@ class OutputProcessor:
                 elif info['reference'] == 'class_configs_dicts':
                     self.check_integrity(self.class_configs_dict, info['reference_paths'][idx], output_data, info['output_paths'][idx], checks_subtuple)
 
-    def reformat_output(self, output_data):
+    def reformat_output(self, output_data: dict, pred_path:str, logits_paths:list[str]):
         
-        '''This function is intended for filling out the strings for the segmentation paths in the output data for 
-        forward propagation. '''
-        pass 
+        '''
+        This function is intended for filling out the fields containing the strings for the segmentation paths in 
+        the output data for forward propagation. 
+        
+        inputs:
 
-    def __call__(input_request, output_dict):
-        pass 
+        output_data: A dictionary containing the outputs of the prior inference call. 
+        
+        pred_path: A string denoting the path to the discretised prediction of the prior inference call.
+        
+        logits_paths: A list of strings denoting the paths to the channel-unrolled logits maps from the prior inference call.
+        (in the same order as was provided by the inference call)
 
+        returns: 
+        
+        output_data with pred_path and logits_paths inserted into the output_data dict in the "pred" and "logits" subdicts.
+        '''
+        for key, val in self.reformat_dict_info.items():
+            if key.title() == 'Logits':
+                output_data = self.dict_path_modif(output_data, val, logits_paths)
+            elif key.title() == 'Pred':
+                output_data = self.dict_path_modif(output_data, val, pred_path)
+            else:
+                raise KeyError('Reformatter info dictionary contained an unsupported key')
+        return output_data
+
+    def write_maps(self, input_req:dict , output_dict: dict, inf_call_config: dict):
+        '''
+        This function is intended for writing the maps (seg and logits) from the output data to permanent or temp files.
+        Also provides the paths to the corresponding files as outputs.
+
+        Inputs:
+            input_req: Dict - Dictionary containing the input request for the inference call, contains the information
+            regarding the name of the data instance in question. 
+
+            output_dict: Dict - Dictionary containing the prior iteration after having been passed through the output checker
+            (also ensures that the corresponding arrays will be on cpu).
+
+            inf_call_config: Dict - A dictionary containing two subfields:
+                'mode': str - The mode that the inference call was be made for (Automatic Init, Interactive Init, Interactive Edit)
+                'edit num': Union[int, None] - The current edit's iteration number or None for initialisations.
+        
+        '''
+
+        #First we write the discretised prediction maps
+        if self.perm_seg:
+        
+            img_filename = os.path.split(input_req['image']['path'])[1]
+            infer_config_dir = f'{inf_call_config["mode"]} Iter {inf_call_config["edit_num"]}' if inf_call_config['mode'].title() != 'Interactive Edit' else inf_call_config['mode'] 
+            pred_path = os.path.join(self.base_save_dir, infer_config_dir, img_filename) 
+
+            #Call the writer, which should be configured to have write_to_file = True. Must output the tempfile path
+            tmp_path = self.perm_imwriter(output_dict)
+            shutil.move(tmp_path, pred_path)
+        else:
+            pred_path = self.temp_imwriter(output_dict)
+        
+        #Now we write the logits maps to a set of tempfiles. 
+        logits_paths = self.temp_imwriter(output_dict)
+
+        return pred_path, logits_paths
+    
+    def __call__(self, input_request, output_dict, infer_call_config):
+        '''
+        Function wraps together the post-processing steps required for checking and writing the segmentations and logits maps.
+        and the output dictionary.
+        
+        input_request: Dict - The request dictionary that was used for performing the inference call.
+        
+        output_dict: Dict - The returned dictionary from the inference call.
+
+        infer_call_config: Dict - A dictionary containing two subfields:
+            'mode': str - The mode that the inference call was made for (Automatic Init, Interactive Init, Interactive Edit)
+            'edit num': Union[int, None] - The current edit's iteration number or None for initialisations.
+        '''
+        try:
+            self.check_output(input_request, output_dict)
+        except:
+            Exception('Checking the output data failed due to the aforementioned error')
+        try:
+            pred_path, logits_paths = self.write_maps(input_req=input_request, output_dict=output_dict, inf_call_config=infer_call_config)
+        except:
+            Exception('Writing the segmentation maps failed due to the aforementioned error')
+        try:
+            output_dict = self.reformat_output(output_data=output_dict, pred_path=pred_path, logits_paths=logits_paths)
+        except:
+            Exception('Reformatting the output data dictionary failed due to the aforementioned error')
+        
+        return output_dict
+    
 if __name__ == '__main__':
+
+
+
+
     check_class = OutputProcessor('dummy', 'dummy', 'dummy', 'dummy')
 
     #Setting some dummy variables.
@@ -259,3 +383,5 @@ if __name__ == '__main__':
     #Testing the dict path modification function:
     print(check_class.dict_path_modif(testing_dict, testing_tuple, 40))
     print(check_class.dict_path_modif(testing_dict, testing_tuple_len1, 40))
+
+    check_class.check_output({}, {})

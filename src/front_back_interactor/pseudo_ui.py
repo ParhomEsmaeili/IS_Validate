@@ -38,7 +38,7 @@ class front_end_simulator:
         image: A dictionary containing a path & a pre-loaded (UI) metatensor objects 
         {'path':image_path, 
         'metatensor':monai metatensor object containing image, torch.float datatype.
-        'meta_dict': image_meta_dictionary}
+        'meta_dict': image_meta_dictionary, contains the original affine from loading and current affine array in the ui-domain.}
 
         model: A string denoting the inference "mode" being simulated, has three options: 
                 1) Automatic Segmentation, denoted: 'IS_autoseg' 
@@ -60,14 +60,14 @@ class front_end_simulator:
         Within each interaction state in IM:    
         
         prev_logits: A dictionary containing: {
-                'paths': list of paths, to each individual logits map (1HWD), in the same order as provided by output CHWD logits map}
-                'prev_logits_metatensor': Non-modified metatensor/torch tensor that is forward-propagated from the prior output (CHWD).
-                'prev_logits_meta_dict': Non-modified meta dictionary that is forward propagated.
+                'paths': list of paths, to each individual logits map (HWD), in the same order as provided by output CHWD logits map}
+                'metatensor': Non-modified (CHWD) metatensor/torch tensor that is forward-propagated from the prior output (CHWD).
+                'meta_dict': Non-modified meta dictionary that is forward propagated.
                 }
         prev_pred: A dictionary containing: {
-                'path': path}
-                'prev_pred_metatensor': Non-modified metatensor/torch tensor that is forward-propagated from the prior output (1HWD).
-                'prev_pred_meta_dict': Non-modified meta dictionary that is forward propagated.
+                'path': path to the discretised map (HWD)}
+                'metatensor': Non-modified metatensor/torch tensor that is forward-propagated from the prior output (1HWD).
+                'meta_dict': Non-modified meta dictionary that is forward propagated.
                 }
 
         prev_optional_memory: A dictionary containing any extra information that the application would like to forward propagate
@@ -91,19 +91,22 @@ class front_end_simulator:
     NOTE: Checks will be put in place to ensure that image resolution, spacing, orientation will be matching & otherwise 
     the code will be non-functional.
 
-        logits_metatensor: MetaTensor or torch object, ((torch.float dtype)), multi-channel logits map (CHWD), where C = Number of Classes (channel first format)
+        'logits': Dict which contains the following fields:
+
+            'metatensor': MetaTensor or torch object, ((torch.float dtype)), multi-channel logits map (CHWD), where C = Number of Classes (channel first format)
         
-        logits_meta_dict: Meta information in dict format,  ('affine must match the input-image metatensor's affine info)
+            'meta_dict: Meta information in dict format,  ('affine must match the input-images' affine info)
         
-        pred_metatensor: MetaTensor or torch tensor object ((torch.int dtype)) containing the discretised prediction (shape 1HWD)
-        pred_meta_dict: Meta information in dict format, which corresponds to the header of the prediction (affine array must match the input image's meta-info)
+        'pred': Dict which contains the following fields:
+            metatensor: MetaTensor or torch tensor object ((torch.int dtype)) containing the discretised prediction (shape 1HWD)
+            meta_dict: Meta information in dict format, which corresponds to the header of the prediction (affine array must match the input image's meta-info)
 
         NOTE: The meta dictionaries will be expected to contain a key:item pair denoted as "affine", containing the 
         affine array required for saving the segmentations in ITK format.
         
         NOTE: The affine must be a torch tensor.
 
-    NOTE: These outputs must be stored/provided on cpu. 
+    NOTE: These outputs must/should be stored/provided on cpu. 
 
     NOTE: Optional to include the "optional_memory" field also, for any extra arguments app would like to store in IM.
         if not required, put a None for the value of this item.
@@ -159,10 +162,15 @@ class front_end_simulator:
         # else:
         #     cudnn.deterministic=False 
         #     cudnn.benchmark=True 
-    def app_output_processor(self):
+    def app_output_processor(self, infer_call_config):
         '''
         Makes use of the output processor class. This will tie together several functionalities such as 
-        massaging the output data dictionary, writing the segmentations, computing the metrics etc.
+        reformatting the output data dictionary, writing the segmentations, computing the metrics etc.
+        
+        infer_config: Dict - A dictionary containing two subfields:
+            'mode': str - The mode that the inference call was be made for (Automatic Init, Interactive Init, Interactive Edit)
+            'edit num': Union[int, None] - The current edit's iteration number or None for initialisations.
+        
         '''
         pass 
 
@@ -222,10 +230,13 @@ class front_end_simulator:
                     'meta_dict': MetaTensor's meta_dict, contains the original affine array, and the pseudo-ui affine array
                 
                 'label': dict - A dictionary containing the sam subfields as the image! Not one-hot encoded for the MetaTensors!
+            
+            NOTE: KEY ASSUMPTION 1: The filename for both the image and ground truth will be the same. 
+            NOTE: KEY ASSUMPTION 2: The ground truth will NOT be one-hot encoded. 
 
         infer_config: Dict - A dictionary containing two subfields:
             'mode': str - The mode that the inference call will be made for (Automatic Init, Interactive Init, Interactive Edit)
-            'edit num': Union[int, None] - The current edit's iteration number.
+            'edit num': Union[int, None] - The current edit's iteration number or None for initialisations.
         
         im: Union[Dict, None] - An optional dictionary containing the existing interaction memory (None for inits)
         prev_output_data: Union[Dict, None] - An optional dictionary containing the post-processed output data from prior
@@ -297,9 +308,9 @@ class front_end_simulator:
          
             mode - The mode in which the application is being used, therefore queried in the request, and the
         
-            edit_num - The editing iteration number (0, 1, ...)
+            edit_num - The editing iteration number (1, ...) or NONE (for initialisation)
         
-        im - (Optional) The currently existing interaction memory or NoneType (For initialisations) 
+        im - (Optional) The currently existing interaction memory (for edit) or NoneType (for initialisations) 
         
         prev_output_data - (Optional) The post-processed output dictionary from the prior iteration of inference (for editing modes). 
         or NoneType. 
