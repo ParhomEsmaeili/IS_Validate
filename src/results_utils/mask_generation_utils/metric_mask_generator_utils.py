@@ -7,6 +7,8 @@ from monai.utils import min_version, optional_import
 
 connected_comp_measure, _ = optional_import("skimage.measure", "0.14.2", min_version)
 
+raise Exception('Masks require refactor in line with new human-centric metrics and efficiency acceleration.') 
+
 class MaskGenerator:
     '''
     This mask generator assumes that for mask generation with click information, that at least one click must be placed among the classes. And ideally for each of the classes (though not absolutely needed for this).

@@ -1,5 +1,4 @@
 import torch 
-from monai.metrics.utils import do_metric_reduction
 
 class ScoreUtils:
     '''
@@ -28,7 +27,7 @@ class ScoreUtils:
     def __call__(self, image_masks, pred, gt):
 
         assert type(image_masks) == tuple, "Score generation failed as the weightmap masks were not in a tuple format"
-        assert type(image_masks[0]) == torch.Tensor, "Score generation failed necause the cross class weightmap was not a torch.Tensor"
+        assert type(image_masks[0]) == torch.Tensor, "Score generation failed because the cross class weightmap was not a torch.Tensor"
         assert type(image_masks[1]) == dict, "Score generation failed because the per-class weightmaps were not presented in a class-separated dict."
         assert type(pred) == torch.Tensor, "Score generation failed as the prediction was not a torch.Tensor"
         assert type(gt) == torch.Tensor, "Score generation failed as the gt was not a torch.Tensor"

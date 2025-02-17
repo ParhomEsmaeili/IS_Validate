@@ -11,7 +11,7 @@ import numpy as np
 import os
 from front_back_interact import front_back_processor
 from src.data.interaction_state_construct import HeuristicInteractionState 
-from src.general_utils.cleanup import im_cleanup
+from src.data.interaction_memory_cleanup import im_cleanup
 
 logger = logging.getLogger(__name__)
 

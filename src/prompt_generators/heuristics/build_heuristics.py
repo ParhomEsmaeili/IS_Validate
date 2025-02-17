@@ -2,7 +2,7 @@ import os
 import sys
 from typing import Union 
 
-from src.prompt_generators.heuristic_generator_utils import mixture_class_registry, base_fncs_registry
+from prompt_generators.heuristics.heuristic_generator_utils import mixture_class_registry, base_fncs_registry
 
 class BuildHeuristic:
 
