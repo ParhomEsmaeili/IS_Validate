@@ -30,14 +30,14 @@ class OutputProcessor:
       self,
       base_save_dir:str,
       temp_save_dir:str,
-      config_labels_dict:dict[str,int],
+      config_labels:dict[str,int],
       perm_seg:bool = True,
-      save_prompts:bool = False,
+      save_prompts:bool = False, 
     ):
 
         self.base_save_dir = base_save_dir 
         self.temp_save_dir = temp_save_dir
-        self.class_configs_dict = config_labels_dict 
+        self.class_configs = config_labels 
         self.perm_seg = perm_seg
         self.save_prompt = save_prompts
 
@@ -51,7 +51,7 @@ class OutputProcessor:
             #provided in the input image (which must be loaded as a channel first). Also checking the spatial resolution
             #of the output HW(D) against the input.
             'check_logits':{
-                'reference_name':('reference', 'class_configs_dict'),
+                'reference_name':('reference', 'class_configs'),
                 'reference_paths':(('image','metatensor'), None),
                 'output_paths': (('logits','metatensor'), ('logits', 'metatensor')),
                 'checks': (('check_num_dims','check_spatial_res'), ('check_num_channel',)),
@@ -84,10 +84,10 @@ class OutputProcessor:
         # if self.perm_seg:
         #     raise NotImplementedError('Implement the writer such that it takes the config for the namedtempfile correctly')
         #     #TODO: Populate the writer class with the correct initialisation.
-        #     self.perm_imwriter = Writer()
+        #     self.perm_imwriter = Writer(self.temp_save_dir??????????????)
         # else:
         #     raise NotImplementedError('Implement the writer such that it takes the appropriate config for the tempfiles which do not delete, etc. etc.')
-        #     self.temp_imwriter = Writer() 
+        #     self.temp_imwriter = Writer(self.temp_save_dir) 
 
 
         #if self.save_prompts:
@@ -268,8 +268,8 @@ class OutputProcessor:
 
                 if info['reference'] == 'reference':
                     self.check_integrity(reference_data, info['reference_paths'][idx], output_data, info['output_paths'][idx], checks_subtuple)
-                elif info['reference'] == 'class_configs_dicts':
-                    self.check_integrity(self.class_configs_dict, info['reference_paths'][idx], output_data, info['output_paths'][idx], checks_subtuple)
+                elif info['reference'] == 'class_configs':
+                    self.check_integrity(self.class_configs, info['reference_paths'][idx], output_data, info['output_paths'][idx], checks_subtuple)
 
     def reformat_output(self, output_data: dict, pred_path:str, logits_paths:list[str]):
         

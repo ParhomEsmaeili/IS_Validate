@@ -9,7 +9,6 @@ import torch
 import random
 import numpy as np
 import os
-from front_back_interact import front_back_processor
 from src.data.interaction_state_construct import HeuristicInteractionState 
 from src.data.interaction_memory_cleanup import im_cleanup
 
@@ -162,15 +161,18 @@ class front_end_simulator:
         # else:
         #     cudnn.deterministic=False 
         #     cudnn.benchmark=True 
-    def app_output_processor(self, infer_call_config):
+    def app_output_processor(self, output_data, infer_call_config, metrics_dict):
         '''
         Makes use of the output processor class. This will tie together several functionalities such as 
         reformatting the output data dictionary, writing the segmentations, computing the metrics etc.
         
+        output_data: Dict - A dictionary containing the pre-processed output dictionary from the inference app call.
+
         infer_config: Dict - A dictionary containing two subfields:
             'mode': str - The mode that the inference call was be made for (Automatic Init, Interactive Init, Interactive Edit)
             'edit num': Union[int, None] - The current edit's iteration number or None for initialisations.
         
+        metrics_dict: Dict - A dictionary containing the tracked metrics.
         '''
         pass 
 
