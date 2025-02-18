@@ -6,15 +6,15 @@ import torch
 from monai.data import MetaTensor 
 from typing import Union 
 
-from src.results_utils.metric_save_util import save_csv
+from src.results_utils.metric_save_util import write_to_csvs
 from src.results_utils.base_metrics.scoring_base_utils import BaseScoringWrapper
 
-class MetricComputer:
+class MetricsHandler:
     def __init__(
         self,
         dice_termination_threshold: float,
         metrics_configs: dict[str, dict],
-        metrics_savepaths: dict[str, str],
+        metrics_savepaths: dict[str, dict[str, Union[str, None, dict]]],
         class_configs_dict: dict[str, int]
 
     ):
@@ -23,12 +23,16 @@ class MetricComputer:
         
         inputs: 
 
-        metrics_configs: A dictionary - Contains the information about each metric under consideration necessary
+        metrics_configs: A nested dictionary - Contains the information about each metric under consideration necessary
         for initialising its corresponding computation class.
 
         Format - metric_type: dict of args.
 
-        metrics_savepaths: A dictionary - Contains the savepaths to each csv file being used for saving metrics.
+        metrics_savepaths: A nested dictionary - Contains the savepaths to each csv file being used for saving metrics.
+        
+        Format - metric_type: Nested Dict of metric type specific paths containing the paths for cross-class and 
+        per-class (Optional) scores for the given metric. CSVs are pre-initialised in the runscript.
+
         '''
         self.termination_thresh = dice_termination_threshold 
         self.metrics_configs = metrics_configs
@@ -123,6 +127,7 @@ class MetricComputer:
             'cross_class_mask':torch.ones_like(tensor, dtype=torch.int32),
             'per_class_masks': {class_lab:torch.ones_like(tensor,dtype=torch.int32) for class_lab in self.class_configs_dict.keys()}
         }
+    
     def exec_base_metrics(self, 
                         pred:Union[torch.Tensor, MetaTensor], 
                         gt:Union[torch.Tensor, MetaTensor],
@@ -131,7 +136,7 @@ class MetricComputer:
         '''
         This is a function which computes the metrics using the base metrics wrapper, and updates the tracked metrics dictionary.
 
-        It also returns a boolean depending on whether a termination condition has been reached.
+        It also returns a boolean depending on whether a termination condition has been reached using dice score.
         '''
         image_masks = self.generate_base_masks(pred)
         metric_output = self.base_computer(
@@ -164,41 +169,65 @@ class MetricComputer:
         
     def exec_base_relative_metrics(self):
         pass 
+    
+    def update_metrics(
+        self,
+        output_data:dict,
+        data_instance: dict,
+        tracked_metrics: dict,
+        im: dict,
+        infer_call_info: dict,
+        ):
 
-    def __call__(self,
-                output_data:dict,
-                data_instance: dict,
-                tracked_metrics: dict,
-                im: dict,
-                infer_call_info: dict,
-                write_metrics: bool):
+        extracted_pred = self.extract_spatial_dims(output_data['pred']['metatensor'])
+        extracted_gt = self.extract_spatial_dims(data_instance['gt']['metatensor'])
+
+        tracked_metrics, terminate_bool = self.exec_base_metrics(extracted_pred, extracted_gt, tracked_metrics, infer_call_info)
         
-        if not write_metrics:
-            extracted_pred = self.extract_spatial_dims(output_data['pred']['metatensor'])
-            extracted_gt = self.extract_spatial_dims(data_instance['gt']['metatensor'])
+        #TODO: Add implementation for other metrics.
 
-            tracked_metrics, terminate_bool = self.exec_base_metrics(extracted_pred, extracted_gt, tracked_metrics, infer_call_info)
+        return tracked_metrics, terminate_bool
+
+    def save_metrics(
+        self,
+        patient_name: str, 
+        terminated_early: bool,
+        tracked_metrics: dict
+        ):
+
+        '''
+        Function which is intended for when the iterative loop is complete, and where we will just be saving the 
+        tracked metrics.
+
+        Inputs:
+
+        patient_name: A string (extracted from the loaded data_instance on the pseudo-ui front-end) denoting the name
+        of the patient. 
+
+        terminated_early: A bool denoting whether the iterative refinement process terminated early due to the segmentation
+        quality reaching an adequate level controlled by the threshold in the class initialisation. 
+
+        tracked_metrics: A dictionary containing the tracked metrics for the given data instance across the iterative
+        refinement process. 
+
+            Tracked metrics will be this exemplar structure:
+            {
+                'Dice':{
+                       '__ Init': __, {
+                        'cross_class_scores': ___,
+                        'per_class_scores': dict() OR NoneType
+                          }
             
-            #TODO: Add implementation for other metrics.
+                       'Interactive Edit Iter __': {} or NoneType
+                      },
+                'xyz':{
+                      },
+                'xyz_editing_only_metric':{
+                  }
 
-            return tracked_metrics, terminate_bool
+        '''
+
+        if terminated_early:
+            raise NotImplementedError('No implementation for handling the tracked metrics when the process terminated early')
         else:
-            #In this situation we presume that the iterative loop is complete, and that we will just be saving the 
-            #tracked metrics.
-
-            #Tracked metrics will have the following structure:
-            # {
-            #     'Dice':{
-            #            '__ Init': __, {
-            #             'cross_class_scores': ___,
-            #             'per_class_scores': dict() OR NoneType
-            #               }
-            #
-            #            'Interactive Edit Iter __': {} or NoneType
-            #           },
-            #     'xyz':{
-            #           },
-            #     'xyz_editing_only_metric':{
-            #       }
-
-            pass 
+            write_to_csvs(patient_name=patient_name, csv_paths=self.metrics_savepaths, tracked_metrics=tracked_metrics)  

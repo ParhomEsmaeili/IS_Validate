@@ -109,8 +109,12 @@ def init_all_csvs(
     
     metrics_save_dir: Absolute path to the directory containing all the subdirs for each metric type.
     
-    metrics_configs: A dictionary containing the configs for the metrics, of relevance are the metric types, 
-    and whether per_class_scores are provided (and whether background is provided).
+    metrics_configs: A nested dictionary containing the configs for the metrics with general structure:
+    metric_type [metric_specific_config]. Within each metric_specific_config is a set of metric configs.
+
+    Of note are fields that state whether:
+    1) per_class_scores are provided and
+    2) and whether background is included in reporting the metrics (on a cross-class and/or per-class basis).
 
     class_configs_dict: A dictionary containing the class-label - class-integer code mapping.
 
