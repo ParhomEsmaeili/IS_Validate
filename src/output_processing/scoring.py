@@ -70,6 +70,31 @@ class MetricComputer:
         # self.init_human_centric_metrics()
         # self.init_budget_metrics()
 
+    def output_checking(self, metric_type, metric_subdict):
+        '''
+
+        Metric_type: A string denoting the metric the scores belong to. 
+
+        Metric subdict contains two fields: 
+
+        cross_class_score: A torch tensor or a metatensor.
+        per_class_scores: A class separated dict of torch tensors or metatensors OR a Nonetype.
+
+        '''
+        
+        if not isinstance(metric_subdict['cross_class_score'], torch.Tensor) and not isinstance(metric_subdict['cross_class_score'], MetaTensor):
+            raise TypeError(f'The cross class score provided for {metric_type} was not a torch tensor or a metatensor')
+
+        if not isinstance(metric_subdict['per_class_scores'], dict) and not metric_subdict['per_class_scores'] is None:
+            raise TypeError('The per class scores provided for {metric_type} were not a dict or a NoneType')
+        
+        if isinstance(metric_subdict['per_class_scores'], dict):
+            for key, val in metric_subdict.items():
+                if not isinstance(val, torch.Tensor) and not isinstance(val, MetaTensor):
+                    raise TypeError(f'The key {key} in per class scores in {metric_type} was not a Torch Tensor or a MetaTensor')
+
+        return True 
+    
     def extract_spatial_dims(self, input):
         '''
         Function which extracts the spatial dimensions of the input, assumed to be CHW(D). Returns it in torch.int32 dtype.
@@ -103,20 +128,35 @@ class MetricComputer:
                         gt:Union[torch.Tensor, MetaTensor],
                         tracked_metrics:dict,
                         infer_call_info:dict):
-        
+        '''
+        This is a function which computes the metrics using the base metrics wrapper, and updates the tracked metrics dictionary.
+
+        It also returns a boolean depending on whether a termination condition has been reached.
+        '''
         image_masks = self.generate_base_masks(pred)
         metric_output = self.base_computer(
             image_masks = image_masks,
             pred = pred,
             gt = gt,
         )
-        #Metric output is provided as a dictionary separated by the metric type.
-        if infer_call_info['mode'].title() != 'Interactive Edit':
-            tracked_metrics[infer_call_info['mode']] = metric_output
-        else:
-            tracked_metrics[f'{infer_call_info["mode"]} Iter {infer_call_info["edit_num"]}'] = metric_output
+        
+        #Checking the metric output by metric_type:
+        if all([self.output_checking(metric_type, subdict) for metric_type, subdict in metric_output.items()]):
+            print('Output datatypes for the metrics are correct')
 
-        if float(tracked_metrics['Dice']) >= self.termination_thresh:
+        #Metric output is provided as a dictionary separated by the metric type, and then by the infer mode, and then 
+        #by cross-class and per-class scores (or NoneType)
+
+        for metric_type, metrics_dict in metric_output.items():
+
+            if infer_call_info['mode'].title() != 'Interactive Edit':
+                tracked_metrics[metric_type] = {infer_call_info['mode']:metrics_dict}
+            else:
+                tracked_metrics[metric_type] = {f'{infer_call_info["mode"]} Iter {infer_call_info["edit_num"]}':metric_output}
+
+        #We implement an early-stopping check for termination based on overall Dice overlap score.
+
+        if float(metric_output['Dice']['cross_class_scores']) >= self.termination_thresh:
             return tracked_metrics, True 
         
         else:
@@ -139,6 +179,8 @@ class MetricComputer:
 
             tracked_metrics, terminate_bool = self.exec_base_metrics(extracted_pred, extracted_gt, tracked_metrics, infer_call_info)
             
+            #TODO: Add implementation for other metrics.
+
             return tracked_metrics, terminate_bool
         else:
             #In this situation we presume that the iterative loop is complete, and that we will just be saving the 
@@ -146,15 +188,17 @@ class MetricComputer:
 
             #Tracked metrics will have the following structure:
             # {
-            #     '__ Init': {
-            #         'Dice': __ 
-            #         'xyz': __
-            #     }
-            #     'Interactive Edit Iter __':{
-            #         'Dice': __
-            #         'xyz': __ 
-            #         'xyz editing only metric': __ 
-            #     }
-            #   etc.
-            # }
+            #     'Dice':{
+            #            '__ Init': __, {
+            #             'cross_class_scores': ___,
+            #             'per_class_scores': dict() OR NoneType
+            #               }
+            #
+            #            'Interactive Edit Iter __': {} or NoneType
+            #           },
+            #     'xyz':{
+            #           },
+            #     'xyz_editing_only_metric':{
+            #       }
+
             pass 

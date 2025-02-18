@@ -81,7 +81,7 @@ class BaseScoringWrapper:
             raise TypeError("Score generation failed as the gt was not a torch.Tensor or a monai MetaTensor")
 
         
-        return {metric_type:self.metric_classes[metric_type](image_masks, pred, gt, self.class_configs_dict) for metric_type in self.metrics_configs.keys()} 
+        return {metric_type:self.metric_classes[metric_type](image_masks, pred, gt) for metric_type in self.metrics_configs.keys()} 
     
 
 class DiceScore:
@@ -94,7 +94,7 @@ class DiceScore:
     ):
         self.ignore_empty = ignore_empty
         self.include_background = include_background
-        # self.include_per_class_scores = include_per_class_scores
+        self.include_per_class_scores = include_per_class_scores
         self.class_configs_dict = class_configs_dict
 
     def dice_score(self,
@@ -131,24 +131,27 @@ class DiceScore:
 
         cross_class = self.dice_score_multiclass(pred, gt, cross_class_mask) 
 
-        # if self.include_per_class_scores:
-        per_class_scores = dict() 
+        if self.include_per_class_scores:
+            per_class_scores = dict() 
+            
+            for class_label, class_integer_code in self.class_configs_dict.items():
+
+                if not self.include_background:
+                    if class_label.title() == 'Background':
+                        continue 
         
-        for class_label, class_integer_code in self.class_configs_dict.items():
-
-            if not self.include_background:
-                if class_label.title() == 'Background':
-                    continue 
-    
-            class_sep_pred = torch.where(pred == class_integer_code, 1, 0)
-            class_sep_gt = torch.where(gt == class_integer_code, 1, 0)
+                class_sep_pred = torch.where(pred == class_integer_code, 1, 0)
+                class_sep_gt = torch.where(gt == class_integer_code, 1, 0)
 
 
-            per_class_scores[class_label] = self.dice_score_per_class(class_sep_pred, class_sep_gt, per_class_masks[class_label])
+                per_class_scores[class_label] = self.dice_score_per_class(class_sep_pred, class_sep_gt, per_class_masks[class_label])
+            
+
+            assert type(cross_class) == torch.Tensor and cross_class.size() == torch.Size([1]), 'Generation of dice score failed because the cross-class score was not a torch tensor of size 1'
         
+        else:
+            per_class_scores = None 
 
-        assert type(cross_class) == torch.Tensor and cross_class.size() == torch.Size([1]), 'Generation of dice score failed because the cross-class score was not a torch tensor of size 1'
-        
         return (cross_class, per_class_scores)
         
     
@@ -237,7 +240,7 @@ class DiceScore:
         
         (cross_class_score, per_class_scores) = self.dice_score(image_masks['cross_class_mask'], image_masks['per_class_masks'], pred, gt)
         
-        return {"cross_class_score":cross_class_score, "per_class_scores":per_class_scores}    
+        return {"cross_class_scores":cross_class_score, "per_class_scores":per_class_scores}    
     
 class ErrorRate:
     def __init__(self):
@@ -268,10 +271,10 @@ class ErrorRate:
         
         _, _, error_rate_cross_class = self.extract_error_rate_info(ignore_empty, pred, gt, image_masks[0])
         
-    
-        per_class_scores = dict()
 
         if include_per_class_scores:
+
+            per_class_scores = dict()
             for class_label, class_code in dict_class_codes.items():
 
                 if not include_background:
@@ -286,7 +289,8 @@ class ErrorRate:
                 
                 per_class_scores[class_label] = per_class_error_rate
 
-
+        else:
+            per_class_scores = None 
         
         return (error_rate_cross_class, per_class_scores)
         
@@ -334,4 +338,4 @@ class ErrorRate:
 
         (cross_class_score, per_class_scores) = self.error_rate(ignore_empty, include_background, include_per_class_scores, image_masks, pred, gt, dict_class_codes)
         
-        return {"cross_class_score":cross_class_score, "per_class_scores":per_class_scores} 
+        return {"cross_class_scores":cross_class_score, "per_class_scores":per_class_scores} 
