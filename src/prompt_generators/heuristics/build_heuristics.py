@@ -1,8 +1,12 @@
 import os
+from os.path import dirname as up
 import sys
+sys.path.append(up(up(up(up(os.path.abspath(__file__))))))
+
 from typing import Union 
 
-from prompt_generators.heuristics.heuristic_generator_utils import mixture_class_registry, base_fncs_registry
+from src.prompt_generators.heuristics.prompt_mixtures import mixture_class_registry
+from src.prompt_generators.heuristics.heuristic_prompt_utils.heuristic_utils_registry import base_registry
 
 class BuildHeuristic:
 
@@ -61,10 +65,10 @@ class BuildHeuristic:
 
 
 
-        (OPTIONAL)prompt_mixture: A twice nested dict denoting a strategy for mixing prompt simulation across intra
+        (OPTIONAL)heuristic_mixture: A twice nested dict denoting a strategy for mixing prompt simulation across intra
         and inter-prompting strategies. The mixture args are a dictionary for each corresponding pairing of cross-interactions.
 
-        This prompt mixture arg will control whether/how prompt-methods will interact/condition one another during the 
+        This heuristic mixture arg will control whether/how prompt-methods will interact/condition one another during the 
         simulation. 
 
             Has structure: dict('inter_prompt':dict[tuple(prompt cross-interaction combinations), mixture_args/None], 
@@ -129,7 +133,7 @@ class BuildHeuristic:
         '''
 
         if not self.heuristic_mixtures:
-            #Here we will initialise the heuristics for fully-independent prompt generation methods.
+            #Here we will initialise the heuristics for fully-independent prompt generation methods (pseudo-mixture).
             heur_fn_dict = dict()
 
             for prompt_type, heuristics in self.heuristics.items():
@@ -137,7 +141,7 @@ class BuildHeuristic:
                 
                 if heuristics: #If heuristics is not a NoneType/I.e. if config exists for a prompt type
                     for heuristic in heuristics: 
-                        prompt_heur_fns[heuristic] = base_fncs_registry[prompt_type][heuristic]
+                        prompt_heur_fns[heuristic] = base_registry[prompt_type][heuristic]
                 else:
                     prompt_heur_fns = None 
                 
@@ -145,10 +149,12 @@ class BuildHeuristic:
 
             return mixture_class_registry['pseudo_mixture'](
                 config_labels_dict=self.config_labels_dict,
-                build_args=self.heuristic_params,
-                heur_fn_dict=heur_fn_dict,                                
                 device=self.device,
-                use_mem=self.use_mem)
+                use_mem=self.use_mem,
+                build_args=self.heuristic_params,
+                mixture_args=self.heuristic_mixtures,
+                heur_fn_dict=heur_fn_dict,                                
+                )
         else:
             raise NotImplementedError('Implement the code for initialising prompt mixture methods.')
             '''
@@ -265,6 +271,6 @@ class BuildHeuristic:
             prompts_torch_format, prompts_labels_torch_format = self.extract_prompts(data)
         
         elif self.heuristic_mixtures:
-
             raise NotImplementedError('The heuristic mixture strategy has not yet been implemented')
+    
         return prompts_torch_format, prompts_labels_torch_format 

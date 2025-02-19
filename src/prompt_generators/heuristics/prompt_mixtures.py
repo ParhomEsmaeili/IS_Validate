@@ -1,42 +1,77 @@
 import torch
 import numpy as np
 import os
+from os.path import dirname as up
 import sys
 from abc import abstractmethod
-from random import shuffle 
-
-
+sys.path.append(up(up(up(up(os.path.abspath(__file__))))))
+from src.prompt_generators.heuristics.prompt_bases import PointBase, ScribbleBase, BboxBase 
 '''
-This file contains all of the prompt generation classes for each of the heuristics that may be used as part of the 
-prompt simulation call. 
+This file contains the prompt mixture generation classes.
+
+Required arguments:
+
+use_mem: Bool - Denotes whether front-End IM memory is used for handling prompt placement (e.g., is IM used to inform prompt generation)
+config_labels_dict: Dict - Denotes the class-label to class-integer code mapping.
+device: str - Denotes the device which the prompt generation will be performed on.
+heur_fn_dict: Dict - Prompt-type separated dictionary containing the set of heuristics fncs being used:
+    
+    Each field contains:
+    Optional Dict separated by heuristic name containing the most basic abstract function for the given heuristic: 
+    {
+        heuristic_name_1: heur_fnc_1
+        ...
+    }
+    If prompt-type is not being used then NoneType.
+
+build_params: Optional(Dict) can also be none-type if no params needed (UNLIKELY and BAD) - 
+    
+    Prompt-type separated dictionary containing the heuristic arguments for each heuristic in the heur_fn_dict.
+    Contains the parameters for how the heuristic is to be called wrt methods in the base classes: for handling
+    challenges in the prompt generation process.
 
 
-For initialisation: 
+        Possible heuristic arguments include: 
 
-Possible heuristic arguments include: 
+        Multi-class related variables, e.g.:
 
-Multi-class related variables (e.g. how they may interact, parametrisations for picking which subcomponents), 
-multi-component related variables (e.g. quantity of disconnected components to place prompts in, priority list method?), 
+        How classes may interact, 
+        Parametrisations for picking which subcomponents, etc.
 
-General prompt-specific parametrisations (e.g. quantity of points, distribution specific parameters [e.g. ]
-or the range if it is not deterministic/fixed,
-budget for the scribbles) for valid prompts.
+        Multi-component related variables, e.g.:
+        
+        Quantity of disconnected components to place prompts in,
+        Component priority list method, etc. 
 
-General prompt-specific parametrisations for non-valid prompts (e.g. probability of executing the heuristic which
-samples a mistaken point). 
+        General prompt-level specific parametrisations for valid-prompts, e.g.:
 
+        Probabilistic sampling related params,
+        Points budget specific params, 
+        Point distribution specific parameters, 
+        Scribbles specific params,
+        Transforms related params (e.g. breaking scribbles), etc.
 
-It should also permit for probabilistic measures potentially where we may want to run a bernoulli trial or
-multinomial trial for deciding which prompt heuristics to use in a mixture method for a given instance 
-(i.e. the flexibility to not use all prompts or prompt methods at ALL times for stress testing). 
+        AND/OR
 
+        General prompt-specific parametrisations for non-valid prompts, e.g.:
+        
+        Probabilistic sampling related params for executing the heuristic samples mistakenly. 
+        Prompt generation specific parameters for executing mistaken heuristics.
 
-Also intended for performing any checks required on the generated prompts (e.g. removing repeats, checking at least
-one prompt is placed)
+heuristic_mixtures_args: 
+    
+    An optional dictionary which contains information about arguments pertaining to mixing prompt generation strategies together
+    intra and inter-prompt. E.g.:
 
+    Can include arguments related specifically to fusing prompts together in the actual generation method.
 
+    
+    It can also permit for arguments pertaining to how they should be combined together, e.g.:
 
+        Probabilistic measures where we may want to run a bernoulli trial or multinomial trial for deciding which 
+        prompt heuristics to use in a mixture method for a given instance (i.e. the flexibility to not use all prompts or prompt methods at ALL times for stress testing). 
 
+--------------------------------------------------------------------------------------------------------------------
 
 
 General Call Inputs:
@@ -57,13 +92,13 @@ data: This is a dictionary which contains the following information:
 
     'im': (Optional) Dictionary containing the interaction memory from prior iterations of interaction. 
     
-generated_prompts: Contains field for each given prompt type:
+generated_prompts: Dict - contains field for each given prompt type:
 
     'prompt' (e.g. points/scribbles/bboxes):
     
     An empty list (OR NONETYPE for skippable prompts) for the spatial prompts for the current iteration.
 
-generated_prompt_labels: Contains field for each given prompt type;
+generated_prompt_labels: Dict - contains field for each given prompt type;
 
     prompt_labels (e.g. points_labels/scribbles_labels/bboxes_labels): 
     
@@ -78,26 +113,16 @@ generated_prompt_labels:
     Amended dict with the additional labels from the simulation. 
 '''
 
-#################################################################################################################
-
-#Here we place the abstracted functions which just perform the implementation according to the input args only.
-
-#These funcs should be able to generate errors in instances where there are no longer any remaining voxels for prompt placement
-#more specifically relevant to the fine granular interaction mechanisms. 
-
-#NOTE: This is not the same as there being no voxels for correction from the start! 
-
-def uniform_random():
-    pass 
-
 ###################################################################################################################
-#Here we place the classes which wrap together the abstracted functions in a manner which handles all the headache about
-#parametrisations, multi-class, multi-component etc. 
+#Here we place the classes which wrap together the abstracted functions in a manner which handles all the headache 
+#about parametrisations, multi-class, multi-component etc. 
 
-class BaseMixture:
-    
+class BaseMixture(PointBase, ScribbleBase, BboxBase):
+
     def filter_empty(self, prompts, prompts_labels, ptype):
-        #We convert empty prompt lists to NoneTypes:
+        '''
+        Function which filters out the empty prompt type lists into NoneTypes.
+        '''
         
         if prompts[ptype] == [] or prompts_labels[ptype] == []:
             prompts[ptype] = None 
@@ -105,11 +130,12 @@ class BaseMixture:
 
         return prompts, prompts_labels
 
-class BasicValidOnlyMixture(BaseMixture):
-    pass  
+class BasicValidOnlyMixture(BaseMixture): 
+    def __init__(self, use_mem):
+        self.use_mem = use_mem 
 
 class BasicMistakesMixture(BaseMixture):
-     pass 
+    pass 
 
 class PseudoMixture(BasicValidOnlyMixture):
     '''
@@ -122,17 +148,26 @@ class PseudoMixture(BasicValidOnlyMixture):
     def __init__(
             self,
             config_labels_dict: dict,
-            build_args: dict,
-            heur_fn_dict: dict,
             device: str,
-            use_mem: bool):
+            heur_fn_dict: dict,
+            build_args: dict,
+            mixture_args: dict = None,
+            use_mem: bool = False,
+            ):
         
+        super().__init__(
+            config_labels_dict=config_labels_dict,
+            device=device,
+            use_mem=use_mem
+        )
         self.configs_labels_dict = config_labels_dict
-        self.heur_build_args = build_args
+        self.device = device
         self.heur_fn_dict = heur_fn_dict
-        self.device = device 
+        self.heur_build_args = build_args
+        self.mixture_args = mixture_args
         self.use_mem = use_mem
 
+        
         #Priority list for the independent fusion strategy, it bins the prompt types into distinct groups of priority
         #each sublist has items equal in priority.
         self.indep_fusion_priority_list = [['bbox'], ['scribbles', 'points']]
@@ -164,17 +199,7 @@ class PseudoMixture(BasicValidOnlyMixture):
     def __call__(self, valid_ptypes, data, generated_prompts, generated_prompt_labels):
         pass 
 
-        
-
-# class bbox_constrained_point:
-#     pass 
-
-base_fncs_registry = {
-    'points':{
-    'uniform_random': uniform_random
-    }
-}
-
+    
 #Mixture registry is for mixture models in which inter and intra-prompt interactions occur during the prompt generation process 
 #we also include pseudomixture (this is where there is absolutely no interaction between prompt generation) for tidyness.
 
