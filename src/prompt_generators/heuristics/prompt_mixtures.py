@@ -15,7 +15,7 @@ sys.path.append(up(up(up(up(os.path.abspath(__file__))))))
 from src.prompt_generators.heuristics.prompt_bases import PointBase, ScribbleBase, BboxBase
 from src.utils.dict_utils import extractor, dict_path_modif
 from src.prompt_generators.heuristics.spatial_utils.component_extraction import get_label_ccp, extract_connected_components
-
+from src.prompt_generators.heuristics.spatial_utils.update_binary_mask import update_binary_mask
 '''
 This file contains the prompt mixture generation classes.
 
@@ -269,8 +269,15 @@ class BaseMixture(PointBase, ScribbleBase, BboxBase):
                     assert all([type(p_item) == torch.Tensor or type(p_item) == MetaTensor for p_item in p_lb]) 
 
                     #We then merge into the ordered prompts dicts.
-                    ordered_prompts_dict[ptype].extend([p_item.to(device=self.sim_device) for p_item in p])
-                    ordered_prompts_lb_dict[ptype].extend([p_item.to(device=self.sim_device) for p_item in p_lb])
+
+                    temp_p = copy.deepcopy(ordered_prompts_dict[ptype])
+                    temp_p.extend([p_item.to(device=self.sim_device) for p_item in p])
+                    
+                    temp_plb = copy.deepcopy(ordered_prompts_lb_dict[ptype])
+                    temp_plb.extend([p_item.to(device=self.sim_device) for p_item in p_lb])
+
+                    ordered_prompts_dict[ptype] = temp_p
+                    ordered_prompts_lb_dict[ptype] = temp_plb 
                 
             #We then extract from the interactive edits, in order. If the remaining state keys are empty, then the 
             # cartesian product will return an empty tuple so that the iterator will just terminate.
@@ -294,9 +301,14 @@ class BaseMixture(PointBase, ScribbleBase, BboxBase):
                 assert all([type(p_item) == torch.Tensor or type(p_item) == MetaTensor for p_item in p_lb]) 
 
                 #We then merge into the ordered prompts dicts.
-                ordered_prompts_dict[ptype].extend([p_item.to(device=self.sim_device) for p_item in p])
-                ordered_prompts_lb_dict[ptype].extend([p_item.to(device=self.sim_device) for p_item in p_lb])
-            
+                temp_p = copy.deepcopy(ordered_prompts_dict[ptype])
+                temp_p.extend([p_item.to(device=self.sim_device) for p_item in p])
+                
+                temp_plb = copy.deepcopy(ordered_prompts_lb_dict[ptype])
+                temp_plb.extend([p_item.to(device=self.sim_device) for p_item in p_lb])
+
+                ordered_prompts_dict[ptype] = temp_p 
+                ordered_prompts_lb_dict[ptype] = temp_plb
         
             for ptype in ptypes:
                 if len(ordered_prompts_dict[ptype]) != len(ordered_prompts_lb_dict[ptype]):
@@ -363,27 +375,20 @@ class BasicValidOnlyMixture(BaseMixture):
 
         return ordered_prompts_dict, ordered_prompts_lb_dict 
 
-    def sort_regions(self, sort: dict[str, str]):
-        '''
-        Can be 3 different sorting algorithms, provided.
-        Must be provided for in the build_args parameters
-        '''
-
-    def init_sampling_regions(self, 
+    def init_sample_regions_components(
+                            self, 
                             pred: Union[None, Union[torch.Tensor, MetaTensor]], 
-                            gt: Union[torch.Tensor, MetaTensor]
+                            gt: Union[torch.Tensor, MetaTensor],
                             ):
         '''
-        Function which initialises the prompt sampling regions. Returns a dict of regions first split by 
-        false negative error region and gt (NOTE: false negative for background = false positive for another class, 
-        hence we only bother with mismatches and split by the GT class).
- 
-        For instances where the error region is not desired (initialisation), the error region subdict is None.
-        For instances where the error region is desired, but the error region is empty (should never happen across all
-        classes otherwise the termination condition should have been met!) then it returns a tensor of zeros for the 
-        "errors".
+        Function which initialises the prompt sampling regions on a component basis. Returns a dict of regions 
+        for gt split by class and components, and also the same for the error regions, but split according to the
+        gt and preds.
 
-        Complication: Class specific challenges wrt ordering the components. E.g. if we had a huge organ and a small
+        For instances where the error region is not desired (initialisation), the error region subdict is None.
+    
+
+        Motivation: Class specific challenges wrt ordering the components. E.g. if we had a huge organ and a small
         organ both oversegmented into background, the strategy of only using false negatives would bias to the huge 
         organ. Similarly, there may be variation in component sizes within a class.
 
@@ -397,8 +402,32 @@ class BasicValidOnlyMixture(BaseMixture):
         Then, apply a sorting algorithm during the iterative looping for each heuristic.
 
         For the gt: Split into class, then into a list of components (torch tensors) within the class. 
+
+
+
+        inputs: 
         
+        pred - Optional (torch.Tensor or MetaTensor) discretised pred (not one-hot encoded)
+        gt - torch.Tensor or MetaTensor which is discrete and not one-hot encoded.
+
+        returns:
+        
+        sampling_regions_dict: A dictionary, contains two fields:
+
+        'gt': Contains a dictionary which is structured as: dict[class_str, list of torch.Tensors]
+        
+        'error_regions': Contains a nested dictionary which is structured as:
+
+        dict[class_str denoting the GT of error voxel, dict[class_str denoting the prediction, list of torch.Tensors]]
+        
+        This dictionary chunks up the false negative error region in the following manner: It splits it by the 
+        ground truth class of the error voxels, it then splits it according to the predicted class, it then splits it
+        into a list of components from the error voxels extracted from this intersection.  
+
+        NOTE: For any instances where a gt class is empty, or the error region is empty for the given config path, then 
+        it will be an empty list []. 
         '''
+        raise NotImplementedError('Needs to be checked for debugging again, add a logical check e.g. that gts sum to quantity of voxels')
         sampling_regions_dict = dict() 
         
         #First we implement the gt extraction since this is always required. 
@@ -418,31 +447,215 @@ class BasicValidOnlyMixture(BaseMixture):
             components_list, _ = get_label_ccp(gt_temp) 
             if components_list == []:
                 warnings.warn(f'Class {label} was empty in gt.')
-        
-            sampling_regions_dict['gt'][label].extend(components_list)
-        
+            tmp = copy.deepcopy(sampling_regions_dict['gt'][label]) 
+            tmp.extend(components_list)
+            sampling_regions_dict['gt'][label] = tmp 
+
         if all([masks == [] for label, masks in sampling_regions_dict['gt'].items() if label.title() != 'Background']):
             raise Exception('All of the foreground classes in the ground truth cannot be empty.')
             
         #if pred is None, then we just return the gts.
         
-        if not pred:
+        if pred is None:
             sampling_regions_dict['error_regions'] = None 
             return sampling_regions_dict
-        else:
-            #Place gt on device and in int32 dtype. 
+        else: 
+            #Place pred on device and in int32 dtype. 
 
             if not pred.device == self.sim_device:
                 warnings.warn('The pred mask must be placed on the sim device')
                 pred = pred.to(dtype=torch.int32, device=self.sim_device)
             
+            #Find the false negative error region. 
+            error_map_bool = torch.where(pred != gt, 1, 0).to(dtype=torch.int32, device=self.sim_device)
+            
+            #Create the error regions dict: 
+            err_regions_dict = dict() 
+
+            for l1, v1 in self.config_labels_dict.items():
+                #Splitting into classes according to gt (i.e. voxels where an error occured and where the gt class exists)                
+                temp_gt = torch.where(gt == v1, 1, 0).to(dtype=torch.int32, device=self.sim_device)
+                split_by_gt = error_map_bool * temp_gt 
+                
+                err_regions_dict[l1]  = dict() 
+
+                for l2, v2 in {key:val for key, val in self.config_labels_dict.items() if key != l1}.items():    
+                    #Splitting into classes according to predicted class that do not belong to.
+                    
+                    #NOTE: We use where key != l1 because error would not occur if the pred was the same as the gt label.
+
+                    #split by pred gives us the map where the gt = v1 but pred = v2
+                    temp_pred = torch.where(pred == v2, 1, 0).to(dtype=torch.int32, device=self.sim_device)
+                    split_by_pred = split_by_gt * temp_pred 
+
+                    #Splitting into the list of components
+                    components_list, _ = get_label_ccp(split_by_pred)
+
+                    err_regions_dict[l1][l2] = components_list 
+
+            sampling_regions_dict['error_regions'] = err_regions_dict 
         
-    def update_error_region():
-        pass 
-        #This should generalise to instances where prompts are placed outside of the current error region so it
-        #can be used for multi-component problems?
+            return sampling_regions_dict
+    
+    
+    def init_sample_regions_no_components(
+                            self, 
+                            pred: Union[None, Union[torch.Tensor, MetaTensor]], 
+                            gt: Union[torch.Tensor, MetaTensor],
+                            ):
+        '''
+        Very basic function which initialises the prompt sampling regions without a per-component basis. 
+        Returns a dict of  regions for gt split by class, and also the same for the error regions.
+
+        It is not intended for sophisticated behaviours, e.g. where one must consider the per-component basis, or the
+        scale of a class. 
+
+        For instances where the error region is not desired (initialisation), the error region subdict is None.
+        Otherwise, it just treats the entirety of the error region as a single mask for each class it belongs to.
+
+        inputs: 
         
+        pred - Optional (torch.Tensor or MetaTensor) discretised pred (not one-hot encoded)
+        gt - torch.Tensor or MetaTensor which is discrete and not one-hot encoded.
+
+        returns:
         
+        sampling_regions_dict: A dictionary, contains two fields:
+
+        'gt': Contains a dictionary which is structured as: dict[class_str, torch.Tensor]
+        
+        'error_regions': Contains a nested dictionary which is structured as:
+
+        dict[class_str denoting the GT of error voxel, torch.Tensor]]
+        
+        This dictionary chunks up the false negative error region in the following manner: It splits it by the 
+        ground truth class of the error voxels, it then splits it according to the predicted class. 
+
+        NOTE: For any instances where a gt class is empty, or the error region is empty for the given config path, then 
+        it will be Nonetype!  
+        '''
+        sampling_regions_dict = dict() 
+        
+        #First we implement the gt extraction since this is always required. 
+
+        #Place gt on device and in int32 dtype. 
+
+        if not gt.device == self.sim_device:
+            warnings.warn('The gt mask must be placed on the sim device')
+            gt = gt.to(dtype=torch.int32, device=self.sim_device)
+        
+        sampling_regions_dict['gt'] = dict.fromkeys(self.config_labels_dict.keys(), None)
+
+        #We then split the gt, by class for each class. 
+        for label, value  in self.config_labels_dict.items():
+            #We split gt by label. 
+            gt_temp = torch.where(gt == value, 1, 0).to(dtype=torch.int32, device=self.sim_device) 
+            if gt_temp.sum() == 0:
+                warnings.warn(f'Class {label} was empty in gt.')
+                sampling_regions_dict['gt'][label] = None 
+            else:
+                sampling_regions_dict['gt'][label] = gt_temp 
+
+        if all([masks is None for label, masks in sampling_regions_dict['gt'].items() if label.title() != 'Background']):
+            raise Exception('All of the foreground classes in the ground truth cannot be empty.')
+        
+        if torch.all(torch.stack(list(sampling_regions_dict['gt'].values())).sum(dim=0) == torch.ones_like(gt)):
+            print('GT all GOOD!')
+        else:
+            raise Exception('GT maps did not merge to a tensor of ones')
+        #if pred is None, then we just return the gts.
+        
+        if pred is None:
+            sampling_regions_dict['error_regions'] = None 
+            return sampling_regions_dict
+        else: 
+            #Place pred on device and in int32 dtype. 
+
+            if not pred.device == self.sim_device:
+                warnings.warn('The pred mask must be placed on the sim device')
+                pred = pred.to(dtype=torch.int32, device=self.sim_device)
+            
+            #Find the false negative error region. 
+            error_map_bool = torch.where(pred != gt, 1, 0).to(dtype=torch.int32, device=self.sim_device)
+            
+            #Create the error regions dict: 
+            err_regions_dict = dict() 
+
+            for l1, v1 in self.config_labels_dict.items():
+                #Splitting into classes according to gt (i.e. voxels where an error occured and where the gt class exists)                
+                temp_gt = torch.where(gt == v1, 1, 0).to(dtype=torch.int32, device=self.sim_device)
+                #We recompute because calling from gt above, NoneType would break.
+                split_by_gt = error_map_bool * temp_gt 
+                
+                if split_by_gt.sum() == 0:
+                    err_regions_dict[l1] = None 
+                else: 
+                    err_regions_dict[l1] = split_by_gt 
+
+
+            sampling_regions_dict['error_regions'] = err_regions_dict 
+
+            if torch.all(torch.stack(list(sampling_regions_dict['error_regions'].values())).sum(dim=0) <= 1):
+                print('No error regions are overlapping!')
+            else:
+                raise Exception('There are overlapping error regions')
+            return sampling_regions_dict
+        
+    def update_error_region(self, region_mask, refinement_prompts: list[torch.Tensor]):
+        '''
+        This is a function which updates a region mask according to a set of refinement prompts. It will convert any 
+        coords with 1s at the coordinates to zeroes.
+
+        This can be incorporated into an approach for multi-component handling, and also for handling different prompt 
+        types.
+
+        In particular, it can handle points and scribbles. It assumes that the prompts are provided as a list of
+        tensors with shape N x N_dim (N = 1 for points, and N_s.p for scribbles). It will raise an exception if
+        the spatial dimensions are larger than N_dims. 
+
+        inputs:
+
+        region_mask: A binary mask with N_dim spatial dims denoting an error region with values of 1, everywhere else is zero. 
+        refinement_prompts: A list of prompts N x N_dim for updating the region mask.
+
+        '''
+        if not all([prompt.shape[1] == region_mask.dim() for prompt in refinement_prompts]):
+            raise Exception('The number of spatial dimensions of all input prompts must match the number of spatial dimensions of the mask')
+        
+        if refinement_prompts == []:
+            warnings.warn('The prompts are empty')
+            return region_mask
+        
+        if region_mask.device != self.sim_device:
+            region_mask.to(device=self.sim_device)
+
+        
+        for coords in refinement_prompts:
+            region_mask = update_binary_mask(region_mask, coords)    
+        return region_mask
+    
+    def sort_components(self, components: Union[list[Union[torch.Tensor, MetaTensor]], None], sort_criterion: str = None):
+        '''
+        This is a function that will sort a list of components according to a sort criterion. 
+
+        inputs: 
+
+        components - list: A list of components, can optionally also be an empty list.
+        sort_criterion - str: A sorting criterion.
+        '''
+
+        if sort_criterion is None:
+            return components 
+        elif sort_criterion.title() == 'Random':
+            #We create a random permutation of integers from 0 to len(sublist) - 1.
+            indices = torch.randperm(range(len(components))).to(int) 
+            return [components[i] for i in indices]
+        elif sort_criterion.title() == 'Component Sum':
+            #This is on the basis of the sum of the torch tensors (i.e. the size of the component)
+            _, indices = torch.sort(torch.stack(components).sum(list(range(1, len(torch.stack(components).shape)))))
+            return [components[i] for i in indices]
+
+
 class BasicMistakesMixture(BaseMixture):
     def rm_repeats(self, ordered_prompts_dict, ordered_prompts_lb_dict):
 
@@ -492,11 +705,18 @@ class PseudoMixture(BasicValidOnlyMixture):
         #Priority list for the independent fusion strategy, it bins the prompt types into distinct groups of priority
         #each sublist has items equal in priority.
         self.indep_fusion_priority_list = [['bbox'], ['scribbles', 'points']]
+    
+    def toggle_components(self):
+        pass 
 
     def independent_iterator(self, valid_ptypes, data, generated_prompts, generated_prompt_labels):
         
         #We iterate through the priority list, bbox goes first as it is only capable of grounding a segmentation.
         for sublist in self.indep_fusion_priority_list:
+
+
+            TOGGLE_COMPONENTS 
+
 
         #We shuffle the valid_ptypes list randomly within the priority list bracket for prompt diversity.
         #(e.g., downstream apps may not necessarily treat scribble points, and standard points the same in their model)
@@ -518,7 +738,7 @@ class PseudoMixture(BasicValidOnlyMixture):
             #         except:
             #             continue 
     def __call__(self, valid_ptypes, data, generated_prompts, generated_prompt_labels):
-        pass 
+        im = data['im']
 
     
 #Mixture registry is for mixture models in which inter and intra-prompt interactions occur during the prompt generation process 
