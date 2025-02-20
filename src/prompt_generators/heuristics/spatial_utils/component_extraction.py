@@ -159,3 +159,6 @@ if __name__ == '__main__':
     print(get_label_ccp(binary_mask_3d))
     # except:
     #     print('missing import')
+
+
+    print(get_label_ccp(torch.zeros(10,10)))

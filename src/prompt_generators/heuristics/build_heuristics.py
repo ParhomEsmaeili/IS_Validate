@@ -52,6 +52,9 @@ class BuildHeuristic:
 
         Almost the same structure as prompt_methods, as they must correspond together!
 
+        NOTE: Must also contain information about handling the iterative loop (e.g. sorting components strategy, 
+        otherwise assumed to be fully according to the default.)
+
         NOTE: Can also be a Nonetype, in which case there is no information required for building the prompters
         (e.g., parameter free/variable free [very unlikely], or if there is no prompt of that type being used)
 
@@ -115,6 +118,10 @@ class BuildHeuristic:
         #Checking that at least one valid prompt type has something populating it
 
         # I.e., if it went through the exception handling for every valid prompt type then it would be only NoneTypes throughout.
+        
+        #NOTE: This is insufficient outside of just refinement prompt simulation, as bbox may be present even without
+        #refinement at each iter! Needs consistent refinement! 
+
         if not all(generated_prompts.values()) or not all(generated_prompts_labels.values()):
             raise ValueError('There must be at least one prompt!')
         

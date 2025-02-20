@@ -48,6 +48,9 @@ class BasicSpatialPromptGenerator(PromptReformatter):
 
         Almost the same structure as prompt_methods, as they must correspond together!
 
+        NOTE: Must also contain information about handling the iterative loop (e.g. sorting components strategy, 
+        otherwise assumed to be fully according to the default.)
+        
         NOTE: Can also be a Nonetype, in which case there is no information required for building the prompters
         (e.g., parameter free/variable free, or if there is no prompt of that type being used)
 
@@ -80,7 +83,7 @@ class BasicSpatialPromptGenerator(PromptReformatter):
         Can optionally can be Nonetype (i.e., fully  independently assumed prompt generation) simulation of prompts (inter and intra-prompt strategy). 
         Hence they will be generated with no consideration of prompting intra and inter-dependencies 
         outside of resolving redundancy conflicts (which should not because of the sampling region fill strategy).
-        
+
         NOTE: This is only intended for fully valid prompt generation!
     
         '''

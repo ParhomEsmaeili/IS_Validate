@@ -363,26 +363,80 @@ class BasicValidOnlyMixture(BaseMixture):
 
         return ordered_prompts_dict, ordered_prompts_lb_dict 
 
-    def init_sampling_regions(self, pred: Union[None, Union[torch.Tensor, MetaTensor]], gt: Union[torch.Tensor, MetaTensor]):
+    def sort_regions(self, sort: dict[str, str]):
         '''
-        Function which initialises the prompt sampling regions. Returns a dict of regions first split by error region
-        and gt. Within each of these, is a subdict separated by class containing a tuple of disconnected components 
-        in order of component size. 
+        Can be 3 different sorting algorithms, provided.
+        Must be provided for in the build_args parameters
+        '''
+
+    def init_sampling_regions(self, 
+                            pred: Union[None, Union[torch.Tensor, MetaTensor]], 
+                            gt: Union[torch.Tensor, MetaTensor]
+                            ):
+        '''
+        Function which initialises the prompt sampling regions. Returns a dict of regions first split by 
+        false negative error region and gt (NOTE: false negative for background = false positive for another class, 
+        hence we only bother with mismatches and split by the GT class).
+ 
+        For instances where the error region is not desired (initialisation), the error region subdict is None.
+        For instances where the error region is desired, but the error region is empty (should never happen across all
+        classes otherwise the termination condition should have been met!) then it returns a tensor of zeros for the 
+        "errors".
+
+        Complication: Class specific challenges wrt ordering the components. E.g. if we had a huge organ and a small
+        organ both oversegmented into background, the strategy of only using false negatives would bias to the huge 
+        organ. Similarly, there may be variation in component sizes within a class.
+
+        Resolution- 
+        
+        For the error region: 
+        
+        Split into class, then split each false negative region by the predicted class (this would be a
+        false positive of that class). Then into a list of components (torch tensors) within that predicted class.
+        
+        Then, apply a sorting algorithm during the iterative looping for each heuristic.
+
+        For the gt: Split into class, then into a list of components (torch tensors) within the class. 
         
         '''
-        #if pred is None, then we just return the gt.
-        if not pred:
-            if not gt.device == self.sim_device:
-                warnings.warn('The gt mask must be placed on the input device')
-                gt = gt.to(device=self.sim_device)
-            #We then split the gt into a list of components for iteration. 
-            for i in 
-            get_label_ccp(gt)
-            return gt 
-        else:
-            pass 
-        #Place both pred and gt on device and in int32 dtype. 
+        sampling_regions_dict = dict() 
+        
+        #First we implement the gt extraction since this is always required. 
 
+        #Place gt on device and in int32 dtype. 
+
+        if not gt.device == self.sim_device:
+            warnings.warn('The gt mask must be placed on the sim device')
+            gt = gt.to(dtype=torch.int32, device=self.sim_device)
+        
+        sampling_regions_dict['gt'] = dict.fromkeys(self.config_labels_dict.keys(), [])
+
+        #We then split the gt, by class and into a list of components for each class. 
+        for label, value  in self.config_labels_dict.items():
+            #We split gt by label. 
+            gt_temp = torch.where(gt == value, 1, 0).to(dtype=torch.int32, device=self.sim_device)
+            components_list, _ = get_label_ccp(gt_temp) 
+            if components_list == []:
+                warnings.warn(f'Class {label} was empty in gt.')
+        
+            sampling_regions_dict['gt'][label].extend(components_list)
+        
+        if all([masks == [] for label, masks in sampling_regions_dict['gt'].items() if label.title() != 'Background']):
+            raise Exception('All of the foreground classes in the ground truth cannot be empty.')
+            
+        #if pred is None, then we just return the gts.
+        
+        if not pred:
+            sampling_regions_dict['error_regions'] = None 
+            return sampling_regions_dict
+        else:
+            #Place gt on device and in int32 dtype. 
+
+            if not pred.device == self.sim_device:
+                warnings.warn('The pred mask must be placed on the sim device')
+                pred = pred.to(dtype=torch.int32, device=self.sim_device)
+            
+        
     def update_error_region():
         pass 
         #This should generalise to instances where prompts are placed outside of the current error region so it
