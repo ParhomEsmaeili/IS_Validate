@@ -31,14 +31,15 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
         
                 a) 'interactions":
                     Points: List of torch tensors each with shape 1 x N_dim (N_dims = number of image dimensions)
-                    Scribbles: Nested list of scribbles (N_sp), each scribble is a list of torch tensors with shape [1 x N_dim] denoting the positional coordinate.
+                    Scribbles: List of scribbles, each scribble is a torch tensor with shape [N_s.p x N_dim] denoting the 
+                    positional coordinate. NOTE: N_s.p is highly dependent on the scribble length! Which can vary between scribbles. 
                     Bboxes: List of N_box torch tensors, each tensor is a 1 x 2*N_dim shape (Extrema of the bbox with order [i_min, j_min, k_min, i_max, j_max, k_max] where ijk = RAS convention) 
                 
                 b) 'interactions_labels'
 
                     Points_labels: List of torch tensors each with shape 1 (Values = class-integer code value for the given point: e.g. 0, 1, 2, 3...)
-                    Scribbles_labels: List of torch tensors, each with shape 1 (Values = class-integer code value for the given point: e.g. 0, 1, 2, 3... )
-                    Bboxes_labels: List of N_box torch tensors, each with shape 1 (Values = class-integer code value for the given point)
+                    Scribbles_labels: List of torch tensors, each with shape 1 (Values = class-integer code value for the given scribble: e.g. 0, 1, 2, 3... )
+                    Bboxes_labels: List of N_box torch tensors, each with shape 1 (Values = class-integer code value for the given bbox)
 
                 "interactions" contains the prompts spatial coords info, and "interactions_labels" the corresponding
                 labels for the prompts. 
@@ -68,7 +69,7 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
         '''
         
         def __init__(self,
-                    device: str,
+                    sim_device: torch.device,
                     use_mem:bool, 
                     prompt_configs: dict,
                     config_labels_dict: dict,
@@ -77,7 +78,7 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
             '''
             inputs:
 
-            device: The device which the prompt generation computations will be implemented on.
+            sim_device: The device which the prompt generation computations will be implemented on.
             
             use_mem: A bool denoting whether the interaction memory should be used as part of prompt generation (I.E is the "UI" 
             refreshing or accumulating prompts)
@@ -89,7 +90,7 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
 
             '''
             super().__init__(
-                            device=device,
+                            sim_device=sim_device,
                             use_mem=use_mem,
                             config_labels_dict=config_labels_dict,
                             sim_methods=prompt_configs['methods'], 

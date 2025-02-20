@@ -1,8 +1,11 @@
 import logging
 import os
+from os.path import dirname as up
+import sys
+sys.path.append(up(up(up(os.path.abspath(__file__)))))
+from src.utils.dict_utils import extractor 
 import csv
 import re 
-from typing import Union 
 
 # import pandas
 
@@ -174,32 +177,6 @@ def sort_infer_calls(infer_call_names):
     #Returning it as a tuple so that it is immutable.
 
     return tuple(infer_call_names_order)
-
-def extractor(x: dict, y: tuple[Union[tuple,str, int]]): 
-    '''
-    This general purpose function is adapted from a lambda function which iterates through the dict using the tuple, 
-    where the order/index denotes the depth. 
-    
-    Once tuple is empty it stops (also for NoneType it stops, i.e. just returns the current dict.) and returns the
-    item from the provided tuple path. 
-
-    Inputs: 
-        x - A dictionary which is populated and will be extracted from
-        y - A tuple consisting of the iterative path through the nested dict.
-    '''
-    if not y:
-        return x
-    else:
-        if not isinstance(y, tuple):
-            raise TypeError('y - path in dict must be a tuple')
-        
-        if y: #If y exists and we are iterating through it still:
-            if not isinstance(x, dict):
-                raise TypeError('x must be a dictionary')
-            if x == {}:
-                raise ValueError('The input dict must be populated otherwise we cannot extract anything.')
-            else:
-                return extractor(x[y[0]], y[1:]) 
 
 def write_row(
         patient_name: str, 

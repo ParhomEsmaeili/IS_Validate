@@ -4,14 +4,14 @@ import sys
 sys.path.append(up(up(up(up(os.path.abspath(__file__))))))
 
 from typing import Union 
-
+import torch
 from src.prompt_generators.heuristics.prompt_mixtures import mixture_class_registry
 from src.prompt_generators.heuristics.heuristic_prompt_utils.heuristic_utils_registry import base_registry
 
 class BuildHeuristic:
 
     def __init__(self,
-                device:str,
+                sim_device: torch.device,
                 use_mem:bool,
                 config_labels_dict:dict,
                 heuristics:dict,
@@ -25,7 +25,7 @@ class BuildHeuristic:
 
         Inputs:
 
-        device: str - The device which the computations will be implemented on for gpu (or cpu) processing.
+        sim_device: torch.device - The device which the computations will be implemented on for gpu (or cpu) processing.
 
         use_mem: A bool - Denotes whether the interaction memory dictionary will be used so that stored memory
         is being retained/used to filter the error regions for prompt generation.
@@ -82,9 +82,9 @@ class BuildHeuristic:
 
 
         Can optionally can be Nonetype (i.e., fully  independently assumed prompt generation) simulation of prompts (inter and intra-prompt strategy). 
-        Hence they will be generated with no consideration of prompting intra and inter-dependencies.
+        Hence they will be generated with no consideration of prompting intra and inter-dependencies (outside of the sampling region being filled)
         '''
-        self.device = device 
+        self.sim_device = sim_device 
         self.use_mem = use_mem 
         self.config_labels_dict = config_labels_dict
         self.heuristics = heuristics 
@@ -149,7 +149,7 @@ class BuildHeuristic:
 
             return mixture_class_registry['pseudo_mixture'](
                 config_labels_dict=self.config_labels_dict,
-                device=self.device,
+                sim_device=self.sim_device,
                 use_mem=self.use_mem,
                 build_args=self.heuristic_params,
                 mixture_args=self.heuristic_mixtures,

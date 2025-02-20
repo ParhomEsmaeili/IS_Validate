@@ -186,13 +186,13 @@ class front_end_simulator:
             # interaction. All information for the autosegmentation state will be provided manually.
 
             self.inter_init_generator = HeuristicInteractionState(
-                device=self.args['device'],
+                sim_device=self.args['sim_device'],
                 use_mem=self.args['use_mem_generator'],
                 prompt_configs=self.args['inter_init_prompt_config'],
                 config_labels_dict=self.args['config_labels_dict']
             )
             self.inter_edit_generator = HeuristicInteractionState(
-                device=self.args['device'],
+                sim_device=self.args['sim_device'],
                 use_mem=self.args['use_mem_generator'],
                 prompt_configs=self.args['inter_edit_prompt_config'],
                 config_labels_dict=self.args['config_labels_dict']

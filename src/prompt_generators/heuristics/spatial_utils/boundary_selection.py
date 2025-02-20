@@ -5,54 +5,34 @@ import numpy as np
 # import nibabel as nib
 import os
 import numpy as np
-from scipy.ndimage import label
+# from scipy.ndimage import label
 
-# def get_boundary(seg, kernel_size):
-#     pad_size = int((kernel_size - 1) / 2)
-#     m_xy = nn.AvgPool3d((kernel_size, kernel_size, 1), stride=1, padding=(pad_size, pad_size, 0)).cuda()
-#     output_xy = m_xy(seg)
-#     edge_xy = abs(seg - output_xy)
-#     # edge = edge_xy[0, :]
-#     edge_locations = torch.multiply(edge_xy, seg)
-#     edge_locations[edge_locations > 0] = 1
-#     edge_mask = edge_locations.squeeze(0)
+def get_boundary(seg, kernel_size):
+    raise NotImplementedError('Implement a check for how this works/what boundary this is extracting.')
+    pad_size = int((kernel_size - 1) / 2)
+    m_xy = nn.AvgPool3d((kernel_size, kernel_size, 1), stride=1, padding=(pad_size, pad_size, 0)).cuda()
+    output_xy = m_xy(seg)
+    edge_xy = abs(seg - output_xy)
+    # edge = edge_xy[0, :]
+    edge_locations = torch.multiply(edge_xy, seg)
+    edge_locations[edge_locations > 0] = 1
+    edge_mask = edge_locations.squeeze(0)
 
-#     return edge_mask
+    return edge_mask
 
+def find_boundary_map(seg, boundary_kernel=3, margin_kernel=7):
+    raise NotImplementedError('Check what boundary this is extracting')
+    boundary = get_boundary(seg, kernel_size=boundary_kernel).unsqueeze(0)
+    margin = get_boundary(seg, kernel_size=margin_kernel).unsqueeze(0) - boundary
+    content = seg - margin - boundary
+    return boundary.squeeze(0), margin.squeeze(0), content.squeeze(0)
 
-# def find_boundary_map(seg, boundary_kernel=3, margin_kernel=7):
-#     boundary = get_boundary(seg, kernel_size=boundary_kernel).unsqueeze(0)
-#     margin = get_boundary(seg, kernel_size=margin_kernel).unsqueeze(0) - boundary
-#     content = seg - margin - boundary
-#     return boundary.squeeze(0), margin.squeeze(0), content.squeeze(0)
-
-
-import torch
-import torch.nn.functional as F
-import scipy.ndimage
-
-import torch
-import torch.nn.functional as F
-import scipy.ndimage
-
-import torch
-import torch.nn.functional as F
-
-import torch
-import torch.nn.functional as F
-
-import torch
-import torch.nn.functional as F
-
-import torch
-import torch.nn.functional as F
-
-def extract_mask_boundary(mask: torch.Tensor, kernel_size: int = 3) -> torch.Tensor:
+def extract_interior_boundary(mask: torch.Tensor, kernel_size: int = 3) -> torch.Tensor:
     """
     Extracts a one-voxel-thick interior boundary of a binary mask in 2D or 3D.
 
     Args:
-        mask (torch.Tensor): A 2D or 3D binary mask of shape (H, W) or (D, H, W).
+        mask (torch.Tensor): A 2D or 3D binary mask of shape (H, W) or (H, W, D).
         kernel_size (int): Structuring element size for erosion (must be odd).
 
     Returns:
@@ -101,14 +81,14 @@ if __name__ == '__main__':
         [0, 0, 0, 0, 0, 0, 0, 0, 0],
     ], dtype=torch.float32)
 
-    cavity_boundaries = extract_mask_boundary(binary_mask_2d)
+    cavity_boundaries = extract_interior_boundary(binary_mask_2d)
     print(cavity_boundaries.numpy())  # Should show only the internal cavity boundaries
 
     binary_mask_3d = torch.zeros((7, 7, 7))
     binary_mask_3d[1:6, 1:6, 1:6] = 1  # Solid cube
     binary_mask_3d[3, 2:5, 2:5] = 0  # Internal cavity (touching the boundary and a central point)
     binary_mask_3d[3,3,3] = 1 # placing back the central point
-    boundary_3d = extract_mask_boundary(binary_mask_3d)
+    boundary_3d = extract_interior_boundary(binary_mask_3d)
     print(boundary_3d.nonzero())
     print(boundary_3d[3, :])
     

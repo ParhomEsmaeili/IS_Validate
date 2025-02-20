@@ -43,7 +43,7 @@ class PromptReformatter:
 
         Input:
         
-        prompts: Scribbles, which are assumed to be provided as a nested list of lists, each sublist contains a set of 1 x N_dim torch tensors
+        prompts: Scribbles, which are assumed to be provided as a list of tensors, each tensor is N_s.p x N_dim torch tensors
         encoding the spatial coordinates for the points in the scribble set.
 
         labels: Scribbles labels, which are assumed to be provided as a list of torch tensors with shape 1 denoting the
@@ -56,7 +56,7 @@ class PromptReformatter:
 
         prompt_reformat = dict() 
 
-        scribble_lambda = lambda prompt : [p[0].clone().detach().to(int).tolist() for p in prompt]
+        scribble_lambda = lambda prompt : [p.clone().detach().to(int).tolist() for p in prompt]
 
         for class_label, class_code in self.class_config.items():
             scribbles_list = [scribble_lambda(prompt) for idx, prompt in enumerate(prompts) if labels[idx] == class_code]
@@ -76,7 +76,7 @@ class PromptReformatter:
         labels: List of torch tensors denoting the label of the bboxes. 
 
         prompt_reformat: A class separated dict, with each class having a nested list of structure:
-            [scribble-level[i_min, i_max, j_min, j_max, k_min, k_max]]
+            [bbox-level[i_min, i_max, j_min, j_max, k_min, k_max]]
         '''
         prompt_reformat = dict() 
         bbox_lambda = lambda b : b[0].clone().detach().to(int).tolist() 
@@ -105,29 +105,29 @@ if __name__ == '__main__':
     config_labels_dict = {'tumor':1, 'background':0}
 
     #Testing basic set ups where each each class has a prompt provided for all prompts.
-    points_1 = [torch.Tensor([[1,2,3]]), torch.Tensor([[4,5,6]])]
-    scribbles_1 = [[torch.Tensor([[1,2,3]]), torch.Tensor([[4,5,6]])], 
-                   [torch.Tensor([[7,8,9]]), torch.Tensor([[10,11,12]])], [torch.Tensor([[13,14,15]])]]
+    points_1 = [torch.Tensor([[1,2,3]]).to(dtype=torch.int32), torch.Tensor([[4,5,6]]).to(dtype=torch.int32)]
+    scribbles_1 = [torch.stack([torch.Tensor([1,2,3]).to(dtype=torch.int32), torch.Tensor([4,5,6]).to(dtype=torch.int32)]), 
+                   torch.stack([torch.Tensor([7,8,9]).to(dtype=torch.int32), torch.Tensor([10,11,12]).to(dtype=torch.int32)]), torch.stack([torch.Tensor([13,14,15]).to(dtype=torch.int32)])]
     #We introduce variation in the scribble length to ensure that it is compatible with variations in scribbles,
     #not required for other prompts since those have a fixed definition for each instance.
 
-    bboxs_1 = [torch.Tensor([[1,2,3,4,5,6]]),
-               torch.Tensor([[7,8,9,10,11,12]])
+    bboxs_1 = [torch.Tensor([[1,2,3,4,5,6]]).to(dtype=torch.int32),
+               torch.Tensor([[7,8,9,10,11,12]]).to(dtype=torch.int32)
             ]
     
 
-    points_lb_1 = [torch.Tensor([1]), torch.Tensor([0])]
-    scribbles_lb_1 = [torch.Tensor([1]), torch.Tensor([0]), torch.Tensor([1])] 
-    bboxs_lb_1 = [torch.Tensor([1]), torch.Tensor([0])] 
+    points_lb_1 = [torch.Tensor([1]).to(dtype=torch.int32), torch.Tensor([0]).to(dtype=torch.int32)]
+    scribbles_lb_1 = [torch.Tensor([1]).to(dtype=torch.int32), torch.Tensor([0]).to(dtype=torch.int32), torch.Tensor([1]).to(dtype=torch.int32)] 
+    bboxs_lb_1 = [torch.Tensor([1]).to(dtype=torch.int32), torch.Tensor([0]).to(dtype=torch.int32)] 
 
     #Basic setup where not every class has a prompt simulated for each prompt type. 
     points_2 = points_1
     scribbles_2 = scribbles_1 
     bboxs_2 = bboxs_1 
 
-    points_lb_2 = [torch.Tensor([1]), torch.Tensor([1])]
-    scribbles_lb_2 = [torch.Tensor([1]), torch.Tensor([1]), torch.Tensor([1])]
-    bboxs_lb_2 = [torch.Tensor([1]), torch.Tensor([1])] 
+    points_lb_2 = [torch.Tensor([1]).to(dtype=torch.int32), torch.Tensor([1]).to(dtype=torch.int32)]
+    scribbles_lb_2 = [torch.Tensor([1]).to(dtype=torch.int32), torch.Tensor([1]).to(dtype=torch.int32), torch.Tensor([1]).to(dtype=torch.int32)]
+    bboxs_lb_2 = [torch.Tensor([1]).to(dtype=torch.int32), torch.Tensor([1]).to(dtype=torch.int32)] 
 
     #Basic setup where we set Nonetypes for some prompt types (i.e. no prompt simulation)
     points_3 = points_1
@@ -156,4 +156,4 @@ if __name__ == '__main__':
     print(reformatter_class.reformat_prompts('scribbles', scribbles_3, scribbles_lb_3))
     print(reformatter_class.reformat_prompts('bboxes', bboxs_3, bboxs_lb_3))
     
-    print(reformatter_class.reformat_prompts('granularity', points_1, points_lb_1))
+    # print(reformatter_class.reformat_prompts('granularity', points_1, points_lb_1))

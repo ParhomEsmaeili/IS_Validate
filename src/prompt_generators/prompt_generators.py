@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class BasicSpatialPromptGenerator(PromptReformatter):
     def __init__(self,
-                device: str,
+                sim_device: torch.device,
                 config_labels_dict: dict,
                 sim_methods: dict[str, dict],
                 sim_build_params: Optional[dict[str, dict]] = None,
@@ -25,7 +25,7 @@ class BasicSpatialPromptGenerator(PromptReformatter):
 
         Inputs:
 
-        device: A str denoting the cuda device (or cpu) being used for the prompt generation computations. 
+        sim_device: A torch.device obj being used for the prompt generation computations. 
 
         config_labels_dict: A dictionary mapping the class labels to the class integer codes. 
 
@@ -78,7 +78,10 @@ class BasicSpatialPromptGenerator(PromptReformatter):
 
 
         Can optionally can be Nonetype (i.e., fully  independently assumed prompt generation) simulation of prompts (inter and intra-prompt strategy). 
-        Hence they will be generated with no consideration of prompting intra and inter-dependencies outside of resolving redundancy conflicts (which should not happen).
+        Hence they will be generated with no consideration of prompting intra and inter-dependencies 
+        outside of resolving redundancy conflicts (which should not because of the sampling region fill strategy).
+        
+        NOTE: This is only intended for fully valid prompt generation!
     
         '''
         super().__init__(config_labels_dict)
@@ -90,7 +93,7 @@ class BasicSpatialPromptGenerator(PromptReformatter):
         self.prompt_types = list(sim_methods.keys()) 
 
         #Building the interactive prompter class, where the callback generates the prompts (and corresponding labels) in torch format.
-        self.interactive_prompter = self.build_prompt_generator(device,
+        self.interactive_prompter = self.build_prompt_generator(sim_device,
                                                                 config_labels_dict,
                                                                 self.sim_methods, 
                                                                 self.sim_build_params, 
@@ -99,7 +102,7 @@ class BasicSpatialPromptGenerator(PromptReformatter):
         
 
     @abstractmethod
-    def build_prompt_generator(self, device, prompt_methods, prompt_build_params, prompt_mixture_params): 
+    def build_prompt_generator(self, sim_device, prompt_methods, prompt_build_params, prompt_mixture_params): 
         pass
     
     
@@ -109,7 +112,8 @@ class BasicSpatialPromptGenerator(PromptReformatter):
     
         a) 'interactions":
             Points: List of torch tensors each with shape 1 x N_dim (N_dims = number of image dimensions)
-            Scribbles: Nested list of scribbles (N_sp), each scribble is a list of torch tensors with shape [1 x N_dim] denoting the positional coordinate.
+            Scribbles: List of scribbles, each scribble is a torch tensor with shape [N_s.p x N_dim] denoting the 
+            positional coordinate. NOTE: N_s.p is highly dependent on the scribble length which can vary between scribbles! 
             Bboxes: List of N_box torch tensors, each tensor is a 1 x 2*N_dim shape (Extrema of the bbox with order [i_min, j_min, k_min, i_max, j_max, k_max] where ijk = RAS convention) 
         
         b) 'interactions_labels'
@@ -208,7 +212,7 @@ class BasicSpatialPromptGenerator(PromptReformatter):
 
 class HeuristicSpatialPromptGenerator(BasicSpatialPromptGenerator):
     def __init__(self,
-                device: str,
+                sim_device: torch.device,
                 use_mem: bool,
                 config_labels_dict: dict[str, int],
                 sim_methods:dict[str,dict], 
@@ -216,7 +220,7 @@ class HeuristicSpatialPromptGenerator(BasicSpatialPromptGenerator):
                 prompt_mixture_params:Optional[dict[str,dict]]=None):
         
         super().__init__(
-                        device=device,
+                        sim_device=sim_device,
                         use_mem=use_mem,
                         config_labels_dict=config_labels_dict,
                         sim_methods=sim_methods, 
@@ -225,7 +229,7 @@ class HeuristicSpatialPromptGenerator(BasicSpatialPromptGenerator):
                         ) 
     
     def build_prompt_generator(self,
-                               device: str,
+                               sim_device: torch.device,
                                use_mem:bool, 
                                config_labels_dict:dict[str, int], 
                                sim_methods: dict, 
@@ -233,7 +237,7 @@ class HeuristicSpatialPromptGenerator(BasicSpatialPromptGenerator):
                                prompt_mixture_params:  Union[dict, None]):
         
         return BuildHeuristic(
-                            device=device,
+                            sim_device=sim_device,
                             use_mem=use_mem,
                             config_labels_dict=config_labels_dict, 
                             heuristics=sim_methods, 

@@ -8,6 +8,7 @@ import numpy as np
 import logging
 import warnings 
 from typing import Optional, Union
+from src.utils.dict_utils import extractor, dict_path_modif
 # from src.save_utils.writer import Writer 
 # from src.save_utils.post import Restored
 
@@ -97,82 +98,22 @@ class OutputProcessor:
         self.reformat_dict_info = {
             'logits': ('logits','paths'), 
             'pred': ('pred','path'),
-        }
-    def extractor(self, x: dict, y: tuple[Union[tuple,str, int]]): 
-        '''
-        This general purpose function is adapted from a lambda function which iterates through the dict using the tuple, 
-        where the order/index denotes the depth. 
-        
-        Once tuple is empty it stops (also for NoneType it stops, i.e. just returns the current dict.) and returns the
-        item from the provided tuple path. 
-
-        Inputs: 
-            x - A dictionary which is populated and will be extracted from
-            y - A tuple consisting of the iterative path through the nested dict.
-        '''
-        if not y:
-            return x
-        else:
-            if not isinstance(y, tuple):
-                raise TypeError('y - path in dict must be a tuple')
-            
-            if y: #If y exists and we are iterating through it still:
-                if not isinstance(x, dict):
-                    raise TypeError('x must be a dictionary')
-                if x == {}:
-                    raise ValueError('The input dict must be populated otherwise we cannot extract anything.')
-                else:
-                    return self.extractor(x[y[0]], y[1:]) 
-
-         
-    def dict_path_modif(self, x: dict, y: tuple[Union[tuple, str, int]], item):
-        '''
-        This function takes a dictionary (can be nested), and a tuple path, and replaces the value at the given tuple path
-        with the provided item.
-
-        Optionally can be used to populate a dictionary also according to a tuple path.
-        NOTE: Use of a tuple with length 1 requires that the tuple be inserted as (path, ) 
-
-        inputs:
-        x - A dictionary which is populated and will have the item modified.
-        y - A tuple path, which can consist of specific immutable datatypes (e.g. tuple, str, int) supported by dicts.
-        item - Any item, which is being placed in dictionary x, with path y. 
-
-        '''
-        if not isinstance(x, dict):
-            raise TypeError('The input arg for dict must be a dictionary')
-        if not isinstance(y, tuple):
-            raise TypeError('The input arg for the tuple path must be a tuple')
-        # if not item:
-        #     raise ValueError('The item cannot be a NoneType')  #NOTE: If an item is not provided then error is raised when calling func.
-        # if x == {}:
-        #     raise ValueError('The input dict must be populated.')
-
-        #Recursively iterating through the dictionary using the tuple path.
-        if len(y) > 1:
-            x[y[0]] = self.dict_path_modif(x[y[0]], y[1:], item)
-            return x 
-        elif len(y) == 1:
-            x[y[0]] = item
-            return x  
-        else:
-            raise ValueError('The input tuple must at least be length 1.')
-        
+        }        
     def check_device(self, 
                     data_dict: dict, 
                     data_path: tuple[Union[str, tuple, int]]):
 
-        item = self.extractor(data_dict, data_path)
+        item = extractor(data_dict, data_path)
 
         if item.get_device() != -1:
             warnings.warn(f'Careful, the dict: \n {data_dict} \n has item at path: \n {data_path} \n which should be stored on cpu device.')
             #If not on cpu, place it on cpu.
             item = item.to(device='cpu')
             # data_dict.update({key:data_dict[key].to(device='cpu')})
-            data_dict = self.dict_path_modif(data_dict, data_path, item)
+            data_dict = dict_path_modif(data_dict, data_path, item)
 
             # Debug check.
-            if self.extractor(data_dict, data_path).get_device() != -1:
+            if extractor(data_dict, data_path).get_device() != -1:
                 raise Exception(f'The output field {data_path} was not correctly processed to be placed on cpu during output processing')
             
         return data_dict 
@@ -214,11 +155,11 @@ class OutputProcessor:
         # but can be used to check num_spatial dims too)
 
         try: 
-            x = self.extractor(reference_dict, reference_path)
+            x = extractor(reference_dict, reference_path)
         except:
             raise Exception['The reference dict did not have the right structure, or the tuple provided did not']
         try:
-            y = self.extractor(data_dict, data_path)
+            y = extractor(data_dict, data_path)
         except:
             raise Exception['The data dict did not have the right structure, or the tuple provided did not.']
         
@@ -292,9 +233,9 @@ class OutputProcessor:
         '''
         for key, val in self.reformat_dict_info.items():
             if key.title() == 'Logits':
-                output_data = self.dict_path_modif(output_data, val, logits_paths)
+                output_data = dict_path_modif(output_data, val, logits_paths)
             elif key.title() == 'Pred':
-                output_data = self.dict_path_modif(output_data, val, pred_path)
+                output_data = dict_path_modif(output_data, val, pred_path)
             else:
                 raise KeyError('Reformatter info dictionary contained an unsupported key')
         return output_data
