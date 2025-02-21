@@ -34,7 +34,9 @@ heur_fn_dict: Dict - Prompt-type separated dictionary containing the set of heur
     }
     If prompt-type is not being used then NoneType.
 
-build_params: Optional(Dict) can also be none-type if no params needed (UNLIKELY and BAD) - 
+build_params: Optional(Dict) can also be none-type if no params needed. 
+    
+    NOTE: NONE should only be used for the initial prototype (as there will always be actual arguments required.) 
     
     Prompt-type separated dictionary containing the heuristic arguments for each heuristic in the heur_fn_dict.
     Contains the parameters for how the heuristic is to be called wrt methods in the base classes: for handling
@@ -45,13 +47,12 @@ build_params: Optional(Dict) can also be none-type if no params needed (UNLIKELY
 
         Multi-class related variables, e.g.:
 
-        How classes may interact, 
-        Parametrisations for picking which subcomponents, etc.
+        How classes may interact affect the prompt generation process within a given heuristic.
 
         Multi-component related variables, e.g.:
         
         Quantity of disconnected components to place prompts in,
-        Component priority list method, etc. 
+        Component priority list method, or Parametrisations for picking which subcomponents, etc. 
 
         General prompt-level specific parametrisations for valid-prompts, e.g.:
 
@@ -133,6 +134,19 @@ class BaseMixture(PointBase, ScribbleBase, BboxBase):
         self.sim_device = sim_device
         self.config_labels_dict = config_labels_dict 
 
+    def shuffle_list(self, input_list: list, sort_criterion: str = None):
+        '''
+        Can be used to sort a list of prompts types within a priority list, or to sort a list of heuristics    
+        ''' 
+        if sort_criterion is None:
+            return components 
+        elif sort_criterion.title() == 'Random':
+            #We create a random permutation of integers from 0 to len(sublist) - 1.
+            indices = torch.randperm(range(len(input_list))).to(int) 
+            return [input_list[i] for i in indices]
+        else:
+            raise NotImplementedError('The list sort criterion provided was not supported')
+    
     def filter_empty(self,
             prompts:Union[list[torch.Tensor], None], 
             prompts_lbs: Union[list[torch.Tensor], None] 
@@ -606,8 +620,8 @@ class BasicValidOnlyMixture(BaseMixture):
         This is a function which updates a region mask according to a set of refinement prompts. It will convert any 
         coords with 1s at the coordinates to zeroes.
 
-        This can be incorporated into an approach for multi-component handling, and also for handling different prompt 
-        types.
+        This can be incorporated into an approach for multi-component handling, multi-class handling and also for 
+        handling different prompt types.
 
         In particular, it can handle points and scribbles. It assumes that the prompts are provided as a list of
         tensors with shape N x N_dim (N = 1 for points, and N_s.p for scribbles). It will raise an exception if
@@ -636,7 +650,7 @@ class BasicValidOnlyMixture(BaseMixture):
     
     def sort_components(self, components: Union[list[Union[torch.Tensor, MetaTensor]], None], sort_criterion: str = None):
         '''
-        This is a function that will sort a list of components according to a sort criterion. 
+        This is a function that will sort a list of mask components according to a sort criterion. 
 
         inputs: 
 
@@ -671,14 +685,21 @@ class BasicMistakesMixture(BaseMixture):
 
         ''' 
 
-class BasicPseudoMixture(BasicValidOnlyMixture):
+class PrototypePseudoMixture(BasicValidOnlyMixture):
     '''
-    This function implements the most basic process of iterating through the prompt-gen heuristics fns to simulate prompts.
-    Intended for heuristics implementations which do not have a mixture model (inter-prompt or intra-prompt).
+    This function implements the most basic process of iterating through the prompt-gen heuristics fns to 
+    simulate prompts.
+
+    Intended as a prototype for heuristics implementations which do not have a mixture model (inter-prompt or 
+    intra-prompt) or any heuristics arguments at all. Any of the relevant heuristics arguments will be temporarily 
+    hard-coded for this prototype:
+    
+    E.g., number of points, number of boxes, number of scribbles etc per class and per heuristic, toggling off the
+    components handling. Toggling off the use-mem for determining whether im is used for prompt generation. No 
+    toggling of the drop-out of prompts. No toggling of the order in which prompts are generated (just does it randomly)
+    
     The only intra/inter-prompt interactions is the removal of coordinates for sampling refinement prompts.
 
-    This function also will implement no drop-out of prompts, etc. I.e. no parametrisations are needed for the 
-    "wrapper"-like functions for probabilistic trials to determine whether a heuristic is used.
     '''
     def __init__(
             self,
@@ -705,18 +726,19 @@ class BasicPseudoMixture(BasicValidOnlyMixture):
         
         #Priority list for the independent fusion strategy, it bins the prompt types into distinct groups of priority
         #each sublist has items equal in priority.
-        self.indep_fusion_priority_list = [['bbox'], ['scribbles', 'points']]
+        self.prompt_priority_list = [['bbox'], ['scribbles', 'points']]
     
     def toggle_components(self):
         pass 
 
-    def independent_iterator(self, valid_ptypes, data, generated_prompts, generated_prompt_labels):
+    def iterator(self, valid_ptypes,, generated_prompts, generated_prompt_labels):
         
-        #We iterate through the priority list, bbox goes first as it is only capable of grounding a segmentation.
-        for sublist in self.indep_fusion_priority_list:
+        #We iterate through a priority list, bbox goes first as it is only capable of grounding a segmentation.
 
-
-            TOGGLE_COMPONENTS 
+        #This priority list is provided because we are sampling without replacement (mostly just relevant for the
+        # refinement prompts). 
+         
+        for sublist in self.prompt_priority_list:
 
 
         #We shuffle the valid_ptypes list randomly within the priority list bracket for prompt diversity.
@@ -731,21 +753,89 @@ class BasicPseudoMixture(BasicValidOnlyMixture):
             #         #Here we will simulate the prompts for the given prompt type, across classes in task,
             #         #according to the heuristics + build provided. 
             #         # 
-            #         # If there are no empty voxels left for prompt placement, we have an error raised, and skip.
+            #         # If there are no empty voxels left for prompt placement, we have an empty list, just skip.
 
-            #         try:
-            #             generated_prompts, generated_prompt_labels = heur(data, generated_prompts, generated_prompt_labels, self.heuristic_params[ptype][heur])
-                    
-            #         except:
-            #             continue 
-    def __call__(self, valid_ptypes, data, generated_prompts, generated_prompt_labels):
-        im = data['im']
+            
+    def __call__(self, valid_ptypes, data, tracked_prompts, tracked_prompts_lbs):
+        '''
+        Function which calls on the methods for implementing the prompt generation process. 
 
-    
-#Mixture registry is for mixture models in which inter and intra-prompt interactions occur during the prompt generation process 
-#we also include pseudomixture (this is where there is absolutely no interaction between prompt generation) for tidyness.
+        inputs: 
+
+        valid_types: A list of prompt types which have a heuristic provided (i.e. for which simulation could occur)
+        
+        data: A dictionary containing the following fields: 
+
+        image: Torch tensor OR Metatensor containing the image in the native image domain (no pre-processing applied other than re-orientation in RAS)
+        gt: Torch tensor OR Metatensor containing the ground truth map in RAS orientation, but otherwise in the native image domain (no pre-processing other than RAS re-orientation).
+        
+        prev_output_data: (NOTE: OPTIONAL, is NONE otherwise) output dictionary from the inference call which has been post-processed 
+        in the pseudo-ui front-end.
+       
+        Two relevant fields for prompt generation contained are the: 
+            pred: A dictionary containing 3 subfields:
+                1) "path": Path to the prediction file (Not Relevant)
+                And two relevant subfields
+                2) "metatensor" A Metatensor or torch tensor (1HW(D)) containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
+                3) "meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
+            
+            logits:
+                1) "paths": List of paths to the prediction file (Not Relevant)
+                And two potentially relevant subfields
+                2) "metatensor" A Metatensor or torch tensor (CHW(D)) containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
+                3) "meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
+        
+        im: Optional (or NoneType) dictionary containing the interaction memory from the prior interaction states.      
+
+
+        tracked_prompts: A dictionary, split by prompt type, which contains the initialised dict according to the 
+        set of valid prompt types (i.e. those for which a prompt can be simulated). Contains empty lists for valid,
+        and NoneTypes for invalid prompt types.
+
+        tracked_prompts_lbs: Same as tracked_prompts, except for the prompts' labels. Split by {prompt_type}_labels.
+        '''
+
+        if self.use_mem:
+            #Extract the interaction memory.
+            im = data['im']
+
+            if not im:
+                raise Exception('If using interaction memory, then it requires interaction memory available! Received nonetype')
+            
+            raise NotImplementedError('Not implemented the handling of interaction memory') 
+            #TODO: If using memory then add the functionality for extracting prior prompts and reformatting etc.
+        else:
+            if data['prev_output_data'] is None:
+                print('We have no prior output data, please check that this is an initialisation!')
+                pred = None 
+            else:
+                print('We have prior output data, please check that this is an editing iteration')
+                pred = data['prev_output_data']['pred']['metatensor'][0, :]
+                pred = pred.to(dtype=torch.int32, device=self.sim_device)
+
+                if not isinstance(pred, torch.Tensor) or not isinstance(gt, MetaTensor):
+                    raise TypeError('The pred needs to be a torch tensor or a Monai MetaTensor')            
+
+            gt = data['gt'][0, :]
+            gt = gt.to(dtype=torch.int32, device=self.sim_device)
+
+            if not isinstance(gt, torch.Tensor) or not isinstance(gt, MetaTensor):
+                raise TypeError('The gt needs to be a torch tensor or a Monai MetaTensor')
+            
+            #Extracts a dict with fields 'gt' and 'error_regions'. Both class separated dicts.
+            sampling_regions_dict = self.init_sample_regions_no_components(pred, gt)
+		    # No need to adjust the tracked prompts or tracked prompts labels variable!
+            
+        toggle_components = False 
+        toggle_class = False 
+        toggle_priority = False 
+
+#Mixture registry is for classes which wrap together the prompt generation process with complex inter/intra-prompt relationships.
+#  
+#we also include basic_pseudomixture (this is where there is absolutely no interaction between prompt generation) 
+#and no complexities about how components or classes are handled at all.
 
 mixture_class_registry = {
-    'basic_pseudo_mixture': BasicPseudoMixture,
+    'prototype_pseudo_mixture': PrototypePseudoMixture,
     # 'bbox_constrained_point': bbox_constrained_point
 }

@@ -75,12 +75,12 @@ class front_end_simulator:
         Refinement prompt information: See `<https://github.com/IS_Validate/blob/main/src/data/interaction_state_construct.py>`
 
         interaction_torch_format: A prompt-type separated dictionary containing the prompt information in list[torch.tensor] format 
-            {'interactions':dict[prompt_type_str[list[torch.tensor]]],
-            'interactions_labels':dict[prompt_type_str[list[torch.tensor]]],
+            {'interactions':dict[prompt_type_str[list[torch.tensor] OR NONE ]], 
+            'interactions_labels':dict[prompt_type_str[list[torch.tensor] OR NONE]],
             }
         interaction_dict_format: A prompt-type separated dictionary containing the prompt info in class separated dict format
             (where each prompt spatial coord is represented as a sublist).  
-            dict[prompt_type_str[class[list[list]]]]
+            dict[prompt_type_str[class[list[list]] OR NONE]]
 
 
             -------------------------------------------------------------------------------------------------------
@@ -187,13 +187,13 @@ class front_end_simulator:
 
             self.inter_init_generator = HeuristicInteractionState(
                 sim_device=self.args['sim_device'],
-                use_mem=self.args['use_mem_generator'],
+                use_mem=False,
                 prompt_configs=self.args['inter_init_prompt_config'],
                 config_labels_dict=self.args['config_labels_dict']
             )
             self.inter_edit_generator = HeuristicInteractionState(
                 sim_device=self.args['sim_device'],
-                use_mem=self.args['use_mem_generator'],
+                use_mem=self.args['use_mem_edit_generator'],
                 prompt_configs=self.args['inter_edit_prompt_config'],
                 config_labels_dict=self.args['config_labels_dict']
             )

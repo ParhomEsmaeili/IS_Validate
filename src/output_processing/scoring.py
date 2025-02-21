@@ -175,10 +175,11 @@ class MetricsHandler:
         output_data:dict,
         data_instance: dict,
         tracked_metrics: dict,
-        im: dict,
+        im_inf: dict,
+        im_metric: dict, 
         infer_call_info: dict,
         ):
-
+ 
         extracted_pred = self.extract_spatial_dims(output_data['pred']['metatensor'])
         extracted_gt = self.extract_spatial_dims(data_instance['gt']['metatensor'])
 

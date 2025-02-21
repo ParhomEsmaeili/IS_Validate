@@ -11,14 +11,15 @@ logger = logging.getLogger(__name__)
 
 class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
         '''
-        Class which can be used to take the image, Optional(prior segmentation information) and ground truth in order to generate an interaction state dictionary for each 
+        Class which can be used to take the image, Optional(prior output information) and ground truth in order to generate an interaction state dictionary for each 
         interaction state throughout the iterative refinement process for any given prompt configuration provided:
         
         This can be dependent on use-mode, hence the class can be initialised for each use interactive use mode separately        
         according to the provided prompt-configuration set.
 
         NOTE: Assumption that will be made is that at least one prompt must be generated across the classes for
-        interactive modes. Users would not otherwise interact with a system!
+        interactive modes. Moreover, for editing iters, at least one refinement prompt must be provided! Users would 
+        not otherwise interact with a system! 
         
         Interaction state is defined as a dict which contains the following key:value pairs:
             
@@ -50,7 +51,8 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
                 Bboxes: Dictionary of class separated (by class label name) 2-fold nested list of list [Box-level[List of length 2 * N_dim]]. 
                 Each sublist denotes the extreme value of the points with order [i_min, j_min, k_min, i_max, j_max, k_max], where ijk=RAS convention. 
                 
-            NOTE: In instances where a prompt type is not at all being (or was not for a given iter) simulated, the corresponding values will be a Nonetype. 
+            NOTE: In instances where a prompt type is not at all being (or was not for a given iter) simulated, 
+            the corresponding values will be a Nonetype. 
 
             
             prev_pred: Info for the discretised prediction maps which the application has provided.
@@ -111,11 +113,11 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
             '''
             Input:
             
-            Image, in Torch tensor or MetaTensor format loaded in the native UI domain.
+            Image, in Torch tensor or MetaTensor format loaded in the native UI domain (1HW(D)).
             
             Infer_mode, a string denoting the inference mode for which we are simulating prompts.
 
-            GT, in Torch tensor or MetaTensor format loaded in the native UI domain. 
+            GT, in Torch tensor or MetaTensor format loaded in the native UI domain (1HW(D)) 
             
             Prev Output Data: An optional dictionary from the prior inference call output:
         

@@ -32,39 +32,35 @@ class BuildHeuristic:
 
         config_labels_dict: A dictionary mapping the class labels to the class integer codes. 
 
+        
+        
         heuristics: Dict - Simulation methods used for generating each prompt (currently: [points, scribbles, bbox]). 
         
-        Must always provide for all prompt types. A nested dictionary first separated by the prompt type:
+        Must always provide for all prompt types. A dictionary first separated by the prompt type:
 
-        Within each prompt type, another dictionary contains key:value pairs containing the list of prompting strategies being used for prompt simulation. 
-        This dictionary has the flexibility to permit combinations/lists of strategies. 
+        Within each prompt type, containing the list of prompting strategies being used for prompt simulation. 
+        This dictionary allows the flexibility to permit combinations/lists of strategies. 
 
-        NOTE: Instances where a specific prompt type is not being used (or was skipped over in simulation), will 
-        require that the value be a NoneType arg instead. The prompts generated will also be a NoneType argument 
-        for the given prompts also!
+        NOTE: Instances where a specific prompt type is never being used, will require that the value be a NoneType 
+        arg instead. The prompts generated will also be a NoneType argument for the given prompts also! 
+
+        NOTE: If any prompt drop-out methods are used, it is possible for an output to be a NoneType even if the 
+        input arg for the prompt type is not.
 
         
-
-
         
         (OPTIONAL) heuristic_params: A twice nested dictionary, for each prompt strategy within a prompt type it 
         contains a dictionary of build arguments for each corresponding strategy implemented. 
 
-        Almost the same structure as prompt_methods, as they must correspond together!
+        Almost the same structure as prompt_methods, as they must correspond together! Example params:
 
-        NOTE: Must also contain information about handling the iterative loop (e.g. sorting components strategy, 
-        otherwise assumed to be fully according to the default.)
+        NOTE: Can contain information about handling the iterative loop (e.g. sorting components strategy, sorting
+        classes, otherwise assumed to be fully according to the default.)
 
-        NOTE: Can also be a Nonetype, in which case there is no information required for building the prompters
-        (e.g., parameter free/variable free [very unlikely], or if there is no prompt of that type being used)
+        NOTE: Can also be fully Nonetype, in which case there is no information required for building the prompters
+        (e.g., parameter free/variable free [very unlikely].
 
-        NOTE: Child classes where the prompt generation method may be the same across prompt types
-        e.g. prompt generation D.L models, will necessitate that the prompt mixture argument denotes the strategy for
-        cross-interaction (e.g., conditioning the model with a prompt prior, or passing all prompt-type requests concurrently 
-        through). NOTE: However, prompt-type & method specific args can still be passed through in the build_params.
-        
-
-
+        NOTE: For prompt types which are not valid, it should be a NoneType. 
 
 
 
@@ -84,9 +80,14 @@ class BuildHeuristic:
             prompt_types (or strategy), cross-reference with the corresponding dict item by converting key into set.
 
 
-        Can optionally can be Nonetype (i.e., fully  independently assumed prompt generation) simulation of prompts (inter and intra-prompt strategy). 
-        Hence they will be generated with no consideration of prompting intra and inter-dependencies (outside of the sampling region being filled)
+        NOTE: Can optionally be fully Nonetype (i.e., fully  independently assumed prompt generation) simulation of 
+        prompts (inter and intra-prompt strategy). 
+        
+        Hence prompts will be generated with no consideration of prompting intra and inter-dependencies 
+        (outside of the sampling region being filled)
+        
         '''
+        
         self.sim_device = sim_device 
         self.use_mem = use_mem 
         self.config_labels_dict = config_labels_dict
@@ -174,7 +175,7 @@ class BuildHeuristic:
             for prompt_type, heuristics in self.heuristics.items():
                 prompt_heur_fns = dict() 
                 
-                if heuristics: #If heuristics is not a NoneType/I.e. if config exists for a prompt type
+                if heuristics: #If heuristics is not a NoneType or empty list/I.e. if config exists for a prompt type
                     for heuristic in heuristics: 
                         prompt_heur_fns[heuristic] = base_registry[prompt_type][heuristic]
                 else:
@@ -182,16 +183,16 @@ class BuildHeuristic:
                 
                 heur_fn_dict[prompt_type] = prompt_heur_fns
 
-            return mixture_class_registry['basic_pseudo_mixture'](
+            return mixture_class_registry['prototype_pseudo_mixture'](
                 config_labels_dict=self.config_labels_dict,
                 sim_device=self.sim_device,
-                use_mem=self.use_mem,
-                build_args=self.heuristic_params,
-                mixture_args=self.heuristic_mixtures,
+                use_mem=False,
+                build_args=None,
+                mixture_args=None,
                 heur_fn_dict=heur_fn_dict,                                
                 )
         else:
-            raise NotImplementedError('Implement the code for initialising prompt mixture methods.')
+            raise NotImplementedError('Implement the code for initialising non-prototype prompt mixture methods.')
             '''
             Info: 
 
@@ -282,13 +283,13 @@ class BuildHeuristic:
             pred: A dictionary containing 3 subfields:
                 1) "path": Path to the prediction file (Not Relevant)
                 And two relevant subfields
-                2) "metatensor" A Metatensor or torch tensor containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
+                2) "metatensor" A Metatensor or torch tensor (1HW(D)) containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
                 3) "meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
             
             logits:
                 1) "paths": List of paths to the prediction file (Not Relevant)
                 And two potentially relevant subfields
-                2) "metatensor" A Metatensor or torch tensor containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
+                2) "metatensor" A Metatensor or torch tensor (CHW(D)) containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
                 3) "meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
         
         im: Optional dictionary containing the interaction memory from the prior interaction states.      

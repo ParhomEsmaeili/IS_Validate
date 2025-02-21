@@ -31,10 +31,10 @@ class BasicSpatialPromptGenerator(PromptReformatter):
 
         sim_methods: Simulation methods used for generating each prompt. Must always provide for all prompt types.
         
-        A nested dictionary first separated by the prompt type (e.g. points, scribbles, bbox).
+        A dictionary first separated by the prompt type (e.g. points, scribbles, bbox).
 
-        Within each prompt type, another dictionary contains key:value pairs containing the list of prompting strategies being used for prompt simulation. 
-        This dictionary has the flexibility to permit combinations of strategies. 
+        Within each prompt type contains the list of prompting strategies being used for prompt simulation. 
+        This has the flexibility to permit combinations of strategies. 
 
         NOTE: Instances where a specific prompt type is not being used, will require that the value be a NoneType arg instead.
         The prompts generated will also be a NoneType argument for the given prompts also!
@@ -80,11 +80,11 @@ class BasicSpatialPromptGenerator(PromptReformatter):
             prompt_types (or strategy), cross-reference with the corresponding dict item by converting key into set.
 
 
-        Can optionally can be Nonetype (i.e., fully  independently assumed prompt generation) simulation of prompts (inter and intra-prompt strategy). 
-        Hence they will be generated with no consideration of prompting intra and inter-dependencies 
-        outside of resolving redundancy conflicts (which should not because of the sampling region fill strategy).
-
-        NOTE: This is only intended for fully valid prompt generation!
+        Can optionally be fully Nonetype (i.e., fully  independently assumed prompt generation) simulation of prompts 
+        (inter and intra-prompt strategy). 
+        
+        Hence they will be generated with no consideration of prompting intra and inter-dependencies (outside of 
+        any sampling region fill strategy). NOTE: This is only intended for fully valid prompt generation!
     
         '''
         super().__init__(config_labels_dict)
@@ -128,7 +128,8 @@ class BasicSpatialPromptGenerator(PromptReformatter):
         "interactions" contains the prompts spatial coords info, and "interactions_labels" the corresponding
         labels for the prompts. 
         
-        NOTE: In instances where a prompt type is not at all being (or was not for a given iter) simulated, the corresponding values will be a Nonetype. 
+        NOTE: In instances where a prompt type is not at all being (or was not for a given iter) simulated,
+        the corresponding values will be a Nonetype. 
 
         Returns:
 
@@ -139,7 +140,8 @@ class BasicSpatialPromptGenerator(PromptReformatter):
             Bboxes: Dictionary of class separated (by class label name) 2-fold nested list of list [Box-level[List of length 2 * N_dim]]. 
             Each sublist denotes the extreme value of the points with order [i_min, j_min, k_min, i_max, j_max, k_max], where ijk=RAS convention. 
         
-        NOTE: In instances where a prompt type is not at all being (or was not for a given iter) simulated, the corresponding values will be a Nonetype. 
+        NOTE: In instances where a prompt type is not at all being (or was not for a given iter) simulated, 
+        the corresponding values will be a Nonetype. 
 
         '''
 
@@ -175,13 +177,13 @@ class BasicSpatialPromptGenerator(PromptReformatter):
             pred: A dictionary containing 3 subfields:
                 1) "path": Path to the prediction file (Not Relevant)
                 And two relevant subfields
-                2) "metatensor" A Metatensor or torch tensor containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
+                2) "metatensor" A Metatensor or torch tensor (1HW(D)) containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
                 3) "meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
             
             logits:
                 1) "paths": List of paths to the prediction file (Not Relevant)
                 And two potentially relevant subfields
-                2) "metatensor" A Metatensor or torch tensor containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
+                2) "metatensor" A Metatensor or torch tensor (CHW(D)) containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
                 3) "meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
         
         im: (NOTE: OPTIONAL) the interaction memory dictionary as defined in
