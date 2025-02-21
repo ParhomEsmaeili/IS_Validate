@@ -94,6 +94,9 @@ class BuildHeuristic:
         self.heuristic_params = heuristic_params
         self.heuristic_mixtures = heuristic_mixtures 
 
+        self.refinement_prompts = ['points', 'scribbles']
+        self.grounded_prompts = ['bboxes'] 
+
         self.heuristic_caller = self.initialise_heuristics()
 
         #Checking that at least one prompt is being used:
@@ -103,27 +106,52 @@ class BuildHeuristic:
 
     def at_least_one_prompt(self, 
                             generated_prompts:dict, 
-                            generated_prompts_labels:dict):
+                            generated_prompts_labels:dict, 
+                            data: dict):
         '''
         This function will check whether at least one prompt type has a prompt, otherwise it will raise an exception.
 
         Requirement: Any empty list should have been converted to a NoneType. We will check for this! 
+
+        inputs: 
+        
+        generated_prompts: A prompt type separated dict containing the list of prompts.
+        generated_prompts_labels: A prompt type separated dict containing the list of prompts corresponding labels.
+        data: The data dictionary which was passed into the call operation, contains info about the prev_output_data.
         '''
+
+        #Determining what the mode is implicitly from the data dictionary.
+
+        if data['prev_output_data'] is None:
+            mode = 'init'
+        else:
+            mode = 'edit' 
 
         #Checking for empty lists to raise an exception about code elsewhere.
 
         if [] in generated_prompts.values() or [] in generated_prompts_labels.values():
             raise ValueError('Any empty prompt lists or prompt labels lists must be replaced with a NoneType for the value')
-        
-        #Checking that at least one valid prompt type has something populating it
 
+
+        #If mode is init, then check it has at least one valid prompt type populating it
+
+        if mode == 'init':
         # I.e., if it went through the exception handling for every valid prompt type then it would be only NoneTypes throughout.
-        
-        #NOTE: This is insufficient outside of just refinement prompt simulation, as bbox may be present even without
-        #refinement at each iter! Needs consistent refinement! 
+            if not any(generated_prompts.values()) or not any(generated_prompts_labels.values()):
+                raise ValueError('There must be at least one prompt!')
+        elif mode == 'edit':
+            #The initial check is insufficient for edits, as bbox may be consistently present even without
+            #refinement at each iter! Needs consistent refinement also!.
+            if not any(generated_prompts.values()) or not any(generated_prompts_labels.values()):
+                raise ValueError('There must be at least one prompt!')
+            
+            if not any([generated_prompts[key] for key in self.refinement_prompts]) or any([generated_prompts_labels[key] for key in self.refinement_prompts]):
+                raise ValueError('There must be one refinement prompt in the editing iterations.')
+        else:
+            raise Exception('Error in the implementation here.')
+         
 
-        if not all(generated_prompts.values()) or not all(generated_prompts_labels.values()):
-            raise ValueError('There must be at least one prompt!')
+        
         
     def initialise_heuristics(self):
         '''
@@ -140,7 +168,7 @@ class BuildHeuristic:
         '''
 
         if not self.heuristic_mixtures:
-            #Here we will initialise the heuristics for fully-independent prompt generation methods (pseudo-mixture).
+            #Here we will initialise the heuristics for fully-independent prompt generation methods (basic pseudo-mixture).
             heur_fn_dict = dict()
 
             for prompt_type, heuristics in self.heuristics.items():
@@ -154,7 +182,7 @@ class BuildHeuristic:
                 
                 heur_fn_dict[prompt_type] = prompt_heur_fns
 
-            return mixture_class_registry['pseudo_mixture'](
+            return mixture_class_registry['basic_pseudo_mixture'](
                 config_labels_dict=self.config_labels_dict,
                 sim_device=self.sim_device,
                 use_mem=self.use_mem,
@@ -187,7 +215,8 @@ class BuildHeuristic:
         '''
         This function initialises then populates the generated prompts and labels using the heuristic caller.
 
-        Also calls on the output checker, to ensure that there is at least one prompt simulated.
+        Also calls on the output checker, to ensure that there is at least one prompt simulated (also handles 
+        instances where refinement iterations must have at least one refinement prompt!).
 
         Inputs:
 
@@ -232,7 +261,7 @@ class BuildHeuristic:
         generated_prompts, generated_prompt_labels = self.heuristic_caller(valid_ptypes, data, generated_prompts, generated_prompt_labels)
                 
         #We check that the output was generated correctly/with a valid output.
-        self.at_least_one_prompt(generated_prompts, generated_prompt_labels)
+        self.at_least_one_prompt(generated_prompts, generated_prompt_labels, data)
 
         return generated_prompts, generated_prompt_labels
 
@@ -246,7 +275,7 @@ class BuildHeuristic:
         image: Torch tensor OR Metatensor containing the image in the native image domain (no pre-processing applied other than re-orientation in RAS)
         gt: Torch tensor OR Metatensor containing the ground truth map in RAS orientation, but otherwise in the native image domain (no pre-processing other than RAS re-orientation).
         
-        prev_output_data: (NOTE: OPTIONAL) output dictionary from the inference call which has been post-processed 
+        prev_output_data: (NOTE: OPTIONAL, is NONE otherwise) output dictionary from the inference call which has been post-processed 
         in the pseudo-ui front-end.
        
         Two relevant fields for prompt generation contained are the: 

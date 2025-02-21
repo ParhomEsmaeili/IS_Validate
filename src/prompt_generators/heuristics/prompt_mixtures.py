@@ -671,10 +671,11 @@ class BasicMistakesMixture(BaseMixture):
 
         ''' 
 
-class PseudoMixture(BasicValidOnlyMixture):
+class BasicPseudoMixture(BasicValidOnlyMixture):
     '''
     This function implements the most basic process of iterating through the prompt-gen heuristics fns to simulate prompts.
     Intended for heuristics implementations which do not have a mixture model (inter-prompt or intra-prompt).
+    The only intra/inter-prompt interactions is the removal of coordinates for sampling refinement prompts.
 
     This function also will implement no drop-out of prompts, etc. I.e. no parametrisations are needed for the 
     "wrapper"-like functions for probabilistic trials to determine whether a heuristic is used.
@@ -745,6 +746,6 @@ class PseudoMixture(BasicValidOnlyMixture):
 #we also include pseudomixture (this is where there is absolutely no interaction between prompt generation) for tidyness.
 
 mixture_class_registry = {
-    'pseudo_mixture': PseudoMixture,
+    'basic_pseudo_mixture': BasicPseudoMixture,
     # 'bbox_constrained_point': bbox_constrained_point
 }
