@@ -16,9 +16,9 @@ class BasicSpatialPromptGenerator(PromptReformatter):
     def __init__(self,
                 sim_device: torch.device,
                 config_labels_dict: dict,
-                sim_methods: dict[str, dict],
-                sim_build_params: Optional[dict[str, dict]] = None,
-                prompt_mixture_params: Optional[dict[str,dict]] = None,
+                sim_methods: dict,
+                sim_build_params: dict,
+                prompt_mixture_params: Union[dict[str,dict], None],
                 ):
         '''
         Prompt generation class for generating the interactive spatial prompts for an interaction state.
@@ -43,48 +43,50 @@ class BasicSpatialPromptGenerator(PromptReformatter):
 
 
 
-        (OPTIONAL) sim_build_params: A twice nested dictionary, for each prompt strategy within a prompt type it 
+        (REQUIRED) sim_build_params: A twice nested dictionary, for each prompt strategy within a prompt type it 
         contains a dictionary of build arguments for each corresponding strategy implemented. 
 
         Almost the same structure as prompt_methods, as they must correspond together!
 
-        NOTE: Must also contain information about handling the iterative loop (e.g. sorting components strategy, 
-        otherwise assumed to be fully according to the default.)
+        NOTE: For each heuristic it must contain information about handling at the heuristic-level.
         
-        NOTE: Can also be a Nonetype, in which case there is no information required for building the prompters
-        (e.g., parameter free/variable free, or if there is no prompt of that type being used)
+        NOTE: Can also be a Nonetype if there is no prompt of that type being used.
 
         NOTE: Child classes where the prompt generation method may be the same across prompt types
-        e.g. prompt generation D.L models, will necessitate that the prompt mixture argument denotes the strategy for
+        e.g. prompt generation D.L models, may  necessitate that the prompt mixture argument denotes the strategy for
         cross-interaction (e.g., conditioning the model with a prompt prior, or passing all prompt-type requests concurrently 
-        through). NOTE: However, prompt-type & method specific args can still be passed through in the build_params.
+        through). NOTE: However, prompt-type/method specific args must still be passed through in the build_params.
+    
+
+
+
+        (OPTIONAL) prompt_mixture: An arbitrarily nested dict denoting a strategy for handling prompt simulation across class-level,
+        intra-prompt level and inter-prompting level strategies. 
         
+    
+        This prompt mixture arg will control whether/how prompt-methods will interact/condition one another 
+        during the simulation. 
 
-
-
-
-
-        (OPTIONAL)prompt_mixture: A twice nested dict denoting a strategy for mixing prompt simulation across intra
-        and inter-prompting strategies. The mixture args are a dictionary for each corresponding pairing of cross-interactions.
-
-        This prompt mixture arg will control whether/how prompt-methods will interact/condition one another during the 
-        simulation. 
-
-            Has structure: dict('inter_prompt':dict[tuple(prompt cross-interaction combinations), mixture_args/None], 
-                                'intra_prompt': dict[prompt_type_str : dict[tuple(prompt_strategy cross-interaction combinations), mixture_args/None])
-            
-            Tuple can provide an immutable set of combinations
+            For example, a structure may look like: 
+        
+        dict(
+            'class_level': dict of mixture args/None
+        
+            'inter_prompt':dict[tuple(prompt cross-interaction combinations), mixture_args/None], 
+                            
+            'intra_prompt': dict[prompt_type_str : dict[tuple(prompt_strategy cross-interaction combinations), mixture_args/None])
+        
+            NOTE: Tuples can provide an immutable set of combinations
 
             NOTE: Downstream use will likely necessitate the use of set logic to verify combinations as the tuple 
             is immutable. Verification likely will entail the following: Generate set of potential combinations from
             prompt_types (or strategy), cross-reference with the corresponding dict item by converting key into set.
 
 
-        Can optionally be fully Nonetype (i.e., fully  independently assumed prompt generation) simulation of prompts 
-        (inter and intra-prompt strategy). 
-        
+        Can optionally be fully Nonetype (i.e., will perform a default behaviour)
+
         Hence they will be generated with no consideration of prompting intra and inter-dependencies (outside of 
-        any sampling region fill strategy). NOTE: This is only intended for fully valid prompt generation!
+        any sampling region fill strategy for fully valid prompt generation!)
     
         '''
         super().__init__(config_labels_dict)
@@ -186,7 +188,7 @@ class BasicSpatialPromptGenerator(PromptReformatter):
                 2) "metatensor" A Metatensor or torch tensor (CHW(D)) containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
                 3) "meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
         
-        im: (NOTE: OPTIONAL) the interaction memory dictionary as defined in
+        im: (NOTE: OPTIONAL, NoneType for initialisation mode.) the interaction memory dictionary as defined in
         `<https://github.com/IS_Validate/blob/main/src/front_back_interactor/pseudo_ui.py>`   
         '''
         
@@ -221,8 +223,8 @@ class HeuristicSpatialPromptGenerator(BasicSpatialPromptGenerator):
                 use_mem: bool,
                 config_labels_dict: dict[str, int],
                 sim_methods:dict[str,dict], 
-                sim_build_params:Optional[dict[str, dict]] = None,
-                prompt_mixture_params:Optional[dict[str,dict]]=None):
+                sim_build_params:dict,
+                prompt_mixture_params:Union[dict[str,dict], None]):
         
         super().__init__(
                         sim_device=sim_device,
@@ -238,7 +240,7 @@ class HeuristicSpatialPromptGenerator(BasicSpatialPromptGenerator):
                                use_mem:bool, 
                                config_labels_dict:dict[str, int], 
                                sim_methods: dict, 
-                               sim_build_params: Union[dict, None], 
+                               sim_build_params: dict, 
                                prompt_mixture_params:  Union[dict, None]):
         
         return BuildHeuristic(

@@ -11,18 +11,18 @@ sys.path.append(up(up(up(up(up(os.path.abspath(__file__)))))))
 from src.prompt_generators.heuristics.spatial_utils.distance_maps import edt_from_back
 import torch
 
-def uniform_random(binary_mask, n, device):
+def uniform_random(binary_mask, n):
     '''
     Function which generates n spatial coordinate from the input binary mask, assumed to be HW(D)
     
     Returns a list of length n (if possible) with tensors denoting spatial coords with shape 1 x n_spatial_dims. If n > num possible (which is > 0) then returns
     a list of num_possible. If num_possible = 0. Then it returns an empty list.
     '''
+    device = binary_mask.device
     #Generate tensor of spatial coords: is Ncoords x N_dim
-    possible_coords = torch.argwhere(binary_mask)
-    if not possible_coords.device == device:
-        raise Exception('The binary mask must be matching with the input device')
-        
+    
+    possible_coords = torch.argwhere(binary_mask).to(device=device)
+    
     if possible_coords.shape[0] >= n:
         #If there are sufficient voxels, return N
         idxs = torch.sort(torch.randint(0, possible_coords.shape[0] - n + 1,(n,), device=device)).values + torch.arange(0, n, device=device)
@@ -38,7 +38,12 @@ def uniform_random(binary_mask, n, device):
 
 def center():
 
-    raise NotImplementedError('Still need to validate the boundary extraction strategy, then use cdist and find the furthest point from the nearest boundaries for all points in the foreground.')
+    raise NotImplementedError('Still cannot be used as it must occur on a component by component basis!')
+    raise NotImplementedError('Still need to validate the boundary extraction strategy?')
+    
+    #TODO: How do we define the center.... currently was using a definition that center = point farthest from background.
+    #Centre of mass-like approaches probably wouldn't work as the centroid could fall outside of a gt.
+    #NOTE: need to give some thought for how to compute, we could easily just use the numpy based method for extracting distance map too but would need containerisation first. 
 
     #Put exception handling in the instance where the boundary mask is also the error region. In this circumstance it just should
     #pick a random point because there is no center.
