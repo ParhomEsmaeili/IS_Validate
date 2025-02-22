@@ -52,7 +52,7 @@ class BuildHeuristic:
         (OPTIONAL) heuristic_params: A twice nested dictionary, for each prompt strategy within a prompt type it 
         contains a dictionary of build arguments for each corresponding strategy implemented. 
 
-        Almost the same structure as prompt_methods, as they must correspond together! Example params:
+        Similar structure as prompt_methods, as they must correspond together! Example params:
 
         NOTE: Can contain information about handling the iterative loop (e.g. sorting components strategy, sorting
         classes, otherwise assumed to be fully according to the default.)
@@ -67,8 +67,9 @@ class BuildHeuristic:
         (OPTIONAL)heuristic_mixture: A twice nested dict denoting a strategy for mixing prompt simulation across intra
         and inter-prompting strategies. The mixture args are a dictionary for each corresponding pairing of cross-interactions.
 
-        This heuristic mixture arg will control whether/how prompt-methods will interact/condition one another during the 
-        simulation. 
+        This heuristic mixture arg will control whether/how prompt-methods will interact/condition one another 
+        during the simulation (e.g. constraining error regions, prompt placements, or even switching on/off specific prompts).
+ 
 
             Has structure: dict('inter_prompt':dict[tuple(prompt cross-interaction combinations), mixture_args/None], 
                                 'intra_prompt': dict[prompt_type_str : dict[tuple(prompt_strategy cross-interaction combinations), mixture_args/None])
@@ -156,16 +157,15 @@ class BuildHeuristic:
         
     def initialise_heuristics(self):
         '''
-        This function will initialise the heuristics to be used, such that they can be called for prompt generation.
+        This function will initialise the heuristic call to be used, such that it can be called for prompt 
+        generation. It takes the abstract heuristics from the registry, and places them into a nested dictionary 
+        split by prompt type and then split by heuristic type.
         
         Returns:
         
-        heur_caller: An initialised class which can be used to generate the prompts: 
+        heur_caller: An initialised class which can be used to generate the prompts.
 
-        For instances with no heuristic mixtures, this consists of prompt-type separated nested dict with subdicts 
-        separated by the heuristic type.
-
-        TODO: For instances with heuristic mixtures, the structure is currently undefined.
+        #TODO: Implementation for mixtures incorporation.
         '''
 
         if not self.heuristic_mixtures:
@@ -175,7 +175,7 @@ class BuildHeuristic:
             for prompt_type, heuristics in self.heuristics.items():
                 prompt_heur_fns = dict() 
                 
-                if heuristics: #If heuristics is not a NoneType or empty list/I.e. if config exists for a prompt type
+                if heuristics: #If ptype heuristics is not a NoneType or empty/I.e. if config exists for a prompt type
                     for heuristic in heuristics: 
                         prompt_heur_fns[heuristic] = base_registry[prompt_type][heuristic]
                 else:
@@ -236,35 +236,14 @@ class BuildHeuristic:
 
         '''
 
-        #We initialise the dictionary containing the prompts and labels across the prompt types:
-        generated_prompts = dict()
-        generated_prompt_labels = dict()
-    
-        for ptype, heurs in self.heuristics.items():
-            
-            valid_ptypes = []
-            #Populate the list of valid (used/configured) prompt types according to the heuristics dict. 
-            
-            #checks whether the heur methods are nonetypes by default.
-            if heurs is not None:
-                valid_ptypes.append(ptype)
-                
-                #Initialising the lists for the valid ptypes 
-                generated_prompts[ptype] = []
-                generated_prompt_labels[f'{ptype}_labels'] = []
+        if not self.heuristic_mixtures:
+            #We populate the prompts:
+            generated_prompts, generated_prompt_labels = self.heuristic_caller(data)
+                    
+            #We check that the output was generated correctly/with a valid output.
+            self.at_least_one_prompt(generated_prompts, generated_prompt_labels, data)
 
-            elif heurs is None:
-                #If nonetype, then the generated prompts will be a nonetype for that prompt-type.
-                generated_prompts[ptype] = None
-                generated_prompt_labels[f'{ptype}_labels'] = None
-
-        #We populate the prompts:
-        generated_prompts, generated_prompt_labels = self.heuristic_caller(valid_ptypes, data, generated_prompts, generated_prompt_labels)
-                
-        #We check that the output was generated correctly/with a valid output.
-        self.at_least_one_prompt(generated_prompts, generated_prompt_labels, data)
-
-        return generated_prompts, generated_prompt_labels
+            return generated_prompts, generated_prompt_labels
 
     def __call__(self, data):
 

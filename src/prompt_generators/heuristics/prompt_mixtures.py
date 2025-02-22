@@ -1,4 +1,4 @@
-from typing import Union 
+from typing import Union, Callable
 import warnings 
 import itertools
 import torch
@@ -36,7 +36,7 @@ heur_fn_dict: Dict - Prompt-type separated dictionary containing the set of heur
 
 build_params: Optional(Dict) can also be none-type if no params needed. 
     
-    NOTE: NONE should only be used for the initial prototype (as there will always be actual arguments required.) 
+    NOTE: NONE should only be used for the initial prototype (as there will almost always be actual arguments required.) 
     
     Prompt-type separated dictionary containing the heuristic arguments for each heuristic in the heur_fn_dict.
     Contains the parameters for how the heuristic is to be called wrt methods in the base classes: for handling
@@ -44,10 +44,6 @@ build_params: Optional(Dict) can also be none-type if no params needed.
 
 
         Possible heuristic arguments include: 
-
-        Multi-class related variables, e.g.:
-
-        How classes may interact affect the prompt generation process within a given heuristic.
 
         Multi-component related variables, e.g.:
         
@@ -80,8 +76,10 @@ heuristic_mixtures_args:
     It can also permit for arguments pertaining to how they should be combined together, e.g.:
 
         Probabilistic measures where we may want to run a bernoulli trial or multinomial trial for deciding which 
-        prompt heuristics to use in a mixture method for a given instance (i.e. the flexibility to not use all prompts or prompt methods at ALL times for stress testing). 
-
+        prompts (or heuristics) to use for a given call (i.e. the flexibility to not use all prompts or prompt methods 
+        at ALL times). 
+    
+    
 --------------------------------------------------------------------------------------------------------------------
 
 
@@ -139,10 +137,10 @@ class BaseMixture(PointBase, ScribbleBase, BboxBase):
         Can be used to sort a list of prompts types within a priority list, or to sort a list of heuristics    
         ''' 
         if sort_criterion is None:
-            return components 
+            return input_list 
         elif sort_criterion.title() == 'Random':
             #We create a random permutation of integers from 0 to len(sublist) - 1.
-            indices = torch.randperm(range(len(input_list))).to(int) 
+            indices = torch.randperm(len(input_list)).to(int) 
             return [input_list[i] for i in indices]
         else:
             raise NotImplementedError('The list sort criterion provided was not supported')
@@ -661,9 +659,7 @@ class BasicValidOnlyMixture(BaseMixture):
         if sort_criterion is None:
             return components 
         elif sort_criterion.title() == 'Random':
-            #We create a random permutation of integers from 0 to len(sublist) - 1.
-            indices = torch.randperm(range(len(components))).to(int) 
-            return [components[i] for i in indices]
+            return self.shuffle_list(components, 'random')
         elif sort_criterion.title() == 'Component Sum':
             #This is on the basis of the sum of the torch tensors (i.e. the size of the component)
             _, indices = torch.sort(torch.stack(components).sum(list(range(1, len(torch.stack(components).shape)))))
@@ -706,7 +702,7 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
             config_labels_dict: dict,
             sim_device: torch.device,
             heur_fn_dict: dict,
-            build_args: dict,
+            build_args: dict = None,
             mixture_args: dict = None,
             use_mem: bool = False,
             ):
@@ -724,46 +720,273 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
         self.use_mem = use_mem
 
         
-        #Priority list for the independent fusion strategy, it bins the prompt types into distinct groups of priority
-        #each sublist has items equal in priority.
-        self.prompt_priority_list = [['bbox'], ['scribbles', 'points']]
-    
-    def toggle_components(self):
-        pass 
-
-    def iterator(self, valid_ptypes,, generated_prompts, generated_prompt_labels):
+        self.prompt_level_order = [['bbox'], ['scribbles', 'points']]
+        #List denoting the priority list of prompt types.it bins the prompt types into distinct groups of priority, 
+        # each sublist has items more equal in priority.
         
-        #We iterate through a priority list, bbox goes first as it is only capable of grounding a segmentation.
+        #Bbox goes first in the outer list as it is only capable of grounding a segmentation; while latter are refinement
+        # and so will be require sampling from an error region without replacement. 
+        
+        #Denoting variables for grounded, and refinement prompts. Grounded prompts only provide a grounding as spatial 
+        # prior while refinement prompts can provide editing capabilities also.
+        
+        self.grounded_prompts_ls = ['bboxes']
+        self.refinement_prompts_ls = ['points', 'scribbles']
 
-        #This priority list is provided because we are sampling without replacement (mostly just relevant for the
-        # refinement prompts). 
-         
-        for sublist in self.prompt_priority_list:
-
-
-        #We shuffle the valid_ptypes list randomly within the priority list bracket for prompt diversity.
-        #(e.g., downstream apps may not necessarily treat scribble points, and standard points the same in their model)
-
-            #We create a random permutation of integers from 0 to len(sublist) - 1.
-            indices = torch.randperm(range(len(sublist))).to(int) 
-            #shuffled sublist:
-            shuffled_sublist = [sublist[i] for i in indices]
-
-            # for heur in ptype_heurs:
-            #         #Here we will simulate the prompts for the given prompt type, across classes in task,
-            #         #according to the heuristics + build provided. 
-            #         # 
-            #         # If there are no empty voxels left for prompt placement, we have an empty list, just skip.
-
+    def init_valid_ptypes(self):
+        '''
+        Function which extracts the list of valid prompt types according to the heuristics functions dict.
+        '''
+        #Populate the list of valid (used/configured) prompt types according to the dict. 
             
-    def __call__(self, valid_ptypes, data, tracked_prompts, tracked_prompts_lbs):
+        #Checks whether the heur function dict is a Nonetype by default.
+        self.valid_ptypes = [key for key,val in self.heur_fn_dict.items() if val is not None]
+
+        if len(self.valid_ptypes) < 1:
+            raise Exception('At least one valid prompt type must have been configured!')
+
+        
+    def init_prompts(self):
+        '''
+        Function which initialises the prompts and prompt labels dictionary according to the valid prompt types 
+        (and also cross-references this again against the heuristics function dict).
+
+        Returns:
+
+        tracked_prompts: A dictionary, split by prompt type, which contains the initialised dict according to the 
+        set of valid prompt types (i.e. those for which a prompt can be simulated). Contains empty lists for valid,
+        and NoneTypes for invalid prompt types.
+
+        tracked_prompts_lbs: Same as tracked_prompts, except for the prompts' labels. Split by {prompt_type}_labels
+        '''
+        #We initialise the dictionary containing the prompts and labels across the prompt types with val None:
+        prompts = dict.fromkeys(self.heur_fn_dict.keys(), None)
+        prompt_lbs = dict.fromkeys([i + '_labels' for i in self.heur_fn_dict.keys()], None)
+    
+        for ptype in self.valid_ptypes:
+            #Populate the list of valid (used/configured) prompt types according to the heuristics dict. 
+            
+            #Checks again whether the heuristics dict is a Nonetype by default.
+            if self.heur_fn_dict[ptype] is not None:
+
+                #Initialises with a list for the valid ptypes 
+                prompts[ptype] = []
+                prompt_lbs[f'{ptype}_labels'] = []
+
+        #Check that the initialisations are indeed NoneTypes for the non-valid ptypes, and empty lists otherwise.
+        if not all([vp is None and prompt_lbs[k] is None for k,vp in prompts.items() if k not in self.valid_ptypes]):
+            raise Exception('The initialised prompts and prompt labels were invalid for the non-valid prompt-types.')
+        if not all([vp is [] and prompt_lbs[k] is [] for k,vp in prompts.items() if k in self.valid_ptypes]):
+            raise Exception('The initialised prompts and prompt labels were invalid for the valid prompt-types.')
+
+        return prompts, prompt_lbs
+
+    def togg_class_level(self, 
+                        tracked_prompts, 
+                        tracked_prompt_lbs, 
+                        samp_regions_dict,
+                        init_bool):
+        '''
+        Executes the prompt simulation process by the class level toggling using the toggling dictionary.
+
+        Inputs:
+        
+        tracked_prompts: P-type separated dict (The initialised tracking prompts which will be tracked throughout)
+        
+        tracked_propmt_lbs: P-type separated dict (The initialised tracking prompt labels which will be tracked throughout)
+        
+        samp_regions_dict: The nested dictionary (split by gt and error region) denoting the class separated regions (or Nones for empty gt/error regions for a given class)
+        
+        init_bool: A bool, denotes whether the inference call the prompt generation is for is an init or edit, this
+        is required for downstream in order to delineate between instances where prompts are being placed on gt or 
+        error region. Required because we cannot infer reliably from the datatype of the error-region and gt after
+        we pass deeper past the class-level toggling.
+
+        (e.g., Error-region separated on class level could have a NoneType for a class because it is empty, or it 
+        could just be because the error-region entry empty because it is an initialisation, the GT must always be not a 
+        nonetype at that level, otherwise there would be no error-region anyways!)
+
+        '''
+        
+        if self.toggling_dict['class_level'] is None:
+            for class_lb in self.config_labels_dict.keys():
+                
+                #By default, We just iterate through on a class by class basis. However, since the sampling regions 
+                # nested dict is configured by 'gt', 'error_region' and then by class, we cannot extract the sampling
+                #region here.
+
+                 
+                #We, do not elect to return an updated sampling region (updated by the prompts placed),
+                # as this functionally does nothing for the current prototype (we are performing on a 
+                # class-by-class basis without errors). 
+
+         
+                if samp_regions_dict['gt'] is None:
+                    raise Exception('The entire ground truth cannot be a NoneType..')
+                
+                if samp_regions_dict['gt'][class_lb] is None: 
+                    #We implement a check here to see if we can skip over..
+                    print(f'Class {class_lb} has no gt and (or by extension) false-negative error region ')
+                    continue 
+                else:
+                    if samp_regions_dict['error_region'] is None: 
+                        if not init_bool:
+                            raise Exception('Cannot have a nonetype for error region item if not initialisation') 
+                        regions_dict = {
+                            'gt':samp_regions_dict['gt'][class_lb],
+                            'error_region': None
+                        }
+
+                    elif samp_regions_dict['error_region'] is not None:
+                        if init_bool:
+                            raise Exception('Cannot have a non-Nonetype for error region item if editing.') 
+                        
+                        #Extract the gt and the false negative error region for the current class and reassign.
+                        regions_dict = {
+                            'gt':samp_regions_dict['gt'][class_lb], 
+                            'error_region':samp_regions_dict['error_region'][class_lb] 
+                            #Note that this error region for this class can still be a nonetype if the errors were not there!
+                            } 
+
+                tracked_prompts, tracked_prompt_lbs = self.togg_inter_prompt_level(
+                    tracked_prompts=tracked_prompts,
+                    tracked_prompt_lbs=tracked_prompt_lbs,
+                    samp_regions_dict=regions_dict,
+                    init_bool=init_bool
+                )
+
+
+
+            return tracked_prompts, tracked_prompt_lbs
+            
+    def togg_inter_prompt_level(self, 
+                                tracked_prompts, 
+                                tracked_prompt_lbs,
+                                samp_regions_dict,
+                                init_bool):
+        '''
+        Inputs: 
+
+        tracked_prompts: Dictionary of tracked prompts.
+        tracked_prompt_lbs: Dictionary of tracked prompts labels
+        samp_regions_dict: Dictionary of sampling regions for the current class in the parent toggle 
+        (toggle_class_level). Contains the 'gt' and the 'error_region' (gt can never be a NoneType).
+        init_bool: A bool denoting whether the prompt generation is for an initialisation or not (relevant for 
+        downstream toggles handling)
+
+        '''
+        if self.toggling_dict['inter_prompt_level'] is None:
+            
+            #Reassign the sampling regions dict for readability.
+            regions_dict = samp_regions_dict 
+
+            #We iterate through Priority/order list for sorting the prompt simulation process for prototype.
+            for sublist in self.prompt_level_order:
+
+                #We shuffle the valid_ptypes list randomly within the priority list bracket for prompt diversity.
+                # e.g., downstream apps may not necessarily treat scribble points, and standard points the same.
+
+                shuffled_sublist = self.shuffle_list(sublist, 'random')
+
+                for ptype in shuffled_sublist:
+
+                    if ptype not in self.valid_ptypes:
+                        print(f'Skipping simulation of prompts: {ptype}')
+                        continue
+                    else:
+
+                        tracked_prompts, tracked_prompt_lbs = self.togg_intra_prompt_level(
+                            ptype=ptype,
+                            tracked_prompts=tracked_prompts,
+                            tracked_prompt_lbs=tracked_prompt_lbs,
+                            samp_regions_dict=regions_dict,
+                            init_bool=init_bool
+                            )
+
+    def togg_intra_prompt_level(self, 
+                                ptype:str,  
+                                tracked_prompts:dict[str,list], 
+                                tracked_prompt_lbs:dict[str,list],
+                                samp_regions_dict:dict[str, Union[torch.Tensor, MetaTensor, None]],
+                                init_bool:bool):
+    
+        #Only gets triggered for valid ptypes in the parent toggle level (inter-prompt toggle). 
+                
+        #We put some handling for extracting the sampling region depending on the prompt type and whether it is an
+        #interactive or an editing prompt. 
+
+        if ptype in self.grounded_prompts_ls:
+            #This will always be exclusively simulated using the ground truth 
+            region = samp_regions_dict['gt'] 
+            if region is None:
+                #If the gt is empty then break, this should have been flagged at the class level.
+                raise Exception('Somehow an empty gt got through, check the logic!')
+        
+        elif ptype in self.refinement_prompts_ls:
+            if samp_regions_dict['gt'] is None:
+                #If the gt is empty then break, this should have been flagged at the class level.
+                raise Exception('Somehow an empty gt got through, check the logic')
+            
+            if init_bool:
+                region = samp_regions_dict['gt']
+                #Initialisation refinement prompts, use the gt for iterating through.
+            else:
+                #Editing refinement prompts, use the error regions.
+                if samp_regions_dict['error_regions'] is None:
+                    #In this case, there is no error for this class! We cannot place anything.
+                    return tracked_prompts, tracked_prompt_lbs
+                else:
+                    region = samp_regions_dict['error_regions'] 
+                    #Otherwise, use the error region! 
+        else:
+            raise Exception('Prompt type does not fall under the grounded, or the refinement type spatial prompts.')
+
+        #We extract the heuristics dictionary for the given prompt type.
+        heurs_dict = self.heur_fn_dict[ptype]
+
+
+         #We shuffle the heuristics list randomly for ensuring prompting diversity.
+        
+        # E.g., especially for scribbles, the form of the scribbles could become obstructive wrt other scribble 
+        # placements, biasing the stress-test. Although for points this is less likely as they're not as obstructive,
+        # it would still be a point of interest. (but it may be relevant, e.g. "point spread").
+        
+
+        shuffled_heurs_order = self.shuffle_list(list(heurs_dict.keys()), 'random')
+        
+        for heur in shuffled_heurs_order:
+
+            #TODO: put a break condition depending on whether any more prompts can be sampled? 
+            #TODO: We need to put a filterer here because the scribbles and prompts use the same regions and require
+            #filtering.
+
+            heur_func = heurs_dict[heur] 
+
+            self.togg_heur_level(
+                ptype=ptype,
+                heur_func=heur_func,
+                tracked_prompts=tracked_prompts,
+                tracked_prompt_lbs=tracked_prompt_lbs,
+                samp_region=region 
+            )
+                        
+
+    def togg_heur_level(self, 
+                        ptype: str,
+                        heur_func: Callable, 
+                        tracked_prompts: dict[str,list], 
+                        tracked_prompt_lbs: dict[str,list],
+                        samp_region: Union[torch.Tensor, MetaTensor]):
+        
+    
+        raise NotImplementedError('Need to figure out why i put ptype here...')
+
+    def __call__(self, data):
         '''
         Function which calls on the methods for implementing the prompt generation process. 
 
         inputs: 
 
-        valid_types: A list of prompt types which have a heuristic provided (i.e. for which simulation could occur)
-        
         data: A dictionary containing the following fields: 
 
         image: Torch tensor OR Metatensor containing the image in the native image domain (no pre-processing applied other than re-orientation in RAS)
@@ -786,13 +1009,6 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                 3) "meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
         
         im: Optional (or NoneType) dictionary containing the interaction memory from the prior interaction states.      
-
-
-        tracked_prompts: A dictionary, split by prompt type, which contains the initialised dict according to the 
-        set of valid prompt types (i.e. those for which a prompt can be simulated). Contains empty lists for valid,
-        and NoneTypes for invalid prompt types.
-
-        tracked_prompts_lbs: Same as tracked_prompts, except for the prompts' labels. Split by {prompt_type}_labels.
         '''
 
         if self.use_mem:
@@ -804,10 +1020,15 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
             
             raise NotImplementedError('Not implemented the handling of interaction memory') 
             #TODO: If using memory then add the functionality for extracting prior prompts and reformatting etc.
+            #TODO: Implement the looper.
+
+            #Then we delete the interaction memory variable to clear space.
+            del im 
         else:
             if data['prev_output_data'] is None:
                 print('We have no prior output data, please check that this is an initialisation!')
-                pred = None 
+                pred = None
+                init_bool = True 
             else:
                 print('We have prior output data, please check that this is an editing iteration')
                 pred = data['prev_output_data']['pred']['metatensor'][0, :]
@@ -815,6 +1036,7 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
 
                 if not isinstance(pred, torch.Tensor) or not isinstance(gt, MetaTensor):
                     raise TypeError('The pred needs to be a torch tensor or a Monai MetaTensor')            
+                init_bool = False
 
             gt = data['gt'][0, :]
             gt = gt.to(dtype=torch.int32, device=self.sim_device)
@@ -825,10 +1047,30 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
             #Extracts a dict with fields 'gt' and 'error_regions'. Both class separated dicts.
             sampling_regions_dict = self.init_sample_regions_no_components(pred, gt)
 		    # No need to adjust the tracked prompts or tracked prompts labels variable!
-            
-        toggle_components = False 
-        toggle_class = False 
-        toggle_priority = False 
+
+        #We initialise the prompt dictionaries.
+        tracked_prompts, tracked_prompts_lbs = self.init_prompts()
+
+        if self.heur_build_args is None and self.mixture_args is None: 
+            #In this case, we will resort to defaults.
+            self.toggling_dict = {
+                'class_level': None, 
+                #None = Just use a default provided.
+                'inter_prompt_level': None, 
+                #None = Just use a default provided. 
+                'intra_prompt_level': None,
+                #None = Just use a default provided.
+                'heuristic_level': None,
+                #None = Just use a default provided.
+            }
+            tracked_prompts, tracked_prompts_lbs = self.togg_class_level(
+                tracked_prompts=tracked_prompts, 
+                tracked_prompt_lbs=tracked_prompts_lbs, 
+                samp_regions_dict=sampling_regions_dict,
+                init_bool=init_bool)
+        else:
+            raise NotImplementedError('Not implemented anything for handling the toggling of anything non-default')
+        
 
 #Mixture registry is for classes which wrap together the prompt generation process with complex inter/intra-prompt relationships.
 #  
