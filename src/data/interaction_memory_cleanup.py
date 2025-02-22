@@ -21,8 +21,9 @@ def im_cleanup(
     is_seg_tmp: bool - Bool which denotes whether the segmentations are being saved permanently or temporarily
     tmp_dir: path - The absolute path to the temp directory which the temporarynamedfiles will be saved to. 
 
+    im_config: The dictionary of configurations which denote how the interaction memory will be clipped.
     im: dict - Interaction memory dictionary, with the individual interaction states denoted by the keys.
-    infer_config: dict - Inference config, contains two fields 1) Mode (str), 2) Edit iter num (int)
+    infer_config: dict - The current inference config which interaction was generated for, contains two fields 1) Mode (str), 2) Edit iter num (int)
 
     Output: 
 
@@ -30,7 +31,7 @@ def im_cleanup(
     '''
 
     if not isinstance(infer_config['edit_num'], int):
-        raise TypeError('The editing number must always be provided as an int')
+        raise TypeError('The editing number must always be provided as an int (for edits), we do not call cleanup after the initialisation! Any initialisation cleanup occurs at edit iter 1!')
     if not isinstance(infer_config['mode'], str):
         raise TypeError('The inference mode must be provided as a str')
     if infer_config['mode'] is not 'Interactive Edit':
@@ -43,10 +44,21 @@ def im_cleanup(
         #This variable handles whether the initialisation is always being retained, this is treated independent of
         #the editing iterations due to the keys used. 
         if not im_config['keep_init']:
-            init_mode_key = [mode for mode in im_keys if 'Init' in mode]
-            #NOTE: We do not need to run any cleanup for the saved tmp files because any deletion will be handled by the 
-            #subsequent edit iters.
-            del im[init_mode_key]
+            
+            deletion_set = set([mode for mode in im_keys if 'Init' in mode])
+            if len(deletion_set) != 1:
+                raise ValueError('The deletion set can only be 1 long for the handling of initialisation!')
+            
+            for key in deletion_set:
+                logits_tmp_paths = im[key]['prev_logits']['paths'] 
+                tempfiles_cleanup(tmp_dir=tmp_dir, paths=logits_tmp_paths)
+                        
+                #We then run cleanup of the temp files stored for the segs, according to the flag which handles whether segs are tmp or permanent.
+                if is_seg_tmp:
+                    seg_tmp_path = im[key]['prev_pred']['path']
+                    tempfiles_cleanup(tmp_dir=tmp_dir, paths=seg_tmp_path)
+
+                del im[key]
     
     elif infer_config['edit_num'] > 1:
 
@@ -59,17 +71,18 @@ def im_cleanup(
             #In this circumstance, the -1 flag denotes that full memory length is being used.
             
             #We make this explicit for comprehension. 
-            pass
+            print('No interaction memory being cleared!')
 
         else: 
 
             edit_iter_num = infer_config['edit_num'] #Variable denoting which editing iteration this cleanup was called at.
 
             #Denotes the upper bound (exclusive) for removal of the memory states.
-            upper_bound_iter_clip = edit_iter_num - edit_memory_len #Eqn: Iter num - 1 (start from prior state) - memory len + 1 (+1 because inclusive of the prior state)
+            upper_bound_iter_clip = edit_iter_num - edit_memory_len 
+            #Eqn: Iter num - 1 (start from prior state) - memory len + 1 (+1 because inclusive of the prior state)
             
             if upper_bound_iter_clip <= 1:
-                pass 
+                print(f'Cannot clear yet, memory retention length is {edit_memory_len} and current iter is {edit_iter_num}')
                 #In instances where full memory length prior to current iter = memory length param, 
                 # upper bound = 1. Hence for upper_bound <= 1, keep all.
 

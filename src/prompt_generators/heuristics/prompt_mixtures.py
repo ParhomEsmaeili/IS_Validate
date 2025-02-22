@@ -1021,14 +1021,18 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
             raise NotImplementedError('Not implemented the handling of interaction memory') 
             #TODO: If using memory then add the functionality for extracting prior prompts and reformatting etc.
             #TODO: Implement the looper.
+            #TODO: Add handling for automatic initialisations which would have Interaction State = NoneType.
 
-            #Then we delete the interaction memory variable to clear space.
+            #Then after it all, we delete the interaction memory variable to clear space.
             del im 
         else:
             if data['prev_output_data'] is None:
                 print('We have no prior output data, please check that this is an initialisation!')
                 pred = None
                 init_bool = True 
+
+                if data['im'] is not None:
+                    raise Exception('The interaction memory should be a NoneType for the initialisation.')
             else:
                 print('We have prior output data, please check that this is an editing iteration')
                 pred = data['prev_output_data']['pred']['metatensor'][0, :]
@@ -1037,6 +1041,9 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                 if not isinstance(pred, torch.Tensor) or not isinstance(gt, MetaTensor):
                     raise TypeError('The pred needs to be a torch tensor or a Monai MetaTensor')            
                 init_bool = False
+
+                if data['im'] is None:
+                    raise Exception('The interaction memory (even if unused) should not be a NoneType for edits.')
 
             gt = data['gt'][0, :]
             gt = gt.to(dtype=torch.int32, device=self.sim_device)
