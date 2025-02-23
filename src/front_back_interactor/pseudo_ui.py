@@ -1,24 +1,27 @@
 '''
 This script is intended for simulating inference from the pseudo-front end, as part of the front-end to back-end setup of an end-to-end interactive seg. application. 
 '''
-from monai.transforms import Compose, ToDeviced 
 from typing import Callable, Sequence, Union, Optional
 import logging
+import os
 import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from monai.data import MetaTensor 
 import torch
 import random
 import numpy as np
-import os
+
 from src.data.interaction_state_construct import HeuristicInteractionState 
+from src.output_processing.processor import OutputProcessor
+from src.output_processing.scoring import MetricsHandler 
 from src.data.interaction_memory_cleanup import im_cleanup
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
 
 class front_end_simulator:
     '''
     This class serves as an "interface" for the pseudo-ui with operations such as: 
     
-    Loading the imaging data in the "UI" domain,
     Generating prompts in the "UI" domain, 
     Storing the interaction states through the iterative segmentation process with configured interaction memory params,
     Saving the segmentation states throughout the iterative segmentation process
@@ -47,14 +50,7 @@ class front_end_simulator:
         class_configs: A dictionary containing the class label - class integer code mapping relationship being used.
 
         im: An interaction memory dictionary containing the set of interaction states. 
-        Keys = Infer mode + optionally (for Edit) the inference iter num (1, ...).
-        
-        NOTE: Experimental config must pre-define the set of interaction states required with the following argument:
-            im_config = 
-            {'keep_init': bool,
-            'memory_len': int (this denotes the retained memory backwards, -1 denotes full memory, otherwise it 
-            denotes the memory retained relative to the "current" iter)
-            }         
+        Keys = Infer mode + optionally (for Edit) the inference iter num (1, ...).       
 
         Within each interaction state in IM:    
         
@@ -111,12 +107,12 @@ class front_end_simulator:
         if not required, put a None for the value of this item.
     '''
     def __init__(self, 
-                infer_app, 
+                infer_app: Callable, 
                 args: dict):
         '''
         Inputs: 
     
-        infer_app: Initialised inference application which can be called to process an input request.
+        infer_app: Initialised inference application which can be called to process an input request (structure noted above).
         
         args: Dictionary containing the information required for performing the experiment, e.g.: 
 
@@ -124,7 +120,7 @@ class front_end_simulator:
         
             config_labels_dict: Dictionary mapping class labels and integer codes.
             
-            inter_init_prompt_config (and inter_edit_prompt_config): "use mode" specific prompt generation config dictionary, 
+            init_prompt_config (and edit_prompt_config): "use mode" specific prompt generation config dictionaries, 
             
             inference run configs: (e.g., modes, number of refinement iterations)
             
@@ -134,16 +130,33 @@ class front_end_simulator:
             the infer_app call: contains fields 'keep_init' and 'im_len' (former denotes the treatment of init interaction
             state, while im_len denotes the edit memory)
 
+                im_config = 
+                    {'keep_init': bool,
+                    'memory_len': int (this denotes the retained memory backwards, -1 denotes full memory, otherwise it 
+                    denotes the memory retained relative to the "current" iter)
+                    }  
+
             etc.
 
         TODO: Add a full exhaustive list of the dictionary fields.
 
         '''
         
+        if not callable(self.infer_app):
+            raise Exception('The inference app must be callable: an initialised class object with a __call__ function for performing inference fully end-to-end.')
+        
         self.infer_app = infer_app
         self.args = args
 
-        self.init_seeds(seed=self.args['random_seed'])
+    def check_nonempty(self, tensor: Union[torch.Tensor, MetaTensor]):
+        '''
+        Basic function which checks whether an input tensor has a foreground voxel. This is determined according to
+        the class labels configs at class initialisation. 
+        '''
+        #We extract the background class val:
+        bg_val = self.args['config_labels_dict']['background']
+        return torch.all(tensor == bg_val)
+            
 
     def init_seeds(self, seed): #, cuda_deterministic=True):
         random.seed(seed)
@@ -161,22 +174,21 @@ class front_end_simulator:
         # else:
         #     cudnn.deterministic=False 
         #     cudnn.benchmark=True 
-    def app_output_processor(self, output_data, infer_call_config, metrics_dict):
-        '''
-        Makes use of the output processor class. This will tie together several functionalities such as 
-        reformatting the output data dictionary, writing the segmentations, computing the metrics etc.
-        
-        output_data: Dict - A dictionary containing the pre-processed output dictionary from the inference app call.
 
-        infer_config: Dict - A dictionary containing two subfields:
-            'mode': str - The mode that the inference call was be made for (Automatic Init, Interactive Init, Interactive Edit)
-            'edit num': Union[int, None] - The current edit's iteration number or None for initialisations.
-        
-        metrics_dict: Dict - A dictionary containing the tracked metrics.
+    def output_handlers_init(self):
         '''
-        pass 
+        This function initialises the class objects which can be used for processing the outputs of calls to the 
+        inference app, generating metrics, saving metrics etc.
+        '''
+        self.metrics_handler = MetricsHandler(
 
-    def input_prompt_gen_initialiser(self):
+        )
+
+        self.output_processor = OutputProcessor(
+
+        ) 
+
+    def inf_prompt_gen_init(self):
         '''
         This function initialises the class objects which can generate the interaction states for use in inference.
         '''
@@ -185,33 +197,35 @@ class front_end_simulator:
             # The Autosegmentation state does not require any interaction state generators since they contain no 
             # interaction. All information for the autosegmentation state will be provided manually.
 
-            self.inter_init_generator = HeuristicInteractionState(
+            self.inf_init_generator = HeuristicInteractionState(
                 sim_device=self.args['sim_device'],
                 use_mem=False,
-                prompt_configs=self.args['inter_init_prompt_config'],
+                prompt_configs=self.args['init_prompt_config'],
                 config_labels_dict=self.args['config_labels_dict']
             )
-            self.inter_edit_generator = HeuristicInteractionState(
+            self.inf_edit_generator = HeuristicInteractionState(
                 sim_device=self.args['sim_device'],
                 use_mem=self.args['use_mem_edit_generator'],
-                prompt_configs=self.args['inter_edit_prompt_config'],
+                prompt_configs=self.args['edit_prompt_config'],
                 config_labels_dict=self.args['config_labels_dict']
             )
         else:
             raise ValueError('The selected prompt generation algorithm is not supported')
     
-    def metric_prompt_gen_initialiser(self):
+    def metric_prompt_gen_init(self):
         '''
         Function intended for initialising the prompt generators for the metric computation.
         '''
         pass 
 
-    def metric_im_handler(self):
+    def metric_im_handler(self, inf_im, metric_im):
         '''
         Function intended for interaction memory handling, but for instances where the generated data is used for metric
-        computation.
+        computation. Uses the inference interaction memory to access new interaction info from the input prompts.
+        Uses this to generate metric interaction memory/update metric interaction memory.
         '''
-
+        #Does absolutely nothing for now.
+        return metric_im
     def input_im_handler(self,
                 data_instance: dict, 
                 infer_config: dict,
@@ -252,7 +266,7 @@ class front_end_simulator:
             im = {'Automatic Init': None}
 
         elif infer_config['mode'].title() == 'Interactive Init':
-            im = {'Interactive Init': self.inter_init_generator(
+            im = {'Interactive Init': self.inf_init_generator(
                 image=data_instance['image']['metatensor'], 
                 mode=infer_config['mode'], 
                 gt=data_instance['label']['metatensor'], 
@@ -261,7 +275,7 @@ class front_end_simulator:
 
 
         elif infer_config['mode'].title() == 'Interactive Edit':
-            im[f'Interactive Edit Iter {infer_config["edit_num"]}'] = self.inter_edit_generator(
+            im[f'Interactive Edit Iter {infer_config["edit_num"]}'] = self.inf_edit_generator(
                 image=data_instance['image']['metatensor'],
                 mode=infer_config['mode'],
                 gt=data_instance['label']['metatensor'],
@@ -270,9 +284,65 @@ class front_end_simulator:
             )
             #Here we implement the optional use of memory clipping in instances where memory concerns may exist.
 
-            im = im_cleanup(self.args['is_seg_tmp'], self.args['tmp_dir_path'], self.args['im_config'], im, infer_config)
+            #We only implement this in the interactive edit mode since it necessitates that there be memory in the first place!
+
+            im = im_cleanup(self.args['is_seg_tmp'], self.tmp_dir_path, self.args['im_config'], im, infer_config)
         
         return im 
+
+
+    def app_output_processor(self,
+                            data_instance: dict,
+                            inf_req: dict,
+                            output_data:dict,
+                            inf_im:dict,
+                            metric_im: Union[dict, None],
+                            infer_call_config:dict, 
+                            tracked_metrics:dict):
+        '''
+        Makes use of the output processor class. This will tie together several functionalities such as 
+        reformatting the output data dictionary, writing the segmentations, computing the metrics etc.
+        
+        data_instance: Dict - A dictionary containing info related to the image, gt for the current data instance we 
+        are evaluating on.
+
+        inf_req: Dict - A dictionary containing the information provided for the input inference request.
+        output_data: Dict - A dictionary containing the pre-processed output dictionary from the inference app call.
+        
+        inf_im: Dict - A dictionary containing the interaction memory for the input prompts.
+        metric_im: Dict - A dictionary containing the interaction memory info the metrics. (e.g. parametrisations)
+        
+        NOTE: Both are provided in the circumstance where any metrics would require memory which could not be
+        provided otherwise.
+        
+        infer_config: Dict - A dictionary containing two subfields:
+            'mode': str - The mode that the inference call was be made for (Automatic Init, Interactive Init, Interactive Edit)
+            'edit num': Union[int, None] - The current edit's iteration number or None for initialisations.
+        
+        metrics_dict: Dict - A dictionary containing the tracked metrics dictionary throughout the iterative refinement process.
+        '''
+        
+        #Order: 
+        #Compute metrics, if terminate then return terminate
+        #Call the output processor (which writes and reformats the output data)
+        
+        #First we call on the metric_im handler for generating any parameters required for metrics.
+        updated_metric_im = self.metric_im_handler(inf_im=inf_im, metric_im=metric_im)
+        
+        #Then we call on the output processor, which checks that the app call provided a valid output (within a prescribed set of rules)
+        # and reformats the data into that expected by future calls on the interaction state constructor. 
+        processed_output_data = self.output_processor(input_request=inf_req, output_dict=output_data)
+        
+        #Then we update the tracked metrics.
+        updated_tracked_metrics, terminate_early = self.metrics_handler.update_metrics(
+            output_data=processed_output_data,
+            data_instance=data_instance,
+            tracked_metrics=tracked_metrics,
+            im_inf=inf_im,
+            im_metric=updated_metric_im,
+            infer_call_info=infer_call_config
+        )
+        return processed_output_data, updated_metric_im, updated_tracked_metrics, terminate_early
 
     def infer_app_request_generator(self,
                             data_instance: dict,
@@ -382,54 +452,165 @@ class front_end_simulator:
         else:
             raise ValueError('The inference mode is invalid for app request generation!')
         
-    def iterative_loop(self, dataset):
+    def iterative_loop(self, data_instance:dict, tracked_metrics: dict):
         '''
-        Dataset object which can be iterated through, performs a set of load transforms when called. 
+        data_instance - A dictionary containing the set of information with respect to the image, and ground truth, 
+        required for the request generation + interaction state generation:
 
+            Contains the following fields:
+
+                'image': dict - A dictionary containing the following subfields
+                    'path': path to the image 
+                    'metatensor': Loaded MetaTensor in RAS orientation (pseudo-UI native domain)
+                    'meta_dict': MetaTensor's meta_dict, contains the original affine array, and the pseudo-ui affine array
+                
+                'label': dict - A dictionary containing the sam subfields as the image! Not one-hot encoded for the MetaTensors!
+            
+            NOTE: KEY ASSUMPTION 1: The filename for both the image and ground truth will be the same. 
+            NOTE: KEY ASSUMPTION 2: The ground truth will NOT be one-hot encoded.
+
+        tracked_metrics - An empty dictionary intended for tracking the metrics for each interaction state throughout the
+        iterative refinement process.
         ''' 
-        
         
         infer_run_configs = self.args['infer_run_configs']
         
-        if type(infer_run_configs) != dict:
+        if not isinstance(infer_run_configs, dict):
             raise TypeError('Inference run type configs must be presented in dict, with keys of "edit_bool" and "num_iters".')
         
-        if type(infer_run_configs['edit_bool']) != bool:
+        if not isinstance(infer_run_configs['edit_bool'],  bool):
             raise TypeError('edit_bool value must be a boolean in the inference run configs dict.')
         
+        #We use the initialisation mode provided in the inference run config to initialise the model.
+        if len({infer_run_configs['init'].title()} & {'Automatic Init', 'Interactive Init'}) != 1:
+
+            #Generate the inference request and initialises the inference interaction memory:
+            request, inf_im = self.infer_app_request_generator(
+                data_instance=data_instance, 
+                infer_call_config={'infer_mode': infer_run_configs['init'].title(), 'edit_num': None},
+                im=None,
+                prev_output_data=None
+            )
+            #Take the generated request dict, and pass it through the callable application.
+            prev_output_data = self.infer_app(request)
+            #This generates the non-processed output data.
+        
+            # We call on the output processor for reformatting/processing of the prev_output_data dictionary for 
+            # future interaction state construction, writing of segs, and generation of metrics for tracking
+
+            prev_output_data, metric_im, tracked_metrics, terminated_early = self.app_output_processor(
+                data_instance=data_instance,
+                inf_req=request, 
+                output_data=prev_output_data,
+                inf_im=inf_im,
+                metric_im=None,
+                infer_call_config={'infer_mode': infer_run_configs['init'].title(), 'edit_num': None},
+                tracked_metrics=tracked_metrics
+                )
+
+            #We put a placeholder for handling the termination condition.
+            if terminated_early:
+                raise Exception('We do not yet have any handling for early convergence')
+                print(f'Reached convergence already, terminating at {infer_run_configs['init'].title()}!')
+                return tracked_metrics, terminated_early 
+        else:
+            raise KeyError('A supported initialisation mode was not selected')  
+            
+
+        #Now, we run the editing iterations, if applicable! 
+
         if infer_run_configs['edit_bool']:
             
-            #We use the initialisation mode provided in the inference run config to initialise the model.
-            if infer_run_configs['init'].title() == 'Automatic Init':
-                pass 
-                #TODO: Add the prompt generation and inference for the automatic initialisation.
-            elif infer_run_configs['init'].title() == 'Interactive Init':
-                pass 
-                #TODO: Add the prompt generation and inference for the interactive initialisation.
-            else:
-                raise KeyError('A supported initialisation mode was not selected')  
+            if not isinstance(infer_run_configs['num_iters'], int):
+                raise TypeError('The num_iters value must be an int in the inference run configs if editing!')
             
-            if type(self.args['infer_run_configs']['num_iters']) != int:
-                raise TypeError('The variable for quantity of editing iterations was not an int type')
-            
-            for iter_num in range(self.args['infer_run_configs']['num_iters']): 
-                #TODO: Add the prompt generation, inference and segmentation saving for the iterative segmentation process. 
-                pass 
-                # self.prompt_generation_handler()
+            print('We are now performing iterative edits')
 
-        else:
-            #Else, just the initialisation, either auto-seg or interactive init. Likely to be seldom used but just in case.
-            if infer_run_configs['init'].title() == 'Automatic':
-                pass 
-                #TODO: Add the prompt generation, inference and segmentation saving for the auto initialisation ONLY runs.
-            elif infer_run_configs['init'].title() == 'Interactive':
-                pass
-                #TODO: Add the prompt generation, inference and segmentation saving for the INTERACTIVE initialisation ONLY runs. 
-            else:
-                raise KeyError('A supported initialisation mode was not selected')
+            for iter_num in range(1, infer_run_configs['num_iters'] + 1):
+
+                #Generate the inference request and initialises the inference interaction memory:
+                request, inf_im = self.infer_app_request_generator(
+                    data_instance=data_instance, 
+                    infer_call_config={'infer_mode': 'Interactive Edit', 'edit_num': iter_num},
+                    im=inf_im,
+                    prev_output_data=prev_output_data
+                )
+                #Take the generated request dict, and pass it through the callable application.
+                prev_output_data = self.infer_app(request)
+                #This generates the non-processed output data.
             
-    def __call__(self):
-        pass 
+                # We call on the output processor for reformatting/processing of the prev_output_data dictionary for 
+                # future interaction state construction, writing of segs, and generation of metrics for tracking
+    
+                prev_output_data, metric_im, tracked_metrics, terminated_early = self.app_output_processor(
+                    output_data=prev_output_data,
+                    inf_im=inf_im,
+                    metric_im=metric_im, 
+                    infer_call_config={'infer_mode': 'Interactive Edit', 'edit_num': iter_num},
+                    tracked_metrics=tracked_metrics
+                    )
+
+                #We put a placeholder for handling the termination condition.
+                if terminated_early:
+                    raise Exception('We do not yet have any handling for early convergence')
+                    print(f'Reached convergence already, terminating at Interactive Edit Iter {iter_num}!')
+                    return tracked_metrics, terminated_early
+        
+        #We delete the inference interaction memory just to be safe so it has zero chance of leaking over into the next
+        # data instance
+        del inf_im 
+
+        return tracked_metrics, terminated_early 
+    
+    def __call__(self, 
+                data_instance:dict,
+                tmp_dir_path:str):
+        '''
+        data_instance - A dictionary containing the set of information with respect to the image, and ground truth, 
+        required for the request generation + interaction state generation:
+
+            Contains the following fields:
+
+                'image': dict - A dictionary containing the following subfields
+                    'path': path to the image 
+                    'metatensor': Loaded MetaTensor in RAS orientation (pseudo-UI native domain)
+                    'meta_dict': MetaTensor's meta_dict, contains the original affine array, and the pseudo-ui affine array
+                
+                'label': dict - A dictionary containing the same subfields as the image! Not one-hot encoded for the MetaTensors!
+            
+            NOTE: KEY ASSUMPTION 1: The filename for both the image and ground truth will be the same. 
+            NOTE: KEY ASSUMPTION 2: The ground truth will NOT be one-hot encoded. 
+        
+        tmp_dir_path - The path name for the current temporary directory initialised for the current data instance.
+        '''
+        #Checking if the foreground for this class is even non-empty... we will currently not be supporting this.
+        if self.check_nonempty(data_instance['label']['metatensor']):
+            raise Exception('The ground truth for the foreground cannot be empty, this functionality is not supported')
+        
+        #Calling on the init_seeds function to initialise the seeds for each data instance (this ensures early
+        #termination would not cause deterministic runs to error across different models.)
+        self.init_seeds(seed=self.args['random_seed'])
+        
+        #Assigning the tmp_dir_path attribute for each data instance. 
+        self.tmp_dir_path = tmp_dir_path
+
+        #Initialising a dictionary for tracking the metrics generated.
+        tracked_metrics = {}
+
+        tracked_metrics, terminated_early = self.iterative_loop(
+            data_instance=data_instance,
+            tracked_metrics=tracked_metrics)
+        
+        #Saving the metrics....
+
+        self.metrics_handler.save_metrics(
+            patient_name=os.path.split(data_instance['image']['path'])[1].split('.')[0],
+            terminated_early=terminated_early,
+            tracked_metrics=tracked_metrics
+        )
+
+        #Nothing is returned here, everything except final tmp_dir cleanup needs to be handled during the loop!
+
 
 
 if __name__ == '__main__':

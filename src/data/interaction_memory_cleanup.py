@@ -1,8 +1,10 @@
 import os 
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from src.utils.cleanup import tempfiles_cleanup, temp_dir_cleanup
+from src.utils.cleanup import selected_tempfiles_cleanup
 from typing import Union 
+import warnings 
+#NOTE: This is compatible with NoneType interaction states also! It just deletes the state entirely.
 
 def im_cleanup(
     is_seg_tmp: bool,
@@ -44,21 +46,25 @@ def im_cleanup(
         #This variable handles whether the initialisation is always being retained, this is treated independent of
         #the editing iterations due to the keys used. 
         if not im_config['keep_init']:
-            
+            warnings.warn('Are you sure you want to delete the initialisation information? This may contain the information you may have extracted at initialisation, e.g. image features')
+
             deletion_set = set([mode for mode in im_keys if 'Init' in mode])
             if len(deletion_set) != 1:
                 raise ValueError('The deletion set can only be 1 long for the handling of initialisation!')
             
-            for key in deletion_set:
-                logits_tmp_paths = im[key]['prev_logits']['paths'] 
-                tempfiles_cleanup(tmp_dir=tmp_dir, paths=logits_tmp_paths)
+            #NOTE: Could comment out: We do not absolutely need to perform this operation below, why? 
+            # Because if we delete edit states in im_memory it would eventually go through and deletes the tempfiles using the 
+            
+            # for key in deletion_set:
+            #     logits_tmp_paths = im[key]['prev_logits']['paths'] 
+            #     selected_tempfiles_cleanup(tmp_dir=tmp_dir, paths=logits_tmp_paths)
                         
-                #We then run cleanup of the temp files stored for the segs, according to the flag which handles whether segs are tmp or permanent.
-                if is_seg_tmp:
-                    seg_tmp_path = im[key]['prev_pred']['path']
-                    tempfiles_cleanup(tmp_dir=tmp_dir, paths=seg_tmp_path)
+            #     #We then run cleanup of the temp files stored for the segs, according to the flag which handles whether segs are tmp or permanent.
+            #     if is_seg_tmp:
+            #         seg_tmp_path = im[key]['prev_pred']['path']
+            #         selected_tempfiles_cleanup(tmp_dir=tmp_dir, paths=seg_tmp_path)
 
-                del im[key]
+            del im[deletion_set[0]]
     
     elif infer_config['edit_num'] > 1:
 
@@ -69,12 +75,16 @@ def im_cleanup(
         
         if edit_memory_len == -1:
             #In this circumstance, the -1 flag denotes that full memory length is being used.
-            
+            if not im_config['keep_init']:
+                raise Exception('Not permitted to delete initialisation states and leave the editing states, little reason to do this.')
+
             #We make this explicit for comprehension. 
             print('No interaction memory being cleared!')
 
         else: 
-
+            
+            warnings.warn('Are you sure you wanted to delete edit states in im_memory?')
+                
             edit_iter_num = infer_config['edit_num'] #Variable denoting which editing iteration this cleanup was called at.
 
             #Denotes the upper bound (exclusive) for removal of the memory states.
@@ -94,13 +104,13 @@ def im_cleanup(
                     #First we run cleanup of the temp files stored for the logits. 
                     logits_tmp_paths = im[key]['prev_logits']['paths']
 
-                    tempfiles_cleanup(tmp_dir=tmp_dir, paths=logits_tmp_paths)
+                    selected_tempfiles_cleanup(tmp_dir=tmp_dir, paths=logits_tmp_paths)
                     
                     #We then run cleanup of the temp files stored for the segs, according to the flag.
 
                     if is_seg_tmp:
                         seg_tmp_path = im[key]['prev_pred']['path']
-                        tempfiles_cleanup(tmp_dir=tmp_dir, paths=seg_tmp_path)
+                        selected_tempfiles_cleanup(tmp_dir=tmp_dir, paths=seg_tmp_path)
 
                     #Then we delete the dictionary entry. 
                     del im[key]

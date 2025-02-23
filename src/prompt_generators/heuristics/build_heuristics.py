@@ -62,7 +62,7 @@ class BuildHeuristic:
 
 
         (OPTIONAL)heuristic_mixture: An arbitrarily nested dict denoting a strategy for the cascading functions which
-        outline the basic strategy of handling prompting wrt class-level toggling, inter-prompt level toggling, 
+        outline the basic strategy of handling prompting interactions, e.g. class-level toggling, inter-prompt level toggling, 
         intra-prompt level toggling.
 
         This heuristic mixture arg will control whether/how prompt-methods will interact/condition one another 
@@ -87,9 +87,6 @@ class BuildHeuristic:
 
 
         NOTE: Can optionally be fully Nonetype i.e. default behaviour.
-        
-        Hence prompts will be generated with no consideration of prompting intra and inter-dependencies 
-        (outside of the sampling region being filled) or class-level dependencies. 
         
         '''
         

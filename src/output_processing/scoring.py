@@ -46,10 +46,10 @@ class MetricsHandler:
 
         self.supported_metrics = {
             'base':{'Dice'},
-            'base_relative':set(),#{'Consistent Dice Improvement'},
-            'human_centric':set(),
-            'human_centric_relative':set(),
-            'annotation_budget':set()
+            'base_relative':{},#{'Consistent Dice Improvement'},
+            'human_centric':{},
+            'human_centric_relative':{},
+            'annotation_budget':{}
         }
 
         #Checking that all the selected metric types are supported.
@@ -155,9 +155,9 @@ class MetricsHandler:
         for metric_type, metrics_dict in metric_output.items():
 
             if infer_call_info['mode'].title() != 'Interactive Edit':
-                tracked_metrics[metric_type] = {infer_call_info['mode']:metrics_dict}
+                tracked_metrics[metric_type] = {infer_call_info['mode'].title():metrics_dict}
             else:
-                tracked_metrics[metric_type] = {f'{infer_call_info["mode"]} Iter {infer_call_info["edit_num"]}':metric_output}
+                tracked_metrics[metric_type] = {f'{infer_call_info["mode"].title()} Iter {infer_call_info["edit_num"]}':metric_output}
 
         #We implement an early-stopping check for termination based on overall Dice overlap score.
 
@@ -175,11 +175,13 @@ class MetricsHandler:
         output_data:dict,
         data_instance: dict,
         tracked_metrics: dict,
-        im_inf: dict,
-        im_metric: dict, 
+        im_inf: Union[dict, None], #Should never be None for this, really..
+        im_metric: Union[dict, None], #Could be Nonetype for this if there are no parametrisation requirements.
         infer_call_info: dict,
         ):
- 
+        #The output data must have been post-processed and checked to ensure that the output of the user is valid
+        #prior to metric computation. 
+        
         extracted_pred = self.extract_spatial_dims(output_data['pred']['metatensor'])
         extracted_gt = self.extract_spatial_dims(data_instance['gt']['metatensor'])
 

@@ -48,7 +48,7 @@ class BasicSpatialPromptGenerator(PromptReformatter):
 
         Almost the same structure as prompt_methods, as they must correspond together!
 
-        NOTE: For each heuristic it must contain information about handling at the heuristic-level.
+        NOTE: For each method it must contain information about handling at the method-level.
         
         NOTE: Can also be a Nonetype if there is no prompt of that type being used.
 
@@ -60,8 +60,8 @@ class BasicSpatialPromptGenerator(PromptReformatter):
 
 
 
-        (OPTIONAL) prompt_mixture: An arbitrarily nested dict denoting a strategy for handling prompt simulation across class-level,
-        intra-prompt level and inter-prompting level strategies. 
+        (OPTIONAL) prompt_mixture: An arbitrarily nested dict denoting a strategy for handling prompt simulation 
+        e.g. class-level, intra-prompt level and inter-prompting level strategies etc.
         
     
         This prompt mixture arg will control whether/how prompt-methods will interact/condition one another 
@@ -84,9 +84,6 @@ class BasicSpatialPromptGenerator(PromptReformatter):
 
 
         Can optionally be fully Nonetype (i.e., will perform a default behaviour)
-
-        Hence they will be generated with no consideration of prompting intra and inter-dependencies (outside of 
-        any sampling region fill strategy for fully valid prompt generation!)
     
         '''
         super().__init__(config_labels_dict)
