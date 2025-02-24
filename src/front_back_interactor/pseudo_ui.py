@@ -715,7 +715,7 @@ class front_end_simulator:
 
                 'image': dict - A dictionary containing the following subfields
                     'path': path to the image 
-                    'metatensor': Loaded MetaTensor in RAS orientation (pseudo-UI native domain)
+                    'metatensor': Loaded MetaTensor in RAS orientation (pseudo-UI native domain) channelfirst 1HWD.
                     'meta_dict': MetaTensor's meta_dict, contains the original affine array, and the pseudo-ui affine array
                 
                 'label': dict - A dictionary containing the same subfields as the image! Not one-hot encoded for the MetaTensors!

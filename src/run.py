@@ -3,9 +3,28 @@ import json
 import logging 
 import sys 
 import os 
-
-
 sys.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
+
+
+def set_parse():
+    # %% set up parser
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--test_mode", default=True, type=bool)
+    parser.add_argument("--resume", type = str, default = '')
+    parser.add_argument("-infer_overlap", default=0.5, type=float, help="sliding window inference overlap")
+    parser.add_argument("-spatial_size", default=(32, 256, 256), type=tuple)
+    parser.add_argument("-patch_size", default=(4, 16, 16), type=tuple)
+    parser.add_argument('-work_dir', type=str, default='./work_dir')
+    ### demo
+    parser.add_argument('--demo_config', type=str, required=True)
+    parser.add_argument("--clip_ckpt", type = str, default = './config/clip')
+    args = parser.parse_args()
+    return args
+
+
+def main():
+    pass 
+
 
 
 
@@ -53,3 +72,4 @@ sys.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 
 
 # # if __name__ == 
+

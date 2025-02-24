@@ -48,16 +48,15 @@ class build_app_planner:
 
 
 def main():
-
-    args = parser.parse_args()
-
     parser = argparse.ArgumentParser()
     parser.add_argument('--app_planner_path', type=str, default = 'Sample_TEST/src/build_app_planner', help='The directory from the parent folder for the repository which contains the testing data')
     parser.add_argument('--init_bool', action='store_true', help='Bool which dictates whether the planner build folder contains an __init__ file')
-    parser.add_argument('--planner_args', type=str, help='Dictionary in json format which contains all of the input arguments required for the planner script')
+    parser.add_argument('--planner_args_path', type=str, help='Path to the json format which contains all of the input arguments required for the planner script')
 
+    args = parser.parse_args()
+    
     run_planner_class = build_app_planner(args.app_planner_path, args.init_bool)
-    run_planner_class.planner_func(json.loads(args.planner_args))
+    run_planner_class.planner_func(json.loads(args.planner_args_path))
 
 if __name__ == '__main__':
 
