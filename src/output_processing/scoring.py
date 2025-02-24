@@ -15,7 +15,7 @@ class MetricsHandler:
         dice_termination_threshold: float,
         metrics_configs: dict[str, dict],
         metrics_savepaths: dict[str, dict[str, Union[str, None, dict]]],
-        class_configs_dict: dict[str, int]
+        config_labels_dict: dict[str, int]
 
     ):
         '''
@@ -37,7 +37,7 @@ class MetricsHandler:
         self.termination_thresh = dice_termination_threshold 
         self.metrics_configs = metrics_configs
         self.metrics_savepaths = metrics_savepaths 
-        self.class_configs_dict = class_configs_dict 
+        self.config_labels_dict = config_labels_dict 
 
         #Note, each metric must contain a corresponding savepath!
 
@@ -110,7 +110,7 @@ class MetricsHandler:
         base_metrics_configs = {key:val for key, val in self.metrics_configs.items() if key in self.base_metrics}
         self.base_computer = BaseScoringWrapper(
             metrics_configs=base_metrics_configs,
-            class_configs_dict=self.class_configs_dict
+            config_labels_dict=self.config_labels_dict
         )
 
 
@@ -125,7 +125,7 @@ class MetricsHandler:
         '''
         return {
             'cross_class_mask':torch.ones_like(tensor, dtype=torch.int32),
-            'per_class_masks': {class_lab:torch.ones_like(tensor,dtype=torch.int32) for class_lab in self.class_configs_dict.keys()}
+            'per_class_masks': {class_lab:torch.ones_like(tensor,dtype=torch.int32) for class_lab in self.config_labels_dict.keys()}
         }
     
     def exec_base_metrics(self, 

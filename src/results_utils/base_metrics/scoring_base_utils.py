@@ -22,10 +22,10 @@ class BaseScoringWrapper:
     def __init__(
             self,
             metrics_configs:dict, 
-            class_configs_dict:dict):
+            config_labels_dict:dict):
 
         self.metrics_configs = metrics_configs  
-        self.class_configs_dict = class_configs_dict 
+        self.config_labels_dict = config_labels_dict 
         self.metric_classes = {}
 
         self.metric_initialiser_map = {
@@ -41,7 +41,7 @@ class BaseScoringWrapper:
                 ignore_empty=self.metrics_configs['Dice']['ignore_empty'],
                 include_background=self.metrics_configs['Dice']['include_background'],
                 include_per_class_scores=self.metrics_configs['Dice']['include_per_class_scores'],
-                class_configs_dict=self.class_configs_dict
+                config_labels_dict=self.config_labels_dict
             )
     
     def init_error_rate(self):
@@ -50,7 +50,7 @@ class BaseScoringWrapper:
             ignore_empty=self.metrics_configs['Error Rate']['ignore_empty'],
             include_background=self.metrics_configs['Error Rate']['include_background'],
             include_per_class_scores=self.metrics_configs['Error Rate']['include_per_class_scores'],
-            class_configs_dict=self.class_configs_dict
+            config_labels_dict=self.config_labels_dict
         ) 
     def __call__(self,  
                 image_masks: dict, 
@@ -90,12 +90,12 @@ class DiceScore:
         ignore_empty: bool,
         include_background: bool,
         include_per_class_scores: bool,
-        class_configs_dict: dict[str, int]
+        config_labels_dict: dict[str, int]
     ):
         self.ignore_empty = ignore_empty
         self.include_background = include_background
         self.include_per_class_scores = include_per_class_scores
-        self.class_configs_dict = class_configs_dict
+        self.config_labels_dict = config_labels_dict
 
     def dice_score(self,
             cross_class_mask: Union[torch.Tensor, MetaTensor], 
@@ -134,7 +134,7 @@ class DiceScore:
         if self.include_per_class_scores:
             per_class_scores = dict() 
             
-            for class_label, class_integer_code in self.class_configs_dict.items():
+            for class_label, class_integer_code in self.config_labels_dict.items():
 
                 if not self.include_background:
                     if class_label.title() == 'Background':

@@ -92,7 +92,7 @@ def init_metric_csvs(
 def init_all_csvs(
     metrics_save_dir: str,
     metric_configs: dict,
-    class_configs_dict: dict
+    config_labels_dict: dict
     ):
     '''
     Function which initialises the 1) metric type subfolders, 2) csvs for saving the metrics. 
@@ -119,7 +119,7 @@ def init_all_csvs(
     1) per_class_scores are provided and
     2) and whether background is included in reporting the metrics (on a cross-class and/or per-class basis).
 
-    class_configs_dict: A dictionary containing the class-label - class-integer code mapping.
+    config_labels_dict: A dictionary containing the class-label - class-integer code mapping.
 
     '''
     
@@ -130,7 +130,7 @@ def init_all_csvs(
         metric_subdir_abspath = os.path.join(metrics_save_dir, metric_type)
         os.makedirs(metric_subdir_abspath, exist_ok=False) #False, folder should not exist! 
         
-        metric_paths_dict = init_metric_csvs(dir_path=metric_subdir_abspath, metric_configs=config, class_configs=class_configs_dict)
+        metric_paths_dict = init_metric_csvs(dir_path=metric_subdir_abspath, metric_configs=config, class_configs=config_labels_dict)
 
         complete_paths_dicts[metric_type] = metric_paths_dict
 

@@ -1,12 +1,11 @@
 '''
 This script is intended for simulating inference from the pseudo-front end, as part of the front-end to back-end setup of an end-to-end interactive seg. application. 
 '''
-from typing import Callable, Sequence, Union, Optional
+from typing import Callable, Union
 import logging
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from monai.data import MetaTensor 
 import torch
 import random
 import numpy as np
@@ -15,6 +14,11 @@ from src.data.interaction_state_construct import HeuristicInteractionState
 from src.output_processing.processor import OutputProcessor
 from src.output_processing.scoring import MetricsHandler 
 from src.data.interaction_memory_cleanup import im_cleanup
+from src.utils_checks.pseudo_ui_check import (
+    check_empty,
+    check_config_labels
+
+)
 
 # logger = logging.getLogger(__name__)
 
@@ -120,7 +124,13 @@ class front_end_simulator:
         
             config_labels_dict: Dictionary mapping class labels and integer codes.
             
-            init_prompt_config (and edit_prompt_config): "use mode" specific prompt generation config dictionaries, 
+            inf_prompt_procedure_type: String denoting the inference prompt generator type: Heuristic is the only 
+            one with support currently.
+
+            inf_init_prompt_config (and inf_edit_prompt_config): "use mode" specific prompt generation config 
+            dictionaries for inference prompt generation.
+
+            metric_init_prompt_config (and metric_edit_prompt_config): Same thing but for the metrics, currently not supported. 
             
             inference run configs: (e.g., modes, number of refinement iterations)
             
@@ -129,6 +139,9 @@ class front_end_simulator:
             interaction memory configs: configs for how the interaction states will be stored to be passed through for
             the infer_app call: contains fields 'keep_init' and 'im_len' (former denotes the treatment of init interaction
             state, while im_len denotes the edit memory)
+
+            NOTE: We currently do not accept deletion of the initialisation but retention of the edit iters, this 
+            is a very atypical configuration.
 
                 im_config = 
                     {'keep_init': bool,
@@ -147,18 +160,32 @@ class front_end_simulator:
         
         self.infer_app = infer_app
         self.args = args
-
-    def check_nonempty(self, tensor: Union[torch.Tensor, MetaTensor]):
+    
+    def init_and_check(self):
         '''
-        Basic function which checks whether an input tensor has a foreground voxel. This is determined according to
-        the class labels configs at class initialisation. 
+        Function is intended for initialisation of all classes used (except for the inference app) in addition to
+        the checks required for the config arguments in the input args at initialisation to prevent catch early-breaking 
+        code.
         '''
-        #We extract the background class val:
-        bg_val = self.args['config_labels_dict']['background']
-        return torch.all(tensor == bg_val)
-            
+        
+        #Running checks on input args.. TODO: Add more to this. 
 
-    def init_seeds(self, seed): #, cuda_deterministic=True):
+        #Running a check on the class configs dictionary.
+        check_config_labels(self.args['configs_labels_dict'])
+
+        #Running a check on....:
+
+
+        #Running initialisation of the classes #TODO: Expand this with any further modifications implemented.
+        
+        #Initialising the prompt generation classes.
+        self.inf_prompt_gen_init()
+        self.metric_prompt_gen_init()
+        
+        #Initialising the output processors and writers.
+        self.post_handlers_init()
+
+    def set_seeds(self, seed): #, cuda_deterministic=True):
         random.seed(seed)
         np.random.seed(seed)
         torch.manual_seed(seed)
@@ -175,24 +202,29 @@ class front_end_simulator:
         #     cudnn.deterministic=False 
         #     cudnn.benchmark=True 
 
-    def output_handlers_init(self):
+    def post_handlers_init(self):
         '''
         This function initialises the class objects which can be used for processing the outputs of calls to the 
         inference app, generating metrics, saving metrics etc.
         '''
         self.metrics_handler = MetricsHandler(
-
+            dice_termination_threshold=self.args['dice_termination_thresh'],
+            metrics_configs=self.args['metrics_class_configs'],
+            metrics_savepaths=self.args['metrics_savepaths'],
+            config_labels_dict=self.args['config_labels_dict']
         )
 
         self.output_processor = OutputProcessor(
-
-        ) 
-
+            base_save_dir= self.args['base_write_dir'],
+            config_labels_dict=self.args['config_labels_dict'],
+            is_seg_tmp=self.args['is_seg_tmp'],
+            save_prompts=self.args['save_prompts']
+        )
     def inf_prompt_gen_init(self):
         '''
         This function initialises the class objects which can generate the interaction states for use in inference.
         '''
-        if self.args['prompt_procedure_type'].title() == 'Heuristic':
+        if self.args['inf_prompt_procedure_type'].title() == 'Heuristic':
             # self.autoseg_state_generator = None  
             # The Autosegmentation state does not require any interaction state generators since they contain no 
             # interaction. All information for the autosegmentation state will be provided manually.
@@ -200,13 +232,13 @@ class front_end_simulator:
             self.inf_init_generator = HeuristicInteractionState(
                 sim_device=self.args['sim_device'],
                 use_mem=False,
-                prompt_configs=self.args['init_prompt_config'],
+                prompt_configs=self.args['inf_init_prompt_config'],
                 config_labels_dict=self.args['config_labels_dict']
             )
             self.inf_edit_generator = HeuristicInteractionState(
                 sim_device=self.args['sim_device'],
                 use_mem=self.args['use_mem_edit_generator'],
-                prompt_configs=self.args['edit_prompt_config'],
+                prompt_configs=self.args['inf_edit_prompt_config'],
                 config_labels_dict=self.args['config_labels_dict']
             )
         else:
@@ -218,11 +250,14 @@ class front_end_simulator:
         '''
         pass 
 
-    def metric_im_handler(self, inf_im, metric_im):
+    def metric_im_handler(self, inf_im:dict, metric_im:Union[dict, None]):
         '''
         Function intended for interaction memory handling, but for instances where the generated data is used for metric
         computation. Uses the inference interaction memory to access new interaction info from the input prompts.
         Uses this to generate metric interaction memory/update metric interaction memory.
+
+        inf_im must be a dict type, cannot be a NoneType.
+        metric_im can be both as at initialisation it may not be initialised.
         '''
         #Does absolutely nothing for now.
         return metric_im
@@ -309,9 +344,11 @@ class front_end_simulator:
         inf_req: Dict - A dictionary containing the information provided for the input inference request.
         output_data: Dict - A dictionary containing the pre-processed output dictionary from the inference app call.
         
-        inf_im: Dict - A dictionary containing the interaction memory for the input prompts.
+        inf_im: Dict - A dictionary containing the interaction memory for the input prompts. Cannot be a NoneType as even
+        automatic initialisation has an IM.
+
         metric_im: Dict - A dictionary containing the interaction memory info the metrics. (e.g. parametrisations)
-        
+        (or a NoneType if initialisation!)
         NOTE: Both are provided in the circumstance where any metrics would require memory which could not be
         provided otherwise.
         
@@ -331,7 +368,7 @@ class front_end_simulator:
         
         #Then we call on the output processor, which checks that the app call provided a valid output (within a prescribed set of rules)
         # and reformats the data into that expected by future calls on the interaction state constructor. 
-        processed_output_data = self.output_processor(input_request=inf_req, output_dict=output_data)
+        processed_output_data = self.output_processor(input_request=inf_req, output_dict=output_data, tmp_dir=self.tmp_dir_path)
         
         #Then we update the tracked metrics.
         updated_tracked_metrics, terminate_early = self.metrics_handler.update_metrics(
@@ -382,7 +419,7 @@ class front_end_simulator:
         
             edit_num - The editing iteration number (1, ...) or NONE (for initialisation)
         
-        im - (Optional) The currently existing interaction memory (for edit) or NoneType (for initialisations) 
+        im - (Optional) The currently existing inference interaction memory (for edit) or NoneType (for initialisations) 
         
         prev_output_data - (Optional) The post-processed output dictionary from the prior iteration of inference (for editing modes). 
         or NoneType. 
@@ -583,25 +620,27 @@ class front_end_simulator:
         
         tmp_dir_path - The path name for the current temporary directory initialised for the current data instance.
         '''
-        #Checking if the foreground for this class is even non-empty... we will currently not be supporting this.
-        if self.check_nonempty(data_instance['label']['metatensor']):
-            raise Exception('The ground truth for the foreground cannot be empty, this functionality is not supported')
+        #Checking if the foreground for this instance is even non-empty... we will currently not be supporting this.
+        if check_empty(data_instance['label']['metatensor'], self.args['config_labels_dict']['background']):
+            raise Exception(f'The ground truth for the foreground cannot be empty, this functionality is not supported. Raised exception for {data_instance['image']['path']}')
         
-        #Calling on the init_seeds function to initialise the seeds for each data instance (this ensures early
-        #termination would not cause deterministic runs to error across different models.)
-        self.init_seeds(seed=self.args['random_seed'])
+        #Calling on the set_seeds function to re-initialise the seeds for each data instance (this ensures early
+        #termination would not cause deterministic runs to vary across different models.)
+        self.set_seeds(seed=self.args['random_seed'])
         
         #Assigning the tmp_dir_path attribute for each data instance. 
         self.tmp_dir_path = tmp_dir_path
 
-        #Initialising a dictionary for tracking the metrics generated.
+        #Initialising a dictionary for tracking the metrics generated, not required for the im dictionaries as this
+        #will be performed within the iterative loop.
         tracked_metrics = {}
 
+        #Executing the iterative loop.
         tracked_metrics, terminated_early = self.iterative_loop(
             data_instance=data_instance,
             tracked_metrics=tracked_metrics)
         
-        #Saving the metrics....
+        #Saving the final set of tracked metrics....
 
         self.metrics_handler.save_metrics(
             patient_name=os.path.split(data_instance['image']['path'])[1].split('.')[0],
@@ -610,6 +649,7 @@ class front_end_simulator:
         )
 
         #Nothing is returned here, everything except final tmp_dir cleanup needs to be handled during the loop!
+        #Final tmp_dir cleanup will occur in the script which calls this function.
 
 
 

@@ -17,30 +17,34 @@ logger = logging.getLogger(__name__)
 '''
     This class OR module needs to be able to process the app output in the following capacities:
     Needs to modify the output data dictionary such that it matches expected structure of the interaction state constructors
-    Needs to implement the writers, for writing the pred, and logits, then adding the paths for each of these correspondingly to 
-    the corresponding written files in the expected structure of the interaction state constructor. 
+    Needs to implement the writers, for writing the pred, and logits, then adding the paths to the output data for each
+    of these corresponding written files, in the expected structure of the interaction state constructor. 
 '''
 
 # NOTE: We use ITK for image saving, hence we convert out RAS orientated tensors into LPS orientation for ITK.
 
 class OutputProcessor:
     '''
-    Class which initialises the output processing class.
+    Class which initialises the output processing class. Takes as initialisation args:
+
+    base_save_dir: Str - The abspath for the base directory in which all of the results and segmentations will be saved
+    config_labels_dict: Dict - The class-integer code mapping.
+    is_seg_tmp: Bool - A boolean denoting whether the predicted segmentations should be saved as temporary files or permanent files.
+    save_prompts: Bool - A boolean denoting whether the input prompts should be saved permanently. 
+
     '''
     def __init__(
       self,
       base_save_dir:str,
-      temp_save_dir:str,
-      config_labels:dict[str,int],
-      perm_seg:bool = True,
+      config_labels_dict:dict[str,int],
+      is_seg_tmp:bool = False,
       save_prompts:bool = False, 
     ):
 
         self.base_save_dir = base_save_dir 
-        self.temp_save_dir = temp_save_dir
-        self.class_configs = config_labels 
-        self.perm_seg = perm_seg
-        self.save_prompt = save_prompts
+        self.class_configs = config_labels_dict 
+        self.is_seg_tmp = is_seg_tmp
+        self.save_prompts = save_prompts
 
         #List of paths in the output dictionary that must be on cpu. Each item is in tuple format, index=depth of dict.
         self.check_cpu_info = [('logits',), ('logits', 'meta_dict', 'affine'), ('pred',), ('pred','meta_dict', 'affine')] 
@@ -82,17 +86,18 @@ class OutputProcessor:
         # Else: use a namedtemporaryfile which does not close. NOTE:Make these modifications in the writer?
         #IT SHOULD ALSO TAKE THE TEMPFILE DIR PROVIDED.
 
-        # if self.perm_seg:
-        #     raise NotImplementedError('Implement the writer such that it takes the config for the namedtempfile correctly')
-        #     #TODO: Populate the writer class with the correct initialisation.
-        #     self.perm_imwriter = Writer(self.temp_save_dir??????????????)
-        # else:
+        # if self.is_seg_tmp:
         #     raise NotImplementedError('Implement the writer such that it takes the appropriate config for the tempfiles which do not delete, etc. etc.')
-        #     self.temp_imwriter = Writer(self.temp_save_dir) 
+        #     self.temp_imwriter = Writer()  
+        # For the temp seg we need to save permanently...?
 
-
-        #if self.save_prompts:
-            # raise NotImplementedError('No dummy class provided for saving prompts')
+        # else:
+        #      raise NotImplementedError('Implement the writer such that it takes the config for the namedtempfile correctly')
+        #     #TODO: Populate the writer class with the correct initialisation.
+        #     self.perm_imwriter = Writer()
+        # For the perm seg we need to delete the temp file once we move it? I think shutil.move does this.
+        if self.save_prompts:
+            raise NotImplementedError('No class provided for saving prompts')
 
         #Dict of info regarding the dict-paths for each filepath being placed after the segmentations have been saved.
         self.reformat_dict_info = {
@@ -240,7 +245,12 @@ class OutputProcessor:
                 raise KeyError('Reformatter info dictionary contained an unsupported key')
         return output_data
 
-    def write_maps(self, input_req:dict , output_dict: dict, inf_call_config: dict):
+    def write_maps(
+            self, 
+            input_req:dict , 
+            output_dict: dict, 
+            inf_call_config: dict,
+            tmp_dir: str):
         '''
         This function is intended for writing the maps (seg and logits) from the output data to permanent or temp files.
         Also provides the paths to the corresponding files as outputs.
@@ -255,28 +265,29 @@ class OutputProcessor:
             inf_call_config: Dict - A dictionary containing two subfields:
                 'mode': str - The mode that the inference call was be made for (Automatic Init, Interactive Init, Interactive Edit)
                 'edit num': Union[int, None] - The current edit's iteration number or None for initialisations.
-        
+            
+            tmp_dir: Str - A string denoting the path to the temporary directory. 
         '''
 
         #First we write the discretised prediction maps
-        if self.perm_seg:
+        if not self.is_seg_tmp:
         
             img_filename = os.path.split(input_req['image']['path'])[1]
-            infer_config_dir = f'{inf_call_config["mode"]} Iter {inf_call_config["edit_num"]}' if inf_call_config['mode'].title() != 'Interactive Edit' else inf_call_config['mode'] 
+            infer_config_dir = f'{inf_call_config["mode"]} Iter {inf_call_config["edit_num"]}' if inf_call_config['mode'].title() != 'Interactive Edit' else inf_call_config['mode'].title() 
             pred_path = os.path.join(self.base_save_dir, infer_config_dir, img_filename) 
 
             #Call the writer, which should be configured to have write_to_file = True. Must output the tempfile path
-            tmp_path = self.perm_imwriter(output_dict)
+            tmp_path = self.perm_imwriter(output_dict, tmp_dir)
             shutil.move(tmp_path, pred_path)
         else:
-            pred_path = self.temp_imwriter(output_dict)
+            pred_path = self.temp_imwriter(output_dict, tmp_dir)
         
         #Now we write the logits maps to a set of tempfiles. 
-        logits_paths = self.temp_imwriter(output_dict)
+        logits_paths = self.temp_imwriter(output_dict, tmp_dir)
 
         return pred_path, logits_paths
     
-    def __call__(self, input_request, output_dict, infer_call_config):
+    def __call__(self, input_request, output_dict, infer_call_config, tmp_dir):
         '''
         Function wraps together the post-processing steps required for checking and writing the segmentations and logits maps.
         and the output dictionary.
@@ -294,7 +305,7 @@ class OutputProcessor:
         except:
             Exception('Checking the output data failed due to the aforementioned error')
         try:
-            pred_path, logits_paths = self.write_maps(input_req=input_request, output_dict=output_dict, inf_call_config=infer_call_config)
+            pred_path, logits_paths = self.write_maps(input_req=input_request, output_dict=output_dict, inf_call_config=infer_call_config, tmp_dir=tmp_dir)
         except:
             Exception('Writing the segmentation maps failed due to the aforementioned error')
         try:
