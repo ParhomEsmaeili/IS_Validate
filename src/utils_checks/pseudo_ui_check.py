@@ -9,14 +9,17 @@ def check_empty(tensor: Union[torch.Tensor, MetaTensor], bg_val):
     Basic function which checks whether an input tensor has any foreground voxel. This is determined according to
     the bg val provided.. 
     '''
+    if not isinstance(tensor, torch.Tensor) and not isinstance(tensor, MetaTensor):
+        raise TypeError('The input tensor can only be a torch tensor or a Monai metatensor')
+    
     return torch.all(tensor == bg_val)
 
 def check_config_labels(config_labels_dict: dict):
     '''
     Basic function which implements some checks on the config labels dictionary.
     '''
-    if not isinstance(config_labels_dict, dict):
-            raise TypeError('Config label-code mapping must be provided as a dict.')
+    if not isinstance(config_labels_dict, dict) or not config_labels_dict:
+        raise TypeError('Config label-code mapping must be provided as a non-empty dict.')
         
     def check_ints(config_labels: dict):
         if not all(isinstance(k, str) for k in config_labels.keys()):
@@ -39,3 +42,5 @@ def check_config_labels(config_labels_dict: dict):
     check_ints(config_labels_dict)
     check_bg(config_labels_dict)
     check_fg_empty(config_labels_dict)
+
+

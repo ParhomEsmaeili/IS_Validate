@@ -3,6 +3,7 @@ This script is intended for simulating inference from the pseudo-front end, as p
 '''
 from typing import Callable, Union
 import logging
+import warnings
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -120,7 +121,8 @@ class front_end_simulator:
         
         args: Dictionary containing the information required for performing the experiment, e.g.: 
 
-            random_seed: The int denoting the seed being used for this instance of validation. 
+            random_seed: The optional int denoting the seed being used for this instance of validation. Otherwise, it is
+            None and there is no determinism.  
         
             config_labels_dict: Dictionary mapping class labels and integer codes.
             
@@ -160,24 +162,32 @@ class front_end_simulator:
         
         self.infer_app = infer_app
         self.args = args
+
+
+        self.check_args()
+        self.init_classes()
     
-    def init_and_check(self):
+    def check_args(self):
         '''
-        Function is intended for initialisation of all classes used (except for the inference app) in addition to
-        the checks required for the config arguments in the input args at initialisation to prevent catch early-breaking 
-        code.
+        Function is intended for all the checks required for the config arguments in the input args at initialisation to 
+        catch early-breaking conditions in code.
         '''
         
-        #Running checks on input args.. TODO: Add more to this. 
+        #Running checks on input args..
 
         #Running a check on the class configs dictionary.
         check_config_labels(self.args['configs_labels_dict'])
 
-        #Running a check on....:
+        #Running a check on random seed is not required, any non-NoneType TypeErrors will be caught by init_seeds.
 
+        #TODO: Add more to this. 
+    
+    def init_classes(self):
+        '''
+        Function is for initialisation of all classes used in other methods (except for the inference app). 
+        '''
+        #TODO: Expand this with any further modifications implemented.
 
-        #Running initialisation of the classes #TODO: Expand this with any further modifications implemented.
-        
         #Initialising the prompt generation classes.
         self.inf_prompt_gen_init()
         self.metric_prompt_gen_init()
@@ -185,13 +195,21 @@ class front_end_simulator:
         #Initialising the output processors and writers.
         self.post_handlers_init()
 
-    def set_seeds(self, seed): #, cuda_deterministic=True):
-        random.seed(seed)
-        np.random.seed(seed)
-        torch.manual_seed(seed)
-        torch.cuda.manual_seed(seed)
-        torch.cuda.manual_seed_all(seed)
+    def set_seeds(self, seed: Union[int, None]): #, cuda_deterministic=True):
+        if seed is None:
+            print('We do not have a fixed seed!')
         
+        else:
+            warnings.warn('You have set a deterministic seed which will be re-initialised for each data instance, please check whether this is intended.')
+            if isinstance(seed, int):
+                random.seed(seed)
+                np.random.seed(seed)
+                torch.manual_seed(seed)
+                torch.cuda.manual_seed(seed)
+                torch.cuda.manual_seed_all(seed)
+            else:
+                raise TypeError('Seed must be an int if it is set for determinism.')
+                    
         #TODO: Once containerisation is implemented, we can re-implement this functionality for instances where a DL model may be used for
         # prompt generation
 
@@ -242,7 +260,7 @@ class front_end_simulator:
                 config_labels_dict=self.args['config_labels_dict']
             )
         else:
-            raise ValueError('The selected prompt generation algorithm is not supported')
+            raise ValueError('The selected prompt generation algorithm-type is not supported')
     
     def metric_prompt_gen_init(self):
         '''
@@ -259,9 +277,17 @@ class front_end_simulator:
         inf_im must be a dict type, cannot be a NoneType.
         metric_im can be both as at initialisation it may not be initialised.
         '''
+        if not isinstance(inf_im, dict) or not inf_im:
+            raise Exception('The inference im must be a non-empty dict')
+        if not isinstance(metric_im, dict) and metric_im is not None:
+            raise TypeError('The metric im must either be a dictionary or a NoneType')
+        if isinstance(metric_im, dict) and not metric_im:
+            raise ValueError('If the metric im is a dict, it cannot be empty!')
+
         #Does absolutely nothing for now.
+
         return metric_im
-    def input_im_handler(self,
+    def inf_im_handler(self,
                 data_instance: dict, 
                 infer_config: dict,
                 im:Union[dict, None],
@@ -296,7 +322,25 @@ class front_end_simulator:
         Returns:
         The updated interaction memory, with any post-processing implemented for cleanup (if activated)
         '''
+        if not isinstance(data_instance, dict) or not data_instance:
+            raise TypeError('The data instance must be a non-empty dictionary, should have been flagged earlier.')
         
+        if not isinstance(infer_config, dict) or not infer_config:
+            raise TypeError('The inference call config must be a dictionary which is non-empty.')
+        
+        if not isinstance(im, dict) and im is not None:
+            raise TypeError('The inference interaction memory should be a dict or a NoneType')
+        
+        if isinstance(im, dict) and not im:
+            raise Exception('If the inference interaction memory exists, then it must not be empty')
+
+        if not isinstance(prev_output_data, dict) and prev_output_data is not None:
+            raise TypeError('The prev output data should be a dict or a NoneType')
+        
+        if isinstance(prev_output_data, dict) and not prev_output_data:
+            raise Exception('If the prev output data is a dict, then it must not be empty')
+
+    
         if infer_config['mode'].title() == 'Automatic Init':
             im = {'Automatic Init': None}
 
@@ -338,6 +382,8 @@ class front_end_simulator:
         Makes use of the output processor class. This will tie together several functionalities such as 
         reformatting the output data dictionary, writing the segmentations, computing the metrics etc.
         
+        Inputs: 
+
         data_instance: Dict - A dictionary containing info related to the image, gt for the current data instance we 
         are evaluating on.
 
@@ -356,12 +402,41 @@ class front_end_simulator:
             'mode': str - The mode that the inference call was be made for (Automatic Init, Interactive Init, Interactive Edit)
             'edit num': Union[int, None] - The current edit's iteration number or None for initialisations.
         
-        metrics_dict: Dict - A dictionary containing the tracked metrics dictionary throughout the iterative refinement process.
+        tracked_metrics: Dict - A dictionary containing the tracked metrics dictionary throughout the iterative refinement process.
+        
+        Returns: 
+
+        processed_output_data : Dict - A dict containing the output of the inference call processed for future calls on the
+        interaction state constructor class.
+
+        updated_im_metric: Dict or None - An optional dict containing the tracked im for the metrics.
+
+        updated_tracked_metrics: Dict - An updated dictionary containing the tracked metrics across the inference calls.
+
+        terminate_early: Bool - A bool which is returned during the updating of the tracked metrics, which determines whether
+        or not to terminate the refinement process early with respect to a termination criterion (currently: Dice = 1.0).
         '''
         
-        #Order: 
-        #Compute metrics, if terminate then return terminate
-        #Call the output processor (which writes and reformats the output data)
+        if not isinstance(data_instance, dict) or not data_instance:
+            raise Exception('The data instance must be a non-empty dictionary, should have been flagged earlier.')
+
+        if not isinstance(inf_req, dict) or not inf_req:
+            raise Exception('The inference request must be a dictionary which is non-empty.')
+        
+        if not isinstance(inf_im, dict) or not inf_im:
+            raise Exception('The inference interaction memory must be a dictionary which is non-empty.')
+        
+        if not isinstance(metric_im, dict) and metric_im is not None:
+            raise TypeError('The metric interaction memory should be a dict or a NoneType')
+        
+        if isinstance(metric_im, dict) and not metric_im:
+            raise Exception('If the metric interaction memory exists, then it must not be empty')
+
+        if not isinstance(infer_call_config, dict) or not infer_call_config:
+            raise Exception('The inference call config must be a dictionary which is non-empty.')
+        
+        if not isinstance(tracked_metrics, dict):
+            raise Exception('The tracked metrics must be a dictionary, even if empty for initialisation.')
         
         #First we call on the metric_im handler for generating any parameters required for metrics.
         updated_metric_im = self.metric_im_handler(inf_im=inf_im, metric_im=metric_im)
@@ -427,14 +502,32 @@ class front_end_simulator:
         Returns:
 
         request - The input request dictionary for input to the app inference call.
-        im - The updated interaction memory dict for tracking.
+        im - The updated inference interaction memory dict for tracking.
         '''
+
+        if not isinstance(data_instance, dict) or not data_instance:
+            raise Exception('Data_instance should be a non-empty dictionary.')
+        if not isinstance(infer_call_config, dict) or not infer_call_config:
+            raise Exception('The infer call config should be a non-empty dictionary.')
+        if not isinstance(im, dict) and im is not None:
+            raise TypeError('The im should either exist as a dictionary for edit request generation, or be a NoneType for init.')
+        if isinstance(im, dict) and not im:
+            raise ValueError('The im, if a dict, must be non-empty.')
+        if not isinstance(prev_output_data, dict) and prev_output_data is not None:
+            raise TypeError('The prev_output_data should either exist as a dictionary for edit request generation, or be a NoneType for init.')
+        if isinstance(prev_output_data, dict) and not prev_output_data:
+            raise ValueError('The prev_output_data, if a dict, should be non-empty.')
+
+
 
         if infer_call_config['mode'].title() == 'Automatic Init':
             if prev_output_data is not None: #We choose an explicit check of Nonetype for the if statement
-                raise ValueError('The previous output should not exist for initialisation')
+                raise TypeError('The previous output should not exist for initialisation')
             
-            im = self.input_im_handler(
+            if infer_call_config['edit_num'] is not None:
+                raise TypeError('The edit num in the infer call config dict should not exist for initialisation!')
+            
+            im = self.inf_im_handler(
                 data_instance=data_instance, 
                 infer_config=infer_call_config, 
                 im=None, 
@@ -451,9 +544,11 @@ class front_end_simulator:
 
         elif infer_call_config['mode'].title() == 'Interactive Init':
             if prev_output_data is not None: #We choose an explicit check of Nonetype for the if statement
-                raise ValueError('The previous output should not exist for initialisation')
+                raise TypeError('The previous output should not exist for initialisation')
+            if infer_call_config['edit_num'] is not None:
+                raise TypeError('The edit num in the infer call config dict should not exist for initialisation!')
             
-            im = self.input_im_handler(
+            im = self.inf_im_handler(
                 data_instance=data_instance, 
                 infer_config=infer_call_config, 
                 im=None, 
@@ -471,8 +566,10 @@ class front_end_simulator:
         elif infer_call_config['mode'].title() == 'Interactive Edit':
             if prev_output_data is None:
                 raise ValueError('There must be a dictionary containing the outputs of the prior inference call!')
+            if infer_call_config['edit_num'] is None and not isinstance(infer_call_config['edit_num'], int):
+                raise TypeError('The edit num in the infer call config dict should be an int!')
             
-            im = self.input_im_handler(
+            im = self.inf_im_handler(
                 data_instance=data_instance,
                 infer_config=infer_call_config,
                 im=im,
@@ -510,6 +607,14 @@ class front_end_simulator:
         iterative refinement process.
         ''' 
         
+        if not isinstance(data_instance, dict):
+            raise TypeError('Expected data instance to be provided as a dictionary.')
+        if not isinstance(tracked_metrics, dict):
+            raise TypeError('The tracked metrics must be initialised as a dictionary')
+        
+        if tracked_metrics or not data_instance:
+            raise Exception('Either the tracked metrics were non-empty, or the data_instance was empty.')
+
         infer_run_configs = self.args['infer_run_configs']
         
         if not isinstance(infer_run_configs, dict):
@@ -620,6 +725,12 @@ class front_end_simulator:
         
         tmp_dir_path - The path name for the current temporary directory initialised for the current data instance.
         '''
+
+        if not isinstance(data_instance, dict) or not data_instance:
+            raise Exception('The data instance must be a non-empty dictionary.')
+        if not isinstance(tmp_dir_path, str) or not tmp_dir_path:
+            raise Exception('The tmp_dir path must be a string and non-empty.')
+
         #Checking if the foreground for this instance is even non-empty... we will currently not be supporting this.
         if check_empty(data_instance['label']['metatensor'], self.args['config_labels_dict']['background']):
             raise Exception(f'The ground truth for the foreground cannot be empty, this functionality is not supported. Raised exception for {data_instance['image']['path']}')
@@ -628,7 +739,7 @@ class front_end_simulator:
         #termination would not cause deterministic runs to vary across different models.)
         self.set_seeds(seed=self.args['random_seed'])
         
-        #Assigning the tmp_dir_path attribute for each data instance. 
+        #Re-assigning the tmp_dir_path attribute for each data instance. 
         self.tmp_dir_path = tmp_dir_path
 
         #Initialising a dictionary for tracking the metrics generated, not required for the im dictionaries as this
