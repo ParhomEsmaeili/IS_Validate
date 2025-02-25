@@ -1,5 +1,5 @@
 from monai.transforms import Compose, LoadImaged, Orientationd, EnsureChannelFirstd, EnsureTyped
-from monai.data import Dataset, MetaTensor 
+from monai.data import Dataset, MetaTensor, DataLoader 
 import json 
 import torch  
 import numpy as np
@@ -7,13 +7,96 @@ from typing import Union, Optional
 import os
 import copy 
 import logging
+import pathlib
 import warnings 
 
 # logger = logging.getLogger(__name__)
 
-def dataset_generator(data_dict):
+def init_data(codebase_dir:str, dataset_name:str, exp_data_configs:dict, file_ext):
+    #Function intended for reading data from the json, formulating it into the structure for the dataset 
+    # constructor and then instantiating the dataset object.
+
+    #Setting the abspath to the datasets dir.
+    dataset_dir = os.path.join(codebase_dir, 'datasets', dataset_name)
+
+    #Extracting the dataset info dict (which contains the split between train and hold-out test data, and hopefully 
+    # config labels info).
+    
+    try:
+        dataset_json_path = os.path.join(dataset_dir, 'dataset.json')
+        #Reading the json file. 
+        with open(dataset_json_path, 'rb') as f:
+            ds_configs = json.load(f)
+    except:
+        dataset_txt_path = os.path.join(dataset_dir, 'dataset.txt')
+        #Reading the txt file. 
+        with open(dataset_txt_path, 'rb') as f:
+            ds_configs = json.load(f)
+
+    #Extracting the config labels dictionary.
+    try:
+        config_labels_dict = ds_configs['labels']  #Try to read the config labels dictionary from dataset info file.
+    except:
+        #Try to read it from the config labels file. 
+        try: 
+            with open(os.path.join(dataset_dir, 'labels_config.json'), 'rb') as f:
+                config_labels_info = json.load(f)
+                config_labels_dict = config_labels_info['labels']
+        except:
+            with open(os.path.join(dataset_dir, 'labels_config.txt'), 'rb') as f:
+                config_labels_info = json.load(f)
+                config_labels_dict = config_labels_info['labels']
+ 
+    if not isinstance(config_labels_dict, dict):
+        raise Exception('Config labels must be in a dictionary mapping format.')
+
+
+    if exp_data_configs['test_mode'].title() == 'Test':
+        #Reading the test list.
+        datalist = ds_configs['test']
+    elif exp_data_configs['test_mode'].title() == 'Val':
+        #Reading the train_val_split file.
+        try:
+            with open(os.path.join(dataset_dir, 'train_val_split.json'), 'rb') as f:
+                splits = json.load(f)
+        except:
+            with open(os.path.join(dataset_dir, 'train_val_split.txt'), 'rb') as f:
+                splits = json.load(f)
+            
+        #Extracting the fold.
+        datalist = splits[f'fold_{exp_data_configs["fold"]}']
+    else:
+        raise Exception('Test mode is not valid, should only be test or val.')
+
+    #Modifying datalist to include abspath and file extensions
+
+    #Extracting the os name.
+    os_name = os.name 
+
+    for data_instance in datalist:
+
+        if os_name is 'nt':
+            #Windows 
+            #Expects that the relative path provided is in windows format.
+            im_path = os.path.join(dataset_dir, str(pathlib.PureWindowsPath(data_instance['image'])))
+            lb_path = os.path.join(dataset_dir, str(pathlib.PureWindowsPath(data_instance['label'])))
+        elif os_name is 'posix':
+            #Posixtype 
+            #Expects that the relative path provided is in posix format.
+            im_path = os.path.join(dataset_dir, str(pathlib.PurePosixPath(data_instance['image'])))
+            lb_path = os.path.join(dataset_dir, str(pathlib.PurePosixPath(data_instance['label'])))
+        else:
+            raise Exception('OS not supported.')
+
+        data_instance['image'] = im_path
+        data_instance['label'] = lb_path
+    
+    return config_labels_dict, dataloader_generator(datalist=datalist)
+
+
+def dataloader_generator(datalist):
     '''
-    This function handles the construction of a dataset object for iterating through.
+    This function handles the construction of a dataset object for iterating through, and then returns the dataloader.
     '''
     load_transforms = [
         LoadImaged(keys=['image', 'label'], reader="ITKReader", image_only=False),
@@ -21,9 +104,35 @@ def dataset_generator(data_dict):
         Orientationd(keys=['image', 'label'], axcodes='RAS'),
         EnsureTyped(keys=['image', 'label'], dtype=[torch.float32, torch.int32]),
     ]
-    return Dataset(data_dict, load_transforms)
+    dataset = Dataset(datalist, load_transforms)
+    return DataLoader(dataset=dataset, batch_size=1, num_workers=1)
 
-def data_instance_generator(data_instance:dict):
+def iterate_dataloader_check(data_instance):
+    
+    if not isinstance(data_instance, dict):
+        raise TypeError('Data loader requires dictionary based transforms to be passed through the dataloader')
+            
+
+    if isinstance(data_instance['image'], MetaTensor) and isinstance(data_instance['label'], MetaTensor):
+        try:
+            im_meta_dict = data_instance['image_meta_dict']
+            label_meta_dict = data_instance['label_meta_dict']
+        except:
+            raise KeyError('The loaded data instance does not contain a meta dictionary')
+
+        #We assert that the data must be single modality for our current application!
+        if int(im_meta_dict['pixdim[4]'][0]) > 1:
+            raise ValueError('This application only supports single modality implementations.')
+        if int(label_meta_dict['pixdim[4]'][0]) > 1:
+            raise ValueError('This application only supports single modality implementations')
+    else:
+        raise TypeError("The loaded image and label data must be a MetaTensor")
+
+    
+
+
+
+def data_instance_reformat(data_instance:dict):
      
     '''
     This function reformats the data instance from the output of the dataset generator's load transforms into the 
