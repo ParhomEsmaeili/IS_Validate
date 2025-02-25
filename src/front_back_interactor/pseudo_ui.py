@@ -23,7 +23,7 @@ from src.utils_checks.pseudo_ui_check import (
 
 # logger = logging.getLogger(__name__)
 
-class front_end_simulator:
+class FrontEndSimulator:
     '''
     This class serves as an "interface" for the pseudo-ui with operations such as: 
     
@@ -157,9 +157,18 @@ class front_end_simulator:
 
         '''
         
-        if not callable(self.infer_app):
-            raise Exception('The inference app must be callable: an initialised class object with a __call__ function for performing inference fully end-to-end.')
-        
+        if not callable(infer_app):
+            raise Exception('The inference app must be callable class.')
+        else:
+            #Check if it has a call attribute!
+            try:
+                callback = getattr(infer_app, "__call__")
+            except:
+                raise Exception('The inference app did not have a function __call__')
+            
+            if not callable(callback):
+                raise Exception('The initialised inference app object had a __call__ attribute which was not a callable function') 
+            
         self.infer_app = infer_app
         self.args = args
 
@@ -653,7 +662,7 @@ class front_end_simulator:
             #We put a placeholder for handling the termination condition.
             if terminated_early:
                 raise Exception('We do not yet have any handling for early convergence')
-                print(f'Reached convergence already, terminating at {infer_run_configs['init'].title()}!')
+                print(f'Reached convergence already, terminating at {infer_run_configs["init"].title()}!')
                 return tracked_metrics, terminated_early 
         else:
             raise KeyError('A supported initialisation mode was not selected')  
@@ -733,7 +742,7 @@ class front_end_simulator:
 
         #Checking if the foreground for this instance is even non-empty... we will currently not be supporting this.
         if check_empty(data_instance['label']['metatensor'], self.args['config_labels_dict']['background']):
-            raise Exception(f'The ground truth for the foreground cannot be empty, this functionality is not supported. Raised exception for {data_instance['image']['path']}')
+            raise Exception(f'The ground truth for the foreground cannot be empty, this functionality is not supported. Raised exception for {data_instance["image"]["path"]}')
         
         #Calling on the set_seeds function to re-initialise the seeds for each data instance (this ensures early
         #termination would not cause deterministic runs to vary across different models.)
@@ -765,5 +774,4 @@ class front_end_simulator:
 
 
 if __name__ == '__main__':
-    dummy = front_end_simulator()
     print('stop')

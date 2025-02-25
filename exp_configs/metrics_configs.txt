@@ -1,0 +1,7 @@
+{
+'prototype':{
+'dummy1':'dummy'
+},
+'dummy':{
+}
+}

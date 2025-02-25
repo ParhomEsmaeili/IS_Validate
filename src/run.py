@@ -3,67 +3,95 @@ import json
 import logging 
 import sys 
 import os 
-import datetime 
-sys.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
-
+import datetime
+import tempfile
+codebase_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__))) 
+sys.path.append(codebase_dir)
+from src.front_back_interactor.pseudo_ui import FrontEndSimulator 
+from src.utils.logging import experiment_args_logger
 
 def set_parse():
     # %% set up parser
     parser = argparse.ArgumentParser()
     
-    parser.add_argument('--rel_dataset_path', type=str, default='Task10_colon')
+    parser.add_argument('--dataset_name', type=str, default='Task10_colon')
+    parser.add_argument('--is_seg_tmp', action='store_false')
+    parser.add_argument('--metric_conf_filename', type=str, default='')
+    parser.add_argument('--prompt_conf_filename', type=str, default='')
     args = parser.parse_args()
     return args
 
 
 def main():
-    pass 
+
+    args = set_parse() 
+    args = vars(args)
 
 
 
+    #Initialise the results folders if it doesn't exist, saves it according to the dataset name?
+    results_dir = os.path.join(codebase_dir, 'results')
+    os.makedirs(results_dir, exist_ok=True)
+    
+    #Initialise the folder for the dataset at hand. 
+    result_dataset_subdir = os.path.join(results_dir, args['dataset_name'])
+    os.makedirs(result_dataset_subdir, exist_ok=True) 
 
+    #Creating a folder for the experiment to store results.
+    exp_datetime = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    exp_results_dir = os.path.join(result_dataset_subdir, exp_datetime)
 
-# parser = argparse.ArgumentParser()
-# parser.add_argument('-tdp', '--test_data_path', type=str, help='The directory from the parent folder for the repository which contains the testing data')
-# parser.add_argument('-ckpt', '--checkpoint_path', type=str)
-# parser.add_argument('--output_dir', type=str, default='./')
-# parser.add_argument('--task_name', type=str, default='test_amos')
-# parser.add_argument('--skip_existing_pred', action='store_true', default=False)
-# parser.add_argument('--save_image_and_gt', action='store_true', default=False)
-# parser.add_argument('--sliding_window', action='store_true', default=False)
+    #Creating the experiment results dir:
+    os.makedirs(exp_results_dir, exist_ok=False) #Should not already exist.
 
-# # parser.add_argument('--image_size', type=int, default=256)
-# parser.add_argument('--crop_size', type=int, default=128)
-# parser.add_argument('--device', type=str, default='cuda')
-# parser.add_argument('-nc', '--num_clicks', type=int, default=5)
-# parser.add_argument('-pm', '--point_method', type=str, default='default')
-# parser.add_argument('-dt', '--data_type', type=str, default='Ts')
+    #Creating the subdirectories for the metrics
+    metrics_dir = os.path.join(exp_results_dir, 'metrics')
+    os.makedirs(metrics_dir, exist_ok=False)
 
-# # parser.add_argument('--threshold', type=int, default=0)
-# parser.add_argument('--dim', type=int, default=3)
-# parser.add_argument('--split_idx', type=int, default=0)
-# parser.add_argument('--split_num', type=int, default=1)
-# # parser.add_argument('--ft2d', action='store_true', default=False)
-# parser.add_argument('--seed', type=int, default=2023)
+    #Based on whether the segmentation is being saved permanently, create the corresponding classes. 
+    if not args['is_seg_tmp']:
 
-# args = parser.parse_args()
+        #Add a function for creating the directories for savin g the metrics according to the inference run type. 
+        raise NotImplementedError('Need to implement func for initialisation of the save directories.')
 
-# ''' parse and output_dir and task_name '''
-# args.output_dir = join(args.output_dir, args.task_name)
-# args.pred_output_dir = join(args.output_dir, "pred")
-# os.makedirs(args.output_dir, exist_ok=True)
-# os.makedirs(args.pred_output_dir, exist_ok=True)
-# args.save_name = join(args.output_dir, "dice.py")
-# print("output_dir set to", args.output_dir)
+    if not True:
+        raise NotImplementedError('Need to fix the infer app builder')
+        infer_app = build_app()
 
-# SEED = args.seed
-# print("set seed as", SEED)
-# torch.manual_seed(SEED)
-# np.random.seed(SEED)
+        if not callable(infer_app):
+            raise Exception('The inference app must be callable class.')
+        else:
+            #Check if it has a call attribute!
+            try:
+                callback = getattr(infer_app, "__call__")
+            except:
+                raise Exception('The inference app did not have a function __call__')
+            
+            #Check if it has a app_configs attribute!
+            try:
+                app_configs_callback = getattr(infer_app, "app_configs")
+            except:
+                raise Exception('The inference app did not have a function app_configs (which can be empty!), for saving the app configs to the experiment logger file.')
 
-# # if torch.cuda.is_available():
-# #     torch.cuda.init()
+            if not callable(callback):
+                raise Exception('The initialised inference app object had a __call__ attribute which was not a callable function.') 
+            
+            if not callable(app_configs_callback):
+                raise Exception("The initialised inference app object had a 'app_configs' attribute which was not a callable function. ")
 
+    
+    #Save the info about the experiment args, save the info about the application config which should be spit out as a method of the callable infer class.
+    
+    logger_save_name = f'experiment_{exp_datetime}_logs'
+    experiment_args_logger(logger_save_name=logger_save_name, root_dir=exp_results_dir, screen=True, tofile=True)
+    exp_setup_logger = logging.getLogger(logger_save_name)
+    exp_setup_logger.info(str(args))
+    
+    
 
-# # if __name__ == 
+    # Create a func which creates the dictionary which is passed through to the dataset constructor.
+    # Add a func for iterating through using the built app. Generates a temporary directory, need to add a path to it. 
 
+    
+if __name__=='__main__':
+    main()

@@ -140,10 +140,11 @@ ubuntu_venv/
 .vscode/
 
 # apps
-input_application
+input_application/Sample_PRISM
+input_application/Sample_SAM_Med3D
 
 #data
-datasets 
+datasets
 
 #results
 results
