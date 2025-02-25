@@ -255,7 +255,7 @@ class front_end_simulator:
             )
             self.inf_edit_generator = HeuristicInteractionState(
                 sim_device=self.args['sim_device'],
-                use_mem=self.args['use_mem_edit_generator'],
+                use_mem=self.args['use_mem_inf_edit'],
                 prompt_configs=self.args['inf_edit_prompt_config'],
                 config_labels_dict=self.args['config_labels_dict']
             )
