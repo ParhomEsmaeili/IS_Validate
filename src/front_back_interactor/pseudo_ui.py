@@ -52,7 +52,7 @@ class FrontEndSimulator:
                 2) Interactive Initialisation: 'IS_inter_init'
                 3) Interactive Editing: 'IS_inter_edit'
         
-        class_configs: A dictionary containing the class label - class integer code mapping relationship being used.
+        config_labels_dict: A dictionary containing the class label - class integer code mapping relationship being used.
 
         im: An interaction memory dictionary containing the set of interaction states. 
         Keys = Infer mode + optionally (for Edit) the inference iter num (1, ...).       
@@ -236,13 +236,13 @@ class FrontEndSimulator:
         '''
         self.metrics_handler = MetricsHandler(
             dice_termination_threshold=self.args['dice_termination_thresh'],
-            metrics_configs=self.args['metrics_class_configs'],
+            metrics_configs=self.args['metrics_configs'],
             metrics_savepaths=self.args['metrics_savepaths'],
             config_labels_dict=self.args['config_labels_dict']
         )
 
         self.output_processor = OutputProcessor(
-            base_save_dir= self.args['base_write_dir'],
+            base_save_dir=self.args['results_dir'],
             config_labels_dict=self.args['config_labels_dict'],
             is_seg_tmp=self.args['is_seg_tmp'],
             save_prompts=self.args['save_prompts']
@@ -545,7 +545,7 @@ class FrontEndSimulator:
             request = {
                 'image': data_instance['image'],
                 'model':'IS_autoseg', 
-                'class_configs': self.args['configs_label_dict'],
+                'config_labels_dict': self.args['configs_label_dict'],
                 'im': im
                 }
             
@@ -567,7 +567,7 @@ class FrontEndSimulator:
             request = {
                 'image': data_instance['image'],
                 'model': 'IS_inter_init', 
-                'class_configs': self.args['configs_label_dict'],
+                'config_labels_dict': self.args['configs_label_dict'],
                 'im': im
                 }
             return request, im 
@@ -588,7 +588,7 @@ class FrontEndSimulator:
             request = {
                 'image': data_instance['image'],
                 'model': 'IS_inter_edit', 
-                'class_configs': self.args['configs_label_dict'],
+                'config_labels_dict': self.args['configs_label_dict'],
                 'im':im
                 }
             return request, im

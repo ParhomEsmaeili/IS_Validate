@@ -12,12 +12,9 @@ import warnings
 
 # logger = logging.getLogger(__name__)
 
-def init_data(codebase_dir:str, dataset_name:str, exp_data_configs:dict, file_ext):
+def init_data(dataset_dir:str, exp_data_configs:dict, file_ext):
     #Function intended for reading data from the json, formulating it into the structure for the dataset 
     # constructor and then instantiating the dataset object.
-
-    #Setting the abspath to the datasets dir.
-    dataset_dir = os.path.join(codebase_dir, 'datasets', dataset_name)
 
     #Extracting the dataset info dict (which contains the split between train and hold-out test data, and hopefully 
     # config labels info).
@@ -25,12 +22,12 @@ def init_data(codebase_dir:str, dataset_name:str, exp_data_configs:dict, file_ex
     try:
         dataset_json_path = os.path.join(dataset_dir, 'dataset.json')
         #Reading the json file. 
-        with open(dataset_json_path, 'rb') as f:
+        with open(dataset_json_path) as f:
             ds_configs = json.load(f)
     except:
         dataset_txt_path = os.path.join(dataset_dir, 'dataset.txt')
         #Reading the txt file. 
-        with open(dataset_txt_path, 'rb') as f:
+        with open(dataset_txt_path) as f:
             ds_configs = json.load(f)
 
     #Extracting the config labels dictionary.
@@ -39,17 +36,21 @@ def init_data(codebase_dir:str, dataset_name:str, exp_data_configs:dict, file_ex
     except:
         #Try to read it from the config labels file. 
         try: 
-            with open(os.path.join(dataset_dir, 'labels_config.json'), 'rb') as f:
+            with open(os.path.join(dataset_dir, 'labels_config.json')) as f:
                 config_labels_info = json.load(f)
                 config_labels_dict = config_labels_info['labels']
         except:
-            with open(os.path.join(dataset_dir, 'labels_config.txt'), 'rb') as f:
+            with open(os.path.join(dataset_dir, 'labels_config.txt')) as f:
                 config_labels_info = json.load(f)
                 config_labels_dict = config_labels_info['labels']
- 
+    
     if not isinstance(config_labels_dict, dict):
         raise Exception('Config labels must be in a dictionary mapping format.')
-
+    else:
+        if not all([isinstance(i, str) for i in config_labels_dict.keys()]):
+            raise TypeError('The keys in the config labels dict must be a str denoting the text semantic info about the class')
+        if not all([isinstance(i, int) for i in config_labels_dict.values()]):
+            raise TypeError('The values in the config labels dict must be an int denoting the class-integer codes')
 
     if exp_data_configs['test_mode'].title() == 'Test':
         #Reading the test list.
@@ -57,10 +58,10 @@ def init_data(codebase_dir:str, dataset_name:str, exp_data_configs:dict, file_ex
     elif exp_data_configs['test_mode'].title() == 'Val':
         #Reading the train_val_split file.
         try:
-            with open(os.path.join(dataset_dir, 'train_val_split.json'), 'rb') as f:
+            with open(os.path.join(dataset_dir, 'train_val_split.json')) as f:
                 splits = json.load(f)
         except:
-            with open(os.path.join(dataset_dir, 'train_val_split.txt'), 'rb') as f:
+            with open(os.path.join(dataset_dir, 'train_val_split.txt')) as f:
                 splits = json.load(f)
             
         #Extracting the fold.
@@ -75,12 +76,12 @@ def init_data(codebase_dir:str, dataset_name:str, exp_data_configs:dict, file_ex
 
     for data_instance in datalist:
 
-        if os_name is 'nt':
+        if os_name == 'nt':
             #Windows 
             #Expects that the relative path provided is in windows format.
             im_path = os.path.join(dataset_dir, str(pathlib.PureWindowsPath(data_instance['image'])))
             lb_path = os.path.join(dataset_dir, str(pathlib.PureWindowsPath(data_instance['label'])))
-        elif os_name is 'posix':
+        elif os_name == 'posix':
             #Posixtype 
             #Expects that the relative path provided is in posix format.
             im_path = os.path.join(dataset_dir, str(pathlib.PurePosixPath(data_instance['image'])))

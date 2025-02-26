@@ -39,7 +39,7 @@ class BaseScoringWrapper:
 
         self.metric_classes['Dice'] = DiceScore(
                 ignore_empty=self.metrics_configs['Dice']['ignore_empty'],
-                include_background=self.metrics_configs['Dice']['include_background'],
+                include_background=self.metrics_configs['Dice']['include_background_metric'],
                 include_per_class_scores=self.metrics_configs['Dice']['include_per_class_scores'],
                 config_labels_dict=self.config_labels_dict
             )
@@ -48,7 +48,7 @@ class BaseScoringWrapper:
    
         self.metric_classes['Error Rate'] = ErrorRate(
             ignore_empty=self.metrics_configs['Error Rate']['ignore_empty'],
-            include_background=self.metrics_configs['Error Rate']['include_background'],
+            include_background=self.metrics_configs['Error Rate']['include_background_metric'],
             include_per_class_scores=self.metrics_configs['Error Rate']['include_per_class_scores'],
             config_labels_dict=self.config_labels_dict
         ) 

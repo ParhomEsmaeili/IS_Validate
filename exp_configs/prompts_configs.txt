@@ -1,7 +1,7 @@
 {
-'prototype':{
-'dummy1':'dummy'
+"prototype":{
+"dummy1":"dummy"
 },
-'dummy':{
+"dummy":{
 }
 }

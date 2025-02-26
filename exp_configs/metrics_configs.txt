@@ -1,7 +1,8 @@
 {
-'prototype':{
-'dummy1':'dummy'
-},
-'dummy':{
+"prototype":{
+"Dice":{"ignore_empty":true,
+	"include_per_class_scores":true,
+	"include_background_metric": false
+	}
 }
 }

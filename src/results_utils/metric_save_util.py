@@ -12,7 +12,7 @@ import re
 def init_metric_csvs(
         dir_path, 
         metric_configs: dict, 
-        class_configs:dict):
+        config_labels_dict:dict):
     '''
     This is a function which initialises the csvs being used for a given metric type. Performs only three operations:
 
@@ -30,7 +30,7 @@ def init_metric_csvs(
     metric_configs: The metric configuration for the given metric type under consideration (the metric NAME) will 
     not be included in the csv filename.
     
-    class_configs: The dictionary mapping class labels to class integer codes.
+    config_labels_dict: The dictionary mapping class labels to class integer codes.
 
     returns: 
     
@@ -50,7 +50,7 @@ def init_metric_csvs(
     header = ['Patient Name']
 
     #Checking whether we have at least one valid class otherwise everything will break.
-    valid_classes = tuple(class_configs) if metric_configs['include_background_metric'] else tuple({key for key in class_configs.keys() if key.title() != "Background"})
+    valid_classes = tuple(config_labels_dict) if metric_configs['include_background_metric'] else tuple({key for key in config_labels_dict.keys() if key.title() != "Background"})
     if len(valid_classes) < 1:
         raise Exception('At least one valid class is required!')
 
@@ -71,10 +71,10 @@ def init_metric_csvs(
     else:
         placeholder = dict()
 
-        for class_lb in class_configs:
+        for class_lb in config_labels_dict:
             #If class label is in the valid ones being saved then init and provide the path.
             if class_lb in valid_classes:
-                filepath = os.path.join(dir_path, f'{class_lb}_class_scores')
+                filepath = os.path.join(dir_path, f'{class_lb}_class_scores.csv')
                 
                 with open(filepath,'a') as f:
                     writer = csv.writer(f)
@@ -130,7 +130,7 @@ def init_all_csvs(
         metric_subdir_abspath = os.path.join(metrics_save_dir, metric_type)
         os.makedirs(metric_subdir_abspath, exist_ok=False) #False, folder should not exist! 
         
-        metric_paths_dict = init_metric_csvs(dir_path=metric_subdir_abspath, metric_configs=config, class_configs=config_labels_dict)
+        metric_paths_dict = init_metric_csvs(dir_path=metric_subdir_abspath, metric_configs=config, config_labels_dict=config_labels_dict)
 
         complete_paths_dicts[metric_type] = metric_paths_dict
 

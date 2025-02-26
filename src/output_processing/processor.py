@@ -27,7 +27,7 @@ class OutputProcessor:
     '''
     Class which initialises the output processing class. Takes as initialisation args:
 
-    base_save_dir: Str - The abspath for the base directory in which all of the results and segmentations will be saved
+    base_save_dir: Str - The abspath for the base directory in which all of the metric results and segmentations will be saved
     config_labels_dict: Dict - The class-integer code mapping.
     is_seg_tmp: Bool - A boolean denoting whether the predicted segmentations should be saved as temporary files or permanent files.
     save_prompts: Bool - A boolean denoting whether the input prompts should be saved permanently. 
@@ -42,7 +42,7 @@ class OutputProcessor:
     ):
 
         self.base_save_dir = base_save_dir 
-        self.class_configs = config_labels_dict 
+        self.config_labels_dict = config_labels_dict 
         self.is_seg_tmp = is_seg_tmp
         self.save_prompts = save_prompts
 
@@ -56,7 +56,7 @@ class OutputProcessor:
             #provided in the input image (which must be loaded as a channel first). Also checking the spatial resolution
             #of the output HW(D) against the input.
             'check_logits':{
-                'reference_name':('reference', 'class_configs'),
+                'reference_name':('reference', 'config_labels_dict'),
                 'reference_paths':(('image','metatensor'), None),
                 'output_paths': (('logits','metatensor'), ('logits', 'metatensor')),
                 'checks': (('check_num_dims','check_spatial_res'), ('check_num_channel',)),
@@ -214,8 +214,8 @@ class OutputProcessor:
 
                 if info['reference'] == 'reference':
                     self.check_integrity(reference_data, info['reference_paths'][idx], output_data, info['output_paths'][idx], checks_subtuple)
-                elif info['reference'] == 'class_configs':
-                    self.check_integrity(self.class_configs, info['reference_paths'][idx], output_data, info['output_paths'][idx], checks_subtuple)
+                elif info['reference'] == 'config_labels_dict':
+                    self.check_integrity(self.config_labels_dict, info['reference_paths'][idx], output_data, info['output_paths'][idx], checks_subtuple)
 
     def reformat_output(self, output_data: dict, pred_path:str, logits_paths:list[str]):
         
@@ -274,7 +274,7 @@ class OutputProcessor:
         
             img_filename = os.path.split(input_req['image']['path'])[1]
             infer_config_dir = f'{inf_call_config["mode"]} Iter {inf_call_config["edit_num"]}' if inf_call_config['mode'].title() != 'Interactive Edit' else inf_call_config['mode'].title() 
-            pred_path = os.path.join(self.base_save_dir, infer_config_dir, img_filename) 
+            pred_path = os.path.join(self.base_save_dir, 'segmentations', infer_config_dir, img_filename) 
 
             #Call the writer, which should be configured to have write_to_file = True. Must output the tempfile path
             tmp_path = self.perm_imwriter(output_dict, tmp_dir)
