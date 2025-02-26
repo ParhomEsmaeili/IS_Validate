@@ -54,6 +54,8 @@ class FrontEndSimulator:
         
         config_labels_dict: A dictionary containing the class label - class integer code mapping relationship being used.
 
+        infer_device: A torch device denoting the device being used for inference. 
+
         im: An interaction memory dictionary containing the set of interaction states. 
         Keys = Infer mode + optionally (for Edit) the inference iter num (1, ...).       
 
@@ -73,7 +75,7 @@ class FrontEndSimulator:
         prev_optional_memory: A dictionary containing any extra information that the application would like to forward propagate
         which is not currently provided.
 
-        Refinement prompt information: See `<https://github.com/IS_Validate/blob/main/src/data/interaction_state_construct.py>`
+        prompt information: See `<https://github.com/IS_Validate/blob/main/src/data/interaction_state_construct.py>`
 
         interaction_torch_format: A prompt-type separated dictionary containing the prompt information in list[torch.tensor] format 
             {'interactions':dict[prompt_type_str[list[torch.tensor] OR NONE ]], 
@@ -546,7 +548,8 @@ class FrontEndSimulator:
                 'image': data_instance['image'],
                 'model':'IS_autoseg', 
                 'config_labels_dict': self.args['configs_label_dict'],
-                'im': im
+                'im': im,
+                'infer_device':self.args['device']
                 }
             
             return request, im
@@ -568,7 +571,8 @@ class FrontEndSimulator:
                 'image': data_instance['image'],
                 'model': 'IS_inter_init', 
                 'config_labels_dict': self.args['configs_label_dict'],
-                'im': im
+                'im': im,
+                'infer_device':self.args['device']
                 }
             return request, im 
         
@@ -589,7 +593,8 @@ class FrontEndSimulator:
                 'image': data_instance['image'],
                 'model': 'IS_inter_edit', 
                 'config_labels_dict': self.args['configs_label_dict'],
-                'im':im
+                'im':im,
+                'infer_device':self.args['device']
                 }
             return request, im
         else:

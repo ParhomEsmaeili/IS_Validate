@@ -16,7 +16,7 @@ class BuildHeuristic:
                 config_labels_dict:dict,
                 heuristics:dict,
                 heuristic_params: dict,
-                heuristic_mixtures: Union[dict[str, dict], None] 
+                heuristic_mixtures: Union[dict, None] 
                 ):
         
         '''
@@ -58,7 +58,7 @@ class BuildHeuristic:
 
         NOTE: For prompt types which are not valid, it should be a NoneType. 
         
-        NOTE: CAN NEVER BE NONETYPE! 
+        NOTE: CAN NEVER BE NONETYPE OTHERWISE! 
 
 
         (OPTIONAL)heuristic_mixture: An arbitrarily nested dict denoting a strategy for the cascading functions which

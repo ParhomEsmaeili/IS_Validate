@@ -24,11 +24,11 @@ def set_parse():
     parser.add_argument('--data_fold', type=str, default=None)
     
     #Experimental process/method related args 
-    parser.add_argument('--app_name', type=str, default='sample_test')
-    parser.add_argument('--random_seed', type=int, default=None)
+    parser.add_argument('--app_name', type=str, default='Sample_TEST') #This acts as the name of the app, but also temporarily acts as the relative path name within the input_applications folder.
+    parser.add_argument('--random_seed', type=int, default=23102002)
     parser.add_argument('--device_idx', type=int, default=None)
     parser.add_argument('--infer_init', type=str, default='Interactive Init')
-    parser.add_argument('--infer_edit_bool', action='store_true', default=True)
+    parser.add_argument('--infer_not_edit_bool', action='store_false', default=True)
     parser.add_argument('--infer_edit_nums', type=int, default=10)
 
     #Validation utilised constructors build args
@@ -38,7 +38,9 @@ def set_parse():
     parser.add_argument('--init_prompt_conf_name', type=str, default='prototype')
     parser.add_argument('--edit_prompt_conf_name', type=str, default='prototype')
     #TODO: Put use_mem and other related args like that for the im etc in here. 
-
+    parser.add_argument('--use_mem_inf_edit', action='store_true', default=False) #Whether im is used for conditioning prompt gen.
+    parser.add_argument('--im_conf_remove_init', action='store_true', default=False) #Bool for whether the init state in im will be removed from memory.
+    parser.add_argument('--im_conf_mem_len', type=int, default=-1)
     #For the output processor.
     parser.add_argument('--is_seg_tmp', action='store_true', default=False)
     
@@ -51,7 +53,17 @@ def gen_experiment_args(args):
 
     output_dict = dict() 
 
+    #Setting the app name for the experiment:
+    output_dict['app_name'] = args.app_name 
+
     #Creating paths
+    
+    #Creating the relative path to the base build dir within the app.
+    output_dict['build_app_rel_path'] = 'src_validate'
+    #Temporarily creating an abspath using this relative path:
+    output_dict['build_app_abspath'] = os.path.join(codebase_dir, 'input_application', output_dict['app_name'], output_dict['build_app_rel_path'])
+
+    #Paths for results and logging. 
     output_dict['results_dir'] = os.path.join(codebase_dir, 'results')
     output_dict['input_dataset_dir'] = os.path.join(codebase_dir, 'datasets', args.dataset_name)
     output_dict['results_dataset_subdir'] = os.path.join(output_dict['results_dir'], args.dataset_name)
@@ -67,11 +79,18 @@ def gen_experiment_args(args):
     }
 
     #Configuring the experimental configs, first the infer run configs:
-    output_dict['infer_run_configs'] = {
-        'init':args.infer_init,
-        'edit_bool':args.infer_edit_bool,
-        'num_iters': args.infer_edit_nums
-    }
+    if not args.infer_not_edit_bool: #Then init only.
+        output_dict['infer_run_configs'] = {
+            'init':args.infer_init,
+            'edit_bool':False,
+            'num_iters': None
+        }
+    else:
+        output_dict['infer_run_configs'] = {
+            'init':args.infer_init,
+            'edit_bool':True,
+            'num_iters': args.infer_edit_nums
+        }
 
     #Extracting the configs dicts for the metrics and the prompt configs.
     exp_conf_dir = os.path.join(codebase_dir, 'exp_configs') 
@@ -129,6 +148,17 @@ def gen_experiment_args(args):
             print('Cuda related error occured, using cpu')
     else:
         raise TypeError('Device idx must be a None (i.e. cpu) or an int.')
+    
+    #Extracting the info about the interaction memory usage:
+
+    #The use of inf im for conditioning the prompt generation.
+    output_dict['use_mem_inf_edit'] = args.use_mem_inf_edit
+    #Handling the im configs in the front-end-simulator (e.g. memory len, keeping init)
+    output_dict['im_config'] = {
+        'keep_init':args.im_conf_keep_init,
+        'im_len':args.im_conf_mem_len 
+    }
+
     return output_dict 
 
 

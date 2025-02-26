@@ -1,7 +1,16 @@
 {
-"prototype":{
-"dummy1":"dummy"
-},
-"dummy":{
-}
+	"prototype":{
+		"methods":{
+			"points":["uniform_random"],
+			"scribbles":null,
+			"bboxes":null
+			},
+		"build_params":{
+			"points":{"uniform_random":
+				},
+			"scribbles":null,
+			"bboxes":null
+			},
+		"mixture_params":null 
+	}
 }

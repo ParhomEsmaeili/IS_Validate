@@ -59,6 +59,6 @@ class build_app:
 
 if __name__ == '__main__':
     #Debugging.
-    build_class = build_app('Sample_TEST/src/build_app', False)
+    build_class = build_app('Sample_TEST/src_validate/build_app', False)
     print(build_class.build_func())
   

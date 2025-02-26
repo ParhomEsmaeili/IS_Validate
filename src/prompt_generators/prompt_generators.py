@@ -18,7 +18,7 @@ class BasicSpatialPromptGenerator(PromptReformatter):
                 config_labels_dict: dict,
                 sim_methods: dict,
                 sim_build_params: dict,
-                prompt_mixture_params: Union[dict[str,dict], None],
+                prompt_mixture_params: Union[dict, None],
                 ):
         '''
         Prompt generation class for generating the interactive spatial prompts for an interaction state.
@@ -41,8 +41,6 @@ class BasicSpatialPromptGenerator(PromptReformatter):
 
         
 
-
-
         (REQUIRED) sim_build_params: A twice nested dictionary, for each prompt strategy within a prompt type it 
         contains a dictionary of build arguments for each corresponding strategy implemented. 
 
@@ -57,8 +55,6 @@ class BasicSpatialPromptGenerator(PromptReformatter):
         cross-interaction (e.g., conditioning the model with a prompt prior, or passing all prompt-type requests concurrently 
         through). NOTE: However, prompt-type/method specific args must still be passed through in the build_params.
     
-
-
 
         (OPTIONAL) prompt_mixture: An arbitrarily nested dict denoting a strategy for handling prompt simulation 
         e.g. class-level, intra-prompt level and inter-prompting level strategies etc.
@@ -219,9 +215,9 @@ class HeuristicSpatialPromptGenerator(BasicSpatialPromptGenerator):
                 sim_device: torch.device,
                 use_mem: bool,
                 config_labels_dict: dict[str, int],
-                sim_methods:dict[str,dict], 
+                sim_methods:dict, 
                 sim_build_params:dict,
-                prompt_mixture_params:Union[dict[str,dict], None]):
+                prompt_mixture_params:Union[dict, None]):
         
         super().__init__(
                         sim_device=sim_device,
