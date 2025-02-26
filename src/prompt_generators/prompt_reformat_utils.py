@@ -89,8 +89,10 @@ class PromptReformatter:
     
     def reformat_prompts(self, prompt_type:str, prompts: Union[list[torch.Tensor], None], prompts_labels: Union[list[torch.Tensor], None]):
         
-        if prompts is None or prompts_labels is None:
-            return None 
+        if prompts is None and prompts_labels is None:
+            return None
+        elif type(prompts) != type(prompts_labels):
+            raise Exception('The prompts and the prompts labels must be the same datatype (i.e. both lists of tensors, or both Nonetypes)')
         else:
             if prompt_type.title() == 'Points':
                 return self.points_reformat(prompts, prompts_labels)

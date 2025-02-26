@@ -26,7 +26,7 @@ def set_parse():
     #Experimental process/method related args 
     parser.add_argument('--app_name', type=str, default='Sample_TEST') #This acts as the name of the app, but also temporarily acts as the relative path name within the input_applications folder.
     parser.add_argument('--random_seed', type=int, default=23102002)
-    parser.add_argument('--device_idx', type=int, default=None)
+    parser.add_argument('--device_idx', type=int, default=0)
     parser.add_argument('--infer_init', type=str, default='Interactive Init')
     parser.add_argument('--infer_not_edit_bool', action='store_false', default=True)
     parser.add_argument('--infer_edit_nums', type=int, default=10)
@@ -155,7 +155,7 @@ def gen_experiment_args(args):
     output_dict['use_mem_inf_edit'] = args.use_mem_inf_edit
     #Handling the im configs in the front-end-simulator (e.g. memory len, keeping init)
     output_dict['im_config'] = {
-        'keep_init':args.im_conf_keep_init,
+        'keep_init':not args.im_conf_remove_init,
         'im_len':args.im_conf_mem_len 
     }
 
@@ -212,7 +212,7 @@ def extract_config(path, name):
 
     return config_dict 
     
-def init_fe():
+def init_fe(sim_device):
     #Function which initialises the front-end simulator.
     pass 
 
@@ -238,6 +238,18 @@ def run_instances(dataloader, fe_sim_obj):
             raise Exception('There was an error in the front-end simulator, running cleanup.')
 
 
+
+def log_config_writer(args_name, exp_setup_logger, experiment_args):
+    exp_setup_logger.info(f'Starting up! {os.linesep}')
+    exp_setup_logger.info(f'{args_name}: {os.linesep}')
+    #Easier to use this method as not everything is json serialisable.
+    for key, value in experiment_args.items():
+        try:
+            exp_setup_logger.info(f"{key}: {json.dumps(value, indent=4)}") #Where possible try to serialise in a manner where its readable. 
+        except:
+            exp_setup_logger.info(f"{key}: {value}")
+    
+    exp_setup_logger.info(f'Moving onto build now!: {os.linesep} {os.linesep} {os.linesep}')
 def main():
 
 
@@ -310,8 +322,10 @@ def main():
     logger_save_name = f'experiment_{experiment_args["exp_datetime"]}_logs'
     experiment_args_logger(logger_save_name=logger_save_name, root_dir=experiment_args['exp_results_dir'], screen=True, tofile=True)
     exp_setup_logger = logging.getLogger(logger_save_name)
-    exp_setup_logger.info(f'Experiment arguments: \n {str(experiment_args)}')
+    log_init_writer(exp_setup_logger, experiment_args)
 
+
+    print('halt')
 
     if not True:
         app_config_dict = infer_app.app_configs()

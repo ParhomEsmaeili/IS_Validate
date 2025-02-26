@@ -14,7 +14,7 @@ from abc import abstractmethod
 sys.path.append(up(up(up(up(os.path.abspath(__file__))))))
 from src.prompt_generators.heuristics.prompt_bases import PointBase, ScribbleBase, BboxBase
 from src.utils.dict_utils import extractor, dict_path_modif
-from src.prompt_generators.heuristics.spatial_utils.component_extraction import get_label_ccp, extract_connected_components
+from src.prompt_generators.heuristics.spatial_utils.component_extraction import get_label_ccp#, extract_connected_components
 from src.prompt_generators.heuristics.spatial_utils.update_binary_mask import update_binary_mask
 '''
 This file contains the prompt mixture generation classes.
@@ -470,7 +470,7 @@ class BasicValidOnlyMixture(BaseMixture):
         NOTE: For any instances where a gt class is empty, or the error region is empty for the given config path, then 
         it will be an empty list []. 
         '''
-        raise NotImplementedError('Needs to be checked for debugging again, add a logical check e.g. that gts sum to quantity of voxels')
+        raise NotImplementedError('Needs to be checked for debugging again, also add a logical check e.g. that gts sum to quantity of voxels')
         sampling_regions_dict = dict() 
         
         #First we implement the gt extraction since this is always required. 
@@ -719,13 +719,16 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
     This function implements the most basic process of iterating through the prompt-gen heuristics fns to 
     simulate prompts.
 
-    Intended as a prototype for heuristics implementations which do not have a mixture model (inter-prompt or 
-    intra-prompt) or any heuristics arguments at all. Any of the relevant heuristics arguments will be temporarily 
-    hard-coded for this prototype:
+    Intended as a prototype for heuristics implementations which do not have a complex mixture model or complex heuristics level args.
+
+    Most basic level only has one heuristic level arg: N_max in placement region (E.g., number of points, number of boxes, number of scribbles etc 
+    per class and per heuristic and per component etc.)
+      
+    Plain class-level, inter-prompt level, intra-prompt level handling and heuristic level handling. 
+    (E.g. No toggling of the drop-out of prompts, no toggling of the order in which prompts are generated (just does it randomly), heuristics order, etc., 
+    components order doesn't even exist it is treated as a singular error map etc.)
     
-    E.g., number of points, number of boxes, number of scribbles etc per class and per heuristic, toggling off the
-    components handling. Toggling off the use-mem for determining whether im is used for prompt generation. No 
-    toggling of the drop-out of prompts. No toggling of the order in which prompts are generated (just does it randomly)
+    Toggling off the use-mem for determining whether im is used for prompt generation. 
     
     The only intra/inter-prompt interactions is the removal of coordinates for sampling refinement prompts.
 

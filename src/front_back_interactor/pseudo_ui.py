@@ -49,12 +49,10 @@ class FrontEndSimulator:
 
         model: A string denoting the inference "mode" being simulated, has three options: 
                 1) Automatic Segmentation, denoted: 'IS_autoseg' 
-                2) Interactive Initialisation: 'IS_inter_init'
-                3) Interactive Editing: 'IS_inter_edit'
+                2) Interactive Initialisation: 'IS_interactive_init'
+                3) Interactive Editing: 'IS_interactive_edit'
         
         config_labels_dict: A dictionary containing the class label - class integer code mapping relationship being used.
-
-        infer_device: A torch device denoting the device being used for inference. 
 
         im: An interaction memory dictionary containing the set of interaction states. 
         Keys = Infer mode + optionally (for Edit) the inference iter num (1, ...).       
@@ -108,7 +106,7 @@ class FrontEndSimulator:
         
         NOTE: The affine must be a torch tensor.
 
-    NOTE: These outputs must/should be stored/provided on cpu. 
+    NOTE: These outputs must be stored/provided on cpu. 
 
     NOTE: Optional to include the "optional_memory" field also, for any extra arguments app would like to store in IM.
         if not required, put a None for the value of this item.
@@ -549,7 +547,6 @@ class FrontEndSimulator:
                 'model':'IS_autoseg', 
                 'config_labels_dict': self.args['configs_label_dict'],
                 'im': im,
-                'infer_device':self.args['device']
                 }
             
             return request, im
@@ -569,10 +566,9 @@ class FrontEndSimulator:
 
             request = {
                 'image': data_instance['image'],
-                'model': 'IS_inter_init', 
+                'model': 'IS_interactive_init', 
                 'config_labels_dict': self.args['configs_label_dict'],
-                'im': im,
-                'infer_device':self.args['device']
+                'im': im
                 }
             return request, im 
         
@@ -591,10 +587,9 @@ class FrontEndSimulator:
 
             request = {
                 'image': data_instance['image'],
-                'model': 'IS_inter_edit', 
+                'model': 'IS_interactive_edit', 
                 'config_labels_dict': self.args['configs_label_dict'],
                 'im':im,
-                'infer_device':self.args['device']
                 }
             return request, im
         else:
