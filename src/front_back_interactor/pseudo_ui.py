@@ -238,12 +238,12 @@ class FrontEndSimulator:
             dice_termination_threshold=self.args['dice_termination_thresh'],
             metrics_configs=self.args['metrics_configs'],
             metrics_savepaths=self.args['metrics_savepaths'],
-            config_labels_dict=self.args['config_labels_dict']
+            config_labels_dict=self.args['configs_labels_dict']
         )
 
         self.output_processor = OutputProcessor(
             base_save_dir=self.args['results_dir'],
-            config_labels_dict=self.args['config_labels_dict'],
+            config_labels_dict=self.args['configs_labels_dict'],
             is_seg_tmp=self.args['is_seg_tmp'],
             save_prompts=self.args['save_prompts']
         )
@@ -257,16 +257,16 @@ class FrontEndSimulator:
             # interaction. All information for the autosegmentation state will be provided manually.
 
             self.inf_init_generator = HeuristicInteractionState(
-                sim_device=self.args['sim_device'],
+                sim_device=self.args['device'],
                 use_mem=False,
                 prompt_configs=self.args['inf_init_prompt_config'],
-                config_labels_dict=self.args['config_labels_dict']
+                config_labels_dict=self.args['configs_labels_dict']
             )
             self.inf_edit_generator = HeuristicInteractionState(
-                sim_device=self.args['sim_device'],
+                sim_device=self.args['device'],
                 use_mem=self.args['use_mem_inf_edit'],
                 prompt_configs=self.args['inf_edit_prompt_config'],
-                config_labels_dict=self.args['config_labels_dict']
+                config_labels_dict=self.args['configs_labels_dict']
             )
         else:
             raise ValueError('The selected prompt generation algorithm-type is not supported')

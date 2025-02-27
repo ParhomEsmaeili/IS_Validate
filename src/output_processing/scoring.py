@@ -46,10 +46,10 @@ class MetricsHandler:
 
         self.supported_metrics = {
             'base':{'Dice'},
-            'base_relative':{},#{'Consistent Dice Improvement'},
-            'human_centric':{},
-            'human_centric_relative':{},
-            'annotation_budget':{}
+            'base_relative':set(),#{'Consistent Dice Improvement'},
+            'human_centric':set(),
+            'human_centric_relative':set(),
+            'annotation_budget':set()
         }
 
         #Checking that all the selected metric types are supported.

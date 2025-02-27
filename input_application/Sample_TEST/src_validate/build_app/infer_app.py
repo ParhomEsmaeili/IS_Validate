@@ -5,7 +5,7 @@
 import torch 
 from monai.data import MetaTensor 
 
-class BuildInferApp:
+class InferApp:
     def __init__(self,
                 dataset_name:str,
                 infer_device:torch.device
@@ -99,7 +99,7 @@ class BuildInferApp:
     def app_configs(self):
 
         #STRONGLY Recommended: A method which returns any configuration specific information for printing to the logfile. Expects a dictionary format.
-        return {} 
+        return {'infer_app_name': 'Sample_TEST'} 
     
     def __call__(self, request: dict):
         
@@ -159,7 +159,7 @@ class BuildInferApp:
 
 
 if __name__ == '__main__':
-    infer_app = BuildInferApp('BraTS2021', torch.device('cpu'))
+    infer_app = InferApp('BraTS2021', torch.device('cpu'))
 
     infer_app.app_configs()
 

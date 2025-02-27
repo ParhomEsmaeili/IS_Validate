@@ -1,27 +1,29 @@
 {
-	"prototype":{
-	
-		"methods":{
-			
-			"points":["uniform_random"],
-			"scribbles":null,
-			"bboxes":null
-			
-			},
-		"build_params":{
+	"heuristic":{
+		"prototype":{
 		
-			"points":{
+			"methods":{
 				
-				"uniform_random": {
-					"n_max": 1
-					}
+				"points":["uniform_random"],
+				"scribbles":null,
+				"bboxes":null
 				
 				},
-			"scribbles":null,
-			"bboxes":null
+			"build_params":{
 			
-			},
-			
-		"mixture_params":null 
+				"points":{
+					
+					"uniform_random": {
+						"n_max": 1
+						}
+					
+					},
+				"scribbles":null,
+				"bboxes":null
+				
+				},
+				
+			"mixture_params":null 
+		}
 	}
 }

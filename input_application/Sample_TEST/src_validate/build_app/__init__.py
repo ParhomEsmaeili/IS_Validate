@@ -1,1 +1,1 @@
-from .load_app import BuildInferApp
+from .infer_app import InferApp

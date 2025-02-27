@@ -5,14 +5,17 @@ import sys
 import os 
 import datetime
 import tempfile 
+import importlib
+import torch 
+import warnings 
+
 codebase_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__))) 
 sys.path.append(codebase_dir)
 from src.front_back_interactor.pseudo_ui import FrontEndSimulator 
 from src.utils.logging import experiment_args_logger
 from src.data.utils import data_instance_reformat, iterate_dataloader_check, init_data
-from src.results_utils.metric_save_util import init_all_csvs 
-import torch 
-import warnings 
+from src.results_utils.metric_save_util import init_all_csvs
+
 
 def set_parse():
     # %% set up parser
@@ -30,6 +33,7 @@ def set_parse():
     parser.add_argument('--infer_init', type=str, default='Interactive Init')
     parser.add_argument('--infer_not_edit_bool', action='store_false', default=True)
     parser.add_argument('--infer_edit_nums', type=int, default=10)
+    parser.add_argument('--dice_termination_thresh', type=float, default=1.0)
 
     #Validation utilised constructors build args
     parser.add_argument('--metric_conf_filename', type=str, default='metrics_configs.txt')
@@ -37,12 +41,15 @@ def set_parse():
     parser.add_argument('--metric_conf_name', type=str, default='prototype')
     parser.add_argument('--init_prompt_conf_name', type=str, default='prototype')
     parser.add_argument('--edit_prompt_conf_name', type=str, default='prototype')
+    parser.add_argument('--metric_prompt_procedure_type', type=str, default='heuristic')
+    parser.add_argument('--inf_prompt_procedure_type', type=str, default='heuristic')
     #TODO: Put use_mem and other related args like that for the im etc in here. 
     parser.add_argument('--use_mem_inf_edit', action='store_true', default=False) #Whether im is used for conditioning prompt gen.
     parser.add_argument('--im_conf_remove_init', action='store_true', default=False) #Bool for whether the init state in im will be removed from memory.
     parser.add_argument('--im_conf_mem_len', type=int, default=-1)
-    #For the output processor.
+    #For the output processor/writing args which are optional.
     parser.add_argument('--is_seg_tmp', action='store_true', default=False)
+    parser.add_argument('--save_prompts', action='store_true', default=False)
     
 
     args = parser.parse_args()
@@ -53,8 +60,9 @@ def gen_experiment_args(args):
 
     output_dict = dict() 
 
-    #Setting the app name for the experiment:
+    #Setting the app name for the experiment, also available for the build script. 
     output_dict['app_name'] = args.app_name 
+    output_dict['dataset_name'] = args.dataset_name 
 
     #Creating paths
     
@@ -97,9 +105,15 @@ def gen_experiment_args(args):
 
     output_dict['metrics_configs'] = extract_config(os.path.join(exp_conf_dir, args.metric_conf_filename), args.metric_conf_name)
     
-    output_dict['inf_init_prompt_config'] =  extract_config(os.path.join(exp_conf_dir, args.prompt_conf_filename), args.init_prompt_conf_name)
+    # output_dict['metric_prompt_procedure_type']
+    output_dict['inf_prompt_procedure_type'] = args.inf_prompt_procedure_type 
 
-    output_dict['inf_edit_prompt_config'] = extract_config(os.path.join(exp_conf_dir, args.prompt_conf_filename), args.edit_prompt_conf_name)
+    #Extracting from inf prompt registry according to procedural type: 
+    inf_prompt_registry = extract_config(os.path.join(exp_conf_dir, args.prompt_conf_filename), args.inf_prompt_procedure_type)
+
+    output_dict['inf_init_prompt_config'] =  inf_prompt_registry[args.init_prompt_conf_name]
+
+    output_dict['inf_edit_prompt_config'] = inf_prompt_registry[args.edit_prompt_conf_name]
     
     # output_dict['metrics_prompts_configs']
     
@@ -107,11 +121,16 @@ def gen_experiment_args(args):
 
     output_dict['random_seed'] = args.random_seed
 
+
+    #Now we extract the termination condition threshold:
+    output_dict['dice_termination_thresh'] = args.dice_termination_thresh 
     #####################################################################################
 
     #Extracting the writer info. 
     output_dict['is_seg_tmp'] = args.is_seg_tmp
-
+    output_dict['save_prompts'] = args.save_prompts
+    ###########################################################################################
+    
     #Extracting the inference and prompt gen device info. 
     if args.device_idx is None:
         output_dict['device'] = torch.device('cpu')
@@ -149,6 +168,8 @@ def gen_experiment_args(args):
     else:
         raise TypeError('Device idx must be a None (i.e. cpu) or an int.')
     
+    ###########################################################################################
+    
     #Extracting the info about the interaction memory usage:
 
     #The use of inf im for conditioning the prompt generation.
@@ -160,11 +181,6 @@ def gen_experiment_args(args):
     }
 
     return output_dict 
-
-
-# def extract_fe_dict(experiment_args_dict):
-#     #Takes the experiment args dict and returns the sub-dict required for the front-end-simulator initialisation. 
-#     pass 
 
 
 def create_seg_dirs(exp_results_dir, infer_run_conf):
@@ -196,7 +212,7 @@ def init_metrics_saves(exp_results_dir, metrics_configs, configs_labels_dict):
     metrics_dir = os.path.join(exp_results_dir, 'metrics')
     os.makedirs(metrics_dir, exist_ok=False)
 
-    init_all_csvs(metrics_dir, metrics_configs, configs_labels_dict)
+    return init_all_csvs(metrics_dir, metrics_configs, configs_labels_dict)
 
 
 def extract_config(path, name):
@@ -212,9 +228,76 @@ def extract_config(path, name):
 
     return config_dict 
     
-def init_fe(sim_device):
-    #Function which initialises the front-end simulator.
-    pass 
+
+def log_config_writer(args_name, args_dict, logger):
+    logger.info(f'Printing {args_name}: {os.linesep}')
+    #Easier to use this method as not everything is json serialisable.
+    for key, value in args_dict.items():
+        try:
+            logger.info(f"{key}: {json.dumps(value, indent=4)}") #Where possible try to serialise in a manner where its readable. 
+        except:
+            logger.info(f"{key}: {value}")
+
+
+def build_infer_app(app_name, dataset_name, device):
+
+    build_app_dir = os.path.join(codebase_dir, 'input_application', app_name, 'src_validate', 'build_app')
+    
+    if not os.path.exists(build_app_dir):
+        raise ValueError('The provided path does not exist')
+    
+    try: #Try to use __init__.
+    
+        MODULE_PATH = os.path.join(build_app_dir, "__init__.py")
+        MODULE_NAME = "InferApp"
+        
+        spec = importlib.util.spec_from_file_location(MODULE_NAME, MODULE_PATH)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = module 
+        spec.loader.exec_module(module)
+        
+        from BuildInferApp import InferApp
+
+    except: #If only providing a .py with no init. 
+        spec = importlib.util.spec_from_file_location("BuildInferApp", os.path.join(build_app_dir, 'infer_app.py'))
+        foo = importlib.util.module_from_spec(spec)
+        sys.modules["BuildInferApp"] = foo
+        spec.loader.exec_module(foo)
+        InferApp = foo.InferApp 
+
+    return InferApp(dataset_name, device) 
+
+
+def init_infer_app(experiment_args:dict): 
+
+    #Function which finds and initialises the inference app using the build script, then checks it has the necessary methods. 
+            
+    #app_name: name of the app AND also the relative path from "input_application" to the app directory
+
+    infer_app = build_infer_app(experiment_args['app_name'], experiment_args['dataset_name'], experiment_args['device'])
+
+    if not callable(infer_app):
+        raise Exception('The inference app must be callable class.')
+    else:
+        #Check if it has a call attribute!
+        try:
+            callback = getattr(infer_app, "__call__")
+        except:
+            raise Exception('The inference app did not have a function __call__')
+        
+        #Check if it has a app_configs attribute!
+        try:
+            app_configs_callback = getattr(infer_app, "app_configs")
+        except:
+            raise Exception('The inference app did not have a function app_configs (which can be empty!), for saving the app configs to the experiment logger file.')
+
+        if not callable(callback):
+            raise Exception('The initialised inference app object had a __call__ attribute which was not a callable function.') 
+        
+        if not callable(app_configs_callback):
+            raise Exception("The initialised inference app object had a 'app_configs' attribute which was not a callable function. ")
+        
+    return infer_app
 
 def run_instances(dataloader, fe_sim_obj):
     #Function is intended for iterating through the constructed dataset.
@@ -237,19 +320,31 @@ def run_instances(dataloader, fe_sim_obj):
             tempdir_obj.cleanup() 
             raise Exception('There was an error in the front-end simulator, running cleanup.')
 
+def init_fe(infer_app, experiment_args):
+    #Function which initialises the front-end simulator.
+    keep_key_list = [
+        'configs_labels_dict',
+        'infer_run_configs',
+        'metrics_configs',
+        'inf_prompt_procedure_type',
+        'inf_init_prompt_config',
+        'inf_edit_prompt_config',
+        'random_seed',
+        'is_seg_tmp',
+        'device',
+        'use_mem_inf_edit',
+        'im_config', 
+        'dice_termination_thresh',
+        'metrics_savepaths',
+        'results_dir',
+        'save_prompts',
+    ]
+
+    args = {key:val for key,val in experiment_args.items() if key in keep_key_list}
+
+    return FrontEndSimulator(infer_app=infer_app, args=args)
 
 
-def log_config_writer(args_name, exp_setup_logger, experiment_args):
-    exp_setup_logger.info(f'Starting up! {os.linesep}')
-    exp_setup_logger.info(f'{args_name}: {os.linesep}')
-    #Easier to use this method as not everything is json serialisable.
-    for key, value in experiment_args.items():
-        try:
-            exp_setup_logger.info(f"{key}: {json.dumps(value, indent=4)}") #Where possible try to serialise in a manner where its readable. 
-        except:
-            exp_setup_logger.info(f"{key}: {value}")
-    
-    exp_setup_logger.info(f'Moving onto build now!: {os.linesep} {os.linesep} {os.linesep}')
 def main():
 
 
@@ -266,11 +361,13 @@ def main():
     ################################## Configuration and extraction of data-related info.  ######################################################################
     
     #Extraction of the config labels dictionary, and the initialisation of the dataloader
-    config_labels_dict, dataloader = init_data(
+    configs_labels_dict, dataloader = init_data(
         dataset_dir=experiment_args['input_dataset_dir'], 
         exp_data_configs=experiment_args['exp_data_configs'],
         file_ext='.nii.gz')
     
+    #We append the config labels dict to the experiment args. 
+    experiment_args['configs_labels_dict'] = configs_labels_dict
 
     ############################## Initialisation of any required directories for this experiment ####################################################################
 
@@ -283,55 +380,37 @@ def main():
     #Creating a base dir for the experiment to store results.
     os.makedirs(experiment_args['exp_results_dir'], exist_ok=False) #Should not already exist.
 
-    #Creating the subdirectories and the csv files for the metrics
-    init_metrics_saves(exp_results_dir=experiment_args['exp_results_dir'], metrics_configs=experiment_args['metrics_configs'], configs_labels_dict=config_labels_dict)
+    #Creating the subdirectories and the csv files for the metrics, then returning a dict of the savepaths according to each and every one of these.
+    experiment_args['metrics_savepaths'] = init_metrics_saves(exp_results_dir=experiment_args['exp_results_dir'], metrics_configs=experiment_args['metrics_configs'], configs_labels_dict=configs_labels_dict)
 
     #Based on whether the segmentation is being saved permanently, create the corresponding subdirectories or not. 
     if not experiment_args['is_seg_tmp']:
         create_seg_dirs(exp_results_dir=experiment_args['exp_results_dir'], infer_run_conf=experiment_args['infer_run_configs'])
-    
-
-    if not True:
-        raise NotImplementedError('Need to fix the infer app builder')
-        infer_app = build_app()
-
-        if not callable(infer_app):
-            raise Exception('The inference app must be callable class.')
-        else:
-            #Check if it has a call attribute!
-            try:
-                callback = getattr(infer_app, "__call__")
-            except:
-                raise Exception('The inference app did not have a function __call__')
-            
-            #Check if it has a app_configs attribute!
-            try:
-                app_configs_callback = getattr(infer_app, "app_configs")
-            except:
-                raise Exception('The inference app did not have a function app_configs (which can be empty!), for saving the app configs to the experiment logger file.')
-
-            if not callable(callback):
-                raise Exception('The initialised inference app object had a __call__ attribute which was not a callable function.') 
-            
-            if not callable(app_configs_callback):
-                raise Exception("The initialised inference app object had a 'app_configs' attribute which was not a callable function. ")
-
-    
+        
     #Save the info about the experiment args, save the info about the application config which should be spit out as a method of the callable infer class.
     
     logger_save_name = f'experiment_{experiment_args["exp_datetime"]}_logs'
     experiment_args_logger(logger_save_name=logger_save_name, root_dir=experiment_args['exp_results_dir'], screen=True, tofile=True)
     exp_setup_logger = logging.getLogger(logger_save_name)
-    log_init_writer(exp_setup_logger, experiment_args)
+    exp_setup_logger.info(f'Starting up! {os.linesep}')
 
+    log_config_writer('Experiment Args', experiment_args, exp_setup_logger)
 
-    print('halt')
+    exp_setup_logger.info(f'Moving onto build now!: {os.linesep} {os.linesep} {os.linesep}')
 
-    if not True:
-        app_config_dict = infer_app.app_configs()
-        if 'app_name' not in app_config_dict:
-            warnings.warn('Should return the application name')
-        exp_setup_logger.info(f'Application configuration arguments \n {str(app_config_dict)}')
+    #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    #Now we move onto building the app
+    
+    infer_app = init_infer_app(experiment_args) 
+
+    #Extract the app configs using the required method. 
+    app_config_dict = infer_app.app_configs()
+
+    if not app_config_dict:
+        warnings.warn('Should at least return the application name')
+
+    #Writing app configs. 
+    log_config_writer('Application Args', app_config_dict, exp_setup_logger)
 
 
 
@@ -339,14 +418,13 @@ def main():
 
     #Build the front-end simulator: 
 
-    # fe_sim_obj = init_fe(config_labels_dict,)
-
-
+    fe_sim_obj = init_fe(infer_app=infer_app, experiment_args=experiment_args)
 
 
     # Iterating through the dataset:
 
-    # run_instances(dataloader=dataloader, fe_sim_obj=fe_sim_obj)
+    run_instances(dataloader=dataloader, fe_sim_obj=fe_sim_obj) 
+
 if __name__=='__main__':
     main()
 

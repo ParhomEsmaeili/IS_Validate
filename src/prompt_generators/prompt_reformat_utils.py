@@ -8,7 +8,7 @@ class PromptReformatter:
 
     def __init__(self,
                 class_config_dict: dict):
-        logger.info('Initialising the prompt reformatter')
+        # logger.info('Initialising the prompt reformatter')
 
         self.class_config = class_config_dict 
 

@@ -748,8 +748,8 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
             config_labels_dict=config_labels_dict,
             sim_device=sim_device,
         )
-        self.configs_labels_dict = config_labels_dict
-        self.sim_device = sim_device
+        # self.configs_labels_dict = config_labels_dict
+        # self.sim_device = sim_device
         self.heur_fn_dict = heur_fn_dict
 
         #Inter-prompt level default variable.
@@ -780,13 +780,13 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
         # deprecated or updated some point.
 
         for ptype in self.valid_ptypes:
-            if self.toggling_dict[ptype] is None:
+            if self.toggling_dict['intra_heur_level'][ptype] is None:
                 raise Exception('The heuristic params cannot be a NoneType if we are simulating for a given prompt')
             
-            for heur, heur_args in self.toggling_dict[ptype].items():
+            for heur, heur_args in self.toggling_dict['intra_heur_level'][ptype].items():
                 if ptype is 'bboxes':
                     if 'jitter' in heur:
-                        raise Exception('We do not yet have a strategy for handling bbox memory without constantly sampling bbox, hence jitter cannot be used yet.')
+                        raise Exception('We do not yet have a strategy for handling bbox memory without constantly sampling bbox and deleting repeats, hence jitter cannot be used yet.')
                 #Checking that any non- n_max heuristic args are being provided. 
                 if any([i not in ['n_max'] for i in heur_args]):
                     raise Exception('Prototype does not accept any heuristic level arguments other than N_max for quantity of prompts placed.')
@@ -846,7 +846,7 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                         mixture_args: Union[dict, None]):
         
         if heur_build_args is None:
-            raise Exception('Heuristic level build arguments are ALWAYS required. At least one!')
+            raise Exception('Heuristic level build arguments are ALWAYS required. At least one per heuristic!')
         elif heur_build_args is not None and mixture_args is None:
             #In this case, we will resort to defaults for the mixture methods.
             self.toggling_dict = {

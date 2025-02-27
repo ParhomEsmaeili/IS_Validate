@@ -12,7 +12,7 @@ import warnings
 
 # logger = logging.getLogger(__name__)
 
-def init_data(dataset_dir:str, exp_data_configs:dict, file_ext):
+def init_data(dataset_dir:str, exp_data_configs:dict, file_ext:str):
     #Function intended for reading data from the json, formulating it into the structure for the dataset 
     # constructor and then instantiating the dataset object.
 
@@ -89,8 +89,8 @@ def init_data(dataset_dir:str, exp_data_configs:dict, file_ext):
         else:
             raise Exception('OS not supported.')
 
-        data_instance['image'] = im_path
-        data_instance['label'] = lb_path
+        data_instance['image'] = im_path + file_ext
+        data_instance['label'] = lb_path + file_ext 
     
     return config_labels_dict, dataloader_generator(datalist=datalist)
 
@@ -105,7 +105,7 @@ def dataloader_generator(datalist):
         Orientationd(keys=['image', 'label'], axcodes='RAS'),
         EnsureTyped(keys=['image', 'label'], dtype=[torch.float32, torch.int32]),
     ]
-    dataset = Dataset(datalist, load_transforms)
+    dataset = Dataset(datalist, Compose(load_transforms))
     return DataLoader(dataset=dataset, batch_size=1, num_workers=1)
 
 def iterate_dataloader_check(data_instance):
