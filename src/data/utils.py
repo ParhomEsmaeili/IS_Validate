@@ -103,7 +103,7 @@ def dataloader_generator(datalist):
         LoadImaged(keys=['image', 'label'], reader="ITKReader", image_only=False),
         EnsureChannelFirstd(keys=['image', 'label']),
         Orientationd(keys=['image', 'label'], axcodes='RAS'),
-        EnsureTyped(keys=['image', 'label'], dtype=[torch.float32, torch.int32]),
+        EnsureTyped(keys=['image', 'label'], dtype=[torch.float64, torch.int64]),
     ]
     dataset = Dataset(datalist, Compose(load_transforms))
     return DataLoader(dataset=dataset, batch_size=1, num_workers=1)

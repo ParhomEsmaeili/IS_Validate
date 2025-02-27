@@ -29,7 +29,7 @@ from monailabel.utils.others.pathology import create_asap_annotations_xml, creat
 logger = logging.getLogger(__name__)
 
 
-def write_nifti(data, filename, affine=None, original_affine=None, output_dtype=np.float32):
+def write_nifti(data, filename, affine=None, original_affine=None, output_dtype=np.float64):
     writer = NibabelWriter(output_dtype=output_dtype)
     writer.set_data_array(data, channel_dim=None, spatial_ndim=None)
     writer.set_metadata({"affine": affine, "original_affine": original_affine})
@@ -92,7 +92,7 @@ def write_seg_nrrd(
     Args:
         image_np: Image as numpy ndarray
         output_file: Output file path that the seg.nrrd file should be saved to
-        dtype: numpy type e.g. float32
+        dtype: numpy type e.g. float64
         affine: Affine matrix
         labels: Labels of image segment which will be written to the nrrd header
         color_map: Mapping from segment_name(str) to it's color e.g. {'heart': [255/255, 244/255, 209/255]}

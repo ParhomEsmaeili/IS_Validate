@@ -60,14 +60,14 @@ class InferApp:
             dummy[0,idx, :, :] = 1 
             list_logits.append(dummy)
         
-        logits_tensor = torch.cat(list_logits, dim=0).to(dtype=torch.float32)
+        logits_tensor = torch.cat(list_logits, dim=0).to(dtype=torch.float64)
 
         #Pred = Plain centred binary mask, like a cuboid.
         
         pred = torch.zeros_like(img)
         pred[0, int(shape[1]/2 - 10) : int(shape[1]/2 + 10),  int(shape[2]/2 - 10) : int(shape[2]/2 + 10), int(shape[3]/2 - 10): int(shape[3]/2 + 10)]
         
-        pred.to(dtype=torch.int32) 
+        pred.to(dtype=torch.int64) 
 
 
         output = {

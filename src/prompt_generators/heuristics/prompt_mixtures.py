@@ -185,7 +185,7 @@ class BaseMixture(PointBase, ScribbleBase, BboxBase):
     def discrete_checker(self, prompt_list: Union[list[torch.Tensor], None], device: torch.device):
         '''
         Function which checks and converts input prompts containing discrete values (e.g. spatial prompts, labels), 
-        to ensure that they are torch.int32 datatypes. Also moves it to the device.
+        to ensure that they are torch.int64 datatypes. Also moves it to the device.
 
         inputs: 
         
@@ -196,7 +196,7 @@ class BaseMixture(PointBase, ScribbleBase, BboxBase):
 
         returns: 
 
-        prompt_list: A list of torch tensors but in the correct datatype (torch.int32) or NoneType for unused instances.
+        prompt_list: A list of torch tensors but in the correct datatype (torch.int64) or NoneType for unused instances.
         '''
 
         if not prompt_list: #If empty list, or NoneType, just pass through.
@@ -207,7 +207,7 @@ class BaseMixture(PointBase, ScribbleBase, BboxBase):
                     raise Exception('No complex numbers should be possible.')
                 elif tensor.is_floating_point():
                     warnings.warn('The discrete prompts should be provided as a torch int type.')
-                    prompt_list[idx] = tensor.to(dtype=torch.int32)
+                    prompt_list[idx] = tensor.to(dtype=torch.int64)
                 else:
                     continue #We pass through if the tensor is a torch int-type.
                 
@@ -475,18 +475,18 @@ class BasicValidOnlyMixture(BaseMixture):
         
         #First we implement the gt extraction since this is always required. 
 
-        #Place gt on device and in int32 dtype. 
+        #Place gt on device and in int64 dtype. 
 
         if not gt.device == self.sim_device:
             warnings.warn('The gt mask must be placed on the sim device')
-            gt = gt.to(dtype=torch.int32, device=self.sim_device)
+            gt = gt.to(dtype=torch.int64, device=self.sim_device)
         
         sampling_regions_dict['gt'] = dict.fromkeys(self.config_labels_dict.keys(), [])
 
         #We then split the gt, by class and into a list of components for each class. 
         for label, value  in self.config_labels_dict.items():
             #We split gt by label. 
-            gt_temp = torch.where(gt == value, 1, 0).to(dtype=torch.int32, device=self.sim_device)
+            gt_temp = torch.where(gt == value, 1, 0).to(dtype=torch.int64, device=self.sim_device)
             components_list, _ = get_label_ccp(gt_temp) 
             if components_list == []:
                 warnings.warn(f'Class {label} was empty in gt.')
@@ -503,21 +503,21 @@ class BasicValidOnlyMixture(BaseMixture):
             sampling_regions_dict['error_regions'] = None 
             return sampling_regions_dict
         else: 
-            #Place pred on device and in int32 dtype. 
+            #Place pred on device and in int64 dtype. 
 
             if not pred.device == self.sim_device:
                 warnings.warn('The pred mask must be placed on the sim device')
-                pred = pred.to(dtype=torch.int32, device=self.sim_device)
+                pred = pred.to(dtype=torch.int64, device=self.sim_device)
             
             #Find the false negative error region. 
-            error_map_bool = torch.where(pred != gt, 1, 0).to(dtype=torch.int32, device=self.sim_device)
+            error_map_bool = torch.where(pred != gt, 1, 0).to(dtype=torch.int64, device=self.sim_device)
             
             #Create the error regions dict: 
             err_regions_dict = dict() 
 
             for l1, v1 in self.config_labels_dict.items():
                 #Splitting into classes according to gt (i.e. voxels where an error occured and where the gt class exists)                
-                temp_gt = torch.where(gt == v1, 1, 0).to(dtype=torch.int32, device=self.sim_device)
+                temp_gt = torch.where(gt == v1, 1, 0).to(dtype=torch.int64, device=self.sim_device)
                 split_by_gt = error_map_bool * temp_gt 
                 
                 err_regions_dict[l1]  = dict() 
@@ -528,7 +528,7 @@ class BasicValidOnlyMixture(BaseMixture):
                     #NOTE: We use where key != l1 because error would not occur if the pred was the same as the gt label.
 
                     #split by pred gives us the map where the gt = v1 but pred = v2
-                    temp_pred = torch.where(pred == v2, 1, 0).to(dtype=torch.int32, device=self.sim_device)
+                    temp_pred = torch.where(pred == v2, 1, 0).to(dtype=torch.int64, device=self.sim_device)
                     split_by_pred = split_by_gt * temp_pred 
 
                     #Splitting into the list of components
@@ -583,18 +583,18 @@ class BasicValidOnlyMixture(BaseMixture):
 
         if not isinstance(gt, torch.Tensor) and not isinstance(gt, MetaTensor):
             raise Exception('The ground truth must be a torch tensor or a metatensor.')
-        #Place gt on device and in int32 dtype. 
+        #Place gt on device and in int64 dtype. 
 
         if not gt.device == self.sim_device:
             warnings.warn('The gt mask must be placed on the sim device')
-            gt = gt.to(dtype=torch.int32, device=self.sim_device)
+            gt = gt.to(dtype=torch.int64, device=self.sim_device)
         
         sampling_regions_dict['gt'] = dict.fromkeys(self.config_labels_dict.keys(), None)
 
         #We then split the gt, by class for each class. 
         for label, value  in self.config_labels_dict.items():
             #We split gt by label. 
-            gt_temp = torch.where(gt == value, 1, 0).to(dtype=torch.int32, device=self.sim_device) 
+            gt_temp = torch.where(gt == value, 1, 0).to(dtype=torch.int64, device=self.sim_device) 
             if gt_temp.sum() == 0:
                 warnings.warn(f'Class {label} was empty in gt.')
                 sampling_regions_dict['gt'][label] = None 
@@ -614,21 +614,21 @@ class BasicValidOnlyMixture(BaseMixture):
             sampling_regions_dict['error_regions'] = None 
             return sampling_regions_dict
         else: 
-            #Place pred on device and in int32 dtype. 
+            #Place pred on device and in int64 dtype. 
 
             if not pred.device == self.sim_device:
                 warnings.warn('The pred mask must be placed on the sim device')
-                pred = pred.to(dtype=torch.int32, device=self.sim_device)
+                pred = pred.to(dtype=torch.int64, device=self.sim_device)
             
             #Find the false negative error region. 
-            error_map_bool = torch.where(pred != gt, 1, 0).to(dtype=torch.int32, device=self.sim_device)
+            error_map_bool = torch.where(pred != gt, 1, 0).to(dtype=torch.int64, device=self.sim_device)
             
             #Create the error regions dict: 
             err_regions_dict = dict() 
 
             for l1, v1 in self.config_labels_dict.items():
                 #Splitting into classes according to gt (i.e. voxels where an error occured and where the gt class exists)                
-                temp_gt = torch.where(gt == v1, 1, 0).to(dtype=torch.int32, device=self.sim_device)
+                temp_gt = torch.where(gt == v1, 1, 0).to(dtype=torch.int64, device=self.sim_device)
                 #We recompute because calling from gt above, NoneType would break.
                 split_by_gt = error_map_bool * temp_gt 
                 
@@ -956,7 +956,7 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                     
                     temp_plab_list = copy.deepcopy(tracked_prompt_lbs[ptype])
                     #Just create a list according to the generated prompts. If it is empty (i.e. len of 0 then will just extend by [])
-                    gen_prompts_lbs = [torch.tensor([class_int], dtype=torch.int32)] * len(temp_plist)
+                    gen_prompts_lbs = [torch.tensor([class_int], dtype=torch.int64)] * len(temp_plist)
 
                     temp_plab_list.extend(gen_prompts_lbs[ptype])
 
@@ -1253,7 +1253,7 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
             else:
                 print('We have prior output data, please check that this is an editing iteration')
                 pred = data['prev_output_data']['pred']['metatensor'][0, :]
-                pred = pred.to(dtype=torch.int32, device=self.sim_device)
+                pred = pred.to(dtype=torch.int64, device=self.sim_device)
 
                 if not isinstance(pred, torch.Tensor) or not isinstance(gt, MetaTensor):
                     raise TypeError('The pred needs to be a torch tensor or a Monai MetaTensor')            
@@ -1263,7 +1263,7 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                     raise Exception('The interaction memory (even if unused) should not be a NoneType for edits.')
 
             gt = data['gt'][0, :]
-            gt = gt.to(dtype=torch.int32, device=self.sim_device)
+            gt = gt.to(dtype=torch.int64, device=self.sim_device)
 
             if not isinstance(gt, torch.Tensor) or not isinstance(gt, MetaTensor):
                 raise TypeError('The gt needs to be a torch tensor or a Monai MetaTensor')

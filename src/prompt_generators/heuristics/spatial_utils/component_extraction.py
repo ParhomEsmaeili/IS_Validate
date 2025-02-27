@@ -42,7 +42,7 @@ def extract_connected_components(binary_mask):
     
     # Initialize Union-Find structures
     parents = torch.arange(num_elements, device=device)
-    ranks = torch.zeros(num_elements, dtype=torch.int32, device=device)
+    ranks = torch.zeros(num_elements, dtype=torch.int64, device=device)
     
     # Define neighbor offsets for 2D (8-connectivity) and 3D (26-connectivity)
     if binary_mask.dim() == 2:
@@ -124,7 +124,7 @@ def get_label_ccp(mask_index: MetaTensor, use_gpu: bool = True) -> tuple[list[An
     torch_tensor = torch.from_numpy(labeled)
     masks = []
     for ncomp in range(1, ncomponents+1):
-        masks.append(torch.where(torch_tensor == ncomp, 1, 0).to(dtype=torch.int32))
+        masks.append(torch.where(torch_tensor == ncomp, 1, 0).to(dtype=torch.int64))
 
     return masks, ncomponents
 
@@ -140,7 +140,7 @@ if __name__ == '__main__':
         [0, 1, 1, 1, 1, 1, 1, 1, 0],
         [0, 1, 1, 1, 1, 1, 1, 1, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ], dtype=torch.int32)
+    ], dtype=torch.int64)
 
     components2d = extract_connected_components(binary_mask_2d)
     for i, comp in enumerate(components2d):

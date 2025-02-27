@@ -26,12 +26,12 @@ def uniform_random(binary_mask, n):
     if possible_coords.shape[0] >= n:
         #If there are sufficient voxels, return N
         idxs = torch.sort(torch.randint(0, possible_coords.shape[0] - n + 1,(n,), device=device)).values + torch.arange(0, n, device=device)
-        coords = possible_coords[idxs, :].to(dtype=torch.int32)
+        coords = possible_coords[idxs, :].to(dtype=torch.int64)
         return list(coords.split(1, 0))
     elif possible_coords.shape[0] < n and possible_coords.shape[0] != 0:
         #If there are not sufficient voxels, return the max quantity?
         #idxs = torch.sort(torch.randint(0, 1,(possible_coords.shape[0],), device=device)).values + torch.arange(0, possible_coords.shape[0], device=device)
-        coords = possible_coords.to(dtype=torch.int32)
+        coords = possible_coords.to(dtype=torch.int64)
         return list(coords.split(1, 0))
     elif possible_coords.shape[0] == 0:
         return []

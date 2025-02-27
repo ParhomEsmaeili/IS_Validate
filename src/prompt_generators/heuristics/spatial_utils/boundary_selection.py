@@ -79,7 +79,7 @@ if __name__ == '__main__':
         [0, 1, 1, 1, 1, 1, 1, 1, 0],
         [0, 1, 1, 1, 1, 1, 1, 1, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ], dtype=torch.float32)
+    ], dtype=torch.float64)
 
     cavity_boundaries = extract_interior_boundary(binary_mask_2d)
     print(cavity_boundaries.numpy())  # Should show only the internal cavity boundaries

@@ -33,7 +33,7 @@ def update_binary_mask(coords: torch.Tensor, mask: torch.Tensor) -> torch.Tensor
     valid_coords = coords[valid_mask].to(device)  # Move valid_coords to the same device as mask
 
     if valid_coords.numel() > 0:  # Ensure there are valid coordinates
-        indices = tuple(valid_coords.to(torch.int32).T)  # Convert valid coordinates to indices using int32
+        indices = tuple(valid_coords.to(torch.int64).T)  # Convert valid coordinates to indices using int64
         mask[indices] = 0  # Set valid positions to 0
     
     return mask

@@ -101,9 +101,9 @@ class MetricsHandler:
     
     def extract_spatial_dims(self, input):
         '''
-        Function which extracts the spatial dimensions of the input, assumed to be CHW(D). Returns it in torch.int32 dtype.
+        Function which extracts the spatial dimensions of the input, assumed to be CHW(D). Returns it in torch.int64 dtype.
         '''
-        return input[0,:].to(dtype=torch.int32)
+        return input[0,:].to(dtype=torch.int64)
     
     def init_base_metrics(self):
         #Extracting the metric configs for the base metric types ONLY.
@@ -124,8 +124,8 @@ class MetricsHandler:
         cross_class_mask and the per_class_masks.
         '''
         return {
-            'cross_class_mask':torch.ones_like(tensor, dtype=torch.int32),
-            'per_class_masks': {class_lab:torch.ones_like(tensor,dtype=torch.int32) for class_lab in self.config_labels_dict.keys()}
+            'cross_class_mask':torch.ones_like(tensor, dtype=torch.int64),
+            'per_class_masks': {class_lab:torch.ones_like(tensor,dtype=torch.int64) for class_lab in self.config_labels_dict.keys()}
         }
     
     def exec_base_metrics(self, 

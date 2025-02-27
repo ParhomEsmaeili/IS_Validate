@@ -292,7 +292,7 @@ class CenterlineScribble(WarpScribble):
         """
         Simulate scribbles for a batch of examples.
         Args:
-            mask: (b,1,H,W) mask in [0,1] to sample scribbles from. torch.int32
+            mask: (b,1,H,W) mask in [0,1] to sample scribbles from. torch.int64
             n_scribbles: (int) only used when max_pixels is set as a multiplier for total area of the scribbles
                 currently, this argument does not control the number of components in the scribble mask
         Returns:

@@ -107,29 +107,29 @@ if __name__ == '__main__':
     config_labels_dict = {'tumor':1, 'background':0}
 
     #Testing basic set ups where each each class has a prompt provided for all prompts.
-    points_1 = [torch.Tensor([[1,2,3]]).to(dtype=torch.int32), torch.Tensor([[4,5,6]]).to(dtype=torch.int32)]
-    scribbles_1 = [torch.stack([torch.Tensor([1,2,3]).to(dtype=torch.int32), torch.Tensor([4,5,6]).to(dtype=torch.int32)]), 
-                   torch.stack([torch.Tensor([7,8,9]).to(dtype=torch.int32), torch.Tensor([10,11,12]).to(dtype=torch.int32)]), torch.stack([torch.Tensor([13,14,15]).to(dtype=torch.int32)])]
+    points_1 = [torch.Tensor([[1,2,3]]).to(dtype=torch.int64), torch.Tensor([[4,5,6]]).to(dtype=torch.int64)]
+    scribbles_1 = [torch.stack([torch.Tensor([1,2,3]).to(dtype=torch.int64), torch.Tensor([4,5,6]).to(dtype=torch.int64)]), 
+                   torch.stack([torch.Tensor([7,8,9]).to(dtype=torch.int64), torch.Tensor([10,11,12]).to(dtype=torch.int64)]), torch.stack([torch.Tensor([13,14,15]).to(dtype=torch.int64)])]
     #We introduce variation in the scribble length to ensure that it is compatible with variations in scribbles,
     #not required for other prompts since those have a fixed definition for each instance.
 
-    bboxs_1 = [torch.Tensor([[1,2,3,4,5,6]]).to(dtype=torch.int32),
-               torch.Tensor([[7,8,9,10,11,12]]).to(dtype=torch.int32)
+    bboxs_1 = [torch.Tensor([[1,2,3,4,5,6]]).to(dtype=torch.int64),
+               torch.Tensor([[7,8,9,10,11,12]]).to(dtype=torch.int64)
             ]
     
 
-    points_lb_1 = [torch.Tensor([1]).to(dtype=torch.int32), torch.Tensor([0]).to(dtype=torch.int32)]
-    scribbles_lb_1 = [torch.Tensor([1]).to(dtype=torch.int32), torch.Tensor([0]).to(dtype=torch.int32), torch.Tensor([1]).to(dtype=torch.int32)] 
-    bboxs_lb_1 = [torch.Tensor([1]).to(dtype=torch.int32), torch.Tensor([0]).to(dtype=torch.int32)] 
+    points_lb_1 = [torch.Tensor([1]).to(dtype=torch.int64), torch.Tensor([0]).to(dtype=torch.int64)]
+    scribbles_lb_1 = [torch.Tensor([1]).to(dtype=torch.int64), torch.Tensor([0]).to(dtype=torch.int64), torch.Tensor([1]).to(dtype=torch.int64)] 
+    bboxs_lb_1 = [torch.Tensor([1]).to(dtype=torch.int64), torch.Tensor([0]).to(dtype=torch.int64)] 
 
     #Basic setup where not every class has a prompt simulated for each prompt type. 
     points_2 = points_1
     scribbles_2 = scribbles_1 
     bboxs_2 = bboxs_1 
 
-    points_lb_2 = [torch.Tensor([1]).to(dtype=torch.int32), torch.Tensor([1]).to(dtype=torch.int32)]
-    scribbles_lb_2 = [torch.Tensor([1]).to(dtype=torch.int32), torch.Tensor([1]).to(dtype=torch.int32), torch.Tensor([1]).to(dtype=torch.int32)]
-    bboxs_lb_2 = [torch.Tensor([1]).to(dtype=torch.int32), torch.Tensor([1]).to(dtype=torch.int32)] 
+    points_lb_2 = [torch.Tensor([1]).to(dtype=torch.int64), torch.Tensor([1]).to(dtype=torch.int64)]
+    scribbles_lb_2 = [torch.Tensor([1]).to(dtype=torch.int64), torch.Tensor([1]).to(dtype=torch.int64), torch.Tensor([1]).to(dtype=torch.int64)]
+    bboxs_lb_2 = [torch.Tensor([1]).to(dtype=torch.int64), torch.Tensor([1]).to(dtype=torch.int64)] 
 
     #Basic setup where we set Nonetypes for some prompt types (i.e. no prompt simulation)
     points_3 = points_1
