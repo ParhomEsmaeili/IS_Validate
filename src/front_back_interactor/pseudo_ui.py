@@ -95,16 +95,14 @@ class FrontEndSimulator:
 
             'metatensor': MetaTensor or torch object, ((torch.float dtype)), multi-channel logits map (CHWD), where C = Number of Classes (channel first format)
         
-            'meta_dict: Meta information in dict format,  ('affine must match the input-images' affine info)
+            'meta_dict: Meta information in dict format,  ('affine must match the input-images' affine info).
         
         'pred': Dict which contains the following fields:
             metatensor: MetaTensor or torch tensor object ((torch.int dtype)) containing the discretised prediction (shape 1HWD)
             meta_dict: Meta information in dict format, which corresponds to the header of the prediction (affine array must match the input image's meta-info)
 
         NOTE: The meta dictionaries will be expected to contain a key:item pair denoted as "affine", containing the 
-        affine array required for saving the segmentations in ITK format.
-        
-        NOTE: The affine must be a torch tensor.
+        affine array. NOTE: The affine must be a torch tensor.
 
     NOTE: These outputs must be stored/provided on cpu. 
 

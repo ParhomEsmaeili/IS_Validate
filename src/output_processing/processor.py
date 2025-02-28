@@ -21,8 +21,6 @@ logger = logging.getLogger(__name__)
     of these corresponding written files, in the expected structure of the interaction state constructor. 
 '''
 
-# NOTE: We use ITK for image saving, hence we convert out RAS orientated tensors into LPS orientation for ITK.
-
 class OutputProcessor:
     '''
     Class which initialises the output processing class. Takes as initialisation args:

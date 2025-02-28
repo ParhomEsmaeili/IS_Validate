@@ -100,7 +100,7 @@ def dataloader_generator(datalist):
     This function handles the construction of a dataset object for iterating through, and then returns the dataloader.
     '''
     load_transforms = [
-        LoadImaged(keys=['image', 'label'], reader="ITKReader", image_only=False),
+        LoadImaged(keys=['image', 'label'], reader="ITKReader", image_only=True),
         EnsureChannelFirstd(keys=['image', 'label']),
         Orientationd(keys=['image', 'label'], axcodes='RAS'),
         EnsureTyped(keys=['image', 'label'], dtype=[torch.float64, torch.int64]),
@@ -116,8 +116,8 @@ def iterate_dataloader_check(data_instance):
 
     if isinstance(data_instance['image'], MetaTensor) and isinstance(data_instance['label'], MetaTensor):
         try:
-            im_meta_dict = data_instance['image_meta_dict']
-            label_meta_dict = data_instance['label_meta_dict']
+            im_meta_dict = data_instance.meta #['image_meta_dict']
+            label_meta_dict = data_instance.meta #['label_meta_dict']
         except:
             raise KeyError('The loaded data instance does not contain a meta dictionary')
 
@@ -144,8 +144,8 @@ def data_instance_reformat(data_instance:dict):
 
     #We extract the paths from the meta_dict:
 
-    im_path = copy.deepcopy(data_instance['image_meta_dict']['filename_or_obj'])
-    label_path = copy.deepcopy(data_instance['label_meta_dict']['filename_or_obj'])
+    im_path = copy.deepcopy(data_instance['image'].meta['filename_or_obj'])
+    label_path = copy.deepcopy(data_instance['label'].meta['filename_or_obj'])
 
     if not os.path.exists(im_path) or not os.path.exists(label_path):
         raise Exception('One of the paths does not exist! Or the full absolute path was not provided to the dataset constructor')
@@ -153,13 +153,13 @@ def data_instance_reformat(data_instance:dict):
     im_tensor = copy.deepcopy(data_instance['image'])
     label_tensor = copy.deepcopy(data_instance['label'])
 
-    if not isinstance(im_tensor, torch.Tensor) or not isinstance(im_tensor, MetaTensor):
-        raise TypeError('Image tensor was not a torch tensor or a Monai meta-tensor.')
-    if not isinstance(label_tensor, torch.Tensor) or not isinstance(label_tensor, MetaTensor):
-        raise TypeError('Label tensor was not a torch tensor or a Monai meta-tensor.')
+    if not isinstance(im_tensor, MetaTensor): #or not isinstance(im_tensor, torch.Tensor):
+        raise TypeError('Image tensor was not a MONAI meta-tensor.')
+    if not isinstance(label_tensor, MetaTensor): #or not isinstance(label_tensor, torch.Tensor): 
+        raise TypeError('Label tensor was not a MONAI meta-tensor.')
     
-    im_meta_dict = copy.deepcopy(data_instance['image_meta_dict'])
-    label_meta_dict = copy.deepcopy(data_instance['image_meta_dict'])
+    im_meta_dict = copy.deepcopy(data_instance['image'].meta)
+    label_meta_dict = copy.deepcopy(data_instance['label'].meta)
 
     if not isinstance(im_meta_dict, dict) or not im_meta_dict:
         raise Exception('The image meta_dict must be a non-empty dictionary')
