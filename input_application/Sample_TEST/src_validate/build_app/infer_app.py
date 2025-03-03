@@ -39,7 +39,7 @@ class InferApp:
             NOTE: The meta dictionaries will be expected to contain a key:item pair denoted as "affine", containing the 
             affine array required for saving the segmentations in ITK format.
             
-            NOTE: The affine must be a torch tensor.
+            NOTE: The affine must be a torch tensor or numpy array.
 
         NOTE: These outputs must be stored/provided on cpu. 
 
@@ -65,7 +65,7 @@ class InferApp:
         #Pred = Plain centred binary mask, like a cuboid.
         
         pred = torch.zeros_like(img)
-        pred[0, int(shape[1]/2 - 10) : int(shape[1]/2 + 10),  int(shape[2]/2 - 10) : int(shape[2]/2 + 10), int(shape[3]/2 - 10): int(shape[3]/2 + 10)]
+        pred[0, int(shape[1]/2 - 10) : int(shape[1]/2 + 5),  int(shape[2]/2 - 10) : int(shape[2]/2 + 5), int(shape[3]/2 - 10): int(shape[3]/2 + 5)]
         
         pred.to(dtype=torch.int64) 
 
@@ -73,11 +73,11 @@ class InferApp:
         output = {
             'logits':{
                 'metatensor':logits_tensor,
-                'meta_dict':{'affine': request['image']['meta_dict']['affine']}
+                'meta_dict':{'affine': request['image'].meta['affine']}
             },
             'pred':{
                 'metatensor':pred,
-                'meta_dict':{'affine': request['image']['meta_dict']['affine']}
+                'meta_dict':{'affine': request['image'].meta['affine']}
             },
             'optional_memory':None
         }

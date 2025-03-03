@@ -106,7 +106,11 @@ def dataloader_generator(datalist):
         EnsureTyped(keys=['image', 'label'], dtype=[torch.float64, torch.int64]),
     ]
     dataset = Dataset(datalist, Compose(load_transforms))
-    return DataLoader(dataset=dataset, batch_size=1, num_workers=1)
+    # return DataLoader(dataset=dataset, batch_size=1, num_workers=1)
+
+    #We switch from DataLoader to just using the Dataset as we do not want our meta dictionary to be endowed with any additional structure induced by the dataloader's
+    #support for batch sizes > 1 at each iteration/callback. 
+    return dataset  
 
 def iterate_dataloader_check(data_instance):
     
@@ -116,15 +120,15 @@ def iterate_dataloader_check(data_instance):
 
     if isinstance(data_instance['image'], MetaTensor) and isinstance(data_instance['label'], MetaTensor):
         try:
-            im_meta_dict = data_instance.meta #['image_meta_dict']
-            label_meta_dict = data_instance.meta #['label_meta_dict']
+            im_meta_dict = data_instance['image'].meta #['image_meta_dict']
+            label_meta_dict = data_instance['label'].meta #['label_meta_dict']
         except:
-            raise KeyError('The loaded data instance does not contain a meta dictionary')
+            raise Exception('The loaded data instance does not contain a meta dictionary')
 
         #We assert that the data must be single modality for our current application!
-        if int(im_meta_dict['pixdim[4]'][0]) > 1:
+        if int(im_meta_dict['pixdim[4]']) > 1:
             raise ValueError('This application only supports single modality implementations.')
-        if int(label_meta_dict['pixdim[4]'][0]) > 1:
+        if int(label_meta_dict['pixdim[4]']) > 1:
             raise ValueError('This application only supports single modality implementations')
     else:
         raise TypeError("The loaded image and label data must be a MetaTensor")
@@ -142,7 +146,7 @@ def data_instance_reformat(data_instance:dict):
     if not isinstance(data_instance, dict) or not data_instance:
         raise Exception('Data instance is assumed to be a non-empty dictionary format..')
 
-    #We extract the paths from the meta_dict:
+    #We extract the paths from the meta info:
 
     im_path = copy.deepcopy(data_instance['image'].meta['filename_or_obj'])
     label_path = copy.deepcopy(data_instance['label'].meta['filename_or_obj'])
@@ -172,7 +176,7 @@ def data_instance_reformat(data_instance:dict):
     original_affine_key = 'original_affine'
     current_affine_key = 'affine'
 
-    def affine_to_tensor(meta_dict:dict, affine_key: str):
+    def affine_checker(meta_dict:dict, affine_key: str):
         if isinstance(meta_dict[affine_key], np.ndarray):
             warnings.warn(f'The meta_dicts key: {affine_key} was a numpy array, converting to torch tensor.')
             meta_dict[affine_key] = torch.from_numpy(meta_dict[affine_key])
@@ -180,13 +184,13 @@ def data_instance_reformat(data_instance:dict):
         elif isinstance(meta_dict[affine_key], torch.Tensor):
             return meta_dict
         else:
-            raise TypeError('The affine info must be initially presented as a numpy or torch tensor.')
+            raise TypeError('The affine info must be presented as a numpy or torch tensor.')
     #Running the affine checker for the original and current affine; for both the image and the label
-    im_meta_dict = affine_to_tensor(im_meta_dict, original_affine_key)
-    im_meta_dict = affine_to_tensor(im_meta_dict, current_affine_key)
+    im_meta_dict = affine_checker(im_meta_dict, original_affine_key)
+    im_meta_dict = affine_checker(im_meta_dict, current_affine_key)
 
-    label_meta_dict = affine_to_tensor(label_meta_dict, original_affine_key)
-    label_meta_dict = affine_to_tensor(label_meta_dict, current_affine_key)
+    label_meta_dict = affine_checker(label_meta_dict, original_affine_key)
+    label_meta_dict = affine_checker(label_meta_dict, current_affine_key)
     
 
     #Now populating the reformatted data instance:

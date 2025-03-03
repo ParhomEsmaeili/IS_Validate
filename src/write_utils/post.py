@@ -11,7 +11,6 @@ from monai.transforms import (
 import itk 
 import tempfile 
 import copy 
-# from monai.utils import InterpolateMode, convert_to_numpy, ensure_tuple_rep
 
 
 class WriteOutput:
@@ -21,36 +20,32 @@ class WriteOutput:
         result_key: str,
         dtype:type = None,
         compress:bool=False,
-        has_channel: bool = True,
         invert_orient: bool = True,
-        save_tmp:bool = True,
         file_ext:str = '.nii.gz'
-
-        # meta_key_postfix: str = "meta_dict",
     ):
         # super().__init__(keys)
         self.ref_key = ref_key
         self.result_key = result_key
         self.dtype = dtype 
         self.compress = compress 
-        self.has_channel = has_channel
         self.invert_orient = invert_orient
-        self.save_tmp = save_tmp 
         self.file_ext = file_ext 
-        # self.meta_key_postfix = meta_key_postfix
 
-    def is_multichannel_image(self, image_np: np.ndarray) -> bool:
-        """Check if the provided image contains multiple channels
+    # def is_channelfirst_image(self, image: MetaTensor) -> bool:
+    #     """Check if the provided image contains channel dimensions
 
-        Args:
-            image_np : Expected shape (channels, width, height, batch)
+    #     Args:
+    #         image: Expected shape (channels, width, height, batch)
 
-        Returns:
-            bool: If this is a multi-channel image or not
-        """
-        # return len(image_np.shape) == 4 and image_np.shape[0] > 1
-        #TODO CONSIDER USING META DICT DIM[0]. 
-        pass 
+    #     Returns:
+    #         bool: If this is a channel first tensor or not
+    #     """
+    #     #We extract the number of spatial dimensions from the metainformation.
+    #     n_spatial_dims = int(image.meta['dim[0]'])
+        
+    #     if not len(image.shape) == n_spatial_dims + 1:
+    #         raise Exception('The expected dimensions were that of a channel first image.')
+        
 
     def write_itk(self, image_np, affine, tmp_dir): #, dtype, compress): #output_file, affine, dtype, compress):
         
@@ -70,7 +65,7 @@ class WriteOutput:
         if affine is not None:
             
             convert_aff_mat = np.diag([-1, -1, 1, 1])
-            if len(affine.shape) == 2:
+            if affine.shape[0] == 3:
                 raise NotImplementedError('We do not yet provide handling for 2D images')
                 # if affine.shape[0] == 3:  # Handle RGB (2D Image)
                     # convert_aff_mat = np.diag([-1, -1, 1])
@@ -111,9 +106,9 @@ class WriteOutput:
         
         return duplicate_reference 
     
-    def __call__(self, data_instance, output_data, tmp_dir: Union[str, None]=None):
+    def __call__(self, inf_req: dict, output_data: dict, tmp_dir: str):
         
-        ref = data_instance[self.ref_key]['metatensor']
+        ref = inf_req[self.ref_key]['metatensor']
         ref_meta_dict = ref.meta
         
         result = output_data[self.result_key]['metatensor']
@@ -128,11 +123,11 @@ class WriteOutput:
                 inverse_transform = Orientation(axcodes=orig_axcodes)
                 # Apply inverse
                 with inverse_transform.trace_transform(False):
-                    result = inverse_transform(result)
+                    result_reformat = inverse_transform(result_reformat)
             else:
                 raise Exception("Failed invert orientation - original_affine is not on the image header")
             
-        #TODO: Put a check to ensure that it is channelfirst. IT MUST BE CHANNELFIRST AND HAVE CHANNEL.
+        #We assume that we have already checked that the outputs are channel first, and that they meet the quantity of channels.
 
         #Add a line of code for extracting the channels, this also removes the channel dimension.
         channel_split = list(result_reformat.array) 

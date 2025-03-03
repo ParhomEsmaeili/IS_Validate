@@ -5,17 +5,18 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 import torch
 import numpy as np
+from monai.data import MetaTensor 
 import logging
 import warnings 
 from typing import Optional, Union
 from src.utils.dict_utils import extractor, dict_path_modif
-# from src.save_utils.writer import Writer 
-# from src.save_utils.post import Restored
+from src.write_utils.post import WriteOutput
 
-logger = logging.getLogger(__name__)
+
+# logger = logging.getLogger(__name__)
 
 '''
-    This class OR module needs to be able to process the app output in the following capacities:
+    This class needs to be able to process the app output in the following capacities:
     Needs to modify the output data dictionary such that it matches expected structure of the interaction state constructors
     Needs to implement the writers, for writing the pred, and logits, then adding the paths to the output data for each
     of these corresponding written files, in the expected structure of the interaction state constructor. 
@@ -45,55 +46,44 @@ class OutputProcessor:
         self.save_prompts = save_prompts
 
         #List of paths in the output dictionary that must be on cpu. Each item is in tuple format, index=depth of dict.
-        self.check_cpu_info = [('logits',), ('logits', 'meta_dict', 'affine'), ('pred',), ('pred','meta_dict', 'affine')] 
+        self.check_cpu_info = [('logits','metatensor'), ('logits', 'meta_dict', 'affine'), ('pred','metatensor'), ('pred','meta_dict', 'affine')] 
        
         #Dictionary containing the reference dict (paths), output_dict (paths) and the corresponding checks being examined.
 
         self.check_integrity_info  = {
             #Checking the number of dims for logits and pred. Must be channelfirst CHW(D) and match the quantity 
             #provided in the input image (which must be loaded as a channel first). Also checking the spatial resolution
-            #of the output HW(D) against the input.
+            #of the output HW(D) against the input. Also checking that if the returned obj is a MetaTensor, then the affine must match that of the image.
             'check_logits':{
                 'reference_name':('reference', 'config_labels_dict'),
                 'reference_paths':(('image','metatensor'), None),
                 'output_paths': (('logits','metatensor'), ('logits', 'metatensor')),
-                'checks': (('check_num_dims','check_spatial_res'), ('check_num_channel',)),
+                'checks': (('check_num_dims','check_spatial_res', 'check_meta_affine'), ('check_num_channel',)),
                 },
             'check_pred':{
                 'reference_name':('reference',),
-                'reference_paths':(('image','metatensor'),),
+                'reference_paths':(('label','metatensor'),),
                 'output_paths': (('pred','metatensor'),),
-                'checks': (('check_num_dims','check_spatial_res'),),
+                'checks': (('check_num_dims','check_spatial_res', 'check_meta_affine'),),
             },
-            #Checking that the pred/logits meta information (affine array only!) matches that of the input request.
-            'check_pred_meta':{
+            #Checking that the pred/logits meta dict item (affine array only!) matches that of the input request.
+            'check_pred_meta_dict':{
                 'reference_name':('reference',),
                 'reference_paths':(('image', 'meta_dict', 'affine'),),
                 'output_paths':(('pred', 'meta_dict', 'affine'),),
-                'checks': (('check_torch_match',),),
+                'checks': (('check_metadict_affine',),),
             },
-            'check_logits_meta':{
+            'check_logits_meta_dict':{
                 'reference_name':('reference',),
                 'reference_paths':(('image', 'meta_dict', 'affine'),),
                 'output_paths':(('logits', 'meta_dict', 'affine'),),
-                'checks': (('check_torch_match',),),
-            }         
+                'checks': (('check_metadict_affine',),),
+            }
         }
 
-        # If writing to a permanent seg. use a namedtemporaryfile which closes. 
-        # Else: use a namedtemporaryfile which does not close. NOTE:Make these modifications in the writer?
-        #IT SHOULD ALSO TAKE THE TEMPFILE DIR PROVIDED.
+        self.pred_writer = WriteOutput(ref_key='label', result_key='pred', dtype=np.int32, compress=False, invert_orient=True, file_ext='.nii.gz')
+        self.logits_writer = WriteOutput(ref_key='image', result_key='logits', dtype=np.float32, compress=False, invert_orient=True, file_ext='.nii.gz')
 
-        # if self.is_seg_tmp:
-        #     raise NotImplementedError('Implement the writer such that it takes the appropriate config for the tempfiles which do not delete, etc. etc.')
-        #     self.temp_imwriter = Writer()  
-        # For the temp seg we need to save permanently...?
-
-        # else:
-        #      raise NotImplementedError('Implement the writer such that it takes the config for the namedtempfile correctly')
-        #     #TODO: Populate the writer class with the correct initialisation.
-        #     self.perm_imwriter = Writer()
-        # For the perm seg we need to delete the temp file once we move it? I think shutil.move does this.
         if self.save_prompts:
             raise NotImplementedError('No class provided for saving prompts')
 
@@ -144,13 +134,15 @@ class OutputProcessor:
 
         checks: A tuple of keys denoting the points of comparison being used (e.g. spatial_res, meta_info)
         '''
-
+        helper_lambdas = {
+        'torch_conversion': lambda x: torch.from_numpy(x) if isinstance(x, np.ndarray) else (x if isinstance(x, torch.Tensor) else None) #Presumes that it can only be torch tensor or numpy array.
+        }
         lambdas = {
         'check_spatial_res' : lambda x,y : x.shape[1:]  == y.shape[1:], # x, y = Channel-first tensors.
         'check_num_dims' : lambda x,y : x.ndim == y.ndim, # x, y = Tensors 
         'check_num_channel' : lambda x,y : x.shape[0] == len(y), # x = Channel-first tensor, y = class labels dict (inclusive of background).
-        'check_torch_match': lambda x,y : torch.all(x == y), # x and y = Torch tensors which match in spatial dims.
-        'check_npy_match': lambda x,y: np.all(x == y) # x and y = npy arrays which match in spatial dims.
+        'check_meta_affine': lambda x,y: torch.all(helper_lambdas['torch_conversion'](x.meta['affine']) == helper_lambdas['torch_conversion'](y.meta['affine'])) if isinstance(y, MetaTensor) else True, #x = MetaTensor, y = MetaTensor or torch Tensor
+        'check_metadict_affine': lambda x,y: torch.all(helper_lambdas['torch_conversion'](x) == helper_lambdas['torch_conversion'](y)), #x,y are either torch tensors or np arrays
         } 
 
         #The check_num_dims lambda function is intended to be used for checking that the #of dims match (standard
@@ -183,7 +175,7 @@ class OutputProcessor:
 
         Performs the following checks:
 
-        Matching image size/resolution.
+        Matching image size/resolution, implicitly checks if the image is channel-first by comparing image size and resolution of the 1: dimensions.
         Matching image metadata: this will be assessed through comparison of the affine array in the meta_dicts to 
         that which was provided in the input request's affine array in the image meta dictionary.
 
@@ -206,7 +198,7 @@ class OutputProcessor:
         #expected requirements.
 
         for item, info in self.check_integrity_info.keys():
-            logger.info(f'Performing integrity check on item: \n {item}')
+            print(f'Performing integrity check on item: \n {item}')
             #We then iterate through each of the items
             for idx, checks_subtuple in enumerate(item['checks']):
 
@@ -255,7 +247,7 @@ class OutputProcessor:
 
         Inputs:
             input_req: Dict - Dictionary containing the input request for the inference call, contains the information
-            regarding the name of the data instance in question. 
+            regarding the name of the data instance in question, and also the information about the image for performing any necessary re-orientation for writing etc.
 
             output_dict: Dict - Dictionary containing the prior iteration after having been passed through the output checker
             (also ensures that the corresponding arrays will be on cpu).
@@ -267,21 +259,23 @@ class OutputProcessor:
             tmp_dir: Str - A string denoting the path to the temporary directory. 
         '''
 
-        #First we write the discretised prediction maps
+        #First we write the discretised prediction map
+
+        #Call the writer which must output the tempfile path
+        tmp_path = self.pred_writer(inf_req=input_req, output_data=output_dict, tmp_dir=tmp_dir)
+
         if not self.is_seg_tmp:
-        
             img_filename = os.path.split(input_req['image']['path'])[1]
             infer_config_dir = f'{inf_call_config["mode"]} Iter {inf_call_config["edit_num"]}' if inf_call_config['mode'].title() != 'Interactive Edit' else inf_call_config['mode'].title() 
             pred_path = os.path.join(self.base_save_dir, 'segmentations', infer_config_dir, img_filename) 
-
-            #Call the writer, which should be configured to have write_to_file = True. Must output the tempfile path
-            tmp_path = self.perm_imwriter(output_dict, tmp_dir)
+            
             shutil.move(tmp_path, pred_path)
         else:
-            pred_path = self.temp_imwriter(output_dict, tmp_dir)
-        
+            pred_path = tmp_path 
+
+          
         #Now we write the logits maps to a set of tempfiles. 
-        logits_paths = self.temp_imwriter(output_dict, tmp_dir)
+        logits_paths = self.logits_writer(inf_req=input_req, output_data=output_dict, tmp_dir=tmp_dir)
 
         return pred_path, logits_paths
     
@@ -315,23 +309,23 @@ class OutputProcessor:
     
 if __name__ == '__main__':
 
+    pass 
 
 
+    # check_class = OutputProcessor('dummy', 'dummy', 'dummy', 'dummy')
 
-    check_class = OutputProcessor('dummy', 'dummy', 'dummy', 'dummy')
+    # #Setting some dummy variables.
+    # testing_dict = {'hi':{'hey':1, 'hello':2, 'bye':3}}
+    # testing_tuple = ('hi', 'hey')
+    # testing_tuple_len1 = ('hi',)
 
-    #Setting some dummy variables.
-    testing_dict = {'hi':{'hey':1, 'hello':2, 'bye':3}}
-    testing_tuple = ('hi', 'hey')
-    testing_tuple_len1 = ('hi',)
+    # #Testing the item extraction function from a dict using a tuple path:
+    # print(check_class.extractor(testing_dict, testing_tuple))
+    # print(check_class.extractor(testing_dict, testing_tuple_len1))
+    # # print(check_class.extractor({}, testing_tuple))
 
-    #Testing the item extraction function from a dict using a tuple path:
-    print(check_class.extractor(testing_dict, testing_tuple))
-    print(check_class.extractor(testing_dict, testing_tuple_len1))
-    # print(check_class.extractor({}, testing_tuple))
+    # #Testing the dict path modification function:
+    # print(check_class.dict_path_modif(testing_dict, testing_tuple, 40))
+    # print(check_class.dict_path_modif(testing_dict, testing_tuple_len1, 40))
 
-    #Testing the dict path modification function:
-    print(check_class.dict_path_modif(testing_dict, testing_tuple, 40))
-    print(check_class.dict_path_modif(testing_dict, testing_tuple_len1, 40))
-
-    check_class.check_output({}, {})
+    # check_class.check_output({}, {})
