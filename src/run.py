@@ -28,7 +28,7 @@ def set_parse():
     
     #Experimental process/method related args 
     parser.add_argument('--app_name', type=str, default='Sample_TEST') #This acts as the name of the app, but also temporarily acts as the relative path name within the input_applications folder.
-    parser.add_argument('--random_seed', type=int, default=23102002)
+    parser.add_argument('--random_seed', type=int, default=341103)
     parser.add_argument('--device_idx', type=int, default=0)
     parser.add_argument('--infer_init', type=str, default='Interactive Init')
     parser.add_argument('--infer_not_edit_bool', action='store_false', default=True)
@@ -308,7 +308,7 @@ def run_instances(dataloader, fe_sim_obj):
         iterate_dataloader_check(data_instance=data_instance)
         
         #Reformat the data instance
-        data_instance_reformat(data_instance=data_instance)
+        data_instance = data_instance_reformat(data_instance=data_instance)
         
         #Initialising the temporary directory.
         tempdir_obj = tempfile.TemporaryDirectory(dir=codebase_dir)
@@ -318,7 +318,7 @@ def run_instances(dataloader, fe_sim_obj):
             fe_sim_obj(data_instance=data_instance, tmp_dir_path=tempdir_obj.name) 
         finally:
             tempdir_obj.cleanup() 
-            raise Exception('There was an error in the front-end simulator, running cleanup.')
+            # raise Exception('There was an error in the front-end simulator, running cleanup.')
 
 def init_fe(infer_app, experiment_args):
     #Function which initialises the front-end simulator.
@@ -336,7 +336,7 @@ def init_fe(infer_app, experiment_args):
         'im_config', 
         'dice_termination_thresh',
         'metrics_savepaths',
-        'results_dir',
+        'exp_results_dir',
         'save_prompts',
     ]
 

@@ -105,7 +105,7 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
         def __call__(
                     self, 
                     image: Union[torch.Tensor, MetaTensor],
-                    infer_mode: str,
+                    mode: str,
                     gt: Union[torch.Tensor, MetaTensor],
                     prev_output_data: Union[dict, None],
                     im: Union[dict, None]
@@ -115,7 +115,7 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
             
             Image, in Torch tensor or MetaTensor format loaded in the native UI domain (1HW(D)).
             
-            Infer_mode, a string denoting the inference mode for which we are simulating prompts.
+            mode, a string denoting the inference mode for which we are simulating prompts.
 
             GT, in Torch tensor or MetaTensor format loaded in the native UI domain (1HW(D)) 
             
@@ -138,7 +138,7 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
                 }
             
             #Generation of the prompts:
-            if infer_mode.title() == 'Interactive Init' or infer_mode.title() == 'Interactive Edit':
+            if mode.title() == 'Interactive Init' or mode.title() == 'Interactive Edit':
                 interaction_torch_format, interaction_labels_torch_format, interaction_dict_format = self.generate_prompt(generator_input_data)
             else:
                 raise ValueError('The inference mode inputted is not valid!')
@@ -146,7 +146,7 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
             #Here we perform a sleight of hand, to reformat the prev_output data for the interaction state defn.
             #since there will be no information regarding the prev_output_data for initialisation. 
 
-            if infer_mode in self.init_modes:
+            if mode in self.init_modes:
                 prev_output_data = {
                 'logits':{
                     'paths': None,

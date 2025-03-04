@@ -48,7 +48,7 @@ class InferApp:
         '''
         #Returns an output with the same structure as the input image tensor. 
         
-        #dummy logits just use a set of cubes with offsets.. 
+        #dummy logits just use a set of slices at different offsets.. 
         
         img = request['image']['metatensor']
         shape = img.shape 
@@ -57,7 +57,7 @@ class InferApp:
         for idx, class_lb in enumerate(request['config_labels_dict'].keys()):
             #create dummy
             dummy = torch.zeros_like(img)
-            dummy[0,idx, :, :] = 1 
+            dummy[0,idx, :, :] = 34.1103 * (idx + 1) 
             list_logits.append(dummy)
         
         logits_tensor = torch.cat(list_logits, dim=0).to(dtype=torch.float64)
@@ -65,7 +65,7 @@ class InferApp:
         #Pred = Plain centred binary mask, like a cuboid.
         
         pred = torch.zeros_like(img)
-        pred[0, int(shape[1]/2 - 10) : int(shape[1]/2 + 5),  int(shape[2]/2 - 10) : int(shape[2]/2 + 5), int(shape[3]/2 - 10): int(shape[3]/2 + 5)]
+        pred[0, int(shape[1]/2 - 20) : int(shape[1]/2 + 5),  int(shape[2]/2 - 20) : int(shape[2]/2 + 5), int(shape[3]/2 - 20): int(shape[3]/2 + 5)] = 1
         
         pred.to(dtype=torch.int64) 
 
@@ -73,11 +73,11 @@ class InferApp:
         output = {
             'logits':{
                 'metatensor':logits_tensor,
-                'meta_dict':{'affine': request['image'].meta['affine']}
+                'meta_dict':{'affine': request['image']['meta_dict']['affine']}
             },
             'pred':{
                 'metatensor':pred,
-                'meta_dict':{'affine': request['image'].meta['affine']}
+                'meta_dict':{'affine': request['image']['meta_dict']['affine']}
             },
             'optional_memory':None
         }
@@ -145,7 +145,7 @@ class InferApp:
 
             interaction_torch_format: A prompt-type separated dictionary containing the prompt information in list[torch.tensor] format 
                 {'interactions':dict[prompt_type_str[list[torch.tensor] OR NONE ]], 
-                'interactions_labels':dict[prompt_type_str[list[torch.tensor] OR NONE]],
+                'interactions_labels':dict[prompt_type_str_labels [list[torch.tensor] OR NONE]],
                 }
             interaction_dict_format: A prompt-type separated dictionary containing the prompt info in class separated dict format
                 (where each prompt spatial coord is represented as a sublist).  

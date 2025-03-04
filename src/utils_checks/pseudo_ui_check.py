@@ -4,13 +4,13 @@ import torch
 from monai.data import MetaTensor 
 
 
-def check_empty(tensor: Union[torch.Tensor, MetaTensor], bg_val):
+def check_empty(tensor: MetaTensor, bg_val):
     '''
     Basic function which checks whether an input tensor has any foreground voxel. This is determined according to
     the bg val provided.. 
     '''
-    if not isinstance(tensor, torch.Tensor) and not isinstance(tensor, MetaTensor):
-        raise TypeError('The input tensor can only be a torch tensor or a Monai metatensor')
+    if not isinstance(tensor, MetaTensor):
+        raise TypeError('The input tensor can only be a Monai metatensor')
     
     return torch.all(tensor == bg_val)
 

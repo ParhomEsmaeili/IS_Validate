@@ -36,7 +36,7 @@ def im_cleanup(
         raise TypeError('The editing number must always be provided as an int (for edits), we do not call cleanup after the initialisation! Any initialisation cleanup occurs at edit iter 1!')
     if not isinstance(infer_config['mode'], str):
         raise TypeError('The inference mode must be provided as a str')
-    if infer_config['mode'] is not 'Interactive Edit':
+    if infer_config['mode'] != 'Interactive Edit':
         raise ValueError('The mode must be interactive edit for the cleanup function')
 
     im_keys = list(im.keys()) 

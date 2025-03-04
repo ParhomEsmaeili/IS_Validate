@@ -222,7 +222,8 @@ def write_row(
     with open(save_path,'a') as f:
         writer = csv.writer(f)
         base_row = [patient_name]
-        writer.writerow(base_row.extend([extractor(path, metrics_dict) for path in extraction_tuples]))
+        base_row.extend([float(extractor(metrics_dict, path)) for path in extraction_tuples])
+        writer.writerow(base_row)
     
 def write_to_csvs(
     patient_name: str,
@@ -283,7 +284,7 @@ def write_to_csvs(
             pass #Explicit for debugging purposes
         elif isinstance(current_metric_csvs['per_class_scores'], dict):
             #In this case, we want to iterate through the non-NoneType classes.
-            for class_lb, path in current_metric_csvs.items():
+            for class_lb, path in current_metric_csvs['per_class_scores'].items():
                 if path is None:
                     pass #Explicit for debugging purposes
                 else:

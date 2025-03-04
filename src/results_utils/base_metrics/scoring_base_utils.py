@@ -33,7 +33,7 @@ class BaseScoringWrapper:
             'Error Rate':self.init_error_rate}
         
         for metric_type in self.metrics_configs.keys():
-            self.metric_initialiser_map[metric_type]
+            self.metric_initialiser_map[metric_type]()
 
     def init_dice(self): 
 
@@ -181,7 +181,7 @@ class DiceScore:
         #else:
         return torch.tensor([0.0])
     
-    def dice_score_multiclass(self, pred, gt, image_mask, dict_class_codes):
+    def dice_score_multiclass(self, pred, gt, image_mask):
 
         '''
         image mask here is the cross-class image mask which is binarised.
@@ -200,7 +200,7 @@ class DiceScore:
             intersection = 0
             
             
-            for class_label, class_code in dict_class_codes.items():
+            for class_label, class_code in self.config_labels_dict.items():
                 
                 if not self.include_background:
                     if class_label.title() == 'Background':
@@ -212,7 +212,7 @@ class DiceScore:
                 gt_channel = torch.where(gt == class_code, 1, 0) 
 
 
-                #NOTE: For weightmaps which are not a tensor of ones (and non binarised maps) the voxel values have 
+                #NOTE: For weightmaps which are not a tensor of ones (and non binarised maps) the voxel values
                 # must have already been weighted by the corresponding values in the image mask, so that when we sum
                 # it already contains the weight.
 
@@ -237,8 +237,8 @@ class DiceScore:
                 pred, 
                 gt):
         
-        
-        (cross_class_score, per_class_scores) = self.dice_score(image_masks['cross_class_mask'], image_masks['per_class_masks'], pred, gt)
+                                                                #cross_class, per_class
+        (cross_class_score, per_class_scores) = self.dice_score(image_masks[0], image_masks[1], pred, gt)
         
         return {"cross_class_scores":cross_class_score, "per_class_scores":per_class_scores}    
     

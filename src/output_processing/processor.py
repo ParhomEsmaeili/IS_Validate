@@ -62,7 +62,7 @@ class OutputProcessor:
                 },
             'check_pred':{
                 'reference_name':('reference',),
-                'reference_paths':(('label','metatensor'),),
+                'reference_paths':(('image','metatensor'),),
                 'output_paths': (('pred','metatensor'),),
                 'checks': (('check_num_dims','check_spatial_res', 'check_meta_affine'),),
             },
@@ -81,7 +81,7 @@ class OutputProcessor:
             }
         }
 
-        self.pred_writer = WriteOutput(ref_key='label', result_key='pred', dtype=np.int32, compress=False, invert_orient=True, file_ext='.nii.gz')
+        self.pred_writer = WriteOutput(ref_key='image', result_key='pred', dtype=np.int32, compress=False, invert_orient=True, file_ext='.nii.gz')
         self.logits_writer = WriteOutput(ref_key='image', result_key='logits', dtype=np.float32, compress=False, invert_orient=True, file_ext='.nii.gz')
 
         if self.save_prompts:
@@ -140,7 +140,7 @@ class OutputProcessor:
         lambdas = {
         'check_spatial_res' : lambda x,y : x.shape[1:]  == y.shape[1:], # x, y = Channel-first tensors.
         'check_num_dims' : lambda x,y : x.ndim == y.ndim, # x, y = Tensors 
-        'check_num_channel' : lambda x,y : x.shape[0] == len(y), # x = Channel-first tensor, y = class labels dict (inclusive of background).
+        'check_num_channel' : lambda x,y : len(x) == y.shape[0], # x = class labels dict (inclusive of background), y = Channel-first tensor
         'check_meta_affine': lambda x,y: torch.all(helper_lambdas['torch_conversion'](x.meta['affine']) == helper_lambdas['torch_conversion'](y.meta['affine'])) if isinstance(y, MetaTensor) else True, #x = MetaTensor, y = MetaTensor or torch Tensor
         'check_metadict_affine': lambda x,y: torch.all(helper_lambdas['torch_conversion'](x) == helper_lambdas['torch_conversion'](y)), #x,y are either torch tensors or np arrays
         } 
@@ -197,16 +197,17 @@ class OutputProcessor:
         #Performing the checks that the pred, logits, and their meta info match the "pseudo-UI" domain's 
         #expected requirements.
 
-        for item, info in self.check_integrity_info.keys():
-            print(f'Performing integrity check on item: \n {item}')
+        for check, check_info in self.check_integrity_info.items():
+            print(f'Performing integrity check: \n {check}')
             #We then iterate through each of the items
-            for idx, checks_subtuple in enumerate(item['checks']):
+            for idx, checks_subtuple in enumerate(check_info['checks']):
 
-                if info['reference'] == 'reference':
-                    self.check_integrity(reference_data, info['reference_paths'][idx], output_data, info['output_paths'][idx], checks_subtuple)
-                elif info['reference'] == 'config_labels_dict':
-                    self.check_integrity(self.config_labels_dict, info['reference_paths'][idx], output_data, info['output_paths'][idx], checks_subtuple)
-
+                if check_info['reference_name'][idx] == 'reference':
+                    self.check_integrity(reference_data, check_info['reference_paths'][idx], output_data, check_info['output_paths'][idx], checks_subtuple)
+                elif check_info['reference_name'][idx] == 'config_labels_dict':
+                    self.check_integrity(self.config_labels_dict, check_info['reference_paths'][idx], output_data, check_info['output_paths'][idx], checks_subtuple)
+                else:
+                    raise KeyError('Error, the string denoting the reference name is not one of the supported ones.')
     def reformat_output(self, output_data: dict, pred_path:str, logits_paths:list[str]):
         
         '''
@@ -266,12 +267,12 @@ class OutputProcessor:
 
         if not self.is_seg_tmp:
             img_filename = os.path.split(input_req['image']['path'])[1]
-            infer_config_dir = f'{inf_call_config["mode"]} Iter {inf_call_config["edit_num"]}' if inf_call_config['mode'].title() != 'Interactive Edit' else inf_call_config['mode'].title() 
+            infer_config_dir = f'{inf_call_config["mode"]} Iter {inf_call_config["edit_num"]}' if inf_call_config['mode'].title() == 'Interactive Edit' else inf_call_config['mode'].title() 
             pred_path = os.path.join(self.base_save_dir, 'segmentations', infer_config_dir, img_filename) 
             
-            shutil.move(tmp_path, pred_path)
+            shutil.move(tmp_path[0], pred_path)
         else:
-            pred_path = tmp_path 
+            pred_path = tmp_path[0] 
 
           
         #Now we write the logits maps to a set of tempfiles. 
@@ -295,15 +296,15 @@ class OutputProcessor:
         try:
             self.check_output(input_request, output_dict)
         except:
-            Exception('Checking the output data failed due to the aforementioned error')
+            raise Exception('Checking the output data failed due to the aforementioned error')
         try:
             pred_path, logits_paths = self.write_maps(input_req=input_request, output_dict=output_dict, inf_call_config=infer_call_config, tmp_dir=tmp_dir)
         except:
-            Exception('Writing the segmentation maps failed due to the aforementioned error')
+            raise Exception('Writing the segmentation maps failed due to the aforementioned error')
         try:
             output_dict = self.reformat_output(output_data=output_dict, pred_path=pred_path, logits_paths=logits_paths)
         except:
-            Exception('Reformatting the output data dictionary failed due to the aforementioned error')
+            raise Exception('Reformatting the output data dictionary failed due to the aforementioned error')
         
         return output_dict
     

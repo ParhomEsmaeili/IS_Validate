@@ -193,6 +193,12 @@ def data_instance_reformat(data_instance:dict):
     label_meta_dict = affine_checker(label_meta_dict, current_affine_key)
     
 
+    #Also applying this to the .meta attribute of the metatensors through reassignment.
+    im_tensor.meta = copy.deepcopy(im_meta_dict)
+    label_tensor.meta = copy.deepcopy(label_meta_dict)
+    
+
+
     #Now populating the reformatted data instance:
 
     reformat_data_instance = {

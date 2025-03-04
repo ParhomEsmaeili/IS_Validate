@@ -81,19 +81,19 @@ class MetricsHandler:
 
         Metric subdict contains two fields: 
 
-        cross_class_score: A torch tensor or a metatensor.
+        cross_class_scores: A torch tensor or a metatensor.
         per_class_scores: A class separated dict of torch tensors or metatensors OR a Nonetype.
 
         '''
         
-        if not isinstance(metric_subdict['cross_class_score'], torch.Tensor) and not isinstance(metric_subdict['cross_class_score'], MetaTensor):
+        if not isinstance(metric_subdict['cross_class_scores'], torch.Tensor) and not isinstance(metric_subdict['cross_class_scores'], MetaTensor):
             raise TypeError(f'The cross class score provided for {metric_type} was not a torch tensor or a metatensor')
 
         if not isinstance(metric_subdict['per_class_scores'], dict) and not metric_subdict['per_class_scores'] is None:
             raise TypeError('The per class scores provided for {metric_type} were not a dict or a NoneType')
         
         if isinstance(metric_subdict['per_class_scores'], dict):
-            for key, val in metric_subdict.items():
+            for key, val in metric_subdict['per_class_scores'].items():
                 if not isinstance(val, torch.Tensor) and not isinstance(val, MetaTensor):
                     raise TypeError(f'The key {key} in per class scores in {metric_type} was not a Torch Tensor or a MetaTensor')
 
@@ -123,10 +123,10 @@ class MetricsHandler:
         spatial dimensions for the base metrics (i.e. without masks applied). It generates this for both the 
         cross_class_mask and the per_class_masks.
         '''
-        return {
-            'cross_class_mask':torch.ones_like(tensor, dtype=torch.int64),
-            'per_class_masks': {class_lab:torch.ones_like(tensor,dtype=torch.int64) for class_lab in self.config_labels_dict.keys()}
-        }
+        return (
+            torch.ones_like(tensor, dtype=torch.int64), #'cross_class_mask':
+            {class_lab:torch.ones_like(tensor,dtype=torch.int64) for class_lab in self.config_labels_dict.keys()} #'per_class_masks': 
+        )
     
     def exec_base_metrics(self, 
                         pred:Union[torch.Tensor, MetaTensor], 
@@ -157,7 +157,7 @@ class MetricsHandler:
             if infer_call_info['mode'].title() != 'Interactive Edit':
                 tracked_metrics[metric_type] = {infer_call_info['mode'].title():metrics_dict}
             else:
-                tracked_metrics[metric_type] = {f'{infer_call_info["mode"].title()} Iter {infer_call_info["edit_num"]}':metric_output}
+                tracked_metrics[metric_type].update({f'{infer_call_info["mode"].title()} Iter {infer_call_info["edit_num"]}':metrics_dict})
 
         #We implement an early-stopping check for termination based on overall Dice overlap score.
 
@@ -183,7 +183,7 @@ class MetricsHandler:
         #prior to metric computation. 
         
         extracted_pred = self.extract_spatial_dims(output_data['pred']['metatensor'])
-        extracted_gt = self.extract_spatial_dims(data_instance['gt']['metatensor'])
+        extracted_gt = self.extract_spatial_dims(data_instance['label']['metatensor'])
 
         tracked_metrics, terminate_bool = self.exec_base_metrics(extracted_pred, extracted_gt, tracked_metrics, infer_call_info)
         

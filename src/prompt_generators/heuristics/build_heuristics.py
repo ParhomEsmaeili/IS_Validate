@@ -148,7 +148,7 @@ class BuildHeuristic:
             if not any(generated_prompts.values()) or not any(generated_prompts_labels.values()):
                 raise ValueError('There must be at least one prompt!')
             
-            if not any([generated_prompts[key] for key in self.refinement_prompts]) or any([generated_prompts_labels[key] for key in self.refinement_prompts]):
+            if not any([generated_prompts[key] for key in self.refinement_prompts]) or not any([generated_prompts_labels[f'{key}_labels'] for key in self.refinement_prompts]):
                 raise ValueError('There must be one refinement prompt in the editing iterations.')
         else:
             raise Exception('Error in the implementation here.')

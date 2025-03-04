@@ -155,7 +155,7 @@ class BasicSpatialPromptGenerator(PromptReformatter):
 
         for prompt_type in self.prompt_types:
             prompts = torch_format_prompts[prompt_type]
-            prompts_labels = torch_format_labels[prompt_type]
+            prompts_labels = torch_format_labels[f'{prompt_type}_labels']
 
             if prompts is None or prompts_labels is None:
                 prompt_dict_format[prompt_type] = None 
@@ -202,14 +202,14 @@ class BasicSpatialPromptGenerator(PromptReformatter):
         
         if not data['prev_output_data'] is None:
             #We run this check for the instance where the "prev_output_data" exists (i.e. for refinement iters)
-            if not isinstance(data['pred']['metatensor'], torch.Tensor) and not isinstance(data['pred']['metatensor'], MetaTensor):
+            if not isinstance(data['prev_output_data']['pred']['metatensor'], torch.Tensor) and not isinstance(data['prev_output_data']['pred']['metatensor'], MetaTensor):
                 raise TypeError('The previous pred must belong to the torch tensor, or monai MetaTensor datatype')
             
-            if not isinstance(data['logits']['metatensor'], torch.Tensor) and not isinstance(data['logits']['metatensor'], MetaTensor):
+            if not isinstance(data['prev_output_data']['logits']['metatensor'], torch.Tensor) and not isinstance(data['prev_output_data']['logits']['metatensor'], MetaTensor):
                 raise TypeError('The previous logits must belong to the torch tensor, or monai MetaTensor datatype')
         
         if data['im'] is not None:
-            if isinstance(data['im'], dict):
+            if not isinstance(data['im'], dict):
                 raise TypeError('The interaction memory must be a dict if it is not a NoneType')
             
         p_torch_format, plabels_torch_format = self.interactive_prompter(data) 

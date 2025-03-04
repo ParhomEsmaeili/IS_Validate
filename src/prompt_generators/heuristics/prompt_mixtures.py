@@ -116,7 +116,7 @@ generated_prompt_labels:
 
 class BaseMixture(PointBase, ScribbleBase, BboxBase):
     def __init__(self, sim_device: torch.device, config_labels_dict: dict):
-        self.spatial_prompts = ['points', 'scribbles', 'bboxes']
+        self.discrete_prompts = ['points', 'scribbles', 'bboxes']
         self.sim_device = sim_device
         self.config_labels_dict = config_labels_dict 
 
@@ -146,7 +146,7 @@ class BaseMixture(PointBase, ScribbleBase, BboxBase):
             prompts_lbs = None 
         elif bool(prompts) ^ bool(prompts_lbs): #Logical XOR, if they do not match then there is an error!
             raise Exception('One of the prompts and prompt labels evaluated as a False, whereas the other was True. Mismatch.')
-        elif prompts & prompts_lbs: #If both are true-types that are not empty.
+        elif bool(prompts) & bool(prompts_lbs): #If both are true-types that are not empty.
             if len(prompts) != len(prompts_lbs):
                 raise Exception('Non-matching quantity of prompts and prompts labels')
             else:
@@ -166,19 +166,17 @@ class BaseMixture(PointBase, ScribbleBase, BboxBase):
         prompts: A dictionary, separated by prompt types containing the lists of prompt inputs.
         '''
 
-        if not set(prompts_dict) == set(prompts_lbs_dict):
-            raise Exception('The prompts dict and the prompts labels dict did not contain the same prompt types')
+        if not {f'{i}_labels' for i in set(prompts_dict)} == set(prompts_lbs_dict):
+            raise Exception('The prompts dict and the prompts labels dict somehow did not contain the same prompt types')
                 
         for prompt_type in prompts_dict.keys():
             p_list = prompts_dict[prompt_type]
-            p_lbs_list = prompts_lbs_dict[prompt_type]
+            p_lbs_list = prompts_lbs_dict[f'{prompt_type}_labels']
 
-            try:
-                p_updated, p_lbs_updated = self.filter_empty(p_list, p_lbs_list)
-            except:
-                Exception(f'Error for prompt type: {prompt_type}')
-            prompts_dict.update({prompt_type, p_updated})
-            prompts_lbs_dict.update({prompt_type, p_lbs_updated})
+            p_updated, p_lbs_updated = self.filter_empty(p_list, p_lbs_list)
+            
+            prompts_dict.update({prompt_type: p_updated})
+            prompts_lbs_dict.update({f'{prompt_type}_labels': p_lbs_updated})
 
         return prompts_dict, prompts_lbs_dict
     
@@ -208,11 +206,8 @@ class BaseMixture(PointBase, ScribbleBase, BboxBase):
                 elif tensor.is_floating_point():
                     warnings.warn('The discrete prompts should be provided as a torch int type.')
                     prompt_list[idx] = tensor.to(dtype=torch.int64)
-                else:
-                    continue #We pass through if the tensor is a torch int-type.
                 
                 if tensor.device != device:
-                    # warnings.warn('The discrete prompts should be on device {}')
                     prompt_list[idx] = tensor.to(device=device)
 
         return prompt_list     
@@ -230,11 +225,11 @@ class BaseMixture(PointBase, ScribbleBase, BboxBase):
         #We then perform any datatype processing, and move to the cpu device.
         for ptype in prompts_dict.keys():
             tmp_plist = copy.deepcopy(prompts_dict[ptype])
-            tmp_plb_list = copy.deepcopy(prompts_lbs_dict[ptype])
+            tmp_plb_list = copy.deepcopy(prompts_lbs_dict[f'{ptype}_labels'])
 
-            if ptype in self.spatial_prompts:
+            if ptype in self.discrete_prompts:
                 prompts_dict[ptype] = self.discrete_checker(prompt_list=tmp_plist, device=torch.device('cpu'))
-                prompts_lbs_dict[ptype] = self.discrete_checker(prompt_list=tmp_plb_list, device=torch.device('cpu'))
+                prompts_lbs_dict[f'{ptype}_labels'] = self.discrete_checker(prompt_list=tmp_plb_list, device=torch.device('cpu'))
 
         return prompts_dict, prompts_lbs_dict
 
@@ -405,16 +400,18 @@ class BasicValidOnlyMixture(BaseMixture):
 
         for ptype, plist in ordered_prompts_dict.items():
             
-            #We need to check that the ptype is even being used first and foremost? 
+            #We need to check that the ptype is even being used first and foremost.
+            if ptype in self.valid_ptypes: 
 
-            #Any removal must occur on both the prompts and the prompt labels, so we save indices of repeats.
-            removal_indices = {i for i, v1 in enumerate(plist) if not any(torch.all(v1 == v2) for v2 in plist[:i])}
+                #Any removal must occur on both the prompts and the prompt labels, so we save indices of repeats. We perform this check up to the index to reduce 
+                # check operations (and since we will not worry ourselves about overwriting points [unlike mistakes simulation].)
+                removal_indices = {i for i, v1 in enumerate(plist) if any(torch.all(v1 == v2) for v2 in plist[:i])}
 
-            new_plist = deleter(plist, removal_indices)
-            new_plb_list = deleter(ordered_prompts_lb_dict[ptype], removal_indices)
+                new_plist = deleter(plist, removal_indices)
+                new_plb_list = deleter(ordered_prompts_lb_dict[f'{ptype}_labels'], removal_indices)
 
-            ordered_prompts_dict[ptype] = new_plist
-            ordered_prompts_lb_dict[ptype] = new_plb_list 
+                ordered_prompts_dict[ptype] = new_plist
+                ordered_prompts_lb_dict[f'{ptype}_labels'] = new_plb_list 
 
         return ordered_prompts_dict, ordered_prompts_lb_dict 
 
@@ -668,7 +665,7 @@ class BasicValidOnlyMixture(BaseMixture):
             raise Exception('The number of spatial dimensions of all input prompts must match the number of spatial dimensions of the mask')
         
         if refinement_prompts == []:
-            warnings.warn('The prompts are empty')
+            warnings.warn('Trying to update the sampling region but the inserted prompts are empty. Check that this is valid.')
             return region_mask
         
         if region_mask.device != self.sim_device:
@@ -676,7 +673,7 @@ class BasicValidOnlyMixture(BaseMixture):
 
         
         for coords in refinement_prompts:
-            region_mask = update_binary_mask(region_mask, coords)    
+            region_mask = update_binary_mask(coords, region_mask)    
         return region_mask
     
     def sort_components(self, components: Union[list[Union[torch.Tensor, MetaTensor]], None], sort_criterion: str = None):
@@ -784,7 +781,7 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                 raise Exception('The heuristic params cannot be a NoneType if we are simulating for a given prompt')
             
             for heur, heur_args in self.toggling_dict['intra_heur_level'][ptype].items():
-                if ptype is 'bboxes':
+                if ptype == 'bboxes':
                     if 'jitter' in heur:
                         raise Exception('We do not yet have a strategy for handling bbox memory without constantly sampling bbox and deleting repeats, hence jitter cannot be used yet.')
                 #Checking that any non- n_max heuristic args are being provided. 
@@ -834,9 +831,9 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                 prompt_lbs[f'{ptype}_labels'] = []
 
         #Check that the initialisations are indeed NoneTypes for the non-valid ptypes, and empty lists otherwise.
-        if not all([vp is None and prompt_lbs[k] is None for k,vp in prompts.items() if k not in self.valid_ptypes]):
+        if not all([vp is None and prompt_lbs[f'{k}_labels'] is None for k,vp in prompts.items() if k not in self.valid_ptypes]):
             raise Exception('The initialised prompts and prompt labels were invalid for the non-valid prompt-types.')
-        if not all([vp is [] and prompt_lbs[k] is [] for k,vp in prompts.items() if k in self.valid_ptypes]):
+        if not all([vp == [] and prompt_lbs[f'{k}_labels'] == [] for k,vp in prompts.items() if k in self.valid_ptypes]):
             raise Exception('The initialised prompts and prompt labels were invalid for the valid prompt-types.')
 
         return prompts, prompt_lbs
@@ -900,15 +897,16 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
              
             #Checks in place for handling init/edit.
             if not init_bool:
-                if samp_regions_dict['error_region'] is None: 
+                if samp_regions_dict['error_regions'] is None: 
                     raise Exception('Cannot have a nonetype for error region dictionary if simulating edit') 
-            else:
-                if samp_regions_dict['error_region'] is not None:
-                    raise Exception('Cannot have a non-Nonetype for error region item if simulating initialisation.') 
-                else:
-                    if all([item is None for item in samp_regions_dict['error_region'].values()]):
+                    
+                if all([item is None for item in samp_regions_dict['error_regions'].values()]):
                         #If all the error regions for all classes are NoneTypes
                         raise Exception('Error in code, no errors remain, should have exited the iterative loop simulation on full convergence')
+            else:
+                if samp_regions_dict['error_regions'] is not None:
+                    raise Exception('Cannot have a non-Nonetype for error region item if simulating initialisation.') 
+                
              
             for class_lb, class_int in self.config_labels_dict.items():
                 
@@ -918,9 +916,10 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                 # as this functionally does nothing for the current prototype (we are performing on a 
                 # class-by-class basis without errors simulated). 
 
+                print(f'Sampling prompts in class {class_lb} \n')
                 if samp_regions_dict['gt'][class_lb] is None: 
                     #We implement a check here to see if we can skip over..
-                    print(f'Skipping class {class_lb} as it has no gt and (or by extension) false-negative error region ')
+                    print(f'Skipping class {class_lb} as it has no gt and (or by extension) false-negative error region \n')
                     continue 
                 else:
                     #Here we extract the gt and the error region for the given class.
@@ -928,16 +927,16 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                         #If initialisation, then we only have access to the ground truth region for the current class.
                         regions_dict = {
                         'gt':samp_regions_dict['gt'][class_lb],
-                        'error_region': None
+                        'error_regions': None
                         }
                     else:
                         #If edit, extract the gt and the false negative error region for the current class.
-                        if samp_regions_dict['error_region'][class_lb] is None:
-                            print(f'Skipping class {class_lb} for editing as it has no error region, hence no refinement prompts can be placed (necessary)')
+                        if samp_regions_dict['error_regions'][class_lb] is None:
+                            print(f'Skipping class {class_lb} for editing as it has no error region, hence no refinement prompts can be placed (necessary) \n')
                         else:
                             regions_dict = {
                                 'gt':samp_regions_dict['gt'][class_lb], 
-                                'error_region':samp_regions_dict['error_region'][class_lb] 
+                                'error_regions':samp_regions_dict['error_regions'][class_lb] 
                                 #NOTE: This error region can still be a nonetype if no errors for the current class!
                                 } 
 
@@ -954,14 +953,14 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                     temp_plist = copy.deepcopy(tracked_prompts[ptype])
                     temp_plist.extend(gen_prompts[ptype])
                     
-                    temp_plab_list = copy.deepcopy(tracked_prompt_lbs[ptype])
+                    temp_plab_list = copy.deepcopy(tracked_prompt_lbs[f'{ptype}_labels'])
                     #Just create a list according to the generated prompts. If it is empty (i.e. len of 0 then will just extend by [])
-                    gen_prompts_lbs = [torch.tensor([class_int], dtype=torch.int64)] * len(temp_plist)
+                    gen_prompts_lbs = [torch.tensor([class_int], dtype=torch.int64, device=self.sim_device)] * len(gen_prompts[ptype])
 
-                    temp_plab_list.extend(gen_prompts_lbs[ptype])
+                    temp_plab_list.extend(gen_prompts_lbs)
 
                     tracked_prompts[ptype] = temp_plist
-                    tracked_prompt_lbs[ptype] = temp_plab_list
+                    tracked_prompt_lbs[f'{ptype}_labels'] = temp_plab_list
 
 
             return tracked_prompts, tracked_prompt_lbs
@@ -1027,10 +1026,10 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                 for ptype in shuffled_sublist:
                     
                     if ptype not in self.valid_ptypes:
-                        print(f'Skipping simulation of prompts: {ptype} as it is not selected for simulation.')
+                        print(f'Skipping simulation of prompts: {ptype} as it is not selected for simulation. \n')
                         continue
                     else:
-                        print(f'Simulating prompts for prompt type: {ptype}')
+                        print(f'Simulating prompts for prompt type: {ptype} \n ')
                         if ptype in self.grounded_prompts_ls:
                             #In this case, region is set to the default ground truth. We use deepcopies to prevent potential leakages
                             #that could occur due to variable assignments.
@@ -1043,13 +1042,13 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                                 raise Exception('Hello? this should never happen. Pay attention designated programmer.') 
                             else:
 
-                                #TODO: Future modifications could make this more efficient by not requiring that the
+                                #TODO: Future modifications could make this more efficient by not requiring that the original
                                 #sampling region remain untouched. Instead recursively modifying the refine region.
                                 #Therefore not requiring us to iterate through the same prompts multiple times.
 
 
                                 #In this case, we take the original refinement region (which should be untouched).
-                                print('Modifying sampling region according to the refinement prompts placed (inter-prompt level)')
+                                print('Modifying sampling region according to the existing refinement prompts placed (inter-prompt level)')
                                 
                                 #We will create the refinement sampling region by modifying the base sampling region using the tracked refinement 
                                 # prompts. We will perform the update according to all of the valid refinement-type 
@@ -1063,7 +1062,7 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                                     region = self.update_error_region(region, tracked_prompts[p])
                                 
                                 if torch.all(region == torch.zeros_like(region)):
-                                    print(f'The refinement sampling region has become filled by refinement prompts, skipping prompt type: {ptype}')
+                                    print(f'The refinement sampling region has become filled by refinement prompts, skipping prompt type: {ptype} \n ')
                                     #NOTE: It is completely ok to do it like this because the outer level handles 
                                     # empty lists which will be returned.
                                     continue 
@@ -1074,7 +1073,7 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                         ptype_gen_prompts = self.togg_intra_prompt_level(
                         ptype=ptype,
                         samp_region=region,
-                        init_bool=init_bool
+                        # init_bool=init_bool
                         )
 
                         if not isinstance(ptype_gen_prompts, list):
@@ -1138,7 +1137,7 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
             for heur in shuffled_heurs_order:
         
                 if ptype in self.refinement_prompts_ls:
-                    print(f'Filling in the sampling region for refinement prompt: {ptype} at the intra-prompt level')
+                    print(f'Filling in the sampling region for refinement prompt: {ptype} at the intra-prompt level \n')
                     #For refinement prompts we are sampling without replacement.
                     region = copy.deepcopy(samp_region)
                     #NOTE: We do this from scratch each time just to be sure that there is no leakage.
@@ -1155,7 +1154,7 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                 # be placed. We do not check nonetypes because nonetypes should never be sampled! 
 
                 if torch.all(region == torch.zeros_like(region)):
-                    print(f'Early termination of the prompt generation for ptype: {ptype}')
+                    print(f'Early termination of the prompt generation for ptype: {ptype} \n')
                     break 
                 else:
                     generated_prompts = self.togg_intra_heur_level(
@@ -1181,7 +1180,7 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
         else:
             #Else, then just extract the heuristic, and the params.
             heur_fnc =  self.heur_fn_dict[ptype][heur]
-            params = self.toggling_dict[ptype][heur]
+            params = self.toggling_dict['intra_heur_level'][ptype][heur]
 
             if ptype == 'bboxes' or ptype == 'scribbles':
                 raise NotImplementedError('We should not have reached ptypes of bbox or scribbles yet, they are not supported!')
@@ -1244,19 +1243,20 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
             del im 
         else:
             if data['prev_output_data'] is None:
-                print('We have no prior output data, please check that this is an initialisation!')
+                print('We have no prior output data, please check that this is an initialisation! \n')
                 pred = None
                 init_bool = True 
 
                 if data['im'] is not None:
                     raise Exception('The interaction memory should be a NoneType for the initialisation.')
             else:
-                print('We have prior output data, please check that this is an editing iteration')
+                print('We have prior output data, please check that this is an editing iteration \n')
                 pred = data['prev_output_data']['pred']['metatensor'][0, :]
                 pred = pred.to(dtype=torch.int64, device=self.sim_device)
 
-                if not isinstance(pred, torch.Tensor) or not isinstance(gt, MetaTensor):
-                    raise TypeError('The pred needs to be a torch tensor or a Monai MetaTensor')            
+                gt = data['gt'][0,:].to(dtype=torch.int64, device=self.sim_device)
+                if not (isinstance(pred, torch.Tensor) or isinstance(pred, MetaTensor)) and not isinstance(gt, MetaTensor):
+                    raise TypeError('The pred needs to be a torch tensor or a Monai MetaTensor, and gt must be a Monai MetaTensor')            
                 init_bool = False
 
                 if data['im'] is None:

@@ -77,7 +77,7 @@ class FrontEndSimulator:
 
         interaction_torch_format: A prompt-type separated dictionary containing the prompt information in list[torch.tensor] format 
             {'interactions':dict[prompt_type_str[list[torch.tensor] OR NONE ]], 
-            'interactions_labels':dict[prompt_type_str[list[torch.tensor] OR NONE]],
+            'interactions_labels':dict[prompt_type_str_labels [list[torch.tensor] OR NONE]],
             }
         interaction_dict_format: A prompt-type separated dictionary containing the prompt info in class separated dict format
             (where each prompt spatial coord is represented as a sublist).  
@@ -207,7 +207,7 @@ class FrontEndSimulator:
             print('We do not have a fixed seed!')
         
         else:
-            warnings.warn('You have set a deterministic seed which will be re-initialised for each data instance, please check whether this is intended.')
+            warnings.warn('You have set a deterministic seed which will be re-initialised for each data instance, please check whether this is intended. \n')
             if isinstance(seed, int):
                 random.seed(seed)
                 np.random.seed(seed)
@@ -240,7 +240,7 @@ class FrontEndSimulator:
         )
 
         self.output_processor = OutputProcessor(
-            base_save_dir=self.args['results_dir'],
+            base_save_dir=self.args['exp_results_dir'],
             config_labels_dict=self.args['configs_labels_dict'],
             is_seg_tmp=self.args['is_seg_tmp'],
             save_prompts=self.args['save_prompts']
@@ -450,7 +450,7 @@ class FrontEndSimulator:
         
         #Then we call on the output processor, which checks that the app call provided a valid output (within a prescribed set of rules)
         # and reformats the data into that expected by future calls on the interaction state constructor. 
-        processed_output_data = self.output_processor(input_request=inf_req, output_dict=output_data, tmp_dir=self.tmp_dir_path)
+        processed_output_data = self.output_processor(input_request=inf_req, output_dict=output_data, infer_call_config=infer_call_config, tmp_dir=self.tmp_dir_path)
         
         #Then we update the tracked metrics.
         updated_tracked_metrics, terminate_early = self.metrics_handler.update_metrics(
@@ -543,7 +543,7 @@ class FrontEndSimulator:
             request = {
                 'image': data_instance['image'],
                 'model':'IS_autoseg', 
-                'config_labels_dict': self.args['configs_label_dict'],
+                'config_labels_dict': self.args['configs_labels_dict'],
                 'im': im,
                 }
             
@@ -565,7 +565,7 @@ class FrontEndSimulator:
             request = {
                 'image': data_instance['image'],
                 'model': 'IS_interactive_init', 
-                'config_labels_dict': self.args['configs_label_dict'],
+                'config_labels_dict': self.args['configs_labels_dict'],
                 'im': im
                 }
             return request, im 
@@ -586,7 +586,7 @@ class FrontEndSimulator:
             request = {
                 'image': data_instance['image'],
                 'model': 'IS_interactive_edit', 
-                'config_labels_dict': self.args['configs_label_dict'],
+                'config_labels_dict': self.args['configs_labels_dict'],
                 'im':im,
                 }
             return request, im
@@ -631,12 +631,12 @@ class FrontEndSimulator:
             raise TypeError('edit_bool value must be a boolean in the inference run configs dict.')
         
         #We use the initialisation mode provided in the inference run config to initialise the model.
-        if len({infer_run_configs['init'].title()} & {'Automatic Init', 'Interactive Init'}) != 1:
+        if len({infer_run_configs['init'].title()} & {'Automatic Init', 'Interactive Init'}) == 1:
 
             #Generate the inference request and initialises the inference interaction memory:
             request, inf_im = self.infer_app_request_generator(
                 data_instance=data_instance, 
-                infer_call_config={'infer_mode': infer_run_configs['init'].title(), 'edit_num': None},
+                infer_call_config={'mode': infer_run_configs['init'].title(), 'edit_num': None},
                 im=None,
                 prev_output_data=None
             )
@@ -653,7 +653,7 @@ class FrontEndSimulator:
                 output_data=prev_output_data,
                 inf_im=inf_im,
                 metric_im=None,
-                infer_call_config={'infer_mode': infer_run_configs['init'].title(), 'edit_num': None},
+                infer_call_config={'mode': infer_run_configs['init'].title(), 'edit_num': None},
                 tracked_metrics=tracked_metrics
                 )
 
@@ -680,7 +680,7 @@ class FrontEndSimulator:
                 #Generate the inference request and initialises the inference interaction memory:
                 request, inf_im = self.infer_app_request_generator(
                     data_instance=data_instance, 
-                    infer_call_config={'infer_mode': 'Interactive Edit', 'edit_num': iter_num},
+                    infer_call_config={'mode': 'Interactive Edit', 'edit_num': iter_num},
                     im=inf_im,
                     prev_output_data=prev_output_data
                 )
@@ -692,10 +692,12 @@ class FrontEndSimulator:
                 # future interaction state construction, writing of segs, and generation of metrics for tracking
     
                 prev_output_data, metric_im, tracked_metrics, terminated_early = self.app_output_processor(
+                    data_instance=data_instance,
+                    inf_req=request,
                     output_data=prev_output_data,
                     inf_im=inf_im,
                     metric_im=metric_im, 
-                    infer_call_config={'infer_mode': 'Interactive Edit', 'edit_num': iter_num},
+                    infer_call_config={'mode': 'Interactive Edit', 'edit_num': iter_num},
                     tracked_metrics=tracked_metrics
                     )
 
@@ -705,9 +707,9 @@ class FrontEndSimulator:
                     print(f'Reached convergence already, terminating at Interactive Edit Iter {iter_num}!')
                     return tracked_metrics, terminated_early
         
-        #We delete the inference interaction memory just to be safe so it has zero chance of leaking over into the next
+        #We delete the inference and metric interaction memory just to be safe so it has zero chance of leaking over into the next
         # data instance
-        del inf_im 
+        del inf_im, metric_im 
 
         return tracked_metrics, terminated_early 
     
@@ -739,7 +741,7 @@ class FrontEndSimulator:
             raise Exception('The tmp_dir path must be a string and non-empty.')
 
         #Checking if the foreground for this instance is even non-empty... we will currently not be supporting this.
-        if check_empty(data_instance['label']['metatensor'], self.args['config_labels_dict']['background']):
+        if check_empty(data_instance['label']['metatensor'], self.args['configs_labels_dict']['background']):
             raise Exception(f'The ground truth for the foreground cannot be empty, this functionality is not supported. Raised exception for {data_instance["image"]["path"]}')
         
         #Calling on the set_seeds function to re-initialise the seeds for each data instance (this ensures early
