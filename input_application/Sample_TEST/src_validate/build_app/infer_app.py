@@ -42,9 +42,6 @@ class InferApp:
             NOTE: The affine must be a torch tensor or numpy array.
 
         NOTE: These outputs must be stored/provided on cpu. 
-
-        NOTE: Optional to include the "optional_memory" field also, for any extra arguments app would like to store in IM.
-            if not required, put a None for the value of this item.
         '''
         #Returns an output with the same structure as the input image tensor. 
         
@@ -56,15 +53,15 @@ class InferApp:
         list_logits = []
         for idx, class_lb in enumerate(request['config_labels_dict'].keys()):
             #create dummy
-            dummy = torch.zeros_like(img)
-            dummy[0,idx, :, :] = 34.1103 * (idx + 1) 
+            # dummy = torch.zeros_like(img)
+            dummy = torch.from_numpy(34.1103 * (idx + 1) * request['image']['metatensor'].array).to(dtype=torch.float64) 
             list_logits.append(dummy)
         
         logits_tensor = torch.cat(list_logits, dim=0).to(dtype=torch.float64)
 
         #Pred = Plain centred binary mask, like a cuboid.
         
-        pred = torch.zeros_like(img)
+        pred = torch.zeros(img.shape)
         pred[0, int(shape[1]/2 - 20) : int(shape[1]/2 + 5),  int(shape[2]/2 - 20) : int(shape[2]/2 + 5), int(shape[3]/2 - 20): int(shape[3]/2 + 5)] = 1
         
         pred.to(dtype=torch.int64) 
@@ -79,7 +76,6 @@ class InferApp:
                 'metatensor':pred,
                 'meta_dict':{'affine': request['image']['meta_dict']['affine']}
             },
-            'optional_memory':None
         }
 
         
@@ -138,9 +134,6 @@ class InferApp:
                     'meta_dict': Non-modified meta dictionary that is forward propagated.
                     }
 
-            prev_optional_memory: A dictionary containing any extra information that the application would like to forward propagate
-            which is not currently provided.
-
             prompt information: See `<https://github.com/IS_Validate/blob/main/src/data/interaction_state_construct.py>`
 
             interaction_torch_format: A prompt-type separated dictionary containing the prompt information in list[torch.tensor] format 
@@ -166,8 +159,8 @@ if __name__ == '__main__':
     request = {
         'image':{
             'path':'dummy',
-            'metatensor': torch.ones((1,100,100,100)),
-            'meta_dict':{'affine':torch.eye(3)}
+            'metatensor': MetaTensor(torch.ones((1,100,100,100))),
+            'meta_dict':{'affine':torch.eye(4)}
         },
         'model':'IS_interactive_edit',
         'config_labels_dict':{'tumour':1, 'background':0},

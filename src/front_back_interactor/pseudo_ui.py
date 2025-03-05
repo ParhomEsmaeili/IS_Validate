@@ -3,6 +3,7 @@ This script is intended for simulating inference from the pseudo-front end, as p
 '''
 from typing import Callable, Union
 import logging
+import time 
 import warnings
 import os
 import sys
@@ -70,9 +71,6 @@ class FrontEndSimulator:
                 'meta_dict': Non-modified meta dictionary that is forward propagated.
                 }
 
-        prev_optional_memory: A dictionary containing any extra information that the application would like to forward propagate
-        which is not currently provided.
-
         prompt information: See `<https://github.com/IS_Validate/blob/main/src/data/interaction_state_construct.py>`
 
         interaction_torch_format: A prompt-type separated dictionary containing the prompt information in list[torch.tensor] format 
@@ -106,8 +104,6 @@ class FrontEndSimulator:
 
     NOTE: These outputs must be stored/provided on cpu. 
 
-    NOTE: Optional to include the "optional_memory" field also, for any extra arguments app would like to store in IM.
-        if not required, put a None for the value of this item.
     '''
     def __init__(self, 
                 infer_app: Callable, 
@@ -137,14 +133,10 @@ class FrontEndSimulator:
             metrics configs: metrics being computed, prompt generation configs for parameter-dependent metrics, etc.
             
             interaction memory configs: configs for how the interaction states will be stored to be passed through for
-            the infer_app call: contains fields 'keep_init' and 'im_len' (former denotes the treatment of init interaction
-            state, while im_len denotes the edit memory)
-
-            NOTE: We currently do not accept deletion of the initialisation but retention of the edit iters, this 
-            is a very atypical configuration.
+            the infer_app call: contains fields 'im_len' (denotes the state memory, inclusive of the initialisation.)
 
                 im_config = 
-                    {'keep_init': bool,
+                    {
                     'memory_len': int (this denotes the retained memory backwards, -1 denotes full memory, otherwise it 
                     denotes the memory retained relative to the "current" iter)
                     }  
@@ -358,7 +350,7 @@ class FrontEndSimulator:
                 gt=data_instance['label']['metatensor'], 
                 prev_output_data=prev_output_data, 
                 im=None)} 
-
+            
 
         elif infer_config['mode'].title() == 'Interactive Edit':
             im[f'Interactive Edit Iter {infer_config["edit_num"]}'] = self.inf_edit_generator(
@@ -632,7 +624,7 @@ class FrontEndSimulator:
         
         #We use the initialisation mode provided in the inference run config to initialise the model.
         if len({infer_run_configs['init'].title()} & {'Automatic Init', 'Interactive Init'}) == 1:
-
+            
             #Generate the inference request and initialises the inference interaction memory:
             request, inf_im = self.infer_app_request_generator(
                 data_instance=data_instance, 
@@ -676,7 +668,7 @@ class FrontEndSimulator:
             print('We are now performing iterative edits')
 
             for iter_num in range(1, infer_run_configs['num_iters'] + 1):
-
+                
                 #Generate the inference request and initialises the inference interaction memory:
                 request, inf_im = self.infer_app_request_generator(
                     data_instance=data_instance, 
@@ -700,7 +692,6 @@ class FrontEndSimulator:
                     infer_call_config={'mode': 'Interactive Edit', 'edit_num': iter_num},
                     tracked_metrics=tracked_metrics
                     )
-
                 #We put a placeholder for handling the termination condition.
                 if terminated_early:
                     raise Exception('We do not yet have any handling for early convergence')

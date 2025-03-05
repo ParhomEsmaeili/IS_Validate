@@ -58,7 +58,7 @@ def selected_tempfiles_cleanup(tmp_dir: str,
         for path in paths:
             if isinstance(path, str):
                 #Checking if path is in the temporary dir, we do not want to delete anything outside of the temporary dir.
-                if tmp_dir != os.path.abspath(os.path.dirname(path)): 
+                if tmp_dir == os.path.abspath(os.path.dirname(path)): 
                     file_cleanup(path) 
                 else:
                     raise ValueError('Attempting to delete a temp file outside of the defined temp directory')

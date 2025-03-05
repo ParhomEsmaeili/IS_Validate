@@ -61,11 +61,7 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
                 Each contains a dictionary separated by the datatype format for representing them:
                     1) Path(s) to the file(s) 2) Original forward propagated form for the array 
                     3) Meta dictionary for the array
-                    
-            3) Extra input arguments that needs to be stored in memory for future inference passes, defined by the user's application! This will be pulled from the
-                output_data dictionary generateed from the inference app call with the "optional_memory" key. 
-                    
-                E.g., prompt feature embeddings, image feature embeddings.
+    
 
          
         '''
@@ -157,8 +153,7 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
                     'path': None,
                     'metatensor': None,
                     'meta_dict': None
-                },
-                'optional_memory': None
+                }
                 }
             
             interaction_state_dict = {
@@ -176,8 +171,7 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
                     'path': prev_output_data['pred']['path'],
                     'metatensor': prev_output_data['pred']['metatensor'],
                     'meta_dict': prev_output_data['pred']['meta_dict']
-                },
-                'prev_optional_memory': prev_output_data['optional_memory']
+                }
             }
 
 

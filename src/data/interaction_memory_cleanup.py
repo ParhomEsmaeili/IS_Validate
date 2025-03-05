@@ -46,7 +46,7 @@ def im_cleanup(
         #This variable handles whether the initialisation is always being retained, this is treated independent of
         #the editing iterations due to the keys used. 
         if not im_config['keep_init']:
-            warnings.warn('Are you sure you want to delete the initialisation information? This may contain the information you may have extracted at initialisation, e.g. image features')
+            warnings.warn('Are you sure you want to delete the initialisation information? This may contain information about grounded prompts.')
 
             deletion_set = set([mode for mode in im_keys if 'Init' in mode])
             if len(deletion_set) != 1:
@@ -64,8 +64,10 @@ def im_cleanup(
             #         seg_tmp_path = im[key]['prev_pred']['path']
             #         selected_tempfiles_cleanup(tmp_dir=tmp_dir, paths=seg_tmp_path)
 
-            del im[deletion_set[0]]
-    
+            del im[deletion_set.pop()]
+
+        if im_config['im_len'] == 0:
+            raise Exception('Cannot delete the interactions of the current interaction state prior to inference call, if you want no prompt conditioning then implement use_mem=False')
     elif infer_config['edit_num'] > 1:
 
         #This variable handles the quantity of editing iteration states kept in memory. -1 denotes full retention, 
@@ -86,20 +88,23 @@ def im_cleanup(
             warnings.warn('Are you sure you wanted to delete edit states in im_memory?')
                 
             edit_iter_num = infer_config['edit_num'] #Variable denoting which editing iteration this cleanup was called at.
-
-            #Denotes the upper bound (exclusive) for removal of the memory states.
-            upper_bound_iter_clip = edit_iter_num - edit_memory_len 
-            #Eqn: Iter num - 1 (start from prior state) - memory len + 1 (+1 because inclusive of the prior state)
             
+            if edit_memory_len == 0:
+                raise Exception('Cannot be removing the interaction information of the current iteration state prior to the inference call, if you want no prompt conditioning then implement use_mem=False')
+            
+            #Denotes the upper bound (exclusive) for removal of the memory states (inclusive of the current state).
+            upper_bound_iter_clip = edit_iter_num - edit_memory_len + 1
+            #Eqn: Iter num (start current state) - memory len + 1 (because we are inclusive of the current state in our memory length, e.g. with memory len 2, at iter 5, it should only retain 5,4. Hence upper bound is 4 exclusive)
+                
             if upper_bound_iter_clip <= 1:
-                print(f'Cannot clear yet, memory retention length is {edit_memory_len} and current iter is {edit_iter_num}')
-                #In instances where full memory length prior to current iter = memory length param, 
+                print(f'Cannot clear yet, edit state memory retention length is {edit_memory_len} and current iter is {edit_iter_num}')
+                #In instances where memory length including current iter = memory length param, 
                 # upper bound = 1. Hence for upper_bound <= 1, keep all.
 
             else:
                 deletion_set = set([f'Interactive Edit Iter {i}' for i in range(1, upper_bound_iter_clip)]) 
                 #Deletion set for all potential iters required to be deleted according to upper bound (non inclusive)
-
+                
                 for key in deletion_set & set(im):
                     #First we run cleanup of the temp files stored for the logits. 
                     logits_tmp_paths = im[key]['prev_logits']['paths']

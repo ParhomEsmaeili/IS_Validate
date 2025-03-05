@@ -180,15 +180,6 @@ class OutputProcessor:
         that which was provided in the input request's affine array in the image meta dictionary.
 
         '''
-        #Performing an explicit check that the optional memory item is provided, even if it is a NoneType. Not required
-        #for the other fields as they have an expected structure, and any deviations will be flagged through exceptions being 
-        #thrown.
-
-        try:
-            output_data['optional_memory']
-        except:
-            warnings.warn('The optional_memory key must be included in the output dictionary, even as a NoneType')
-            output_data['optional_memory'] = None 
 
         #Performing the checks that the pred, logits, and their meta dict's affine array are on cpu. (or placing them on cpu)
         for field in self.check_cpu_info:
