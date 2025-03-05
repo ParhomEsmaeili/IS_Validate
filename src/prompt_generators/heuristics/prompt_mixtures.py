@@ -601,8 +601,8 @@ class BasicValidOnlyMixture(BaseMixture):
         if all([masks is None for label, masks in sampling_regions_dict['gt'].items() if label.title() != 'Background']):
             raise Exception('All of the foreground classes in the ground truth cannot be empty.')
         
-        if torch.all(torch.stack(list(sampling_regions_dict['gt'].values())).sum(dim=0) == torch.ones_like(gt)):
-            print('GT all GOOD!')
+        if torch.all(torch.stack([i for i in sampling_regions_dict['gt'].values() if i is not None]).sum(dim=0) == torch.ones_like(gt)):
+            print('GT inclusive of background merged to a tensor of ones.')
         else:
             raise Exception('GT maps did not merge to a tensor of ones')
         #if pred is None, then we just return the gts.
@@ -637,8 +637,15 @@ class BasicValidOnlyMixture(BaseMixture):
 
             sampling_regions_dict['error_regions'] = err_regions_dict 
 
-            if torch.all(torch.stack(list(sampling_regions_dict['error_regions'].values())).sum(dim=0) <= 1):
-                print('No error regions are overlapping!')
+            #Checking the error regions:
+
+            if all([masks is None for masks in sampling_regions_dict['error_regions'].values()]):
+                raise Exception('All of the error regions cannot be empty, should have terminated the iterative loop already..')
+
+            #Extracting the valid (non-nonetype) error regions across all classes. (i.e. the general error region), if all error regions were None then it should break already.
+            err_regions = torch.stack([i for i in sampling_regions_dict['error_regions'].values() if i is not None]).sum(dim=0)
+            if torch.all((err_regions == 0) | (err_regions == 1)):
+                print('No error regions are overlapping as the  values of the sum across classes for the error region maps is 0 or 1 for each voxel!')
             else:
                 raise Exception('There are overlapping error regions')
             return sampling_regions_dict
@@ -661,19 +668,24 @@ class BasicValidOnlyMixture(BaseMixture):
         refinement_prompts: A list of prompts N x N_dim for updating the region mask.
 
         '''
-        if not all([prompt.shape[1] == region_mask.dim() for prompt in refinement_prompts]):
-            raise Exception('The number of spatial dimensions of all input prompts must match the number of spatial dimensions of the mask')
+        # if not all([prompt.shape[1] == region_mask.dim() for prompt in refinement_prompts]):
+        #     raise Exception('The number of spatial dimensions of all input prompts must match the number of spatial dimensions of the mask')
         
         if refinement_prompts == []:
             warnings.warn('Trying to update the sampling region but the inserted prompts are empty. Check that this is valid.')
             return region_mask
         
+        #Instead, we will fuse all of the coordinates, hence permitting for the handling to occur in a single step after merging. 
+        coords = torch.cat(refinement_prompts, dim=0)
+        if not coords.shape[1] == region_mask.dim():
+            raise Exception('The spatial dimensions of the input refinement prompts must match the number of spatial dimensions in the mask.')
+
         if region_mask.device != self.sim_device:
             region_mask.to(device=self.sim_device)
 
         
-        for coords in refinement_prompts:
-            region_mask = update_binary_mask(coords, region_mask)    
+        # for coords in refinement_prompts:
+        region_mask = update_binary_mask(coords, region_mask)    
         return region_mask
     
     def sort_components(self, components: Union[list[Union[torch.Tensor, MetaTensor]], None], sort_criterion: str = None):
@@ -765,29 +777,38 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
         self.grounded_prompts_ls = ['bboxes']
         self.refinement_prompts_ls = ['points', 'scribbles']
 
-        #Initialising the toggling dict which provides the information necessary for toggling throughout the cascade.
-        self.init_toggle_dict(heur_build_args=build_args, mixture_args=mixture_args)
         #Initialising the list of valid prompt types.
         self.init_valid_ptypes()
+
+        #Initialising the toggling dict which provides the information necessary for toggling throughout the cascade.
+        self.init_toggle_dict(heur_build_args=build_args, mixture_args=mixture_args)
+        
         #Checking that the heuristic level params are actually supported.
         self.check_heur_params() 
 
     def check_heur_params(self):
         #This is just a hard-coded placeholder function for the prototype which only allows points, should be 
         # deprecated or updated some point.
+        
+        for ptype, heurs_configs in self.toggling_dict['intra_heur_level'].items(): 
 
-        for ptype in self.valid_ptypes:
-            if self.toggling_dict['intra_heur_level'][ptype] is None:
-                raise Exception('The heuristic params cannot be a NoneType if we are simulating for a given prompt')
-            
-            for heur, heur_args in self.toggling_dict['intra_heur_level'][ptype].items():
-                if ptype == 'bboxes':
-                    if 'jitter' in heur:
-                        raise Exception('We do not yet have a strategy for handling bbox memory without constantly sampling bbox and deleting repeats, hence jitter cannot be used yet.')
-                #Checking that any non- n_max heuristic args are being provided. 
-                if any([i not in ['n_max'] for i in heur_args]):
-                    raise Exception('Prototype does not accept any heuristic level arguments other than N_max for quantity of prompts placed.')
-                
+            if ptype in self.valid_ptypes:
+                if heurs_configs is None:
+                    raise Exception('The heuristic params cannot be a NoneType if we are simulating for a given prompt')
+
+                for heur, heur_args in heurs_configs.items():
+                    if ptype == 'bboxes':
+                        if 'jitter' in heur:
+                            raise Exception('We do not yet have a strategy for handling bbox memory without constantly sampling bbox and deleting repeats, hence jitter cannot be used yet.')
+                    #Checking that any non- n_max heuristic args are being provided. 
+                    if any([i not in ['n_max'] for i in heur_args]):
+                        raise Exception('Prototype does not accept any heuristic level arguments other than N_max for quantity of prompts placed.')
+               
+            else:
+                if heurs_configs is not None:
+                    raise Exception('Attempted to provide heuristics configuration for a non-valid prompt type.')
+              
+                 
     def init_valid_ptypes(self):
         '''
         Function which extracts the list of valid prompt types according to the heuristics functions dict.
@@ -800,7 +821,7 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
         if len(self.valid_ptypes) < 1:
             raise Exception('At least one valid prompt type must have been configured!')
         
-        if 'bboxes' in self.valid_ptypes or 'scribbles' in self.valid_ptypes:
+        if 'scribbles' in self.valid_ptypes or 'bboxes' in self.valid_ptypes:
             raise NotImplementedError('We have selected bbox and scribbles in the prompt gen. configs but they are not ready')
         
     def init_prompts(self):
@@ -857,7 +878,7 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                 #Use the heuristic build args provided.
             }
         else:
-            raise NotImplementedError('Not implemented anything for handling the toggling of anything non-default')
+            raise NotImplementedError('Not implemented anything for handling the toggling of anything non-default wrt mixture strategies.')
         
     def togg_class_level(self, 
                         tracked_prompts, 
@@ -891,9 +912,9 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
             #Just checking for debugging..
             if samp_regions_dict['gt'] is None:
                 raise Exception('The entire ground truth cannot be a NoneType..otherwise we cannot even sample.')
-            #Checking that at least one class has a GT...
-            if all([item is None for item in samp_regions_dict['gt'].values()]):
-                raise Exception('Error in code, no gt available?')
+            #Checking that at least one foreground class has a GT..., should already be handled in the front-end but just in case!
+            if all([val is None for key,val in samp_regions_dict['gt'].items() if key.title() != 'Background']):
+                raise Exception('Error in code, no foreground gt available, should have been flagged earlier?')
              
             #Checks in place for handling init/edit.
             if not init_bool:
@@ -902,7 +923,7 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                     
                 if all([item is None for item in samp_regions_dict['error_regions'].values()]):
                         #If all the error regions for all classes are NoneTypes
-                        raise Exception('Error in code, no errors remain, should have exited the iterative loop simulation on full convergence')
+                        raise Exception('Error in code, no errors remain, should have exited the iterative loop simulation on full convergence, and should have flagged this in the error region extraction phase.')
             else:
                 if samp_regions_dict['error_regions'] is not None:
                     raise Exception('Cannot have a non-Nonetype for error region item if simulating initialisation.') 
@@ -933,11 +954,15 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                         #If edit, extract the gt and the false negative error region for the current class.
                         if samp_regions_dict['error_regions'][class_lb] is None:
                             print(f'Skipping class {class_lb} for editing as it has no error region, hence no refinement prompts can be placed (necessary) \n')
+                            if set(self.valid_ptypes) & set(self.grounded_prompts_ls) != set():
+                                raise Exception('We still have not fixed the handling of grounded prompts, and so we cannot skip over if we use grounded prompts! Current approach requires sampling at every iteration')
                         else:
                             regions_dict = {
                                 'gt':samp_regions_dict['gt'][class_lb], 
                                 'error_regions':samp_regions_dict['error_regions'][class_lb] 
-                                #NOTE: This error region can still be a nonetype if no errors for the current class!
+                                #NOTE: There is currently a potential logical conflict. 
+                                # We should theoretically not even require the gt for editing, but we had included it temporarily until we decided how to handle grounded
+                                #like prompts. The solution would therefore be to just perform a deterministic extraction at each iteration!
                                 } 
 
                 gen_prompts = self.togg_inter_prompt_level(
@@ -964,7 +989,9 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
 
 
             return tracked_prompts, tracked_prompt_lbs
-            
+
+        else:
+            raise NotImplementedError     
     def togg_inter_prompt_level(self, 
                                 samp_regions_dict,
                                 init_bool):
@@ -1031,7 +1058,7 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                     else:
                         print(f'Simulating prompts for prompt type: {ptype} \n ')
                         if ptype in self.grounded_prompts_ls:
-                            #In this case, region is set to the default ground truth. We use deepcopies to prevent potential leakages
+                            #In this case, region is set to the default ground truth/grounded region. We use deepcopies to prevent potential leakages
                             #that could occur due to variable assignments.
                             region = copy.deepcopy(grounded_region)
             
@@ -1140,7 +1167,7 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                     print(f'Filling in the sampling region for refinement prompt: {ptype} at the intra-prompt level \n')
                     #For refinement prompts we are sampling without replacement.
                     region = copy.deepcopy(samp_region)
-                    #NOTE: We do this from scratch each time just to be sure that there is no leakage.
+                    #NOTE: We do this from scratch each time just to be sure that there is no leakage as the update error will modify the mask in place permanently # which we currently do not want
                     #NOTE: The update error region function can handle empty lists!
                     region = self.update_error_region(region, tracked_prompts)
 
@@ -1151,7 +1178,7 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                     raise Exception('Prompt type does not fall under the grounded or refinement prompt types.')
                 
                 #If the sampling region in-filled/filtered is zeroes then we must terminate, no more prompts can 
-                # be placed. We do not check nonetypes because nonetypes should never be sampled! 
+                # be placed. We do not check nonetypes because nonetypes should never be sampled nor passed through! 
 
                 if torch.all(region == torch.zeros_like(region)):
                     print(f'Early termination of the prompt generation for ptype: {ptype} \n')
@@ -1254,19 +1281,19 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                 pred = data['prev_output_data']['pred']['metatensor'][0, :]
                 pred = pred.to(dtype=torch.int64, device=self.sim_device)
 
-                gt = data['gt'][0,:].to(dtype=torch.int64, device=self.sim_device)
-                if not (isinstance(pred, torch.Tensor) or isinstance(pred, MetaTensor)) and not isinstance(gt, MetaTensor):
-                    raise TypeError('The pred needs to be a torch tensor or a Monai MetaTensor, and gt must be a Monai MetaTensor')            
+                # gt = data['gt'][0,:].to(dtype=torch.int64, device=self.sim_device)
+                if not (isinstance(pred, torch.Tensor) or isinstance(pred, MetaTensor)):
+                    raise TypeError('The pred needs to be a torch tensor or a Monai MetaTensor')            
                 init_bool = False
 
                 if data['im'] is None:
                     raise Exception('The interaction memory (even if unused) should not be a NoneType for edits.')
 
-            gt = data['gt'][0, :]
-            gt = gt.to(dtype=torch.int64, device=self.sim_device)
+            #Loading the gt.
+            gt = data['gt'][0, :].to(dtype=torch.int64, device=self.sim_device)
 
-            if not isinstance(gt, torch.Tensor) or not isinstance(gt, MetaTensor):
-                raise TypeError('The gt needs to be a torch tensor or a Monai MetaTensor')
+            if not isinstance(gt, MetaTensor):
+                raise TypeError('The gt needs to be a Monai MetaTensor')
             
             #Extracts a dict with fields 'gt' and 'error_regions'. Both class separated dicts.
             sampling_regions_dict = self.init_sample_regions_no_components(pred, gt)

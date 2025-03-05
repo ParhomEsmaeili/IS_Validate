@@ -46,7 +46,7 @@ def set_parse():
     #TODO: Put use_mem and other related args like that for the im etc in here. 
     parser.add_argument('--use_mem_inf_edit', action='store_true', default=False) #Whether im is used for conditioning prompt gen.
     parser.add_argument('--im_conf_remove_init', action='store_true', default=False) #Bool for whether the init state in im will be removed from memory.
-    parser.add_argument('--im_conf_mem_len', type=int, default=1) 
+    parser.add_argument('--im_conf_mem_len', type=int, default=-1) 
     
     #Int which determines the memory length used at cleanup after the interaction memory is updated with the current edit iteration's interaction state (inclusive of current state). 
     # This functionally has the same thing as using a memory length of N (where N is our variable here) for conditioning

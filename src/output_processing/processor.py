@@ -99,7 +99,7 @@ class OutputProcessor:
         item = extractor(data_dict, data_path)
 
         if item.get_device() != -1:
-            warnings.warn(f'Careful, the dict: \n {data_dict} \n has item at path: \n {data_path} \n which should be stored on cpu device.')
+            warnings.warn(f'Careful, the output dict has item at path: \n {data_path} \n which should be stored on cpu device.')
             #If not on cpu, place it on cpu.
             item = item.to(device='cpu')
             # data_dict.update({key:data_dict[key].to(device='cpu')})

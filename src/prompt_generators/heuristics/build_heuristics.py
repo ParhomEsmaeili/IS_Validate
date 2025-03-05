@@ -192,9 +192,9 @@ class BuildHeuristic:
             return mixture_class_registry['prototype_pseudo_mixture'](
                 config_labels_dict=self.config_labels_dict,
                 sim_device=self.sim_device,
-                use_mem=False,
+                use_mem=self.use_mem,
                 build_args=self.heuristic_params,
-                mixture_args=None,
+                mixture_args=self.heuristic_mixtures,
                 heur_fn_dict=heur_fn_dict,                                
                 )
         else:

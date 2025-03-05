@@ -23,7 +23,7 @@
 				
 				},
 				
-			"mixture_params":null 
+			"mixture_params":null
 		}
 	}
 }
