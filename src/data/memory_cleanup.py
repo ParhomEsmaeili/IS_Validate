@@ -6,11 +6,12 @@ from typing import Union
 import warnings 
 #NOTE: This is compatible with NoneType interaction states also! It just deletes the state entirely.
 
-def im_cleanup(
+def memory_cleanup(
     is_seg_tmp: bool,
     tmp_dir: str,
     im_config: dict,
     im: dict,
+    paths: dict,
     infer_config: dict):
     '''
     Function which takes the existing interaction memory dictionary, and cleans up according to the definition of 
@@ -25,11 +26,13 @@ def im_cleanup(
 
     im_config: The dictionary of configurations which denote how the interaction memory will be clipped.
     im: dict - Interaction memory dictionary, with the individual interaction states denoted by the keys.
+    paths: dict - Paths dictionary with the individual interaction states that they correspond to denoted by the keys. 
     infer_config: dict - The current inference config which interaction was generated for, contains two fields 1) Mode (str), 2) Edit iter num (int)
 
     Output: 
 
-    im: The cleaned up interaction memory dictionary, according to the interaction memory config provided.
+    im: The cleaned up interaction memory dictionary, according to the inference memory config provided.
+    paths: The cleaned up paths memory dictionary according to the inference memory config provided. 
     '''
 
     if not isinstance(infer_config['edit_num'], int):
@@ -64,9 +67,10 @@ def im_cleanup(
             #         seg_tmp_path = im[key]['prev_pred']['path']
             #         selected_tempfiles_cleanup(tmp_dir=tmp_dir, paths=seg_tmp_path)
 
-            del im[deletion_set.pop()]
+            del im[tuple(deletion_set)[0]]
+            del paths[tuple(deletion_set)[0]]
 
-        if im_config['im_len'] == 0:
+        if im_config['im_len'] <= 0:
             raise Exception('Cannot delete the interactions of the current interaction state prior to inference call, if you want no prompt conditioning then implement use_mem=False')
     elif infer_config['edit_num'] > 1:
 
@@ -89,7 +93,7 @@ def im_cleanup(
                 
             edit_iter_num = infer_config['edit_num'] #Variable denoting which editing iteration this cleanup was called at.
             
-            if edit_memory_len == 0:
+            if edit_memory_len <= 0:
                 raise Exception('Cannot be removing the interaction information of the current iteration state prior to the inference call, if you want no prompt conditioning then implement use_mem=False')
             
             #Denotes the upper bound (exclusive) for removal of the memory states (inclusive of the current state).
@@ -107,19 +111,20 @@ def im_cleanup(
                 
                 for key in deletion_set & set(im):
                     #First we run cleanup of the temp files stored for the logits. 
-                    logits_tmp_paths = im[key]['prev_logits']['paths']
+                    logits_tmp_paths = paths[key]['prev_logits']['paths']
 
                     selected_tempfiles_cleanup(tmp_dir=tmp_dir, paths=logits_tmp_paths)
                     
                     #We then run cleanup of the temp files stored for the segs, according to the flag.
 
                     if is_seg_tmp:
-                        seg_tmp_path = im[key]['prev_pred']['path']
+                        seg_tmp_path = paths[key]['prev_pred']['path']
                         selected_tempfiles_cleanup(tmp_dir=tmp_dir, paths=seg_tmp_path)
 
                     #Then we delete the dictionary entry. 
                     del im[key]
+                    del paths[key]
                 
     else:
         raise ValueError('The edit iter num must be greater than 0 (i.e. only should be called for cleanup on edit iters)')
-    return im 
+    return im, paths 

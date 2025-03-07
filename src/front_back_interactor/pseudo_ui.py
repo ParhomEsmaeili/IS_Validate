@@ -15,13 +15,13 @@ import numpy as np
 from src.data.interaction_state_construct import HeuristicInteractionState 
 from src.output_processing.processor import OutputProcessor
 from src.output_processing.scoring import MetricsHandler 
-from src.data.interaction_memory_cleanup import im_cleanup
+from src.data.memory_cleanup import memory_cleanup
 from src.utils_checks.pseudo_ui_check import (
     check_empty,
     check_config_labels
 
 )
-
+from src.utils.dict_utils import dict_path_create
 # logger = logging.getLogger(__name__)
 
 class FrontEndSimulator:
@@ -287,28 +287,13 @@ class FrontEndSimulator:
 
         return metric_im
     def inf_im_handler(self,
-                data_instance: dict, 
+                # data_instance: dict, 
                 infer_config: dict,
                 im:Union[dict, None],
                 prev_output_data: Union[dict, None],
                 ):
         '''
         Function which handles the interaction memory dict for the input information. Takes the following args:
-
-        data_instance - A dictionary containing the set of information with respect to the image, and ground truth, 
-        required for the request generation + interaction state generation:
-
-            Contains the following fields:
-
-                'image': dict - A dictionary containing the following subfields
-                    'path': path to the image 
-                    'metatensor': Loaded MetaTensor in RAS orientation (pseudo-UI native domain)
-                    'meta_dict': MetaTensor's meta_dict, contains the original affine array, and the pseudo-ui affine array
-                
-                'label': dict - A dictionary containing the sam subfields as the image! Not one-hot encoded for the MetaTensors!
-            
-            NOTE: KEY ASSUMPTION 1: The filename for both the image and ground truth will be the same. 
-            NOTE: KEY ASSUMPTION 2: The ground truth will NOT be one-hot encoded. 
 
         infer_config: Dict - A dictionary containing two subfields:
             'mode': str - The mode that the inference call will be made for (Automatic Init, Interactive Init, Interactive Edit)
@@ -321,7 +306,7 @@ class FrontEndSimulator:
         Returns:
         The updated interaction memory, with any post-processing implemented for cleanup (if activated)
         '''
-        if not isinstance(data_instance, dict) or not data_instance:
+        if not isinstance(self.data_instance, dict) or not self.data_instance:
             raise TypeError('The data instance must be a non-empty dictionary, should have been flagged earlier.')
         
         if not isinstance(infer_config, dict) or not infer_config:
@@ -345,18 +330,18 @@ class FrontEndSimulator:
 
         elif infer_config['mode'].title() == 'Interactive Init':
             im = {'Interactive Init': self.inf_init_generator(
-                image=data_instance['image']['metatensor'], 
+                image=self.data_instance['image']['metatensor'], 
                 mode=infer_config['mode'], 
-                gt=data_instance['label']['metatensor'], 
+                gt=self.data_instance['label']['metatensor'], 
                 prev_output_data=prev_output_data, 
                 im=None)} 
             
 
         elif infer_config['mode'].title() == 'Interactive Edit':
             im[f'Interactive Edit Iter {infer_config["edit_num"]}'] = self.inf_edit_generator(
-                image=data_instance['image']['metatensor'],
+                image=self.data_instance['image']['metatensor'],
                 mode=infer_config['mode'],
-                gt=data_instance['label']['metatensor'],
+                gt=self.data_instance['label']['metatensor'],
                 prev_output_data=prev_output_data,
                 im=im
             )
@@ -364,29 +349,80 @@ class FrontEndSimulator:
 
             #We only implement this in the interactive edit mode since it necessitates that there be memory in the first place!
 
-            im = im_cleanup(self.args['is_seg_tmp'], self.tmp_dir_path, self.args['im_config'], im, infer_config)
+            im, self.tracked_paths = memory_cleanup(self.args['is_seg_tmp'], self.tmp_dir_path, self.args['im_config'], im, self.tracked_paths, infer_config)
         
         return im 
 
+    def update_tracked_paths(self, output_paths:dict, inf_call_config:dict):
+        
+        '''
+        This function is intended for filling out the fields containing the strings for the segmentation paths in 
+        the output data for forward propagation. 
+        
+        inputs:
+        
+        output_paths: A dict containing the following fields
+            
+            pred: A string denoting the path to the discretised prediction of the prior inference call.
+        
+            logits: A list of strings denoting the paths to the channel-unrolled logits maps from the prior inference call.
+            (in the same order as was provided by the inference call)
 
+        inf_call_config: A dict denoting the current inference call configuration which we will use to store the output paths which have been given to us from the 
+        prior iter.
+
+        returns: 
+        
+        output_paths with pred_path and logits_paths of prior iteration output inserted in the key for the current iteration, done with the assumption that each interaction 
+        state is always dependent on the output of the prior state at minimum. For initialisations this is just None... it is a dummy variable due to my own dislike 
+        for seeing disordered sets but also to simplify the process of future editing iterations to harmonise the extraction of prior preds and logits
+        from both the prev_output data dict, and the tracked paths dict.
+        
+        '''
+        
+        # if inf_call_config['mode'].title() != 'Interactive Edit':
+        #     raise ValueError('This should be called on the edit states only!')
+        
+        infer_config_dir = f'{inf_call_config["mode"]} Iter {inf_call_config["edit_num"]}' if inf_call_config['mode'].title() == 'Interactive Edit' else inf_call_config['mode'].title() 
+            
+            
+        #Dict of info regarding the dict-paths for each filepath being placed after the segmentations have been saved.
+        reformat_dict_info = {
+            'logits': (infer_config_dir, 'prev_logits','paths'), 
+            'pred': (infer_config_dir, 'prev_pred','path'),
+        }     
+
+        for key, val in reformat_dict_info.items():
+            if key.title() == 'Logits':
+                try: 
+                    self.tracked_paths = dict_path_create(self.tracked_paths, val, output_paths['logits'])
+                except:
+                    self.tracked_paths = dict_path_create(self.tracked_paths, val, None)
+            elif key.title() == 'Pred':
+                try:
+                    self.tracked_paths = dict_path_create(self.tracked_paths, val, output_paths['pred'])
+                except:
+                    self.tracked_paths = dict_path_create(self.tracked_paths, val, None)
+            else:
+                raise KeyError('Reformatter info dictionary contained an unsupported key')
+    
     def app_output_processor(self,
-                            data_instance: dict,
-                            inf_req: dict,
+                            # data_instance: dict,
+                            # inf_req: dict,
                             output_data:dict,
                             inf_im:dict,
                             metric_im: Union[dict, None],
-                            infer_call_config:dict, 
-                            tracked_metrics:dict):
+                            infer_call_config:dict,): 
+                            # tracked_metrics:dict):
         '''
         Makes use of the output processor class. This will tie together several functionalities such as 
         reformatting the output data dictionary, writing the segmentations, computing the metrics etc.
         
-        Inputs: 
+        Uses: 
 
-        data_instance: Dict - A dictionary containing info related to the image, gt for the current data instance we 
+        self.data_instance: Dict - A dictionary containing info related to the image, gt for the current data instance we 
         are evaluating on.
 
-        inf_req: Dict - A dictionary containing the information provided for the input inference request.
         output_data: Dict - A dictionary containing the pre-processed output dictionary from the inference app call.
         
         inf_im: Dict - A dictionary containing the interaction memory for the input prompts. Cannot be a NoneType as even
@@ -401,26 +437,22 @@ class FrontEndSimulator:
             'mode': str - The mode that the inference call was be made for (Automatic Init, Interactive Init, Interactive Edit)
             'edit num': Union[int, None] - The current edit's iteration number or None for initialisations.
         
-        tracked_metrics: Dict - A dictionary containing the tracked metrics dictionary throughout the iterative refinement process.
         
         Returns: 
 
-        processed_output_data : Dict - A dict containing the output of the inference call processed for future calls on the
-        interaction state constructor class.
+        output_paths : Dict - A dict containing the paths for the saved outputs of the inference call.
 
         updated_im_metric: Dict or None - An optional dict containing the tracked im for the metrics.
-
-        updated_tracked_metrics: Dict - An updated dictionary containing the tracked metrics across the inference calls.
 
         terminate_early: Bool - A bool which is returned during the updating of the tracked metrics, which determines whether
         or not to terminate the refinement process early with respect to a termination criterion (currently: Dice = 1.0).
         '''
         
-        if not isinstance(data_instance, dict) or not data_instance:
+        if not isinstance(self.data_instance, dict) or not self.data_instance:
             raise Exception('The data instance must be a non-empty dictionary, should have been flagged earlier.')
 
-        if not isinstance(inf_req, dict) or not inf_req:
-            raise Exception('The inference request must be a dictionary which is non-empty.')
+        # if not isinstance(inf_req, dict) or not inf_req:
+        #     raise Exception('The inference request must be a dictionary which is non-empty.')
         
         if not isinstance(inf_im, dict) or not inf_im:
             raise Exception('The inference interaction memory must be a dictionary which is non-empty.')
@@ -434,29 +466,30 @@ class FrontEndSimulator:
         if not isinstance(infer_call_config, dict) or not infer_call_config:
             raise Exception('The inference call config must be a dictionary which is non-empty.')
         
-        if not isinstance(tracked_metrics, dict):
+        if not isinstance(self.tracked_metrics, dict):
             raise Exception('The tracked metrics must be a dictionary, even if empty for initialisation.')
         
         #First we call on the metric_im handler for generating any parameters required for metrics.
         updated_metric_im = self.metric_im_handler(inf_im=inf_im, metric_im=metric_im)
         
         #Then we call on the output processor, which checks that the app call provided a valid output (within a prescribed set of rules)
-        # and reformats the data into that expected by future calls on the interaction state constructor. 
-        processed_output_data = self.output_processor(input_request=inf_req, output_dict=output_data, infer_call_config=infer_call_config, tmp_dir=self.tmp_dir_path)
-        
+        # writes any desired predictions and logits, and returns the paths to the corresponding files. 
+        output_paths = self.output_processor(data_instance=self.data_instance, patient_name=self.patient_name, output_dict=output_data, infer_call_config=infer_call_config, tmp_dir=self.tmp_dir_path)
+        #Tuple.
+
         #Then we update the tracked metrics.
-        updated_tracked_metrics, terminate_early = self.metrics_handler.update_metrics(
-            output_data=processed_output_data,
-            data_instance=data_instance,
-            tracked_metrics=tracked_metrics,
+        self.tracked_metrics, terminate_early = self.metrics_handler.update_metrics(
+            output_data=output_data,
+            data_instance=self.data_instance,
+            tracked_metrics=self.tracked_metrics,
             im_inf=inf_im,
             im_metric=updated_metric_im,
             infer_call_info=infer_call_config
         )
-        return processed_output_data, updated_metric_im, updated_tracked_metrics, terminate_early
+        return output_paths, updated_metric_im, terminate_early
 
     def infer_app_request_generator(self,
-                            data_instance: dict,
+                            # data_instance: dict,
                             infer_call_config: dict,
                             im: Union[dict, None], 
                             prev_output_data: Union[dict, None]):
@@ -474,19 +507,6 @@ class FrontEndSimulator:
 
         Inputs:
 
-        data_instance - A dictionary containing the set of information with respect to the image, and ground truth, 
-        required for the request generation + interaction state generation:
-
-            Contains the following fields:
-
-                'image': dict - A dictionary containing the following subfields
-                    'path': path to the image 
-                    'metatensor': Loaded MetaTensor in RAS orientation (pseudo-UI native domain)
-                    'meta_dict': MetaTensor's meta_dict, contains the affine array.
-                
-                'label': dict - A dictionary containing the same subfields as the image! Not one-hot encoded for the MetaTensors!
-            
-        
         infer_call_config: A dict providing info about the current infer call, contains
          
             mode - The mode in which the application is being used, therefore queried in the request, and the
@@ -495,7 +515,7 @@ class FrontEndSimulator:
         
         im - (Optional) The currently existing inference interaction memory (for edit) or NoneType (for initialisations) 
         
-        prev_output_data - (Optional) The post-processed output dictionary from the prior iteration of inference (for editing modes). 
+        prev_output_data - (Optional) The output dictionary from the prior iteration of inference (for editing modes). 
         or NoneType. 
 
         Returns:
@@ -504,7 +524,7 @@ class FrontEndSimulator:
         im - The updated inference interaction memory dict for tracking.
         '''
 
-        if not isinstance(data_instance, dict) or not data_instance:
+        if not isinstance(self.data_instance, dict) or not self.data_instance:
             raise Exception('Data_instance should be a non-empty dictionary.')
         if not isinstance(infer_call_config, dict) or not infer_call_config:
             raise Exception('The infer call config should be a non-empty dictionary.')
@@ -527,13 +547,13 @@ class FrontEndSimulator:
                 raise TypeError('The edit num in the infer call config dict should not exist for initialisation!')
             
             im = self.inf_im_handler(
-                data_instance=data_instance, 
+                # data_instance=selfdata_instance 
                 infer_config=infer_call_config, 
                 im=None, 
                 prev_output_data=None)
 
             request = {
-                'image': data_instance['image'],
+                'image': self.data_instance['image'],
                 'model':'IS_autoseg', 
                 'config_labels_dict': self.args['configs_labels_dict'],
                 'im': im,
@@ -548,14 +568,14 @@ class FrontEndSimulator:
                 raise TypeError('The edit num in the infer call config dict should not exist for initialisation!')
             
             im = self.inf_im_handler(
-                data_instance=data_instance, 
+                # data_instance=data_instance, 
                 infer_config=infer_call_config, 
                 im=None, 
                 prev_output_data=None) 
 
 
             request = {
-                'image': data_instance['image'],
+                'image': self.data_instance['image'],
                 'model': 'IS_interactive_init', 
                 'config_labels_dict': self.args['configs_labels_dict'],
                 'im': im
@@ -569,14 +589,14 @@ class FrontEndSimulator:
                 raise TypeError('The edit num in the infer call config dict should be an int!')
             
             im = self.inf_im_handler(
-                data_instance=data_instance,
+                # data_instance=data_instance,
                 infer_config=infer_call_config,
                 im=im,
                 prev_output_data=prev_output_data
             )
 
             request = {
-                'image': data_instance['image'],
+                'image': self.data_instance['image'],
                 'model': 'IS_interactive_edit', 
                 'config_labels_dict': self.args['configs_labels_dict'],
                 'im':im,
@@ -585,33 +605,16 @@ class FrontEndSimulator:
         else:
             raise ValueError('The inference mode is invalid for app request generation!')
         
-    def iterative_loop(self, data_instance:dict, tracked_metrics: dict):
+    def iterative_loop(self):
         '''
-        data_instance - A dictionary containing the set of information with respect to the image, and ground truth, 
-        required for the request generation + interaction state generation:
-
-            Contains the following fields:
-
-                'image': dict - A dictionary containing the following subfields
-                    'path': path to the image 
-                    'metatensor': Loaded MetaTensor in RAS orientation (pseudo-UI native domain)
-                    'meta_dict': MetaTensor's meta_dict, contains the original affine array, and the pseudo-ui affine array
-                
-                'label': dict - A dictionary containing the sam subfields as the image! Not one-hot encoded for the MetaTensors!
-            
-            NOTE: KEY ASSUMPTION 1: The filename for both the image and ground truth will be the same. 
-            NOTE: KEY ASSUMPTION 2: The ground truth will NOT be one-hot encoded.
-
-        tracked_metrics - An empty dictionary intended for tracking the metrics for each interaction state throughout the
-        iterative refinement process.
         ''' 
         
-        if not isinstance(data_instance, dict):
+        if not isinstance(self.data_instance, dict):
             raise TypeError('Expected data instance to be provided as a dictionary.')
-        if not isinstance(tracked_metrics, dict):
+        if not isinstance(self.tracked_metrics, dict):
             raise TypeError('The tracked metrics must be initialised as a dictionary')
         
-        if tracked_metrics or not data_instance:
+        if self.tracked_metrics or not self.data_instance:
             raise Exception('Either the tracked metrics were non-empty, or the data_instance was empty.')
 
         infer_run_configs = self.args['infer_run_configs']
@@ -625,35 +628,36 @@ class FrontEndSimulator:
         #We use the initialisation mode provided in the inference run config to initialise the model.
         if len({infer_run_configs['init'].title()} & {'Automatic Init', 'Interactive Init'}) == 1:
             
+            self.update_tracked_paths(output_paths=None, inf_call_config={'mode':infer_run_configs['init'].title(), 'edit_num': None}) 
+
             #Generate the inference request and initialises the inference interaction memory:
             request, inf_im = self.infer_app_request_generator(
-                data_instance=data_instance, 
+                # data_instance=data_instance, 
                 infer_call_config={'mode': infer_run_configs['init'].title(), 'edit_num': None},
                 im=None,
                 prev_output_data=None
             )
             #Take the generated request dict, and pass it through the callable application.
             prev_output_data = self.infer_app(request)
-            #This generates the non-processed output data.
+            #This generates the output data.
         
-            # We call on the output processor for reformatting/processing of the prev_output_data dictionary for 
-            # future interaction state construction, writing of segs, and generation of metrics for tracking
+            # We call on the output processor for processing of the prev_output_data dictionary for 
+            # writing of segs, and generation of metrics for tracking
 
-            prev_output_data, metric_im, tracked_metrics, terminated_early = self.app_output_processor(
-                data_instance=data_instance,
-                inf_req=request, 
+            output_paths, metric_im, terminated_early = self.app_output_processor(
+                # data_instance=data_instance,
+                # inf_req=request, 
                 output_data=prev_output_data,
                 inf_im=inf_im,
                 metric_im=None,
                 infer_call_config={'mode': infer_run_configs['init'].title(), 'edit_num': None},
-                tracked_metrics=tracked_metrics
                 )
 
             #We put a placeholder for handling the termination condition.
             if terminated_early:
                 raise Exception('We do not yet have any handling for early convergence')
                 print(f'Reached convergence already, terminating at {infer_run_configs["init"].title()}!')
-                return tracked_metrics, terminated_early 
+                return terminated_early 
         else:
             raise KeyError('A supported initialisation mode was not selected')  
             
@@ -669,9 +673,13 @@ class FrontEndSimulator:
 
             for iter_num in range(1, infer_run_configs['num_iters'] + 1):
                 
+                #First we store the prior output paths here:
+                self.update_tracked_paths(output_paths=output_paths, inf_call_config={'mode': 'Interactive Edit', 'edit_num': iter_num})
+
+
                 #Generate the inference request and initialises the inference interaction memory:
                 request, inf_im = self.infer_app_request_generator(
-                    data_instance=data_instance, 
+                    # data_instance=data_instance, 
                     infer_call_config={'mode': 'Interactive Edit', 'edit_num': iter_num},
                     im=inf_im,
                     prev_output_data=prev_output_data
@@ -683,29 +691,29 @@ class FrontEndSimulator:
                 # We call on the output processor for reformatting/processing of the prev_output_data dictionary for 
                 # future interaction state construction, writing of segs, and generation of metrics for tracking
     
-                prev_output_data, metric_im, tracked_metrics, terminated_early = self.app_output_processor(
-                    data_instance=data_instance,
-                    inf_req=request,
+                output_paths, metric_im, terminated_early = self.app_output_processor(
+                    # data_instance=data_instance,
+                    # inf_req=request,
                     output_data=prev_output_data,
                     inf_im=inf_im,
                     metric_im=metric_im, 
                     infer_call_config={'mode': 'Interactive Edit', 'edit_num': iter_num},
-                    tracked_metrics=tracked_metrics
                     )
                 #We put a placeholder for handling the termination condition.
                 if terminated_early:
                     raise Exception('We do not yet have any handling for early convergence')
                     print(f'Reached convergence already, terminating at Interactive Edit Iter {iter_num}!')
-                    return tracked_metrics, terminated_early
+                    return terminated_early
         
-        #We delete the inference and metric interaction memory just to be safe so it has zero chance of leaking over into the next
+        #We delete the inference and metric interaction memory, prev output data, output paths etc just to be safe so it has zero chance of leaking over into the next
         # data instance
-        del inf_im, metric_im 
+        del inf_im, metric_im, prev_output_data, output_paths, self.tracked_paths
 
-        return tracked_metrics, terminated_early 
+        return terminated_early 
     
     def __call__(self, 
                 data_instance:dict,
+                patient_name: str, 
                 tmp_dir_path:str):
         '''
         data_instance - A dictionary containing the set of information with respect to the image, and ground truth, 
@@ -714,20 +722,24 @@ class FrontEndSimulator:
             Contains the following fields:
 
                 'image': dict - A dictionary containing the following subfields
-                    'path': path to the image 
                     'metatensor': Loaded MetaTensor in RAS orientation (pseudo-UI native domain) channelfirst 1HWD.
                     'meta_dict': MetaTensor's meta_dict, contains the original affine array, and the pseudo-ui affine array
                 
                 'label': dict - A dictionary containing the same subfields as the image! Not one-hot encoded for the MetaTensors!
-            
-            NOTE: KEY ASSUMPTION 1: The filename for both the image and ground truth will be the same. 
-            NOTE: KEY ASSUMPTION 2: The ground truth will NOT be one-hot encoded. 
         
+        patient_name - The string denoting the filename for the image and ground truth. 
+
+        NOTE: KEY ASSUMPTION 1: The filename for both the image and ground truth will be the same. 
+
         tmp_dir_path - The path name for the current temporary directory initialised for the current data instance.
         '''
 
         if not isinstance(data_instance, dict) or not data_instance:
             raise Exception('The data instance must be a non-empty dictionary.')
+        
+        if not isinstance(patient_name, str) or not patient_name:
+            raise Exception('The name for the image must be a string and be non-empty.')
+        
         if not isinstance(tmp_dir_path, str) or not tmp_dir_path:
             raise Exception('The tmp_dir path must be a string and non-empty.')
 
@@ -742,21 +754,28 @@ class FrontEndSimulator:
         #Re-assigning the tmp_dir_path attribute for each data instance. 
         self.tmp_dir_path = tmp_dir_path
 
+        #Re-assigning the patient name
+        self.patient_name = patient_name 
+
+        #Re-assigning the data instance
+        self.data_instance = data_instance 
+
         #Initialising a dictionary for tracking the metrics generated, not required for the im dictionaries as this
         #will be performed within the iterative loop.
-        tracked_metrics = {}
+        self.tracked_metrics = {}
+
+        #First we initialise the dictionary for storing the set of output paths. 
+        self.tracked_paths = {}
 
         #Executing the iterative loop.
-        tracked_metrics, terminated_early = self.iterative_loop(
-            data_instance=data_instance,
-            tracked_metrics=tracked_metrics)
+        terminated_early = self.iterative_loop()
         
         #Saving the final set of tracked metrics....
 
         self.metrics_handler.save_metrics(
-            patient_name=os.path.split(data_instance['image']['path'])[1].split('.')[0],
+            patient_name=patient_name,
             terminated_early=terminated_early,
-            tracked_metrics=tracked_metrics
+            tracked_metrics=self.tracked_metrics
         )
 
         #Nothing is returned here, everything except final tmp_dir cleanup needs to be handled during the loop!

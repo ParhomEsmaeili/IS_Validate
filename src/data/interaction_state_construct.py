@@ -6,7 +6,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from src.prompt_generators.prompt_generators import HeuristicSpatialPromptGenerator
 import logging 
-
+import copy 
 logger = logging.getLogger(__name__)
 
 class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
@@ -23,7 +23,7 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
         
         Interaction state is defined as a dict which contains the following key:value pairs:
             
-            Image - A dictionary separated by the datatype: 1) Path to the image, 2) MetaTensor of the image itself.
+            Image - A dictionary: 1) MetaTensor of the image itself 2) tensor representing the affine of the image in the ui-domain. 
             
             Prompts (currently supports points, scribbles, bbox). The prompts and labels provided with
             two types of formats:
@@ -59,8 +59,8 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
             prev_logits: Channelwise logit maps which correspond to that which the application has provided.
             
                 Each contains a dictionary separated by the datatype format for representing them:
-                    1) Path(s) to the file(s) 2) Original forward propagated form for the array 
-                    3) Meta dictionary for the array
+                    1)Original forward propagated form for the array 
+                    2) Meta dictionary for the array
     
 
          
@@ -119,7 +119,7 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
         
             Two related fields here - discretised segmentation and multi-channel (channel first) logits maps (background is a class).  
 
-            im: An optional dictionary containing the set of retained interaction states (or NONE). 
+            im: An optional dictionary containing the set of retained interaction states (or NONE for initialisations). 
 
             Returns:
             Interaction state dictionary for the current iteration for which the call has been made.
@@ -145,17 +145,18 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
             if mode in self.init_modes:
                 prev_output_data = {
                 'logits':{
-                    'paths': None,
+                    # 'paths': None,
                     'metatensor': None,
                     'meta_dict': None
                 },
                 'pred':{
-                    'path': None,
+                    # 'path': None,
                     'metatensor': None,
                     'meta_dict': None
                 }
                 }
-            
+
+
             interaction_state_dict = {
                 'interaction_torch_format':{
                     'interactions': interaction_torch_format,
@@ -163,12 +164,12 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
                 },
                 'interaction_dict_format': interaction_dict_format,
                 'prev_logits':{
-                    'paths': prev_output_data['logits']['paths'],
+                    # 'paths': prev_output_data['logits']['paths'],
                     'metatensor': prev_output_data['logits']['metatensor'],
                     'meta_dict': prev_output_data['logits']['meta_dict']
                 },
                 'prev_pred':{
-                    'path': prev_output_data['pred']['path'],
+                    # 'path': prev_output_data['pred']['path'],
                     'metatensor': prev_output_data['pred']['metatensor'],
                     'meta_dict': prev_output_data['pred']['meta_dict']
                 }

@@ -25,6 +25,7 @@ def set_parse():
     parser.add_argument('--dataset_name', type=str, default='BraTS2021_Training_Data_Split_True_proportion_0.8_channels_t2_resized_FLIRT_binarised')
     parser.add_argument('--test_mode', type=str, default='test')
     parser.add_argument('--data_fold', type=str, default=None)
+    parser.add_argument('--dataloading_type', type=str, default='basic')
     
     #Experimental process/method related args 
     parser.add_argument('--app_name', type=str, default='Sample_TEST') #This acts as the name of the app, but also temporarily acts as the relative path name within the input_applications folder.
@@ -51,7 +52,7 @@ def set_parse():
     #Int which determines the memory length used at cleanup after the interaction memory is updated with the current edit iteration's interaction state (inclusive of current state). 
     # This functionally has the same thing as using a memory length of N (where N is our variable here) for conditioning
     #the prompt generation of the next iteration (if memory is being used for conditioning.) N is strictly > 0 as N = 0 would remove the current iteration's interaction
-    #for inference, and also would be the same as ignoring the interaction memory for prompt generation (for which we have a separate variable.)
+    #for inference, and also would be the same as ignoring the memory for prompt generation (for which we have a separate variable.)
  
     #For the output processor/writing args which are optional.
     parser.add_argument('--is_seg_tmp', action='store_true', default=False)
@@ -314,14 +315,14 @@ def run_instances(dataloader, fe_sim_obj):
         iterate_dataloader_check(data_instance=data_instance)
         
         #Reformat the data instance
-        data_instance = data_instance_reformat(data_instance=data_instance)
+        data_instance, patient_name = data_instance_reformat(data_instance=data_instance)
         
         #Initialising the temporary directory.
         tempdir_obj = tempfile.TemporaryDirectory(dir=codebase_dir)
 
         try:
             #Calling the front-end simulator
-            fe_sim_obj(data_instance=data_instance, tmp_dir_path=tempdir_obj.name) 
+            fe_sim_obj(data_instance=data_instance, patient_name=patient_name, tmp_dir_path=tempdir_obj.name) 
         finally:
             tempdir_obj.cleanup() 
             # raise Exception('There was an error in the front-end simulator, running cleanup.')

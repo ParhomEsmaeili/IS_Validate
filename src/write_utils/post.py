@@ -106,9 +106,9 @@ class WriteOutput:
         
         return duplicate_reference 
     
-    def __call__(self, inf_req: dict, output_data: dict, tmp_dir: str):
+    def __call__(self, data_instance: dict, output_data: dict, tmp_dir: str):
         
-        ref = inf_req[self.ref_key]['metatensor']
+        ref = data_instance[self.ref_key]['metatensor']
         ref_meta_dict = ref.meta
         
         result = output_data[self.result_key]['metatensor']

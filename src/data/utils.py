@@ -97,7 +97,7 @@ def init_data(dataset_dir:str, exp_data_configs:dict, file_ext:str):
 
 def dataloader_generator(datalist):
     '''
-    This function handles the construction of a dataset object for iterating through, and then returns the dataloader.
+    This function handles the construction of a dataset object for iterating through.
     '''
     load_transforms = [
         LoadImaged(keys=['image', 'label'], reader="ITKReader", image_only=True),
@@ -162,16 +162,28 @@ def data_instance_reformat(data_instance:dict):
     if not isinstance(label_tensor, MetaTensor): #or not isinstance(label_tensor, torch.Tensor): 
         raise TypeError('Label tensor was not a MONAI meta-tensor.')
     
-    im_meta_dict = copy.deepcopy(data_instance['image'].meta)
-    label_meta_dict = copy.deepcopy(data_instance['label'].meta)
+    #Wiping all of the metadictionary outside of the affine and original affine keys. The user should not, and does not, require any of this other information! Bye bye!
+    retained_keys = ('original_affine', 'affine')
 
-    if not isinstance(im_meta_dict, dict) or not im_meta_dict:
+    im_tensor.meta = {key:val for key, val in im_tensor.meta.items() if key in retained_keys}
+    label_tensor.meta = {key:val for key, val in label_tensor.meta.items() if key in retained_keys}    
+
+    
+    # im_meta_dict = copy.deepcopy(data_instance['image'].meta)
+    # label_meta_dict = copy.deepcopy(data_instance['label'].meta)
+
+    if not isinstance(im_tensor.meta, dict) or not im_tensor.meta:
         raise Exception('The image meta_dict must be a non-empty dictionary')
     
-    if not isinstance(label_meta_dict, dict) or not label_meta_dict:
+    if not isinstance(label_tensor.meta, dict) or not label_tensor.meta:
         raise Exception('The label meta_dict must be a non-empty dictionary') 
 
     #Checking that the meta dict contains the affine arrays required.
+
+    #First copying the meta dict to keep it separate from the metatensor. 
+
+    im_meta_dict = copy.deepcopy(im_tensor.meta)
+    label_meta_dict = copy.deepcopy(label_tensor.meta)
 
     original_affine_key = 'original_affine'
     current_affine_key = 'affine'
@@ -203,18 +215,24 @@ def data_instance_reformat(data_instance:dict):
 
     reformat_data_instance = {
         'image': {
-            'path': im_path,
+            # 'path': im_path,
             'metatensor': im_tensor,
             'meta_dict': im_meta_dict
         },
         'label': {
-            'path': label_path,
+            # 'path': label_path,
             'metatensor': label_tensor,
             'meta_dict': label_meta_dict
         }
     } 
+    
+    if os.path.split(im_path)[1].split('.')[0] != os.path.split(label_path)[1].split('.')[0]:
+        raise Exception('The name for the provided image and label needs to be the same!')
+    
 
-    return reformat_data_instance
+    patient_name = os.path.split(im_path)[1].split('.')[0]
+
+    return reformat_data_instance, patient_name
 
 
 def read_jsons(dataset_abs_path:str, exp_data_type:str, fold :Union[str, None]):

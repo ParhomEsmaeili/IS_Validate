@@ -87,11 +87,6 @@ class OutputProcessor:
         if self.save_prompts:
             raise NotImplementedError('No class provided for saving prompts')
 
-        #Dict of info regarding the dict-paths for each filepath being placed after the segmentations have been saved.
-        self.reformat_dict_info = {
-            'logits': ('logits','paths'), 
-            'pred': ('pred','path'),
-        }        
     def check_device(self, 
                     data_dict: dict, 
                     data_path: tuple[Union[str, tuple, int]]):
@@ -199,37 +194,11 @@ class OutputProcessor:
                     self.check_integrity(self.config_labels_dict, check_info['reference_paths'][idx], output_data, check_info['output_paths'][idx], checks_subtuple)
                 else:
                     raise KeyError('Error, the string denoting the reference name is not one of the supported ones.')
-    def reformat_output(self, output_data: dict, pred_path:str, logits_paths:list[str]):
-        
-        '''
-        This function is intended for filling out the fields containing the strings for the segmentation paths in 
-        the output data for forward propagation. 
-        
-        inputs:
-
-        output_data: A dictionary containing the outputs of the prior inference call. 
-        
-        pred_path: A string denoting the path to the discretised prediction of the prior inference call.
-        
-        logits_paths: A list of strings denoting the paths to the channel-unrolled logits maps from the prior inference call.
-        (in the same order as was provided by the inference call)
-
-        returns: 
-        
-        output_data with pred_path and logits_paths inserted into the output_data dict in the "pred" and "logits" subdicts.
-        '''
-        for key, val in self.reformat_dict_info.items():
-            if key.title() == 'Logits':
-                output_data = dict_path_modif(output_data, val, logits_paths)
-            elif key.title() == 'Pred':
-                output_data = dict_path_modif(output_data, val, pred_path)
-            else:
-                raise KeyError('Reformatter info dictionary contained an unsupported key')
-        return output_data
 
     def write_maps(
             self, 
-            input_req:dict , 
+            data_instance:dict,
+            patient_name: str, 
             output_dict: dict, 
             inf_call_config: dict,
             tmp_dir: str):
@@ -238,9 +207,11 @@ class OutputProcessor:
         Also provides the paths to the corresponding files as outputs.
 
         Inputs:
-            input_req: Dict - Dictionary containing the input request for the inference call, contains the information
-            regarding the name of the data instance in question, and also the information about the image for performing any necessary re-orientation for writing etc.
+            data_instance: Dict - Dictionary containing the data instance which provides information about the image for performing any necessary re-orientation 
+            for writing etc.
 
+            patient_name: str - A string denoting the name of the patient/image. Disentangled from the data instance for anonymisation. 
+            
             output_dict: Dict - Dictionary containing the prior iteration after having been passed through the output checker
             (also ensures that the corresponding arrays will be on cpu).
 
@@ -254,12 +225,12 @@ class OutputProcessor:
         #First we write the discretised prediction map
 
         #Call the writer which must output the tempfile path
-        tmp_path = self.pred_writer(inf_req=input_req, output_data=output_dict, tmp_dir=tmp_dir)
+        tmp_path = self.pred_writer(data_instance=data_instance, output_data=output_dict, tmp_dir=tmp_dir)
 
         if not self.is_seg_tmp:
-            img_filename = os.path.split(input_req['image']['path'])[1]
+            # img_filename = os.path.split(input_req['image']['path'])[1]
             infer_config_dir = f'{inf_call_config["mode"]} Iter {inf_call_config["edit_num"]}' if inf_call_config['mode'].title() == 'Interactive Edit' else inf_call_config['mode'].title() 
-            pred_path = os.path.join(self.base_save_dir, 'segmentations', infer_config_dir, img_filename) 
+            pred_path = os.path.join(self.base_save_dir, 'segmentations', infer_config_dir, patient_name + '.nii.gz') 
             
             shutil.move(tmp_path[0], pred_path)
         else:
@@ -267,17 +238,19 @@ class OutputProcessor:
 
           
         #Now we write the logits maps to a set of tempfiles. 
-        logits_paths = self.logits_writer(inf_req=input_req, output_data=output_dict, tmp_dir=tmp_dir)
+        logits_paths = self.logits_writer(data_instance=data_instance, output_data=output_dict, tmp_dir=tmp_dir)
 
         return pred_path, logits_paths
     
-    def __call__(self, input_request, output_dict, infer_call_config, tmp_dir):
+    def __call__(self, data_instance, patient_name, output_dict, infer_call_config, tmp_dir):
         '''
         Function wraps together the post-processing steps required for checking and writing the segmentations and logits maps.
         and the output dictionary.
         
-        input_request: Dict - The request dictionary that was used for performing the inference call.
-        
+        data_instance: Dict - The dictionary that represents the patient instance which was used for generating the input data.
+
+        patient_name: Str - The name (without extension) of the patient name/image name. 
+
         output_dict: Dict - The returned dictionary from the inference call.
 
         infer_call_config: Dict - A dictionary containing two subfields:
@@ -285,19 +258,19 @@ class OutputProcessor:
             'edit num': Union[int, None] - The current edit's iteration number or None for initialisations.
         '''
         try:
-            self.check_output(input_request, output_dict)
+            self.check_output(data_instance, output_dict)
         except:
             raise Exception('Checking the output data failed due to the aforementioned error')
         try:
-            pred_path, logits_paths = self.write_maps(input_req=input_request, output_dict=output_dict, inf_call_config=infer_call_config, tmp_dir=tmp_dir)
+            pred_path, logits_paths = self.write_maps(data_instance=data_instance, patient_name=patient_name, output_dict=output_dict, inf_call_config=infer_call_config, tmp_dir=tmp_dir)
         except:
             raise Exception('Writing the segmentation maps failed due to the aforementioned error')
-        try:
-            output_dict = self.reformat_output(output_data=output_dict, pred_path=pred_path, logits_paths=logits_paths)
-        except:
-            raise Exception('Reformatting the output data dictionary failed due to the aforementioned error')
+        # try:
+        #     output_paths = self.reformat_output(output_paths=output_paths, pred_path=pred_path, logits_paths=logits_paths)
+        # except:
+        #     raise Exception('Reformatting the output data dictionary failed due to the aforementioned error')
         
-        return output_dict
+        return {'pred':pred_path, 'logits':logits_paths}
     
 if __name__ == '__main__':
 

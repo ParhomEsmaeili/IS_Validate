@@ -124,7 +124,7 @@ class InferApp:
             Within each interaction state in IM:    
             
             prev_logits: A dictionary containing: {
-                    'paths': list of paths, to each individual logits map (HWD), in the same order as provided by output CHWD logits map}
+                    # 'paths': list of paths, to each individual logits map (HWD), in the same order as provided by output CHWD logits map}
                     'metatensor': Non-modified (CHWD) metatensor/torch tensor that is forward-propagated from the prior output (CHWD).
                     'meta_dict': Non-modified meta dictionary that is forward propagated.
                     }

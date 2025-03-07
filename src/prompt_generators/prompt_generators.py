@@ -178,16 +178,16 @@ class BasicSpatialPromptGenerator(PromptReformatter):
         in the processor called in the pseudo-ui front-end.
        
         Two relevant fields for prompt generation contained are the: 
-            pred: A dictionary containing 3 subfields:
-                1) "path": Path to the prediction file (Not Relevant)
+            pred: A dictionary containing 2, optionally 3 subfields:
+                1) "path": Path to the prediction file (optionally)
                 And two relevant subfields
-                2) "metatensor" A Metatensor or torch tensor (1HW(D)) containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
+                2) "metatensor" A Metatensor or torch tensor (1HW(D)) containing the previous segmentation in the native image domain 
                 3) "meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
             
             logits:
-                1) "paths": List of paths to the prediction file (Not Relevant)
-                And two potentially relevant subfields
-                2) "metatensor" A Metatensor or torch tensor (CHW(D)) containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
+                1) "paths": List of paths to the prediction file (optionally)
+                And two relevant subfields
+                2) "metatensor" A Metatensor or torch tensor (CHW(D)) containing the previous segmentation in the native image domain 
                 3) "meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
         
         im: (NOTE: OPTIONAL, NoneType for initialisation mode.) the interaction memory dictionary as defined in
