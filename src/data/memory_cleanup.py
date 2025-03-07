@@ -70,7 +70,7 @@ def memory_cleanup(
             del im[tuple(deletion_set)[0]]
             del paths[tuple(deletion_set)[0]]
 
-        if im_config['im_len'] <= 0:
+        if im_config['im_len'] == 0:
             raise Exception('Cannot delete the interactions of the current interaction state prior to inference call, if you want no prompt conditioning then implement use_mem=False')
     elif infer_config['edit_num'] > 1:
 
@@ -93,7 +93,7 @@ def memory_cleanup(
                 
             edit_iter_num = infer_config['edit_num'] #Variable denoting which editing iteration this cleanup was called at.
             
-            if edit_memory_len <= 0:
+            if edit_memory_len == 0:
                 raise Exception('Cannot be removing the interaction information of the current iteration state prior to the inference call, if you want no prompt conditioning then implement use_mem=False')
             
             #Denotes the upper bound (exclusive) for removal of the memory states (inclusive of the current state).

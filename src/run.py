@@ -51,8 +51,8 @@ def set_parse():
     
     #Int which determines the memory length used at cleanup after the interaction memory is updated with the current edit iteration's interaction state (inclusive of current state). 
     # This functionally has the same thing as using a memory length of N (where N is our variable here) for conditioning
-    #the prompt generation of the next iteration (if memory is being used for conditioning.) N is strictly > 0 as N = 0 would remove the current iteration's interaction
-    #for inference, and also would be the same as ignoring the memory for prompt generation (for which we have a separate variable.)
+    #the prompt generation of the next iteration (if memory is being used for conditioning.) N is strictly > 0 or N = - 1, where N=-1 indicates full memory length paradoxically. 
+    # as N = 0 would remove the current iteration's interaction for inference, and also would be the same as ignoring the memory for prompt generation (for which we have a separate variable.)
  
     #For the output processor/writing args which are optional.
     parser.add_argument('--is_seg_tmp', action='store_true', default=False)
