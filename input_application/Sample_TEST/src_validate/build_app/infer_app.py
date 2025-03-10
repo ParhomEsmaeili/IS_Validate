@@ -7,11 +7,11 @@ from monai.data import MetaTensor
 
 class InferApp:
     def __init__(self,
-                dataset_name:str,
+                dataset_info:dict,
                 infer_device:torch.device
                 ):
         
-        self.dataset_name = dataset_name
+        self.dataset_info = dataset_info
         self.infer_device  = infer_device 
 
         self.build_inference_apps()

@@ -69,7 +69,14 @@ def gen_experiment_args(args):
 
     #Setting the app name for the experiment, also available for the build script. 
     output_dict['app_name'] = args.app_name 
-    output_dict['dataset_name'] = args.dataset_name 
+
+    #Loading in the relevant information from the dataset
+
+    output_dict['dataset_info'] = {
+    'dataset_name': args.dataset_name,
+    'dataset_modality': extract_config(os.path.join(codebase_dir, 'datasets', args.dataset_name, 'dataset.json'), 'modality'),
+    }
+
 
     #Creating paths
     
@@ -78,7 +85,7 @@ def gen_experiment_args(args):
     #Temporarily creating an abspath using this relative path:
     output_dict['build_app_abspath'] = os.path.join(codebase_dir, 'input_application', output_dict['app_name'], output_dict['build_app_rel_path'])
 
-    #Paths for results and logging. 
+    #Paths for results and logging etc. 
     output_dict['results_dir'] = os.path.join(codebase_dir, 'results')
     output_dict['input_dataset_dir'] = os.path.join(codebase_dir, 'datasets', args.dataset_name)
     output_dict['results_dataset_subdir'] = os.path.join(output_dict['results_dir'], args.dataset_name)
@@ -223,7 +230,7 @@ def init_metrics_saves(exp_results_dir, metrics_configs, configs_labels_dict):
 
 
 def extract_config(path, name):
-    #Function which extracts configs dicts from json or txt files. Takes the path to the file, and the name of the specific config desired. Returns a dict.
+    #Function which extracts configs dicts from json or txt files. Takes the path to the file, and the name of the specific config desired.
 
     if not os.path.exists(path):
         raise Exception('The path was not a valid one. Please check.')    
@@ -231,9 +238,9 @@ def extract_config(path, name):
     #Loading the file:
     with open(path) as f:
         configs_registry = json.load(f)
-        config_dict = configs_registry[name]
+        config = configs_registry[name]
 
-    return config_dict 
+    return config 
     
 
 def log_config_writer(args_name, args_dict, logger):
@@ -246,7 +253,7 @@ def log_config_writer(args_name, args_dict, logger):
             logger.info(f"{key}: {value}")
 
 
-def build_infer_app(app_name, dataset_name, device):
+def build_infer_app(app_name, dataset_info, device):
 
     build_app_dir = os.path.join(codebase_dir, 'input_application', app_name, 'src_validate', 'build_app')
     
@@ -272,7 +279,7 @@ def build_infer_app(app_name, dataset_name, device):
         spec.loader.exec_module(foo)
         InferApp = foo.InferApp 
 
-    return InferApp(dataset_name, device) 
+    return InferApp(dataset_info, device) 
 
 
 def init_infer_app(experiment_args:dict): 
@@ -281,7 +288,7 @@ def init_infer_app(experiment_args:dict):
             
     #app_name: name of the app AND also the relative path from "input_application" to the app directory
 
-    infer_app = build_infer_app(experiment_args['app_name'], experiment_args['dataset_name'], experiment_args['device'])
+    infer_app = build_infer_app(experiment_args['app_name'], experiment_args['dataset_info'], experiment_args['device'])
 
     if not callable(infer_app):
         raise Exception('The inference app must be callable class.')
@@ -414,7 +421,7 @@ def main():
     app_config_dict = infer_app.app_configs()
 
     if not app_config_dict:
-        warnings.warn('Should at least return the application name')
+        raise Exception('Should at least return the application name in the app_configs method.')
 
     #Writing app configs. 
     log_config_writer('Application Args', app_config_dict, exp_setup_logger)
