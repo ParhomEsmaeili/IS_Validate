@@ -18,7 +18,7 @@ from src.write_utils.post import WriteOutput
 '''
     This class needs to be able to process the app output in the following capacities:
     Needs to modify the output data dictionary such that it matches expected structure of the interaction state constructors
-    Needs to implement the writers, for writing the pred, and logits, then adding the paths to the output data for each
+    Needs to implement the writers, for writing the pred, and probs, then adding the paths to the output data for each
     of these corresponding written files, in the expected structure of the interaction state constructor. 
 '''
 
@@ -46,18 +46,18 @@ class OutputProcessor:
         self.save_prompts = save_prompts
 
         #List of paths in the output dictionary that must be on cpu. Each item is in tuple format, index=depth of dict.
-        self.check_cpu_info = [('logits','metatensor'), ('logits', 'meta_dict', 'affine'), ('pred','metatensor'), ('pred','meta_dict', 'affine')] 
+        self.check_cpu_info = [('probs','metatensor'), ('probs', 'meta_dict', 'affine'), ('pred','metatensor'), ('pred','meta_dict', 'affine')] 
        
         #Dictionary containing the reference dict (paths), output_dict (paths) and the corresponding checks being examined.
 
         self.check_integrity_info  = {
-            #Checking the number of dims for logits and pred. Must be channelfirst CHW(D) and match the quantity 
+            #Checking the number of dims for probs and pred. Must be channelfirst CHW(D) and match the quantity 
             #provided in the input image (which must be loaded as a channel first). Also checking the spatial resolution
             #of the output HW(D) against the input. Also checking that if the returned obj is a MetaTensor, then the affine must match that of the image.
-            'check_logits':{
+            'check_probs':{
                 'reference_name':('reference', 'config_labels_dict'),
                 'reference_paths':(('image','metatensor'), None),
-                'output_paths': (('logits','metatensor'), ('logits', 'metatensor')),
+                'output_paths': (('probs','metatensor'), ('probs', 'metatensor')),
                 'checks': (('check_num_dims','check_spatial_res', 'check_meta_affine'), ('check_num_channel',)),
                 },
             'check_pred':{
@@ -66,23 +66,23 @@ class OutputProcessor:
                 'output_paths': (('pred','metatensor'),),
                 'checks': (('check_num_dims','check_spatial_res', 'check_meta_affine'),),
             },
-            #Checking that the pred/logits meta dict item (affine array only!) matches that of the input request.
+            #Checking that the pred/probs meta dict item (affine array only!) matches that of the input request.
             'check_pred_meta_dict':{
                 'reference_name':('reference',),
                 'reference_paths':(('image', 'meta_dict', 'affine'),),
                 'output_paths':(('pred', 'meta_dict', 'affine'),),
                 'checks': (('check_metadict_affine',),),
             },
-            'check_logits_meta_dict':{
+            'check_probs_meta_dict':{
                 'reference_name':('reference',),
                 'reference_paths':(('image', 'meta_dict', 'affine'),),
-                'output_paths':(('logits', 'meta_dict', 'affine'),),
+                'output_paths':(('probs', 'meta_dict', 'affine'),),
                 'checks': (('check_metadict_affine',),),
             }
         }
 
         self.pred_writer = WriteOutput(ref_key='image', result_key='pred', dtype=np.int32, compress=False, invert_orient=True, file_ext='.nii.gz')
-        self.logits_writer = WriteOutput(ref_key='image', result_key='logits', dtype=np.float32, compress=False, invert_orient=True, file_ext='.nii.gz')
+        self.probs_writer = WriteOutput(ref_key='image', result_key='probs', dtype=np.float32, compress=False, invert_orient=True, file_ext='.nii.gz')
 
         if self.save_prompts:
             raise NotImplementedError('No class provided for saving prompts')
@@ -162,10 +162,10 @@ class OutputProcessor:
 
     def check_output(self, reference_data, output_data):
         '''
-        Function which checks whether the output data provided logits, segs, meta info etc, are on cpu. Moves any 
+        Function which checks whether the output data provided probs, segs, meta info etc, are on cpu. Moves any 
         offending tensors onto cpu.
 
-        Function also performs checks for the integrity of the outputs (logits, pred, logits_meta_dict, 
+        Function also performs checks for the integrity of the outputs (probs, pred, probs_meta_dict, 
         pred_meta_dict) match the requirements with respect to input request.
 
         Performs the following checks:
@@ -176,11 +176,11 @@ class OutputProcessor:
 
         '''
 
-        #Performing the checks that the pred, logits, and their meta dict's affine array are on cpu. (or placing them on cpu)
+        #Performing the checks that the pred, probs, and their meta dict's affine array are on cpu. (or placing them on cpu)
         for field in self.check_cpu_info:
             output_data = self.check_device(output_data, field)
         
-        #Performing the checks that the pred, logits, and their meta info match the "pseudo-UI" domain's 
+        #Performing the checks that the pred, probs, and their meta info match the "pseudo-UI" domain's 
         #expected requirements.
 
         for check, check_info in self.check_integrity_info.items():
@@ -203,7 +203,7 @@ class OutputProcessor:
             inf_call_config: dict,
             tmp_dir: str):
         '''
-        This function is intended for writing the maps (seg and logits) from the output data to permanent or temp files.
+        This function is intended for writing the maps (seg and probs) from the output data to permanent or temp files.
         Also provides the paths to the corresponding files as outputs.
 
         Inputs:
@@ -237,14 +237,14 @@ class OutputProcessor:
             pred_path = tmp_path[0] 
 
           
-        #Now we write the logits maps to a set of tempfiles. 
-        logits_paths = self.logits_writer(data_instance=data_instance, output_data=output_dict, tmp_dir=tmp_dir)
+        #Now we write the probs maps to a set of tempfiles. 
+        probs_paths = self.probs_writer(data_instance=data_instance, output_data=output_dict, tmp_dir=tmp_dir)
 
-        return pred_path, logits_paths
+        return pred_path, probs_paths
     
     def __call__(self, data_instance, patient_name, output_dict, infer_call_config, tmp_dir):
         '''
-        Function wraps together the post-processing steps required for checking and writing the segmentations and logits maps.
+        Function wraps together the post-processing steps required for checking and writing the segmentations and probs maps.
         and the output dictionary.
         
         data_instance: Dict - The dictionary that represents the patient instance which was used for generating the input data.
@@ -262,15 +262,15 @@ class OutputProcessor:
         except:
             raise Exception('Checking the output data failed due to the aforementioned error')
         try:
-            pred_path, logits_paths = self.write_maps(data_instance=data_instance, patient_name=patient_name, output_dict=output_dict, inf_call_config=infer_call_config, tmp_dir=tmp_dir)
+            pred_path, probs_paths = self.write_maps(data_instance=data_instance, patient_name=patient_name, output_dict=output_dict, inf_call_config=infer_call_config, tmp_dir=tmp_dir)
         except:
             raise Exception('Writing the segmentation maps failed due to the aforementioned error')
         # try:
-        #     output_paths = self.reformat_output(output_paths=output_paths, pred_path=pred_path, logits_paths=logits_paths)
+        #     output_paths = self.reformat_output(output_paths=output_paths, pred_path=pred_path, probs_paths=probs_paths)
         # except:
         #     raise Exception('Reformatting the output data dictionary failed due to the aforementioned error')
         
-        return {'pred':pred_path, 'logits':logits_paths}
+        return {'pred':pred_path, 'probs':probs_paths}
     
 if __name__ == '__main__':
 

@@ -101,9 +101,9 @@ class MetricsHandler:
     
     def extract_spatial_dims(self, input):
         '''
-        Function which extracts the spatial dimensions of the input, assumed to be CHW(D). Returns it in torch.int64 dtype.
+        Function which extracts the spatial dimensions of the input, assumed to be CHW(D). Returns it in torch.int64 dtype in a channel-split list.
         '''
-        return input[0,:].to(dtype=torch.int64)
+        return [input[i,:].to(dtype=torch.int64) for i in range(input.shape[0])]
     
     def init_base_metrics(self):
         #Extracting the metric configs for the base metric types ONLY.
@@ -182,8 +182,9 @@ class MetricsHandler:
         #The output data must have been post-processed and checked to ensure that the output of the user is valid
         #prior to metric computation. 
         
-        extracted_pred = self.extract_spatial_dims(output_data['pred']['metatensor'])
-        extracted_gt = self.extract_spatial_dims(data_instance['label']['metatensor'])
+        extracted_pred = self.extract_spatial_dims(output_data['pred']['metatensor'])[0] #We use 0 index as it should be len 1
+        extracted_probs = self.extract_spatial_dims(output_data['probs']['metatensor']) #We do not index here, as the probs are channel-split.
+        extracted_gt = self.extract_spatial_dims(data_instance['label']['metatensor'])[0] #We use 0 index as it should be len 1
 
         tracked_metrics, terminate_bool = self.exec_base_metrics(extracted_pred, extracted_gt, tracked_metrics, infer_call_info)
         

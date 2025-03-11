@@ -26,9 +26,9 @@ class InferApp:
             NOTE: Checks will be put in place to ensure that image resolution, spacing, orientation will be matching & otherwise 
         the code will be non-functional.
 
-            'logits': Dict which contains the following fields:
+            'probs': Dict which contains the following fields:
 
-                'metatensor': MetaTensor or torch object, ((torch.float dtype)), multi-channel logits map (CHWD), where C = Number of Classes (channel first format)
+                'metatensor': MetaTensor or torch object, ((torch.float dtype)), multi-channel probs map (CHWD), where C = Number of Classes (channel first format)
             
                 'meta_dict: Meta information in dict format,  ('affine must match the input-images' affine info)
             
@@ -45,19 +45,19 @@ class InferApp:
         '''
         #Returns an output with the same structure as the input image tensor. 
         
-        #dummy logits just use a set of slices at different offsets.. 
+        #dummy probs just use a set of slices at different offsets.. 
         
         img = request['image']['metatensor']
         shape = img.shape 
 
-        list_logits = []
+        list_probs = []
         for idx, class_lb in enumerate(request['config_labels_dict'].keys()):
             #create dummy
             # dummy = torch.zeros_like(img)
             dummy = torch.from_numpy(34.1103 * (idx + 1) * request['image']['metatensor'].array).to(dtype=torch.float64) 
-            list_logits.append(dummy)
+            list_probs.append(dummy)
         
-        logits_tensor = torch.cat(list_logits, dim=0).to(dtype=torch.float64)
+        probs_tensor = torch.cat(list_probs, dim=0).to(dtype=torch.float64)
 
         #Pred = Plain centred binary mask, like a cuboid.
         
@@ -68,8 +68,8 @@ class InferApp:
 
 
         output = {
-            'logits':{
-                'metatensor':logits_tensor,
+            'probs':{
+                'metatensor':probs_tensor,
                 'meta_dict':{'affine': request['image']['meta_dict']['affine']}
             },
             'pred':{
@@ -123,13 +123,11 @@ class InferApp:
 
             Within each interaction state in IM:    
             
-            prev_logits: A dictionary containing: {
-                    # 'paths': list of paths, to each individual logits map (HWD), in the same order as provided by output CHWD logits map}
-                    'metatensor': Non-modified (CHWD) metatensor/torch tensor that is forward-propagated from the prior output (CHWD).
+            prev_probs: A dictionary containing: {
+                    'metatensor': Non-modified (CHWD) metatensor/torch tensor that is forward-propagated from the prior output (CHWD) assumed to be in the order of the config labels dict.
                     'meta_dict': Non-modified meta dictionary that is forward propagated.
                     }
             prev_pred: A dictionary containing: {
-                    'path': path to the discretised map (HWD)}
                     'metatensor': Non-modified metatensor/torch tensor that is forward-propagated from the prior output (1HWD).
                     'meta_dict': Non-modified meta dictionary that is forward propagated.
                     }

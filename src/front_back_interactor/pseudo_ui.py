@@ -60,13 +60,11 @@ class FrontEndSimulator:
 
         Within each interaction state in IM:    
         
-        prev_logits: A dictionary containing: {
-                'paths': list of paths, to each individual logits map (HWD), in the same order as provided by output CHWD logits map}
+        prev_probs: A dictionary containing: {
                 'metatensor': Non-modified (CHWD) metatensor/torch tensor that is forward-propagated from the prior output (CHWD).
                 'meta_dict': Non-modified meta dictionary that is forward propagated.
                 }
         prev_pred: A dictionary containing: {
-                'path': path to the discretised map (HWD)}
                 'metatensor': Non-modified metatensor/torch tensor that is forward-propagated from the prior output (1HWD).
                 'meta_dict': Non-modified meta dictionary that is forward propagated.
                 }
@@ -89,9 +87,9 @@ class FrontEndSimulator:
     NOTE: Checks will be put in place to ensure that image resolution, spacing, orientation will be matching & otherwise 
     the code will be non-functional.
 
-        'logits': Dict which contains the following fields:
+        'probs': Dict which contains the following fields:
 
-            'metatensor': MetaTensor or torch object, ((torch.float dtype)), multi-channel logits map (CHWD), where C = Number of Classes (channel first format)
+            'metatensor': MetaTensor or torch object, ((torch.float dtype)), multi-channel probs map (CHWD), where C = Number of Classes (channel first format)
         
             'meta_dict: Meta information in dict format,  ('affine must match the input-images' affine info).
         
@@ -365,17 +363,17 @@ class FrontEndSimulator:
             
             pred: A string denoting the path to the discretised prediction of the prior inference call.
         
-            logits: A list of strings denoting the paths to the channel-unrolled logits maps from the prior inference call.
-            (in the same order as was provided by the inference call)
+            probs: A list of strings denoting the paths to the channel-unrolled probs maps from the prior inference call.
+            (in the order corresponding to the config labels dictionary.)
 
         inf_call_config: A dict denoting the current inference call configuration which we will use to store the output paths which have been given to us from the 
         prior iter.
 
         returns: 
         
-        output_paths with pred_path and logits_paths of prior iteration output inserted in the key for the current iteration, done with the assumption that each interaction 
+        output_paths with pred_path and probs_paths of prior iteration output inserted in the key for the current iteration, done with the assumption that each interaction 
         state is always dependent on the output of the prior state at minimum. For initialisations this is just None... it is a dummy variable due to my own dislike 
-        for seeing disordered sets but also to simplify the process of future editing iterations to harmonise the extraction of prior preds and logits
+        for seeing disordered sets but also to simplify the process of future editing iterations to harmonise the extraction of prior preds and probs
         from both the prev_output data dict, and the tracked paths dict.
         
         '''
@@ -388,14 +386,14 @@ class FrontEndSimulator:
             
         #Dict of info regarding the dict-paths for each filepath being placed after the segmentations have been saved.
         reformat_dict_info = {
-            'logits': (infer_config_dir, 'prev_logits','paths'), 
+            'probs': (infer_config_dir, 'prev_probs','paths'), 
             'pred': (infer_config_dir, 'prev_pred','path'),
         }     
 
         for key, val in reformat_dict_info.items():
-            if key.title() == 'Logits':
+            if key.title() == 'Probs':
                 try: 
-                    self.tracked_paths = dict_path_create(self.tracked_paths, val, output_paths['logits'])
+                    self.tracked_paths = dict_path_create(self.tracked_paths, val, output_paths['probs'])
                 except:
                     self.tracked_paths = dict_path_create(self.tracked_paths, val, None)
             elif key.title() == 'Pred':
@@ -473,7 +471,7 @@ class FrontEndSimulator:
         updated_metric_im = self.metric_im_handler(inf_im=inf_im, metric_im=metric_im)
         
         #Then we call on the output processor, which checks that the app call provided a valid output (within a prescribed set of rules)
-        # writes any desired predictions and logits, and returns the paths to the corresponding files. 
+        # writes any desired predictions and probs, and returns the paths to the corresponding files. 
         output_paths = self.output_processor(data_instance=self.data_instance, patient_name=self.patient_name, output_dict=output_data, infer_call_config=infer_call_config, tmp_dir=self.tmp_dir_path)
         #Tuple.
 

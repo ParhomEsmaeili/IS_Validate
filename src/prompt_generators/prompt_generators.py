@@ -184,7 +184,7 @@ class BasicSpatialPromptGenerator(PromptReformatter):
                 2) "metatensor" A Metatensor or torch tensor (1HW(D)) containing the previous segmentation in the native image domain 
                 3) "meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
             
-            logits:
+            probs:
                 1) "paths": List of paths to the prediction file (optionally)
                 And two relevant subfields
                 2) "metatensor" A Metatensor or torch tensor (CHW(D)) containing the previous segmentation in the native image domain 
@@ -205,8 +205,8 @@ class BasicSpatialPromptGenerator(PromptReformatter):
             if not isinstance(data['prev_output_data']['pred']['metatensor'], torch.Tensor) and not isinstance(data['prev_output_data']['pred']['metatensor'], MetaTensor):
                 raise TypeError('The previous pred must belong to the torch tensor, or monai MetaTensor datatype')
             
-            if not isinstance(data['prev_output_data']['logits']['metatensor'], torch.Tensor) and not isinstance(data['prev_output_data']['logits']['metatensor'], MetaTensor):
-                raise TypeError('The previous logits must belong to the torch tensor, or monai MetaTensor datatype')
+            if not isinstance(data['prev_output_data']['probs']['metatensor'], torch.Tensor) and not isinstance(data['prev_output_data']['probs']['metatensor'], MetaTensor):
+                raise TypeError('The previous probs must belong to the torch tensor, or monai MetaTensor datatype')
         
         if data['im'] is not None:
             if not isinstance(data['im'], dict):

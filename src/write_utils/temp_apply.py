@@ -115,13 +115,13 @@ if __name__ == '__main__':
 
     loaded_img_copy = copy.deepcopy(loaded_dict['image'])
     #For a dummy example where a MetaTensor object is provided.
-    logits_fe_metatensor = torch.cat([loaded_img_copy * n for n in range(5)])   #.array) 
-    logits_fe_tensor = torch.cat([torch.from_numpy(loaded_img_copy.array)  * 10 * n for n in range(5)]) #We just adjust the value for assurance in debugging.
+    probs_fe_metatensor = torch.cat([loaded_img_copy * n for n in range(5)])   #.array) 
+    probs_fe_tensor = torch.cat([torch.from_numpy(loaded_img_copy.array)  * 10 * n for n in range(5)]) #We just adjust the value for assurance in debugging.
     
     #Passing it through the converter.
 
-    # logits_fe_metatensor = converter(logits_fe_metatensor, loaded_img_copy)
-    # logits_fe_tensor = converter(logits_fe_tensor, loaded_img_copy)
+    # probs_fe_metatensor = converter(probs_fe_metatensor, loaded_img_copy)
+    # probs_fe_tensor = converter(probs_fe_tensor, loaded_img_copy)
 
 
     # original_img_axcodes = nib.aff2axcodes(loaded_img_copy.meta['original_affine']) 
@@ -129,8 +129,8 @@ if __name__ == '__main__':
     # orientation_undone_img_fn = Orientation(axcodes=original_img_axcodes)
 
     # with orientation_undone_img_fn.trace_transform(False):
-    #     orientation_undone_logits = orientation_undone_img_fn(logits_fe_metatensor)
-    #     orientation_undone_constructed_logits = orientation_undone_img_fn(logits_fe_tensor) 
+    #     orientation_undone_probs = orientation_undone_img_fn(probs_fe_metatensor)
+    #     orientation_undone_constructed_probs = orientation_undone_img_fn(probs_fe_tensor) 
 
 
     # save_im = SaveImage(writer="ITKWriter")
@@ -152,25 +152,25 @@ if __name__ == '__main__':
     #             compress=False)
     # print('halt!')
 
-    # #Writing dummy logits
+    # #Writing dummy probs
     # if True:
     #     for i in range(5):
-    #         write_itk(orientation_undone_logits.array[i], 
-    #             output_file=f'/home/parhomesmaeili/sanity_check_images/pancreas/vscodeLogitsMetaTensorHandlerITKManual_{i}.nii.gz', 
+    #         write_itk(orientation_undone_probs.array[i], 
+    #             output_file=f'/home/parhomesmaeili/sanity_check_images/pancreas/vscodeprobsMetaTensorHandlerITKManual_{i}.nii.gz', 
     #             affine=loaded_img_copy.meta['original_affine'], 
     #             dtype=np.float32, 
     #             compress=False)
             
-    #         write_itk(orientation_undone_constructed_logits.array[i], 
-    #             output_file=f'/home/parhomesmaeili/sanity_check_images/pancreas/vscodeLogitsConstructedMetaTensorHandlerITKManual_{i}.nii.gz', 
+    #         write_itk(orientation_undone_constructed_probs.array[i], 
+    #             output_file=f'/home/parhomesmaeili/sanity_check_images/pancreas/vscodeprobsConstructedMetaTensorHandlerITKManual_{i}.nii.gz', 
     #             affine=loaded_img_copy.meta['original_affine'], 
     #             dtype=np.float32, 
     #             compress=False)
         
     #     #Writing an actual continuous map.
 
-    #     write_itk(np.random.randn(*orientation_undone_constructed_logits.array.shape[1:]),
-    #         output_file='/home/parhomesmaeili/sanity_check_images/pancreas/vscodeRandomContinuousLogitsITKManual.nii.gz',
+    #     write_itk(np.random.randn(*orientation_undone_constructed_probs.array.shape[1:]),
+    #         output_file='/home/parhomesmaeili/sanity_check_images/pancreas/vscodeRandomContinuousprobsITKManual.nii.gz',
     #         affine=loaded_img_copy.meta['original_affine'],
     #         dtype=np.float32,
     #         compress=False
@@ -180,7 +180,7 @@ if __name__ == '__main__':
     dummy_tempdir = tempfile.TemporaryDirectory(dir='/home/parhomesmaeili/sanity_check_images/tmp')
 
     pred_output_writer = WriteOutput('label', 'pred', dtype=np.int32, compress=False, invert_orient=True)
-    logits_output_writer = WriteOutput('image', 'logits', dtype=np.float32, compress=False, invert_orient=True)
+    probs_output_writer = WriteOutput('image', 'probs', dtype=np.float32, compress=False, invert_orient=True)
 
     data_instance = {'image': {
             'path': data_dict['image'],
@@ -199,8 +199,8 @@ if __name__ == '__main__':
             'metatensor': pred_fe_metatensor,
             'meta_dict': {}
             },
-        'logits':{
-            'metatensor': logits_fe_metatensor,
+        'probs':{
+            'metatensor': probs_fe_metatensor,
             'meta_dict':{}
         }
     }
@@ -210,8 +210,8 @@ if __name__ == '__main__':
             'metatensor': pred_fe_tensor,
             'meta_dict': {}
             },
-        'logits':{
-            'metatensor': logits_fe_tensor,
+        'probs':{
+            'metatensor': probs_fe_tensor,
             'meta_dict':{}
         }
     }
@@ -221,15 +221,15 @@ if __name__ == '__main__':
         output_data=output_metatensor_format,
         tmp_dir=dummy_tempdir.name
         )
-    logits_metatensor_paths = logits_output_writer(
+    probs_metatensor_paths = probs_output_writer(
         data_instance=data_instance,
         output_data=output_metatensor_format,
         tmp_dir=dummy_tempdir.name
     )
 
     shutil.move(pred_metatensor_paths[0], '/home/parhomesmaeili/sanity_check_images/pancreas/vscodeMetaTensorHandlerITKManual.nii.gz')
-    for i in range(len(logits_metatensor_paths)):
-        shutil.move(logits_metatensor_paths[i], f'/home/parhomesmaeili/sanity_check_images/pancreas/vscodeLogitsMetaTensorHandlerITKManual_{i}.nii.gz')
+    for i in range(len(probs_metatensor_paths)):
+        shutil.move(probs_metatensor_paths[i], f'/home/parhomesmaeili/sanity_check_images/pancreas/vscodeprobsMetaTensorHandlerITKManual_{i}.nii.gz')
 
     print('halt, now the plain tensors.')
 
@@ -239,12 +239,12 @@ if __name__ == '__main__':
         output_data=output_tensor_format,
         tmp_dir=dummy_tempdir.name
         )
-    logits_metatensor_paths = logits_output_writer(
+    probs_metatensor_paths = probs_output_writer(
         data_instance=data_instance,
         output_data=output_tensor_format,
         tmp_dir=dummy_tempdir.name
     )
 
     shutil.move(pred_metatensor_paths[0], '/home/parhomesmaeili/sanity_check_images/pancreas/vscodeConstructedMetaTensorHandlerITKManual.nii.gz')
-    for i in range(len(logits_metatensor_paths)):
-        shutil.move(logits_metatensor_paths[i], f'/home/parhomesmaeili/sanity_check_images/pancreas/vscodeLogitsConstructedMetaTensorHandlerITKManual_{i}.nii.gz')
+    for i in range(len(probs_metatensor_paths)):
+        shutil.move(probs_metatensor_paths[i], f'/home/parhomesmaeili/sanity_check_images/pancreas/vscodeprobsConstructedMetaTensorHandlerITKManual_{i}.nii.gz')

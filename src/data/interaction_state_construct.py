@@ -56,7 +56,7 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
 
             
             prev_pred: Info for the discretised prediction maps which the application has provided.
-            prev_logits: Channelwise logit maps which correspond to that which the application has provided.
+            prev_probs: Channelwise logit maps which correspond to that which the application has provided.
             
                 Each contains a dictionary separated by the datatype format for representing them:
                     1)Original forward propagated form for the array 
@@ -117,7 +117,7 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
             
             Prev Output Data: An optional dictionary from the prior inference call output:
         
-            Two related fields here - discretised segmentation and multi-channel (channel first) logits maps (background is a class).  
+            Two related fields here - discretised segmentation and multi-channel (channel first) probs maps (background is a class).  
 
             im: An optional dictionary containing the set of retained interaction states (or NONE for initialisations). 
 
@@ -144,7 +144,7 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
 
             if mode in self.init_modes:
                 prev_output_data = {
-                'logits':{
+                'probs':{
                     # 'paths': None,
                     'metatensor': None,
                     'meta_dict': None
@@ -163,10 +163,10 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
                     'interactions_labels': interaction_labels_torch_format,
                 },
                 'interaction_dict_format': interaction_dict_format,
-                'prev_logits':{
-                    # 'paths': prev_output_data['logits']['paths'],
-                    'metatensor': prev_output_data['logits']['metatensor'],
-                    'meta_dict': prev_output_data['logits']['meta_dict']
+                'prev_probs':{
+                    # 'paths': prev_output_data['probs']['paths'],
+                    'metatensor': prev_output_data['probs']['metatensor'],
+                    'meta_dict': prev_output_data['probs']['meta_dict']
                 },
                 'prev_pred':{
                     # 'path': prev_output_data['pred']['path'],

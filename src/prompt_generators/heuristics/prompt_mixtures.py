@@ -85,7 +85,7 @@ data: This is a dictionary which contains the following information:
 
     Contains the following fields:
         pred: A dict, which contains a subfield "metatensor", with a 1HWD Metatensor, or torch tensor containing the prediction mask from the prior inference call.
-        logits: A dict, which contains a subfield "metatensor", with a CHWD Metatensor, or torch tensor for the logits map from the prior inference call.
+        probs: A dict, which contains a subfield "metatensor", with a CHWD Metatensor, or torch tensor for the probs map from the prior inference call.
 
     'im': (Optional) Dictionary containing the interaction memory from prior iterations of interaction. 
     
@@ -1242,7 +1242,7 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                 2) "metatensor" A Metatensor or torch tensor (1HW(D)) containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
                 3) "meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
             
-            logits:
+            probs:
                 1) "paths": List of paths to the prediction file (Not Relevant)
                 And two potentially relevant subfields
                 2) "metatensor" A Metatensor or torch tensor (CHW(D)) containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 

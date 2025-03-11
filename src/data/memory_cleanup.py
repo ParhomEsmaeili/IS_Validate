@@ -59,8 +59,8 @@ def memory_cleanup(
             # Because if we delete edit states in im_memory it would eventually go through and deletes the tempfiles using the 
             
             # for key in deletion_set:
-            #     logits_tmp_paths = im[key]['prev_logits']['paths'] 
-            #     selected_tempfiles_cleanup(tmp_dir=tmp_dir, paths=logits_tmp_paths)
+            #     probs_tmp_paths = im[key]['prev_probs']['paths'] 
+            #     selected_tempfiles_cleanup(tmp_dir=tmp_dir, paths=probs_tmp_paths)
                         
             #     #We then run cleanup of the temp files stored for the segs, according to the flag which handles whether segs are tmp or permanent.
             #     if is_seg_tmp:
@@ -110,10 +110,10 @@ def memory_cleanup(
                 #Deletion set for all potential iters required to be deleted according to upper bound (non inclusive)
                 
                 for key in deletion_set & set(im):
-                    #First we run cleanup of the temp files stored for the logits. 
-                    logits_tmp_paths = paths[key]['prev_logits']['paths']
+                    #First we run cleanup of the temp files stored for the probs. 
+                    probs_tmp_paths = paths[key]['prev_probs']['paths']
 
-                    selected_tempfiles_cleanup(tmp_dir=tmp_dir, paths=logits_tmp_paths)
+                    selected_tempfiles_cleanup(tmp_dir=tmp_dir, paths=probs_tmp_paths)
                     
                     #We then run cleanup of the temp files stored for the segs, according to the flag.
 
