@@ -150,7 +150,9 @@ class InferApp:
 
 
 if __name__ == '__main__':
-    infer_app = InferApp('BraTS2021', torch.device('cpu'))
+    infer_app = InferApp({
+        'dataset_name':'BraTS2021',
+        'modality':'MRI'}, torch.device('cpu'))
 
     infer_app.app_configs()
 
