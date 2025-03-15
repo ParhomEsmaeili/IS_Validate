@@ -28,10 +28,10 @@ def set_parse():
     parser.add_argument('--dataloading_type', type=str, default='basic')
     
     #Experimental process/method related args 
-    parser.add_argument('--app_name', type=str, default='Sample_TEST') #This acts as the name of the app, but also temporarily acts as the relative path name within the input_applications folder.
+    parser.add_argument('--app_name', type=str, default='Sample_SAMMed3D')#default='Sample_TEST') #This acts as the name of the app, but also temporarily acts as the relative path name within the input_applications folder.
     parser.add_argument('--random_seed', type=int, default=341103)
     parser.add_argument('--device_idx', type=int, default=0)
-    parser.add_argument('--infer_init', type=str, default='Interactive Init')
+    parser.add_argument('--infer_init', type=str, default='Automatic Init')
     parser.add_argument('--infer_not_edit_bool', action='store_false', default=True)
     parser.add_argument('--infer_edit_nums', type=int, default=10)
     parser.add_argument('--dice_termination_thresh', type=float, default=1.0)

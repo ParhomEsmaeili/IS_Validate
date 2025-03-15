@@ -956,6 +956,8 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                             print(f'Skipping class {class_lb} for editing as it has no error region, hence no refinement prompts can be placed (necessary) \n')
                             if set(self.valid_ptypes) & set(self.grounded_prompts_ls) != set():
                                 raise Exception('We still have not fixed the handling of grounded prompts, and so we cannot skip over if we use grounded prompts! Current approach requires sampling at every iteration')
+                            else:
+                                continue 
                         else:
                             regions_dict = {
                                 'gt':samp_regions_dict['gt'][class_lb], 

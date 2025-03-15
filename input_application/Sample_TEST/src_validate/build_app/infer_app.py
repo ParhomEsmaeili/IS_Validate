@@ -107,16 +107,16 @@ class InferApp:
         NOTE: Orientation convention is always assumed to be RAS! 
 
             image: A dictionary containing a path & a pre-loaded (UI) metatensor objects 
-            {'path':image_path, 
             'metatensor':monai metatensor object containing image, torch.float datatype.
-            'meta_dict': image_meta_dictionary, contains the original affine from loading and current affine array in the ui-domain.}
+            'meta_dict': image_meta_dictionary, contains the original affine from loading and current affine array in the ui-domain.
 
             model: A string denoting the inference "mode" being simulated, has three options: 
                     1) Automatic Segmentation, denoted: 'IS_autoseg' 
                     2) Interactive Initialisation: 'IS_interactive_init'
                     3) Interactive Editing: 'IS_interactive_edit'
             
-            config_labels_dict: A dictionary containing the class label - class integer code mapping relationship being used.
+            config_labels_dict: A dictionary containing the class label - class integer code mapping relationship being used. note that the codes are >= 0 with 0 = background.
+
 
             im: An interaction memory dictionary containing the set of interaction states. 
             Keys = Infer mode + optionally (for Edit) the inference iter num (1, ...).       
@@ -135,8 +135,8 @@ class InferApp:
             prompt information: See `<https://github.com/IS_Validate/blob/main/src/data/interaction_state_construct.py>`
 
             interaction_torch_format: A prompt-type separated dictionary containing the prompt information in list[torch.tensor] format 
-                {'interactions':dict[prompt_type_str[list[torch.tensor] OR NONE ]], 
-                'interactions_labels':dict[prompt_type_str_labels [list[torch.tensor] OR NONE]],
+                {'interactions':dict[prompt_type_str[list[torch.tensor/metatensor] OR NONE ]], 
+                'interactions_labels':dict[prompt_type_str_labels [list[torch.tensor/metatensor] OR NONE]],
                 }
             interaction_dict_format: A prompt-type separated dictionary containing the prompt info in class separated dict format
                 (where each prompt spatial coord is represented as a sublist).  

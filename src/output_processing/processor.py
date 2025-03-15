@@ -257,14 +257,10 @@ class OutputProcessor:
             'mode': str - The mode that the inference call was made for (Automatic Init, Interactive Init, Interactive Edit)
             'edit num': Union[int, None] - The current edit's iteration number or None for initialisations.
         '''
-        try:
-            self.check_output(data_instance, output_dict)
-        except:
-            raise Exception('Checking the output data failed due to the aforementioned error')
-        try:
-            pred_path, probs_paths = self.write_maps(data_instance=data_instance, patient_name=patient_name, output_dict=output_dict, inf_call_config=infer_call_config, tmp_dir=tmp_dir)
-        except:
-            raise Exception('Writing the segmentation maps failed due to the aforementioned error')
+        
+        self.check_output(data_instance, output_dict)
+            
+        pred_path, probs_paths = self.write_maps(data_instance=data_instance, patient_name=patient_name, output_dict=output_dict, inf_call_config=infer_call_config, tmp_dir=tmp_dir)
         # try:
         #     output_paths = self.reformat_output(output_paths=output_paths, pred_path=pred_path, probs_paths=probs_paths)
         # except:
