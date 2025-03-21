@@ -53,7 +53,8 @@ class FrontEndSimulator:
                 2) Interactive Initialisation: 'IS_interactive_init'
                 3) Interactive Editing: 'IS_interactive_edit'
         
-        config_labels_dict: A dictionary containing the class label - class integer code mapping relationship being used. note that the codes are >= 0 with 0 = background.
+        config_labels_dict: A dictionary containing the class label - class integer code mapping relationship being used. note that the codes are >= 0 with 
+        0 = background always, and that the labels are pre-normalised. E.g., 0,1,2,3... and never 0,2,3,5.
 
 
         im: An interaction memory dictionary containing the set of interaction states. 
