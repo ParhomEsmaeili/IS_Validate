@@ -140,7 +140,7 @@ ubuntu_venv/
 .vscode/
 
 # apps
-input_application/Sample_PRISM
+input_application/Sample_SegVol
 input_application/Sample_SAMMed3D
 
 #data
