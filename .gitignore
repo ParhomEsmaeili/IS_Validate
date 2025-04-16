@@ -142,6 +142,7 @@ ubuntu_venv/
 # apps
 input_application/Sample_SegVol
 input_application/Sample_SAMMed3D
+input_application/Sample_SAMMed2D
 
 #data
 datasets
