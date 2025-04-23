@@ -953,7 +953,7 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                     else:
                         #If edit, extract the gt and the false negative error region for the current class.
                         if samp_regions_dict['error_regions'][class_lb] is None:
-                            print(f'Skipping class {class_lb} for editing as it has no error region, hence no refinement prompts can be placed (necessary) \n')
+                            print(f'Skipping class {class_lb} for editing as it has no false negative error region, hence no refinement prompts can be placed (necessary) \n')
                             if set(self.valid_ptypes) & set(self.grounded_prompts_ls) != set():
                                 raise Exception('We still have not fixed the handling of grounded prompts, and so we cannot skip over if we use grounded prompts! Current approach requires sampling at every iteration')
                             else:
