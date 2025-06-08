@@ -12,12 +12,11 @@ import warnings
 
 # logger = logging.getLogger(__name__)
 
-def init_data(dataset_dir:str, exp_data_configs:dict, file_ext:str):
+def init_data(dataset_dir:str, exp_task_configs:dict): #, file_ext:str):
     #Function intended for reading data from the json, formulating it into the structure for the dataset 
     # constructor and then instantiating the dataset object.
 
-    #Extracting the dataset info dict (which contains the split between train and hold-out test data, and hopefully 
-    # config labels info).
+    #Reading the dataset.json file which will contain the base information about the dataset as initially formulated.
     
     try:
         dataset_json_path = os.path.join(dataset_dir, 'dataset.json')
@@ -30,51 +29,57 @@ def init_data(dataset_dir:str, exp_data_configs:dict, file_ext:str):
         with open(dataset_txt_path) as f:
             ds_configs = json.load(f)
 
-    #Extracting the config labels dictionary.
+    #Reading the dataset_split.json file which will describe the cases which will be used for the experiment.
+
     try:
-        config_labels_dict = ds_configs['labels']  #Try to read the config labels dictionary from dataset info file.
+        dataset_split_path = os.path.join(dataset_dir, 'dataset_split.json')
+        #Reading the json file.
+        with open(dataset_split_path) as f:
+            data_sampling_configs = json.load(f) 
     except:
-        #Try to read it from the config labels file. 
-        try: 
-            with open(os.path.join(dataset_dir, 'labels_config.json')) as f:
-                config_labels_info = json.load(f)
-                config_labels_dict = config_labels_info['labels']
-        except:
-            with open(os.path.join(dataset_dir, 'labels_config.txt')) as f:
-                config_labels_info = json.load(f)
-                config_labels_dict = config_labels_info['labels']
+        dataset_txt_path = os.path.join(dataset_dir, 'dataset.txt')
+        #Reading the txt file.
+        with open(dataset_txt_path) as f:
+            data_sampling_configs = json.load(f) 
+
+    #Extracting information about the default specifications of the datasets
+    orig_semantic_classes_dict = ds_configs.get('semantic_classes') #We do not put a failsafe because this is a required field.
     
-    if not isinstance(config_labels_dict, dict):
-        raise Exception('Config labels must be in a dictionary mapping format.')
+    if not isinstance(orig_semantic_classes_dict, dict):
+        raise Exception('Semantic labels must be in a dictionary mapping format.')
     else:
-        if not all([isinstance(i, str) for i in config_labels_dict.keys()]):
-            raise TypeError('The keys in the config labels dict must be a str denoting the text semantic info about the class')
-        if not all([isinstance(i, int) for i in config_labels_dict.values()]):
-            raise TypeError('The values in the config labels dict must be an int denoting the class-integer codes')
+        #We need to check that the keys describing the semantic classes are strings.
+        if not all([isinstance(i, str) for i in orig_semantic_classes_dict.keys()]):
+            raise TypeError('The keys in the semantic classes dict must be a str denoting the text semantic info about the class')
+        #We need to check whether the ids are all integers
+        if not all([isinstance(i, int) for i in orig_semantic_classes_dict.values()]):
+            raise TypeError('The semantic class-integer codes must be an int')
+        if any([i['semantic_type'] is 'thing' for i in orig_semantic_classes_dict.values()]):
+            raise NotImplementedError('The semantic type for the default input dataset is a "thing", but we do not yet provide proper handling for panoptic datasets.')
+      
+    #Extracting the case list according to the experimental task configs:
+    if exp_task_configs['dataset_sampling']['sampling_categor']:
 
-    if exp_data_configs['test_mode'].title() == 'Test':
-        #Reading the test list.
-        datalist = ds_configs['test']
-    elif exp_data_configs['test_mode'].title() == 'Val':
-        #Reading the train_val_split file.
-        try:
-            with open(os.path.join(dataset_dir, 'train_val_split.json')) as f:
-                splits = json.load(f)
-        except:
-            with open(os.path.join(dataset_dir, 'train_val_split.txt')) as f:
-                splits = json.load(f)
-            
-        #Extracting the fold.
-        datalist = splits[f'fold_{exp_data_configs["fold"]}']
-    else:
-        raise Exception('Eval mode is not valid, should only be test or val.')
+        case_list = data_sampling_configs['']
 
-    #Modifying datalist to include abspath and file extensions
+
+    
+    return config_labels_dict, dataloader_generator(datalist=datalist)
+
+
+def create_cases(recursive_dict):
+
+    #A function which will create the default structure of the cases, which will be passed through to the dataloader for case by case
+    #processing downstream. 
+
+
+
+    #Determining the actual filepaths for the task at hand: Modifying case-list to include abspath and file extensions
 
     #Extracting the os name.
     os_name = os.name 
 
-    for data_instance in datalist:
+    for case_instance in case_list:
 
         if os_name == 'nt':
             #Windows 
@@ -90,9 +95,14 @@ def init_data(dataset_dir:str, exp_data_configs:dict, file_ext:str):
             raise Exception('OS not supported.')
 
         data_instance['image'] = im_path + file_ext
-        data_instance['label'] = lb_path + file_ext 
-    
-    return config_labels_dict, dataloader_generator(datalist=datalist)
+        data_instance['label'] = lb_path + file_ext  
+
+
+    return case_list 
+
+
+
+
 
 
 def dataloader_generator(datalist):

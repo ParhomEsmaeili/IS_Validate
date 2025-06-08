@@ -23,8 +23,8 @@ def set_parse():
     
     #Data related args
     parser.add_argument('--dataset_name', type=str, default='Dataset008_HepaticVessel')#'BraTS2021_Training_Data_Split_True_proportion_0.8_channels_t2_resized_FLIRT_binarised')
-    parser.add_argument('--test_mode', type=str, default='test')
-    parser.add_argument('--data_fold', type=str, default=None)
+    # parser.add_argument('--test_mode', type=str, default='test')
+    # parser.add_argument('--data_fold', type=str, default=None)
     parser.add_argument('--dataloading_type', type=str, default='basic')
     
     #Experimental process/method related args 
@@ -98,12 +98,7 @@ def gen_experiment_args(args):
 
     #Configuring more generic experiment related configs.
 
-    #Configuring the experimental data-selection configs for sample extraction.
-    output_dict['exp_data_configs'] = {
-        'test_mode':args.test_mode,
-        'data_fold': args.data_fold,
-        
-    }
+
     #Configuring the experimental configs, first the infer run configs:
     if not args.infer_not_edit_bool: #Then init only.
         output_dict['infer_run_configs'] = {
@@ -125,7 +120,8 @@ def gen_experiment_args(args):
 
     output_dict['task_id'] =args.task_conf_name
     output_dict['task_configs'] = extract_config(os.path.join(exp_conf_dir, args.task_conf_filename), args.task_conf_name)
-
+    output_dict['seg_problem'] = output_dict['task_configs']['seg_problem']
+    
     output_dict['metrics_configs'] = extract_config(os.path.join(exp_conf_dir, args.metric_conf_filename), args.metric_conf_name)
     
     # output_dict['metric_prompt_procedure_type']
@@ -381,14 +377,12 @@ def main():
     #Reformulate the args into the format required for the experiment:
     experiment_args = gen_experiment_args(args)
 
-
     ################################## Configuration and extraction of data-related info.  ######################################################################
     
     #Extraction of the config labels dictionary, and the initialisation of the dataloader
     configs_labels_dict, dataloader = init_data(
         dataset_dir=experiment_args['input_dataset_dir'], 
-        exp_data_configs=experiment_args['exp_data_configs'],
-        file_ext='.nii.gz')
+        exp_task_configs=experiment_args['task_configs'])
     
     #We append the config labels dict to the experiment args. 
     experiment_args['configs_labels_dict'] = configs_labels_dict
