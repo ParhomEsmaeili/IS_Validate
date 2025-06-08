@@ -302,7 +302,7 @@ def standard_dataset_json_gen(output_folder: str,
     
     # numTraining: is used to double check all cases are there in the relpaths!
     # numTest: is used to double check all cases are there in the relpaths!
-    dataset_json['numTraining'] = num_training_cases
+    dataset_json['numTrain'] = num_training_cases
     dataset_json['numTest'] = num_test_cases
     
     #annotators config dict, need to check whether a description is available (i.e. non-nonetype) for the annotation protocol, otherwise provide reference and 
@@ -408,7 +408,7 @@ def standard_dataset_json_gen(output_folder: str,
         for case in test_relpaths.values():
             #We iterate over the subdicts corresponding to each of the cases for validating.
 
-            #Slightly modified from above, as we do not necessarily assume that the test set should have labels (so algorithm designers can't work within challenge constraints without
+            #Slightly modified from above, as we do not necessarily assume that the test set should have labels (so algorithm designers can work within challenge constraints without
             # pain-staking processing).
             if not all([isinstance(v, dict) for v in case.values()]):
                 raise Exception('The key:values of each case must be composed of a datatype:dictionary format, otherwise we cannot store the relpaths compactly.')
