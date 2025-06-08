@@ -2,7 +2,7 @@
 	"task_id_1":{
 		"data_sampling":
 			{
-				"sample_group_category": "all_train",
+				"sample_group_category": ["all_train"],
 				"image_conf": {
 					"image_channel": ["t2w"]
 					},		
