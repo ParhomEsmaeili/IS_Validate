@@ -71,7 +71,7 @@ class FrontEndSimulator:
                 'meta_dict': Non-modified meta dictionary that is forward propagated.
                 }
 
-        prompt information: See `<https://github.com/IS_Validate/blob/main/src/data/interaction_state_construct.py>`
+        prompt information
 
         interaction_torch_format: A prompt-type separated dictionary containing the prompt information in list[torch.tensor] format 
             {'interactions':dict[prompt_type_str[list[torch.tensor/metatensor] OR NONE ]], 
@@ -86,7 +86,7 @@ class FrontEndSimulator:
 
     Inference app must generate the output in a dict format with the following fields:
 
-    NOTE: Checks will be put in place to ensure that image resolution, spacing, orientation will be matching & otherwise 
+    NOTE: Checks will be put in place to ensure that voxel count, spacing, orientation will be matching & otherwise 
     the code will be non-functional.
 
         'probs': Dict which contains the following fields:
@@ -117,7 +117,9 @@ class FrontEndSimulator:
 
             random_seed: The optional int denoting the seed being used for this instance of validation. Otherwise, it is
             None and there is no determinism.  
-        
+
+            sim_empty_fg_automatic: Boolean denoting whether to simulate/attempt automatic segmentation in cases where the foreground are empty (non-background). 
+
             config_labels_dict: Dictionary mapping class labels and integer codes.
             
             inf_prompt_procedure_type: String denoting the inference prompt generator type: Heuristic is the only 
@@ -474,7 +476,7 @@ class FrontEndSimulator:
         
         #Then we call on the output processor, which checks that the app call provided a valid output (within a prescribed set of rules)
         # writes any desired predictions and probs, and returns the paths to the corresponding files. 
-        output_paths = self.output_processor(data_instance=self.data_instance, patient_name=self.patient_name, output_dict=output_data, infer_call_config=infer_call_config, tmp_dir=self.tmp_dir_path)
+        output_paths = self.output_processor(data_instance=self.data_instance, case_name=self.case_name, output_dict=output_data, infer_call_config=infer_call_config, tmp_dir=self.tmp_dir_path)
         #Tuple.
 
         #Then we update the tracked metrics.
@@ -605,7 +607,7 @@ class FrontEndSimulator:
         else:
             raise ValueError('The inference mode is invalid for app request generation!')
         
-    def iterative_loop(self):
+    def iterative_loop(self, empty_foreground:bool=False):
         '''
         ''' 
         
@@ -624,6 +626,22 @@ class FrontEndSimulator:
         
         if not isinstance(infer_run_configs['edit_bool'],  bool):
             raise TypeError('edit_bool value must be a boolean in the inference run configs dict.')
+        
+        if empty_foreground and infer_run_configs['init'].title() == 'Interactive Init':
+            #If the foreground is empty, we cannot perform an interactive initialisation with current prompting mechanisms, so if this is the config then we raise an error.
+            raise ValueError('Cannot currently perform interactive initialisation with empty foreground with our prompting mechanisms, this should have been flagged earlier!')
+        else:
+            if self.args['sim_empty_fg_automatic'] and empty_foreground:
+                #We can perform the initialisation, but only the initialisation. We currently do not support any mechanisms for simulating prompts for empty foregrounds.
+                warnings.warn('We have an empty foreground, with current prompting strategy we will only perform an automatic initialisation, if at all.')
+                #We will modify the infer_run_configs to only perform an automatic initialisation.
+                infer_run_configs['edit_bool'] = False
+                infer_run_configs['num_iters'] = 0
+                #This is only a temporary fix, we will implement a more robust solution in the future, but also it is only implemented for the current 
+                # data instance, the class attribute is not modified for other data instances. 
+            else:
+                raise Exception('There was an empty foreground and the sim_empty_fg_automatic flag was not set to True, this should have been flagged earlier!')
+        
         
         #We use the initialisation mode provided in the inference run config to initialise the model.
         if len({infer_run_configs['init'].title()} & {'Automatic Init', 'Interactive Init'}) == 1:
@@ -655,9 +673,9 @@ class FrontEndSimulator:
 
             #We put a placeholder for handling the termination condition.
             if terminated_early:
-                raise Exception('We do not yet have any handling for early convergence')
+                # raise Exception('We do not yet have any handling for early convergence')
                 print(f'Reached convergence already, terminating at {infer_run_configs["init"].title()}!')
-                return terminated_early 
+                return 0, terminated_early #0 is a placeholder for the number of editing iterations performed, which is zero in this case.
         else:
             raise KeyError('A supported initialisation mode was not selected')  
             
@@ -701,19 +719,19 @@ class FrontEndSimulator:
                     )
                 #We put a placeholder for handling the termination condition.
                 if terminated_early:
-                    raise Exception('We do not yet have any handling for early convergence')
+                    # raise Exception('We do not yet have any handling for early convergence')
                     print(f'Reached convergence already, terminating at Interactive Edit Iter {iter_num}!')
-                    return terminated_early
+                    return iter_num, terminated_early # iter_num is the number of editing iterations performed, which is iter_num in this case.
         
         #We delete the inference and metric interaction memory, prev output data, output paths etc just to be safe so it has zero chance of leaking over into the next
         # data instance
         del inf_im, metric_im, prev_output_data, output_paths, self.tracked_paths
 
-        return terminated_early 
+        return None, terminated_early 
     
     def __call__(self, 
                 data_instance:dict,
-                patient_name: str, 
+                case_name: str, 
                 tmp_dir_path:str):
         '''
         data_instance - A dictionary containing the set of information with respect to the image, and ground truth, 
@@ -727,7 +745,7 @@ class FrontEndSimulator:
                 
                 'label': dict - A dictionary containing the same subfields as the image! Not one-hot encoded for the MetaTensors!
         
-        patient_name - The string denoting the filename for the image and ground truth. 
+        case_name - The string denoting the filename for the image and ground truth. 
 
         NOTE: KEY ASSUMPTION 1: The filename for both the image and ground truth will be the same. 
 
@@ -737,16 +755,40 @@ class FrontEndSimulator:
         if not isinstance(data_instance, dict) or not data_instance:
             raise Exception('The data instance must be a non-empty dictionary.')
         
-        if not isinstance(patient_name, str) or not patient_name:
+        if not isinstance(case_name, str) or not case_name:
             raise Exception('The name for the image must be a string and be non-empty.')
         
         if not isinstance(tmp_dir_path, str) or not tmp_dir_path:
             raise Exception('The tmp_dir path must be a string and non-empty.')
 
-        #Checking if the foreground for this instance is even non-empty... we will currently not be supporting this.
+        #Checking if the foreground for this instance is even non-empty... we will currently not be supporting this at all for interaction simulation. In most scenarios
+        # it would not make sense to simulate prompts for an empty foreground, as ultimately there usually would be some salient target to have prompted the user to interact
+        # with the image in the first place.
         if check_empty(data_instance['label']['metatensor'], self.args['configs_labels_dict']['background']):
-            raise Exception(f'The ground truth for the foreground cannot be empty, this functionality is not supported. Raised exception for {data_instance["image"]["path"]}')
+            if self.args['infer_run_configs']['init'].title() == 'Automatic Init':
+                if not self.args['sim_empty_fg_automatic']:
+                    warnings.warn(f'The gold standard segmentation for the task foreground is completely empty and sim_empty_fg_automatic flag is false, skipping... \n'
+                        f'If this is not intended, please check the data instance provided. \n'
+                        f'Image path: {data_instance["image"]["path"]} \n'
+                        f'Ground truth path: {data_instance["label"]["path"]} \n'
+                        f'Case name: {case_name} \n')
+                    return    
+                else:
+                    #If automatic initialisation is being used, in this case we want the algorithm to be able to appropriately handle the empty foreground case.
+                    warnings.warn(f'The gold standard seg. for the foreground is empty, but the sim_empty_fg_automatic flag is set to True, so we will only perform an automatic initialisation. \n'
+                        f'Image path: {data_instance["image"]["path"]} \n'
+                        f'Ground truth path: {data_instance["label"]["path"]} \n'
+                        f'Case name: {case_name} \n')
+                    empty_foreground = True
+            else:
+                warnings.warn(f'The gold standard segmentation for the task foreground is completely empty, skipping... \n'
+                    f'If this is not intended, please check the data instance provided. \n'
+                    f'Image path: {data_instance["image"]["path"]} \n'
+                    f'Ground truth path: {data_instance["label"]["path"]} \n'
+                    f'Case name: {case_name} \n')
+                return # We return here, since we do not want to raise an exception for this case, but rather skip the instance.
         
+
         #Calling on the set_seeds function to re-initialise the seeds for each data instance (this ensures early
         #termination would not cause deterministic runs to vary across different models.)
         self.set_seeds(seed=self.args['random_seed'])
@@ -754,8 +796,8 @@ class FrontEndSimulator:
         #Re-assigning the tmp_dir_path attribute for each data instance. 
         self.tmp_dir_path = tmp_dir_path
 
-        #Re-assigning the patient name
-        self.patient_name = patient_name 
+        #Re-assigning the Case name
+        self.case_name = case_name 
 
         #Re-assigning the data instance
         self.data_instance = data_instance 
@@ -768,13 +810,16 @@ class FrontEndSimulator:
         self.tracked_paths = {}
 
         #Executing the iterative loop.
-        terminated_early = self.iterative_loop()
+        iter_num, terminated_early = self.iterative_loop(empty_foreground=empty_foreground)
         
         #Saving the final set of tracked metrics....
 
         self.metrics_handler.save_metrics(
-            patient_name=patient_name,
+            case_name=case_name,
+            empty_foreground=empty_foreground,
             terminated_early=terminated_early,
+            temporary_iter_lims=(iter_num, self.args['infer_run_configs']['num_iters']), #This is a tuple containing the lower and upper iteration limits for padding the tracked metrics, 
+            # if early convergence occured.....
             tracked_metrics=self.tracked_metrics
         )
 

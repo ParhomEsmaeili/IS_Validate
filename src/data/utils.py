@@ -67,7 +67,7 @@ def init_data(dataset_dir:str, exp_data_configs:dict, file_ext:str):
         #Extracting the fold.
         datalist = splits[f'fold_{exp_data_configs["fold"]}']
     else:
-        raise Exception('Test mode is not valid, should only be test or val.')
+        raise Exception('Eval mode is not valid, should only be test or val.')
 
     #Modifying datalist to include abspath and file extensions
 

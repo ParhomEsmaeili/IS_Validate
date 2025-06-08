@@ -1,0 +1,40 @@
+Explanation/Justification for the folder structure assumed by dataset conversion scripts:
+
+    Interactive segmentation provides strong promise for more tasks than it is currently being used for, in particular the capability to provide prompts inherently
+    endows the capability to provide more informative inputs which will enable segmentation to branch out naturally to instance and panoptic segmentation tasks.
+
+    (Here, we will commonly assume that background is a "stuff" semantic class that it is essentially ubiquituous, as not all "stuff" would be that informative,
+    generally. Although there is promise for the development of new algorithms through the use of supervoxels..)
+
+    Moreover, it is hoped that these algorithms will accelerate the annotation of new datasets, potentially to be used to train other algorithms. Clearly we have a 
+    chicken and the egg scenario, because the vast majority of medical imaging segmentation datasets are semantic segmentation. Nor do we have good strategies yet for
+    label fusion in instance segmentation scenarios. Lastly, common situations arise in medical image annotation, such as inter and intra-rater variability. 
+
+    It would be very relevant to tackle all of these issues, and strategies for scaling these algorithms for dataset annotation tasks.
+
+
+With that being said, there is no standard convention for handling instance or panoptic segmentations, or multi-annotator datasets (some are exceptionally rare also).
+
+For MedIO filetypes which are not inherently capable of being vector-valued (on a "voxel" basis), we will currently be using the following convention for the 
+segmentations (e.g., for a nifti format):
+
+Case/Sample
+|___Annotator
+     |_____Semantic class (We assume this much is consistent otherwise what is the point of this framework! Harmonising semantic classes is a different problem entirely 
+                           and will be left to the Vision-Language modellers of the world)
+         |_______ Instance ID 
+
+This format structure will temporarily support semantic, instance, and panoptic segmentation datasets. With just some careful handling of the json file to denote 
+the stuff and things classes.
+
+NOTE: Panoptic segmentations are recommended for evaluating instance segmentation anyways.... because otherwise we cannot sample prompts for over-segmentation, without
+using heuristics in dataloading.
+
+
+This convention, though temporary, should be fairly flexible and readable. For the image data itself, we will presume an nnU-net inspired convention:
+
+Case/Sample
+|____Channel (Channel here can refer to almost anything which has been used to stratify the dataset, e.g. multi-series/mpMRI, CT contrast-phases, etc.)
+            Currently we will make the assumption that the series correspond to different "images" corresponding to a reasonable time window (so not necessarily for
+            time series data), e.g. PET-CT, and that the scans will be co-registered and reformatted into a consistent "image domain". 
+

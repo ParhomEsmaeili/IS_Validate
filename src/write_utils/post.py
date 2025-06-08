@@ -56,7 +56,7 @@ class WriteOutput:
         if isinstance(affine, torch.Tensor):
             affine = affine.numpy()
         if len(image_np.shape) >= 2:
-            image_np = image_np.transpose().copy()
+            image_np = image_np.transpose().copy() #Transposition operation is necessary to convert between the axis ordering in MONAI IO and ITK
         if self.dtype:
             image_np = image_np.astype(self.dtype)
 

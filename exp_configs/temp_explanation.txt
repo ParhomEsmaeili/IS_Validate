@@ -1,0 +1,16 @@
+Temporary structure for organising the experimental configs information. Wanted to put it into a yaml but given that the full experimental stack is not yet determined, a hacky implementation was used here. Not yet fully fleshed out with respect to the future plans, either.
+
+We have some main configurations that go into the definition of an experiment ID (which is applied across a set of algorithms):
+
+Dataset (Self explanatory)
+
+Within each dataset (given that each dataset has task specific requirements):
+
+Task Config (explicitly and/or implicitly describes the task wrt a given dataset: channels (modalities/series), patch_config (voxel-count, spacing), seg_problem (problem_type: binary_semantic, multiclass_sem, instance etc., and the target semantic_classes). For now, we will not merge the prompting into the task config (but will do later). Absence of a specific config will typically mean that it is the default.
+
+Prompt Config (this determines the general logic for the prompting mechanism, and implicitly determines what the prompting task is)
+
+Metrics Config (describes the metrics that are going to be used to measuring segmentation quality. For now we will only be dealing with semantic segmentation, so for now this is just Dice and NSD computed on the foreground semantic classes)
+
+
+

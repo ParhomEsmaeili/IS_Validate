@@ -22,7 +22,7 @@ def set_parse():
     parser = argparse.ArgumentParser()
     
     #Data related args
-    parser.add_argument('--dataset_name', type=str, default='BraTS2021_Training_Data_Split_True_proportion_0.8_channels_t2_resized_FLIRT_binarised')
+    parser.add_argument('--dataset_name', type=str, default='Dataset008_HepaticVessel')#'BraTS2021_Training_Data_Split_True_proportion_0.8_channels_t2_resized_FLIRT_binarised')
     parser.add_argument('--test_mode', type=str, default='test')
     parser.add_argument('--data_fold', type=str, default=None)
     parser.add_argument('--dataloading_type', type=str, default='basic')
@@ -39,11 +39,14 @@ def set_parse():
     #Validation utilised constructors build args
     parser.add_argument('--metric_conf_filename', type=str, default='metrics_configs.txt')
     parser.add_argument('--prompt_conf_filename', type=str, default='prompts_configs.txt')
+    parser.add_argument('--task_conf_filename', type=str, default='task_configs.txt')
     parser.add_argument('--metric_conf_name', type=str, default='prototype')
+    parser.add_argument('--task_conf_name', type=str, default='task_id_1')
     parser.add_argument('--init_prompt_conf_name', type=str, default='prototype')
     parser.add_argument('--edit_prompt_conf_name', type=str, default='prototype')
     parser.add_argument('--metric_prompt_procedure_type', type=str, default='heuristic')
     parser.add_argument('--inf_prompt_procedure_type', type=str, default='heuristic')
+    parser.add_argument('--sim_empty_fg')
     #TODO: Put use_mem and other related args like that for the im etc in here. 
     parser.add_argument('--use_mem_inf_edit', action='store_true', default=False) #Whether im is used for conditioning prompt gen.
     parser.add_argument('--im_conf_remove_init', action='store_true', default=False) #Bool for whether the init state in im will be removed from memory.
@@ -74,9 +77,8 @@ def gen_experiment_args(args):
 
     output_dict['dataset_info'] = {
     'dataset_name': args.dataset_name,
-    'dataset_modality': extract_config(os.path.join(codebase_dir, 'datasets', args.dataset_name, 'dataset.json'), 'modality'),
+    'dataset_channel': extract_config(os.path.join(codebase_dir, 'datasets', args.dataset_name, 'dataset.json'), 'channel_names'),
     }
-
 
     #Creating paths
     
@@ -94,12 +96,14 @@ def gen_experiment_args(args):
 
     ########################################################################################################################
 
-    #Configuring the experimental data-selection configs for extraction.
+    #Configuring more generic experiment related configs.
+
+    #Configuring the experimental data-selection configs for sample extraction.
     output_dict['exp_data_configs'] = {
         'test_mode':args.test_mode,
-        'data_fold': args.data_fold
+        'data_fold': args.data_fold,
+        
     }
-
     #Configuring the experimental configs, first the infer run configs:
     if not args.infer_not_edit_bool: #Then init only.
         output_dict['infer_run_configs'] = {
@@ -114,8 +118,13 @@ def gen_experiment_args(args):
             'num_iters': args.infer_edit_nums
         }
 
-    #Extracting the configs dicts for the metrics and the prompt configs.
-    exp_conf_dir = os.path.join(codebase_dir, 'exp_configs') 
+    #Configuring more experiment specific configs:
+
+    #Extracting the configs dicts for the dataloading, metrics and the prompt configs.
+    exp_conf_dir = os.path.join(codebase_dir, 'exp_configs', args.dataset_name) 
+
+    output_dict['task_id'] =args.task_conf_name
+    output_dict['task_configs'] = extract_config(os.path.join(exp_conf_dir, args.task_conf_filename), args.task_conf_name)
 
     output_dict['metrics_configs'] = extract_config(os.path.join(exp_conf_dir, args.metric_conf_filename), args.metric_conf_name)
     
@@ -322,14 +331,14 @@ def run_instances(dataloader, fe_sim_obj):
         iterate_dataloader_check(data_instance=data_instance)
         
         #Reformat the data instance
-        data_instance, patient_name = data_instance_reformat(data_instance=data_instance)
+        data_instance, case_name = data_instance_reformat(data_instance=data_instance)
         
         #Initialising the temporary directory.
         tempdir_obj = tempfile.TemporaryDirectory(dir=codebase_dir)
 
         try:
             #Calling the front-end simulator
-            fe_sim_obj(data_instance=data_instance, patient_name=patient_name, tmp_dir_path=tempdir_obj.name) 
+            fe_sim_obj(data_instance=data_instance, case_name=case_name, tmp_dir_path=tempdir_obj.name) 
         finally:
             tempdir_obj.cleanup() 
             # raise Exception('There was an error in the front-end simulator, running cleanup.')
@@ -338,6 +347,7 @@ def init_fe(infer_app, experiment_args):
     #Function which initialises the front-end simulator.
     keep_key_list = [
         'configs_labels_dict',
+        'sim_empty_fg_automatic'
         'infer_run_configs',
         'metrics_configs',
         'inf_prompt_procedure_type',

@@ -178,8 +178,22 @@ def sort_infer_calls(infer_call_names):
 
     return tuple(infer_call_names_order)
 
+
+def try_float_or_keep(x):
+    #Func which will convert a value to a float if possible. If presented with a datatype which cannot be converted, if 
+    #it is a datatype which would raise a valueerror or a typeerror, then it will return the value as is. Otherwise, it will
+    #raise an exception, because we do not want to silently fail.
+    try:
+        return float(x)
+    except (ValueError, TypeError):
+        #If we have a valueerror or a typeerror, then we will just return the value as is.
+        return x
+    except Exception as e:
+        #If we have an unexpected exception, then we will raise it.
+        raise Exception(f'Unexpected exception when trying to convert {x} to a float: {e}') from e
+
 def write_row(
-        patient_name: str, 
+        case_name: str, 
         save_path: str, 
         extraction_tuples: tuple[tuple], 
         metrics_dict: dict[str, dict]):
@@ -188,7 +202,7 @@ def write_row(
     Function which writes a row of results to their corresponding csv file.
 
     Inputs:
-    patient_name: String denoting the image name under consideration
+    case_name: String denoting the case name under consideration
     
     save_path: The path to the csv file which the scores are being written to.
     
@@ -217,16 +231,21 @@ def write_row(
     .
     .
     }
-    '''
-    
+    ''' 
     with open(save_path,'a') as f:
         writer = csv.writer(f)
-        base_row = [patient_name]
-        base_row.extend([float(extractor(metrics_dict, path)) for path in extraction_tuples])
+        base_row = [case_name]
+        # base_row.extend([float(extractor(metrics_dict, path)) for path in extraction_tuples if extractor(metrics_dict, path)]) 
+        base_row.extend([
+            try_float_or_keep(val)
+            for path in extraction_tuples
+            for val in [extractor(metrics_dict, path)]
+        ])
+        #We will typically use a string to denote that the process terminated early, or that the foreground was empty.
         writer.writerow(base_row)
     
 def write_to_csvs(
-    patient_name: str,
+    case_name: str,
     csv_paths: dict[str, dict],
     tracked_metrics: dict
 ):
@@ -235,7 +254,7 @@ def write_to_csvs(
 
     Inputs: 
 
-    patient_name: A string denoting the corresponding image's filename under consideration.
+    case_name: A string denoting the corresponding case under consideration.
     
     csv_paths: A nested dictionary with structure: metric_type: {
         'cross_class_scores': 'cross_class_path',
@@ -277,7 +296,7 @@ def write_to_csvs(
         #Generating the tuples for the paths:
         path_tuples = tuple([(infer_mode, 'cross_class_scores') for infer_mode in sorted_infer_calls])
         #Writing:
-        write_row(patient_name=patient_name, save_path=current_metric_csvs['cross_class_scores'], extraction_tuples=path_tuples,  metrics_dict=metrics_dict)
+        write_row(case_name=case_name, save_path=current_metric_csvs['cross_class_scores'], extraction_tuples=path_tuples,  metrics_dict=metrics_dict)
        
         # per_class_score handling, since this is not always provided at all, or across all classes:
         if current_metric_csvs['per_class_scores'] is None:
@@ -289,7 +308,7 @@ def write_to_csvs(
                     pass #Explicit for debugging purposes
                 else:
                     path_tuples = tuple([(infer_mode, 'per_class_scores', class_lb) for infer_mode in sorted_infer_calls])
-                    write_row(patient_name=patient_name, save_path=path, extraction_tuples=path_tuples, metrics_dict=metrics_dict)
+                    write_row(case_name=case_name, save_path=path, extraction_tuples=path_tuples, metrics_dict=metrics_dict)
         else:
             Exception(f'Unexpected datatype for the per-class scores csv paths in {metric_type}')
 

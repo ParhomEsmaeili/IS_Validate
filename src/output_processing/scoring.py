@@ -5,6 +5,7 @@ import numpy as np
 import torch
 from monai.data import MetaTensor 
 from typing import Union 
+import warnings 
 
 from src.results_utils.metric_save_util import write_to_csvs
 from src.results_utils.base_metrics.scoring_base_utils import BaseScoringWrapper
@@ -45,11 +46,11 @@ class MetricsHandler:
             raise Exception('The metrics configs and metrics savepaths must have the exact same keys')
 
         self.supported_metrics = {
-            'base':{'Dice'},
-            'base_relative':set(),#{'Consistent Dice Improvement'},
-            'human_centric':set(),
-            'human_centric_relative':set(),
-            'annotation_budget':set()
+            'base':{'Dice', 'NSD'},
+            # 'base_relative':set(),#{'Consistent Dice Improvement'},
+            # 'human_centric':set(),
+            # 'human_centric_relative':set(),
+            # 'annotation_budget':set()
         }
 
         #Checking that all the selected metric types are supported.
@@ -62,10 +63,10 @@ class MetricsHandler:
         
         #Dividing the selected metrics into their corresponding subtype.
         self.base_metrics = self.supported_metrics['base'] & set(self.metrics_configs)
-        self.base_relative_metrics = self.supported_metrics['base_relative'] & set(self.metrics_configs)
-        self.human_centric_metrics = self.supported_metrics['human_centric'] & set(self.metrics_configs)
-        self.human_centric_relative_metrics = self.supported_metrics['human_centric_relative'] & set(self.metrics_configs)
-        self.budget_metrics = self.supported_metrics['annotation_budget'] & set(self.metrics_configs)
+        # self.base_relative_metrics = self.supported_metrics['base_relative'] & set(self.metrics_configs)
+        # self.human_centric_metrics = self.supported_metrics['human_centric'] & set(self.metrics_configs)
+        # self.human_centric_relative_metrics = self.supported_metrics['human_centric_relative'] & set(self.metrics_configs)
+        # self.budget_metrics = self.supported_metrics['annotation_budget'] & set(self.metrics_configs)
 
         
         self.init_base_metrics()
@@ -114,13 +115,13 @@ class MetricsHandler:
         )
 
 
-    def init_base_relative_metrics(self):
-        pass 
+    # def init_base_relative_metrics(self):
+    #     pass 
     
     def generate_base_masks(self, tensor):
         '''
         Basic function which generates a tensor of ones (with shape matching input tensor) across the entirety of the 
-        spatial dimensions for the base metrics (i.e. without masks applied). It generates this for both the 
+        spatial dimensions for the base counting metrics (i.e. without masks applied). It generates this for both the 
         cross_class_mask and the per_class_masks.
         '''
         return (
@@ -167,8 +168,8 @@ class MetricsHandler:
         else:
             return tracked_metrics, False 
         
-    def exec_base_relative_metrics(self):
-        pass 
+    # def exec_base_relative_metrics(self):
+    #     pass 
     
     def update_metrics(
         self,
@@ -183,19 +184,19 @@ class MetricsHandler:
         #prior to metric computation. 
         
         extracted_pred = self.extract_spatial_dims(output_data['pred']['metatensor'])[0] #We use 0 index as it should be len 1
-        extracted_probs = self.extract_spatial_dims(output_data['probs']['metatensor']) #We do not index here, as the probs are channel-split.
+        # extracted_probs = self.extract_spatial_dims(output_data['probs']['metatensor']) #We do not index here, as the probs are channel-split.
         extracted_gt = self.extract_spatial_dims(data_instance['label']['metatensor'])[0] #We use 0 index as it should be len 1
 
         tracked_metrics, terminate_bool = self.exec_base_metrics(extracted_pred, extracted_gt, tracked_metrics, infer_call_info)
-        
-        #TODO: Add implementation for other metrics.
-
+    
         return tracked_metrics, terminate_bool
 
     def save_metrics(
         self,
-        patient_name: str, 
+        case_name: str, 
+        empty_foreground: bool,
         terminated_early: bool,
+        temporary_iter_lims:tuple[int],
         tracked_metrics: dict
         ):
 
@@ -205,11 +206,13 @@ class MetricsHandler:
 
         Inputs:
 
-        patient_name: A string (extracted from the loaded data_instance on the pseudo-ui front-end) denoting the name
-        of the patient. 
+        case_name: A string (extracted from the loaded data_instance on the pseudo-ui front-end) denoting the name
+        of the case. 
 
         terminated_early: A bool denoting whether the iterative refinement process terminated early due to the segmentation
-        quality reaching an adequate level controlled by the threshold in the class initialisation. 
+        quality reaching an adequate level. 
+
+        temporary_iter_lims: A tuple for temporarily handling early termination, for bottom and upper iteration limit for padding the tracked metrics. 
 
         tracked_metrics: A dictionary containing the tracked metrics for the given data instance across the iterative
         refinement process. 
@@ -222,7 +225,7 @@ class MetricsHandler:
                         'per_class_scores': dict() OR NoneType
                           }
             
-                       'Interactive Edit Iter __': {} or NoneType
+                       'Interactive Edit Iter __': same thing: cross class scores: ___, or per_class_scores: {} or NoneType
                       },
                 'xyz':{
                       },
@@ -230,8 +233,48 @@ class MetricsHandler:
                   }
 
         '''
-
-        if terminated_early:
-            raise NotImplementedError('No implementation for handling the tracked metrics when the process terminated early')
+        if temporary_iter_lims[1] == 0:
+            #If the upper limit is 0 then we are not performing editing iteration, so no need to provide handling.
+            print('The upper budget limit of the iterations is 0 as we only do init, so we will not need to provide any special handling for additional iterations')
         else:
-            write_to_csvs(patient_name=patient_name, csv_paths=self.metrics_savepaths, tracked_metrics=tracked_metrics)  
+            if empty_foreground:
+                #In this case we will pad the tracked metrics with "empty_foreground" denoting that the foreground was empty and so we could not
+                #perform any editing iterations.
+                warnings.warn('The foreground was empty and the sim_empty_fg_automatic config was set to True, so if performing interactive edits we will pad the tracked metrics with a string denoting empty foreground')
+                for metric_type, metric_subdict in tracked_metrics.items():
+                    for iter_num in range(temporary_iter_lims[0] + 1, temporary_iter_lims[1] + 1):
+                        #We will be starting at the first iteration after the stopping point, and by default we always have the init, so 
+                        #we will only be padding the interactive edit iterations.
+                        
+                        #First we pad the cross-class scores:
+                        metric_subdict['Interactive Edit Iter ' + str(iter_num)]['cross_class_scores'] = 'empty_foreground'
+                        #Then we pad the per-class scores, if include_per_class_scores config is True
+                        if self.metrics_configs[metric_type]['include_per_class_scores']:
+                            for class_lb in self.config_labels_dict.keys():
+                                if not self.metrics_configs[metric_type]['include_background_metric']:
+                                    continue 
+                                #We will pad the per-class scores with a string denoting empty foreground.
+                                metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'][class_lb] = 'empty_foreground'
+            elif terminated_early: #Terminated early but not because of a fully empty foreground.
+                warnings.warn('The process terminated early, given that determining the early termination is a design choice that is not fully covered,'
+                ' the current implementation will pad with a string denoting early termination')
+                # raise NotImplementedError('No implementation for handling the tracked metrics when the process terminated early')
+
+                for metric_type, metric_subdict in tracked_metrics.items():
+                    for iter_num in range(temporary_iter_lims[0] + 1, temporary_iter_lims[1] + 1):
+                        #We will be starting at the first iteration after the stopping point, and by default we always have the init, so 
+                        #we will only be padding the interactive edit iterations.
+                        
+                        #First we pad the cross-class scores:
+                        metric_subdict['Interactive Edit Iter ' + str(iter_num)]['cross_class_scores'] = 'terminated_early'
+                        #Then we pad the per-class scores, if include_per_class_scores config is True
+                        if self.metrics_configs[metric_type]['include_per_class_scores']:
+                            for class_lb in self.config_labels_dict.keys():
+                                if not self.metrics_configs[metric_type]['include_background_metric']:
+                                    continue 
+                                #We will pad the per-class scores with a string denoting early termination.
+                                metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'][class_lb] = 'terminated_early'
+            else:
+                print('The process did not terminate early, so we will save the tracked metrics as they are without modification')
+
+        write_to_csvs(case_name=case_name, csv_paths=self.metrics_savepaths, tracked_metrics=tracked_metrics)  

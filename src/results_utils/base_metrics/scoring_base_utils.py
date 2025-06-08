@@ -1,11 +1,16 @@
-import torch 
+import torch
+import numpy as np 
 from monai.data import MetaTensor 
 from typing import Union 
+from surface_distance import compute_surface_distances 
+from surface_distance.metrics import compute_surface_dice_at_tolerance
+import copy 
+import warnings 
 
 class BaseScoringWrapper:
     '''
     Assumption is that the class integer codes are in order, and starting from 0, with increments of 1 per class. 
-    Class code = 0 refers to background ALWAYS.
+    Class code = 0 refers to background semantic class ALWAYS.
 
     NOTE: Metrics configs can be used directly for a base metric, or it can be used as part of a metric config which 
     uses a base metric (e.g., a human-intent metric). However, the base component within the "wrapped" metric 
@@ -29,29 +34,32 @@ class BaseScoringWrapper:
         self.metric_classes = {}
 
         self.metric_initialiser_map = {
-            'Dice':self.init_dice, 
-            'Error Rate':self.init_error_rate}
+            'Dice':self.init_dice,
+            'NSD': self.init_NSD,
+            }
+            # 'Error Rate':self.init_error_rate}
         
         for metric_type in self.metrics_configs.keys():
             self.metric_initialiser_map[metric_type]()
 
     def init_dice(self): 
 
-        self.metric_classes['Dice'] = DiceScore(
-                ignore_empty=self.metrics_configs['Dice']['ignore_empty'],
-                include_background=self.metrics_configs['Dice']['include_background_metric'],
-                include_per_class_scores=self.metrics_configs['Dice']['include_per_class_scores'],
-                config_labels_dict=self.config_labels_dict
-            )
-    
-    def init_error_rate(self):
-   
-        self.metric_classes['Error Rate'] = ErrorRate(
-            ignore_empty=self.metrics_configs['Error Rate']['ignore_empty'],
-            include_background=self.metrics_configs['Error Rate']['include_background_metric'],
-            include_per_class_scores=self.metrics_configs['Error Rate']['include_per_class_scores'],
+        self.metric_classes['Dice'] = Dice(
+            ignore_empty=self.metrics_configs['Dice']['ignore_empty'],
+            include_background=self.metrics_configs['Dice']['include_background_metric'],
+            include_per_class_scores=self.metrics_configs['Dice']['include_per_class_scores'],
             config_labels_dict=self.config_labels_dict
-        ) 
+            )
+    def init_NSD(self):
+
+        self.metric_classes['NSD'] = NSD(
+            ignore_empty=self.metrics_configs['NSD']['ignore_empty'],
+            include_background=self.metrics_configs['NSD']['include_background_metric'],
+            include_per_class_scores=self.metrics_configs['NSD']['include_per_class_scores'],
+            tolerance_mm=self.metrics_configs['NSD']['tolerance_mm'], #this is the tolerance used in the metric, not the spacing for the image. 
+            config_labels_dict=self.config_labels_dict       
+            )
+        
     def __call__(self,  
                 image_masks: dict, 
                 pred: Union[torch.Tensor, MetaTensor], 
@@ -69,10 +77,10 @@ class BaseScoringWrapper:
             raise Exception["Score generation failed as the weightmap masks were not in a tuple format"]
         
         if not isinstance(image_masks[0], torch.Tensor) and not isinstance(image_masks[0], MetaTensor):
-            raise TypeError("Score generation failed because the cross-class weightmap was not a torch.Tensor or MetaTensor")
+            raise TypeError("Score generation failed because the cross-class mask was not a torch.Tensor or MetaTensor")
         
         if not isinstance(image_masks[1], dict):
-            raise TypeError("Score generation failed because the per-class weightmaps were not presented in a class-separated dict.")
+            raise TypeError("Score generation failed because the per-class masks were not presented in a class-separated dict.")
 
         if not isinstance(pred, torch.Tensor) and not isinstance(pred, MetaTensor):
             raise TypeError("Score generation failed as the prediction was not a torch.Tensor or a monai MetaTensor")
@@ -84,7 +92,7 @@ class BaseScoringWrapper:
         return {metric_type:self.metric_classes[metric_type](image_masks, pred, gt) for metric_type in self.metrics_configs.keys()} 
     
 
-class DiceScore:
+class Dice:
 
     def __init__(self,
         ignore_empty: bool,
@@ -104,17 +112,17 @@ class DiceScore:
             gt: Union[torch.Tensor, MetaTensor]):
         
         '''
-        Multi-class generalisable dice-score computer, it implements the summing across all of the classes prior to 
-        computing the overall Dice Score.
+        Dice-score computer, it implements two modes for computing dice score, on a per-class basis and by summing across all of the classes prior to 
+        computing the overall Dice Score. Latter is not necessarily viable for large class-imbalances.
 
         inputs: 
         
-        cross_class_mask - torch tensor or monai metatensor for weighting the multi-class computation. 
+        cross_class_mask - torch tensor or monai metatensor for voxel-weighting the multiclass dice score computation. 
         This cannot be a zeroes tensor. 
 
         Assumed to be HW(D). 
 
-        per_class_masks - class-separated dictionary of torch tensors or monai metatensors for weighting the multiclass computation.
+        per_class_masks - class-separated dictionary of torch tensors or monai metatensors for voxel-weighting the dice score computations.
         These all cannot be a zeroes tensor. 
 
         Assumed to each be HW(D)
@@ -127,7 +135,7 @@ class DiceScore:
 
         #For multi-class (or binary class where self-include background is TRUE)
 
-        #We weight this according to the class-separated image_masks (BINARISED).  
+        #We weight/mask this according to the class-separated image_masks (BINARISED).  
 
         cross_class = self.dice_score_multiclass(pred, gt, cross_class_mask) 
 
@@ -145,7 +153,8 @@ class DiceScore:
 
 
                 per_class_scores[class_label] = self.dice_score_per_class(class_sep_pred, class_sep_gt, per_class_masks[class_label])
-            
+                assert type(per_class_scores[class_label]) == torch.Tensor and per_class_scores[class_label].size() == torch.Size([1]), 'Generation of dice score failed because the score for a specific class was not a torch tensor of size 1'
+        
 
             assert type(cross_class) == torch.Tensor and cross_class.size() == torch.Size([1]), 'Generation of dice score failed because the cross-class score was not a torch tensor of size 1'
         
@@ -167,17 +176,15 @@ class DiceScore:
 
         intersection = torch.sum(torch.masked_select(image_mask, class_sep_pred * class_sep_gt > 0))
 
-        if y_o > 0:
+        if y_o > 0: #in this case we can always calculate a dice score because denom will not be zero.
             return torch.tensor([(2 * intersection)/(denom)])
         
-        if self.ignore_empty or denom.isnan():
-            #If we ignore empty or the click set was empty then just return a nan value
+        if self.ignore_empty:
+            #If y_o was not  >0 (i.e, the gt region was under consideration was not empty) then if ignore_empty, we just return a nan value
             return torch.tensor([float("nan")])
-        
         if denom <=0:
             #If we do not ignore empties, then return a value of 1 if the denom is <=0 (i.e. when both are empty) to indicate full coverage...
             return torch.tensor([1.0])
-        
         #else:
         return torch.tensor([0.0])
     
@@ -222,10 +229,9 @@ class DiceScore:
             return torch.tensor([(2.0 * intersection) / (y_o + y_hat_o)])
         
         
-        if self.ignore_empty or denorm.isnan():
-            #If we ignore empty or the click set was empty, then just return a nan value
+        if self.ignore_empty:
+            #If we ignore empty, then just return a nan value if there was nothing in the "gt".
             return torch.tensor([float("nan")])
-        
         denorm = y_o + y_hat_o
         if denorm <= 0:
             #If we do not ignore empties, then return a value of 1 if the denom is <=0 (i.e. when both are empty) to indicate full coverage...
@@ -239,103 +245,196 @@ class DiceScore:
         
                                                                 #cross_class, per_class
         (cross_class_score, per_class_scores) = self.dice_score(image_masks[0], image_masks[1], pred, gt)
-        
+
         return {"cross_class_scores":cross_class_score, "per_class_scores":per_class_scores}    
     
-class ErrorRate:
-    def __init__(self):
-        raise NotImplementedError('Requires refactor to move class-level arguments into the class init. Also to use the include_per_class_scores thing?')
 
+class NSD: 
+    #Normalised Surface Dice Metric calculation:
+
+    # Borrows heavily from the Deepmind implementation, but wrapped for our purposes to accept upstream initialisation parameters, needs to extend to multi-class semantic
+    #seg. 
     
-    def error_rate(self, ignore_empty, include_background, include_per_class_scores, image_masks, pred, gt, dict_class_codes):
+    def __init__(self,
+        ignore_empty: bool,
+        include_background: bool,
+        include_per_class_scores: bool,
+        config_labels_dict: dict[str, int],
+        tolerance_mm: float #temporarily we will assume the same tolerance is to be used across all classes, which will be reasonable in binary semantic seg. 
+        #should ideally be overridden on a target by target basis, or some reasonable measure across an instance-by-instance basis.
+    ):
+        self.ignore_empty = ignore_empty
+        self.include_background = include_background
+        self.include_per_class_scores = include_per_class_scores
+        self.config_labels_dict = config_labels_dict
+        self.tolerance_mm = tolerance_mm 
+
+ 
+ 
+    def NSD_calc(
+            self, 
+            pred: Union[torch.Tensor, MetaTensor], 
+            gt: MetaTensor):
         
-        #This is multi-class generalisable.        
+        '''
+        Calculates surface distance on a class by class basis (unlike a simple overlap counting metric like dice it cannot reasonably be computed in a multi-class manner
+        without performing an averaging over semantic classes)
+
+        pred, gt - torch tensors or monai metatensors for the pred and gt.
+
+        Assumed to each be HW(D) (not one-hot encoded)
+        ''' 
         
-        #We assume the prediction and gt are discrete.
-
-        #We assume that the image mask contains the information about which voxels are being used for computing the error rate (it may also captures a weight map).
-        assert type(ignore_empty) == bool, 'Error rate generation failed because ignore_empty was not a bool'
-        assert type(include_background) == bool, 'Error rate generation failed because include_background was not a bool'
-        assert type(include_per_class_scores) == bool, 'Error rate generation failed because include_per_class_scores parameter was not a bool'
-        assert type(image_masks) == tuple, 'Error rate generation failed because image_masks were not presented in a tuple consisting of a cross-class mask and a class separated dict of masks'
-        assert type(image_masks[0]) == torch.Tensor, 'Error rate generation failed because the cross-class mask was not a torch.Tensor'
-        assert type(image_masks[1]) == dict, 'Error rate generation failed because the per-class mask parameter was not a class-separated dict.'
-
-    
-        # class_separated_pred = dict() 
-
-        # class_separated_gt = dict()
-
-        #Unlike the dice score computation, the include background metric parameter is not used for the cross class score. Any information pertaining to that 
-        # should be encoded into the image mask[0]. I.e. the image mask contains the weighting for all of the voxels under consideration. 
-        
-        _, _, error_rate_cross_class = self.extract_error_rate_info(ignore_empty, pred, gt, image_masks[0])
-        
-
-        if include_per_class_scores:
-
-            per_class_scores = dict()
-            for class_label, class_code in dict_class_codes.items():
-
-                if not include_background:
-                    if class_label.title() == "Background":
-                        continue 
-
-                class_separated_pred = torch.where(pred == class_code, 1, 0)
-                class_separated_gt = torch.where(gt == class_code, 1, 0)
+        per_class_scores = dict() 
             
-                (per_class_weighted_errors, per_class_weighted_denom, per_class_error_rate) = self.extract_error_rate_info(ignore_empty, class_separated_pred, class_separated_gt, image_masks[1][class_label])
+        for class_label, class_integer_code in self.config_labels_dict.items():
+            if class_label.title() == 'Background': 
+                #Background will never have an actual meaningful interpretation, it is a "stuff" class with no structure associated, 
+                # and is not particularly relevant, so typically we will not include it in the NSD computation.
+                #However, if the user has specified to include it, then we will compute the NSD for it, but it is not recommended.
+                if not self.include_background:
+                    continue
+                else:
+                    warnings.warn('Background class is not that meaningful a class for surface dice computation, recommended to not include it')
 
-                
-                per_class_scores[class_label] = per_class_error_rate
+            class_sep_pred = torch.where(pred == class_integer_code, 1, 0)
+            class_sep_gt = torch.where(gt == class_integer_code, 1, 0)
 
+            per_class_scores[class_label] = self.NSD_binary(class_sep_pred, class_sep_gt)
+        
+        #Compute the cross-class score, dummy method for now is to just average over the classes.        
+        if self.ignore_empty:
+            #if ignoring empty "gt" then we filter the nan values in the cross-class computation, as it would correspond to instances where there was no, 
+            # "gt"/reference annotation and/or no prediction either. 
+
+            filtered_scores = [i for i in per_class_scores.values() if not torch.isnan(i)]
+            if len(filtered_scores) == 0:        
+                cross_class = torch.tensor([float("nan")]) #There was no class for which there was a non nan-type metric, so just return nan.
+            else:
+                cross_class = torch.nanmean(torch.cat(list(per_class_scores.values()))) #We just compute the nan-mean.
+                cross_class = torch.tensor([float(cross_class)])
+                if torch.isnan(cross_class):
+                    raise Exception('Nan generated by cross-class scores on the separate NSD scores for each class, despite applying a filter on the nans s.t. all classes being empty is correctly handled')
         else:
+            #if not ignore empty then we will always have a numeric value for the per-class scores, so we can just compute the mean across all of the classes.
+            cross_class = torch.mean(torch.cat(list(per_class_scores.values())))
+            cross_class = torch.tensor([float(cross_class)]) #just in case it isn't a floating point value (it should be)
+        if not self.include_per_class_scores:
             per_class_scores = None 
+            warnings.warn('Strongly recommended to include per-class scores for NSD as it is not a simple counting metric, each target has its own -shape- it is recommended to examine per-class scores. \n')
+
+        assert type(cross_class) == torch.Tensor and cross_class.size() == torch.Size([1]), 'Generation of NSD has failed because the cross-class score was not a torch tensor of size 1'
         
-        return (error_rate_cross_class, per_class_scores)
+
+        return (cross_class, per_class_scores)
         
-    def extract_error_rate_info(self, ignore_empty, pred, gt, image_mask):
+    def NSD_binary(self, class_sep_pred, class_sep_gt):
+        '''
+        Function which performs the calculation of the Normalised Surface Dice on a pair of binary masks (could be for any pairing, semantic or even downstream... instance)
+        '''
+        #Just to be careful because of weirdness about MetaTensor behaviours across MONAI versions we abuse deepcopy... temporary hacky method... so we don't break
+        #any underlying obj... 
         
-        disjoint = torch.ones_like(pred) - torch.where(pred == gt, 1, 0) 
+        pred_copy = copy.deepcopy(class_sep_pred)
+        gt_copy = copy.deepcopy(class_sep_gt)
 
-        #applying the image mask weightings to these error voxels
+        if isinstance(pred_copy, MetaTensor):
+            #Version for other venvs
+            pred_np = copy.deepcopy(pred_copy.array) 
 
-        weighted_errors = torch.sum(disjoint * image_mask)
+            #Version for the segvol_venv:
+            # pred_np = copy.deepcopy(pred_copy.data.numpy())             
+        elif isinstance(pred_copy, torch.Tensor):
+            #Version for other venvs:
+            pred_np = copy.deepcopy(pred_copy.numpy())
+            
+            #Version for the segvol_venv:
+            # pred_np = copy.deepcopy(pred_copy.numpy())
 
-        #computing the denominator (the weighting of the gt voxels) from the gt mask, the image mask should implicitly capture the set of voxels being
-        # examined, so we can just sum over the gt.... 
+        if isinstance(gt_copy, MetaTensor):
+            #Version for other venvs:
+            gt_np = copy.deepcopy(gt_copy.data.array)
 
-        weighted_denom = torch.sum(image_mask) 
+            #Version for the segvol_venv:
+            # gt_np = copy.deepcopy(gt_copy.data.numpy()) 
+        else:
+            raise Exception('Need the image spacing, therefore the underlying image spacing must be available from the reference annotation.')
+
+        #We put some pre-checks here to handle the cases where ground truth is empty such that we can raise some warnings, even though the imported function will
+        #be able to handle the case where the ground truth is empty but the prediction is not empty, or both are empty. Also, we want the flexibility for not ignoring empty
+        #ground truths, so we can return a perfect score of 1.0 if both are empty, or a score of 0.0 if the prediction is not empty but the ground truth is empty.
+        #Although, it is highly recommended to use ignore_empty=True, as otherwise it can lead to a lot of confusion in the results.
+        if gt_np.sum() == 0: 
+            if self.ignore_empty:
+                #If we ignore empty, then just return a nan value if there was nothing in the "gt". 
+                warnings.warn('There is a "ground truth" which has no foreground for a given target, please consider checking whether this is intended or reasonable.')
+                return torch.tensor([float("nan")])
+            # Unlike a Dice Overlap score, there is no simple interpretation to computing the surface dice in the absence of a reference annotation, but we can still
+            # put something reasonable here if the prediction is also empty, then we can return a perfect score of 1.0. Highly non-recommended to not use 
+            # ignore_empty=False, for this reason, as it will lead to a lot of confusion in the results.
+            else:
+                if pred_np.sum() == 0:
+                    warnings.warn('Ignore_empty is False, but there is a "ground truth" which has no foreground for a given target, but the prediction is also empty, so returning a perfect score of 1.0.')
+                    return torch.tensor([1.0])
+                else:
+                    warnings.warn('Ignore_empty is False, but there is a "ground truth" which has no foreground for a given target, but the prediction is not empty, so returning a score of 0.0.')
+                    return torch.tensor([0.0])
 
 
-        error_rate = self.error_rate_comp(ignore_empty, weighted_errors, weighted_denom)
 
+        val_dom_affine = gt_copy.meta['affine']
+        #extracting the affine (in the domain of the validation, i.e. after orientation to RAS) to obtain the image spacing    
+        if val_dom_affine is not None:
+            if val_dom_affine.shape[0] != 4: 
+                raise NotImplementedError('We do not yet provide handling for non 3D-annotation domains')
+            dim = val_dom_affine.shape[0] - 1
+            _m_key = (slice(-1), slice(-1))
+            im_spacing = np.linalg.norm(val_dom_affine[_m_key] @ np.eye(dim), axis=0)
+        #spacing_mm is the voxel-level image-spacing itself.
+        surface_distances = compute_surface_distances(mask_gt=gt_np.astype(bool), mask_pred=pred_np.astype(bool), spacing_mm=im_spacing)
+        #tolerance_mm is the tolerance in mm for the surface dice.
+        surface_dice = compute_surface_dice_at_tolerance(surface_distances=surface_distances, tolerance_mm=self.tolerance_mm)
 
-        return (weighted_errors, weighted_denom, error_rate)
-    
-    def error_rate_comp(self, ignore_empty, weighted_errors, weighted_denom):
-
-        if weighted_denom > 0:
-            #In this case, there were some voxels for this class which had been modified.
-            error_rate = torch.tensor([weighted_errors/weighted_denom])
-            assert float(error_rate) <= 1.0
-
-            return error_rate 
-
-        if ignore_empty or weighted_denom.isnan():
-            #if ignore empty or the mask was empty (due to the click set OR due to the changed voxels set.)
+        if np.isnan(surface_dice): #in this case the pred and gt must both be empty.
+            if gt_np.sum() != 0 or pred_np.sum() != 0:
+                raise Exception('Somehow a nan generated for surface dice despite not having empty masks for both pred and gt')
             return torch.tensor([float("nan")])
+        else:
+            return torch.tensor([float(surface_dice)]) #just in case it isn't a floating point value (it should be) 
+    
+    def __call__(self, 
+                image_masks, 
+                pred, 
+                gt):
         
-        if weighted_denom <= 0:
-            #If there are no changed voxels (this is when the denom would = 0), then just return an error rate of 0.
-            return torch.tensor([float(0)])
-
-
-    def __call__(self, ignore_empty, include_background, include_per_class_scores, image_masks, pred, gt, dict_class_codes):
+                                                                #cross_class, per_class
+        (cross_class_score, per_class_scores) = self.NSD_calc(pred, gt)
         
+        return {"cross_class_scores":cross_class_score, "per_class_scores":per_class_scores}
 
-        # (cross_class_score, per_class_scores) = self.error_rate(ignore_empty, image_mask, pred, gt, num_classes)
 
-        (cross_class_score, per_class_scores) = self.error_rate(ignore_empty, include_background, include_per_class_scores, image_masks, pred, gt, dict_class_codes)
-        
-        return {"cross_class_scores":cross_class_score, "per_class_scores":per_class_scores} 
+if __name__ == '__main__':
+    from monai.transforms import Compose, LoadImaged, EnsureChannelFirstd
+    from monai.data import MetaTensor 
+    import torch 
+    input_dict = {'label':'/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/BraTS2021_Training_Data_Split_True_proportion_0.8_channels_t2_resized_FLIRT_binarised/imagesTs/BraTS2021_00002.nii.gz'}
+    load_transf = [LoadImaged(keys=['label'], image_only=False), EnsureChannelFirstd(keys=['label'])]
+    loaded_im_dict = Compose(load_transf)(input_dict)
+
+    im_metatensor = loaded_im_dict['label'] #MetaTensor(x=torch.from_numpy(loaded_im_dict['label']), meta={'affine':torch.from_numpy(loaded_im_dict['label_meta_dict']['affine'])})
+    scoring_class = BaseScoringWrapper(
+        metrics_configs=
+        {
+            'NSD': {
+                'ignore_empty':True,
+                'include_background_metric':False, 
+                'include_per_class_scores':True,                
+                'tolerance_mm':1
+            }
+        },
+        config_labels_dict={'background':0, 'tumour':1}
+    )  
+    # NSD_calc_class = NSD(ignore_empty=True, include_background=False, include_per_class_scores=True, config_labels_dict={'background':0, 'tumour':1}, tolerance_mm=1) 
+    #output = NSD_calc_class(None, im_metatensor[0], im_metatensor[0])
+    output = scoring_class((torch.zeros([100,100,100]), dict()), im_metatensor[0], im_metatensor[0])
+    print('fin')

@@ -1,0 +1,22 @@
+{
+	"task_id_1":{
+		"data_sampling":
+			{
+				"sample_group_category": "all_train",
+				"image_conf": {
+					"image_channel": "MRI"
+					},	
+				 "annotation_conf": { 
+				 	"annotator": "annotator_1",
+				 	"instance_id": "instance_1"
+				 	}
+			},
+		"seg_problem": "whole_hippocampus",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_hippocampus":["Anterior","Posterior"]
+				}
+			}
+	}
+}
