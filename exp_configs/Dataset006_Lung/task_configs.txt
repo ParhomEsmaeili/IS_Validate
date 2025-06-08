@@ -4,11 +4,11 @@
 			{
 				"sample_group_category": "all_train",
 				"image_conf": {
-					"image_channel": "CT"
+					"image_channel": ["CT"]
 					},	
 				 "annotation_conf": { 
-				 	"annotator": "annotator_1",
-				 	"instance_id": "instance_1"
+				 	"annotator": ["annotator_1"],
+				 	"instance_id": ["instance_1"]
 				 	}
 			},
 		"seg_problem": "lung_cancer",
