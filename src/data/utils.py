@@ -5,6 +5,9 @@ import torch
 import numpy as np
 from typing import Union, Optional 
 import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) #Adding the parent directory to the path so that we can import utils from there.
+from utils.dict_utils import extractor #This is a custom utility function for extracting dicts.
 import copy 
 import logging
 import pathlib
@@ -12,12 +15,13 @@ import warnings
 
 # logger = logging.getLogger(__name__)
 
-def init_data(dataset_dir:str, exp_task_configs:dict): #, file_ext:str):
-    #Function intended for reading data from the json, formulating it into the structure for the dataset 
-    # constructor and then instantiating the dataset object.
+def init_task_cases(dataset_dir:str, exp_task_configs:dict): #, file_ext:str):
+    '''
+    This function creates a dictionary of the task cases, which is then used, alongside some dataloader utilities, in order to create
+    a dataset object which can be used for iterating through the cases in the task.
+    '''
 
-    #Reading the dataset.json file which will contain the base information about the dataset as initially formulated.
-    
+    #Reading the dataset.json file which will contain the base information about the dataset as initially formulated offline.
     try:
         dataset_json_path = os.path.join(dataset_dir, 'dataset.json')
         #Reading the json file. 
@@ -37,12 +41,80 @@ def init_data(dataset_dir:str, exp_task_configs:dict): #, file_ext:str):
         with open(dataset_split_path) as f:
             data_sampling_configs = json.load(f) 
     except:
-        dataset_txt_path = os.path.join(dataset_dir, 'dataset.txt')
+        dataset_txt_path = os.path.join(dataset_dir, 'dataset_split.txt')
         #Reading the txt file.
         with open(dataset_txt_path) as f:
             data_sampling_configs = json.load(f) 
 
-    #Extracting information about the default specifications of the datasets
+    #Extracting the case list according to the list provided in the sampling category description in the task configs:
+    split_dict_path = ['sampling'] + exp_task_configs['data_sampling']['sample_group_category'] 
+    split_dict_path = tuple(split_dict_path) if isinstance(split_dict_path, list) else split_dict_path
+    #We will use the extractor function to extract the case list from the data_sampling_configs.
+    sample_category = exp_task_configs['data_sampling']['sample_group_category'][0]
+    if not isinstance(sample_category, str):
+        raise TypeError('The sample_group_category must be a string denoting the sampling category, e.g. "all_" or "kfold_".')
+    if not sample_category.startswith(('all_', 'kfold_')):
+        raise NotImplementedError('The sample_group_category must start with "all_" or "kfold_" for now. Other sampling categories are not yet supported.')
+    split_metadata_path = ('sampling', sample_category, 'meta')
+
+    #Now we will extract the case list and the metadata from the data_sampling_configs
+    case_list = extractor(data_sampling_configs, split_dict_path) 
+    if not isinstance(case_list, list) or not case_list:
+        #If the case list is not a list or is empty, we raise an error.
+        raise TypeError('The case list must be a list of strings denoting each case folder to be used.')
+    split_metadata = extractor(data_sampling_configs, split_metadata_path)
+    if not isinstance(split_metadata, dict) or not split_metadata:
+        #If the split metadata is not a dict or is empty, we raise an error.
+        raise TypeError('The split metadata must be a non-empty dictionary containing information about the split.')
+    
+    #We will put a sanity check here to ensure that the user is not attempting to provide a case list for which the dataset.json could 
+    #quite possible not have produced any reasonable cases. 
+    #
+    # I.e., in the example where the dataset.json has numTest=0 but the user is attempting to use something sampled from test set for the 
+    # experiment, we will raise an error. Moreover, we will check that the cases all have corresponding annotations, because for now
+    # we do not support cases without annotations.
+    if ds_configs[f"num{split_metadata['split'].capitalize()}"] == 0:
+        raise ValueError(f'The dataset.json file does not contain any cases for the {split_metadata["split"]} set, but the experiment is attempting to use a sample from this set')
+        #TODO: We need to provide a better name for the split metadata key, as this is not very descriptive. It can easily be confused
+        #with the split within the subset, while for now it is referring to the split of the dataset as a whole, i.e. train, test.
+    if not all(['label' in ds_configs[split_metadata['split']][case].keys() for case in case_list]):
+        raise ValueError(f'The dataset.json file does not contain labels for all cases in the {split_metadata["split"]} set, but the mechanisms provided currently require annotations.')
+
+
+    #We now put some type checks to ensure that the quantity of cases is correct, corresponding to the number of cases in the dataset.json file,
+    #and the sampling category, which provides a description of the mechanism for sampling the cases. This is the final line of sanity
+    #checking that the sampling was done correctly offline. E.g., k-fold must have a specific structure. 
+
+    #We extract the specific source for the data (i.e. train set or test set) from the metadata in the data_splits.json file, in order to 
+    # cross reference against the dataset.json file. 
+
+    if exp_task_configs['data_sampling']['sample_group_category'].beginswith('all_'):
+        #If the sampling category begins with 'all_', then we assume that all cases are to be used.
+        if not len(case_list) == ds_configs[f"num{split_metadata['split'].capitalize()}"]:
+            expected_num = ds_configs[f'num{split_metadata["split"].capitalize()}']
+            raise ValueError(
+                f'The number of cases in the dataset.json file does not match the number of cases in the {split_metadata["split"]} set, '
+                f'expected {expected_num} but got {len(case_list)}'
+            )
+    elif exp_task_configs['data_sampling']['sample_group_category'].startswith('kfold_'):
+        #If the sampling category is kfold then we assume that the cases are to be sampled from a k-fold cross-validation setup. 
+        # We will check that the number of cases in the fold is feasible. i.e., that it is equivalent to the floor division of the 
+        # number of cases in the dataset.json file by the number of folds. 
+        num_folds = int(split_metadata['k_folds']) 
+        expected_num = ds_configs[f'num{split_metadata["split"].capitalize()}'] // num_folds
+        if not len(case_list) == expected_num:
+            raise ValueError(
+                f'The number of cases in the dataset.json file does not match the number of cases in the {split_metadata["split"]} set for the k-fold cross-validation, '
+                f'expected {expected_num} but got {len(case_list)}'
+            )
+    else:
+        #We do not yet support any other sampling categories, so we raise an error.
+        raise NotImplementedError('The sample category must be either "all_" or "kfold_" for now. Other sampling categories are not yet supported.')
+
+    #Now that we know which cases we are using, we can extract some case specific information with respect to the task at hand.
+
+
+    #Extracting information about the task with respect to the segmentation problem. 
     orig_semantic_classes_dict = ds_configs.get('semantic_classes') #We do not put a failsafe because this is a required field.
     
     if not isinstance(orig_semantic_classes_dict, dict):
@@ -54,15 +126,13 @@ def init_data(dataset_dir:str, exp_task_configs:dict): #, file_ext:str):
         #We need to check whether the ids are all integers
         if not all([isinstance(i, int) for i in orig_semantic_classes_dict.values()]):
             raise TypeError('The semantic class-integer codes must be an int')
-        if any([i['semantic_type'] is 'thing' for i in orig_semantic_classes_dict.values()]):
+        if any([i['semantic_type'].capitalize() == 'Thing' for i in orig_semantic_classes_dict.values()]):
             raise NotImplementedError('The semantic type for the default input dataset is a "thing", but we do not yet provide proper handling for panoptic datasets.')
-      
-    #Extracting the case list according to the experimental task configs:
-    if exp_task_configs['dataset_sampling']['sampling_categor']:
-
-        case_list = data_sampling_configs['']
-
-
+    
+    
+    #Here we will extract some more specific information for the more complex configurations of data, e.g. multi-channel images, 
+    # multi-annotator/annotator specific setups, the selection of specific segmentation instances if at all, etc. Currently we will 
+    # assume that all of these parameters should be lists of length 1, as we do not yet support multi-channel or multi-annotator setups.
     
     return config_labels_dict, dataloader_generator(datalist=datalist)
 

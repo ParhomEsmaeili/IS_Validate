@@ -13,7 +13,7 @@ codebase_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(codebase_dir)
 from src.front_back_interactor.pseudo_ui import FrontEndSimulator 
 from src.utils.logging import experiment_args_logger
-from src.data.utils import data_instance_reformat, iterate_dataloader_check, init_data
+from src.data.utils import data_instance_reformat, iterate_dataloader_check, init_task_cases
 from src.results_utils.metric_save_util import init_all_csvs
 
 
@@ -380,7 +380,7 @@ def main():
     ################################## Configuration and extraction of data-related info.  ######################################################################
     
     #Extraction of the config labels dictionary, and the initialisation of the dataloader
-    configs_labels_dict, dataloader = init_data(
+    configs_labels_dict, dataloader = init_task_cases(
         dataset_dir=experiment_args['input_dataset_dir'], 
         exp_task_configs=experiment_args['task_configs'])
     
