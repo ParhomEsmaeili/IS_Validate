@@ -416,7 +416,7 @@ def create_case_list(
 
 
 
-def dataloader_generator(case_list:dict, image_keys:list, label_keys:list, transforms_configs:dict):
+def dataloader_generator(case_list:list, image_keys:list, label_keys:list, transforms_configs:dict):
     '''
     This function handles the construction of a dataset object for iterating through.
     '''
