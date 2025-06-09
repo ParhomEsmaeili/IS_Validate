@@ -47,7 +47,7 @@ def init_metric_csvs(
     #Initialising the first row (header: contains patient name, empty space after that because each metric has their
     #own specifics wrt which iter is being presented etc.)
 
-    header = ['Patient Name']
+    header = ['Case Name']
 
     #Checking whether we have at least one valid class otherwise everything will break.
     valid_classes = tuple(config_labels_dict) if metric_configs['include_background_metric'] else tuple({key for key in config_labels_dict.keys() if key.title() != "Background"})

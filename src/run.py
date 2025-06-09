@@ -22,10 +22,10 @@ def set_parse():
     parser = argparse.ArgumentParser()
     
     #Data related args
-    parser.add_argument('--dataset_name', type=str, default='Dataset008_HepaticVessel')#'BraTS2021_Training_Data_Split_True_proportion_0.8_channels_t2_resized_FLIRT_binarised')
+    parser.add_argument('--dataset_name', type=str, default='Dataset004_Hippocampus')#'BraTS2021_Training_Data_Split_True_proportion_0.8_channels_t2_resized_FLIRT_binarised')
     # parser.add_argument('--test_mode', type=str, default='test')
     # parser.add_argument('--data_fold', type=str, default=None)
-    parser.add_argument('--dataloading_type', type=str, default='basic')
+    # parser.add_argument('--dataloading_type', type=str, default='basic')
     
     #Experimental process/method related args 
     parser.add_argument('--app_name', type=str, default='Sample_SAMMed3D')#default='Sample_TEST') #This acts as the name of the app, but also temporarily acts as the relative path name within the input_applications folder.
@@ -117,7 +117,7 @@ def gen_experiment_args(args):
 
     #Extracting the configs dicts for the dataloading, metrics and the prompt configs.
     exp_conf_dir = os.path.join(codebase_dir, 'exp_configs', args.dataset_name) 
-
+    # output_dict['dataloading_type'] = args.dataloading_type
     output_dict['task_id'] =args.task_conf_name
     output_dict['task_configs'] = extract_config(os.path.join(exp_conf_dir, args.task_conf_filename), args.task_conf_name)
     output_dict['seg_problem'] = output_dict['task_configs']['seg_problem']
@@ -381,7 +381,7 @@ def main():
     
     #Extraction of the config labels dictionary, and the initialisation of the dataloader
     configs_labels_dict, dataloader = init_task_cases(
-        dataset_dir=experiment_args['input_dataset_dir'], 
+        dataset_dir=experiment_args['input_dataset_dir'],
         exp_task_configs=experiment_args['task_configs'])
     
     #We append the config labels dict to the experiment args. 
