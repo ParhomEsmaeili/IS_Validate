@@ -46,7 +46,7 @@ def set_parse():
     parser.add_argument('--edit_prompt_conf_name', type=str, default='prototype')
     parser.add_argument('--metric_prompt_procedure_type', type=str, default='heuristic')
     parser.add_argument('--inf_prompt_procedure_type', type=str, default='heuristic')
-    parser.add_argument('--sim_empty_fg')
+    parser.add_argument('--sim_empty_fg_automatic', action='store_true', default=False)
     #TODO: Put use_mem and other related args like that for the im etc in here. 
     parser.add_argument('--use_mem_inf_edit', action='store_true', default=False) #Whether im is used for conditioning prompt gen.
     parser.add_argument('--im_conf_remove_init', action='store_true', default=False) #Bool for whether the init state in im will be removed from memory.
@@ -124,6 +124,9 @@ def gen_experiment_args(args):
     
     output_dict['metrics_configs'] = extract_config(os.path.join(exp_conf_dir, args.metric_conf_filename), args.metric_conf_name)
     
+    #Extracting the config dict for handling the empty fg....? 
+    output_dict['sim_empty_fg_automatic'] = args.sim_empty_fg_automatic  
+
     # output_dict['metric_prompt_procedure_type']
     output_dict['inf_prompt_procedure_type'] = args.inf_prompt_procedure_type 
 
