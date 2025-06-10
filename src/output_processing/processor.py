@@ -198,7 +198,7 @@ class OutputProcessor:
     def write_maps(
             self, 
             data_instance:dict,
-            patient_name: str, 
+            case_name: str, 
             output_dict: dict, 
             inf_call_config: dict,
             tmp_dir: str):
@@ -210,7 +210,7 @@ class OutputProcessor:
             data_instance: Dict - Dictionary containing the data instance which provides information about the image for performing any necessary re-orientation 
             for writing etc.
 
-            patient_name: str - A string denoting the name of the patient/image. Disentangled from the data instance for anonymisation. 
+            case_name: str - A string denoting the name of the case/image. Disentangled from the data instance for anonymisation. 
             
             output_dict: Dict - Dictionary containing the prior iteration after having been passed through the output checker
             (also ensures that the corresponding arrays will be on cpu).
@@ -230,7 +230,7 @@ class OutputProcessor:
         if not self.is_seg_tmp:
             # img_filename = os.path.split(input_req['image']['path'])[1]
             infer_config_dir = f'{inf_call_config["mode"]} Iter {inf_call_config["edit_num"]}' if inf_call_config['mode'].title() == 'Interactive Edit' else inf_call_config['mode'].title() 
-            pred_path = os.path.join(self.base_save_dir, 'segmentations', infer_config_dir, patient_name + '.nii.gz') 
+            pred_path = os.path.join(self.base_save_dir, 'segmentations', infer_config_dir, case_name + '.nii.gz') 
             
             shutil.move(tmp_path[0], pred_path)
         else:
@@ -242,14 +242,14 @@ class OutputProcessor:
 
         return pred_path, probs_paths
     
-    def __call__(self, data_instance, patient_name, output_dict, infer_call_config, tmp_dir):
+    def __call__(self, data_instance, case_name, output_dict, infer_call_config, tmp_dir):
         '''
         Function wraps together the post-processing steps required for checking and writing the segmentations and probs maps.
         and the output dictionary.
         
-        data_instance: Dict - The dictionary that represents the patient instance which was used for generating the input data.
+        data_instance: Dict - The dictionary that represents the case instance which was used for generating the input data.
 
-        patient_name: Str - The name (without extension) of the patient name/image name. 
+        case_name: Str - The name (without extension) of the case name/image name. 
 
         output_dict: Dict - The returned dictionary from the inference call.
 
@@ -260,7 +260,7 @@ class OutputProcessor:
         
         self.check_output(data_instance, output_dict)
             
-        pred_path, probs_paths = self.write_maps(data_instance=data_instance, patient_name=patient_name, output_dict=output_dict, inf_call_config=infer_call_config, tmp_dir=tmp_dir)
+        pred_path, probs_paths = self.write_maps(data_instance=data_instance, case_name=case_name, output_dict=output_dict, inf_call_config=infer_call_config, tmp_dir=tmp_dir)
         # try:
         #     output_paths = self.reformat_output(output_paths=output_paths, pred_path=pred_path, probs_paths=probs_paths)
         # except:

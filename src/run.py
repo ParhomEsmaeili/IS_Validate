@@ -13,6 +13,7 @@ codebase_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(codebase_dir)
 from src.front_back_interactor.pseudo_ui import FrontEndSimulator 
 from src.utils.logging import experiment_args_logger
+from src.utils.dict_utils import extractor
 from src.data.utils import data_instance_reformat, iterate_dataloader_check, init_task_cases
 from src.results_utils.metric_save_util import init_all_csvs
 
@@ -22,7 +23,7 @@ def set_parse():
     parser = argparse.ArgumentParser()
     
     #Data related args
-    parser.add_argument('--dataset_name', type=str, default='Dataset004_Hippocampus')#'BraTS2021_Training_Data_Split_True_proportion_0.8_channels_t2_resized_FLIRT_binarised')
+    parser.add_argument('--dataset_name', type=str, default='Dataset001_BrainTumour')#'BraTS2021_Training_Data_Split_True_proportion_0.8_channels_t2_resized_FLIRT_binarised')
     # parser.add_argument('--test_mode', type=str, default='test')
     # parser.add_argument('--data_fold', type=str, default=None)
     # parser.add_argument('--dataloading_type', type=str, default='basic')
@@ -73,13 +74,6 @@ def gen_experiment_args(args):
     #Setting the app name for the experiment, also available for the build script. 
     output_dict['app_name'] = args.app_name 
 
-    #Loading in the relevant information from the dataset
-
-    output_dict['dataset_info'] = {
-    'dataset_name': args.dataset_name,
-    'dataset_channel': extract_config(os.path.join(codebase_dir, 'datasets', args.dataset_name, 'dataset.json'), 'channel_names'),
-    }
-
     #Creating paths
     
     #Creating the relative path to the base build dir within the app.
@@ -122,6 +116,15 @@ def gen_experiment_args(args):
     output_dict['task_configs'] = extract_config(os.path.join(exp_conf_dir, args.task_conf_filename), args.task_conf_name)
     output_dict['seg_problem'] = output_dict['task_configs']['seg_problem']
     
+    #Loading in the relevant information from the dataset
+
+    output_dict['dataset_info'] = {
+    'dataset_name': args.dataset_name,
+    'dataset_channel': extract_config(os.path.join(codebase_dir, 'datasets', args.dataset_name, 'dataset.json'), 'channel_names'),
+    'task_channel': extractor(output_dict['task_configs'], ('data_sampling', 'image_conf', 'image_channel'))
+    }
+
+
     output_dict['metrics_configs'] = extract_config(os.path.join(exp_conf_dir, args.metric_conf_filename), args.metric_conf_name)
     
     #Extracting the config dict for handling the empty fg....? 
@@ -346,7 +349,7 @@ def init_fe(infer_app, experiment_args):
     #Function which initialises the front-end simulator.
     keep_key_list = [
         'configs_labels_dict',
-        'sim_empty_fg_automatic'
+        'sim_empty_fg_automatic',
         'infer_run_configs',
         'metrics_configs',
         'inf_prompt_procedure_type',

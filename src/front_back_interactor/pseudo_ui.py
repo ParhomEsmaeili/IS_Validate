@@ -627,21 +627,24 @@ class FrontEndSimulator:
         if not isinstance(infer_run_configs['edit_bool'],  bool):
             raise TypeError('edit_bool value must be a boolean in the inference run configs dict.')
         
-        if empty_foreground and infer_run_configs['init'].title() == 'Interactive Init':
-            #If the foreground is empty, we cannot perform an interactive initialisation with current prompting mechanisms, so if this is the config then we raise an error.
-            raise ValueError('Cannot currently perform interactive initialisation with empty foreground with our prompting mechanisms, this should have been flagged earlier!')
-        else:
-            if self.args['sim_empty_fg_automatic'] and empty_foreground:
+        if empty_foreground:
+            if infer_run_configs['init'].title() == 'Interactive Init':
+                #If the foreground is empty, we cannot perform an interactive initialisation with current prompting mechanisms, so if this is the config then we raise an error.
+                raise ValueError('Cannot currently perform interactive initialisation with empty foreground with our prompting mechanisms, this should have been flagged earlier!')    
+            
+            if self.args['sim_empty_fg_automatic']:
                 #We can perform the initialisation, but only the initialisation. We currently do not support any mechanisms for simulating prompts for empty foregrounds.
                 warnings.warn('We have an empty foreground, with current prompting strategy we will only perform an automatic initialisation, if at all.')
                 #We will modify the infer_run_configs to only perform an automatic initialisation.
+                infer_run_configs['init'] == 'Automatic Init'
                 infer_run_configs['edit_bool'] = False
                 infer_run_configs['num_iters'] = 0
                 #This is only a temporary fix, we will implement a more robust solution in the future, but also it is only implemented for the current 
                 # data instance, the class attribute is not modified for other data instances. 
-            else:
+            elif not self.args['sim_empty_fg_automatic']:
                 raise Exception('There was an empty foreground and the sim_empty_fg_automatic flag was not set to True, this should have been flagged earlier!')
-        
+            else:
+                raise Exception('Unknown use-case.')
         
         #We use the initialisation mode provided in the inference run config to initialise the model.
         if len({infer_run_configs['init'].title()} & {'Automatic Init', 'Interactive Init'}) == 1:
@@ -810,8 +813,11 @@ class FrontEndSimulator:
         self.tracked_paths = {}
 
         #Executing the iterative loop.
-        iter_num, terminated_early = self.iterative_loop(empty_foreground=empty_foreground)
-        
+        try:       
+            iter_num, terminated_early = self.iterative_loop(empty_foreground=empty_foreground)
+        except:
+            iter_num, terminated_early = self.iterative_loop()
+            empty_foreground = False       
         #Saving the final set of tracked metrics....
 
         self.metrics_handler.save_metrics(
