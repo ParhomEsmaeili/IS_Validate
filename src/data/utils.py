@@ -3,7 +3,7 @@ from monai.data import Dataset, MetaTensor, DataLoader
 import json 
 import torch  
 import numpy as np
-from typing import Union, Optional 
+from typing import Union, Optional, Sequence
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) #Adding the parent directory to the path so that we can import utils from there.
@@ -12,7 +12,7 @@ import copy
 import logging
 import pathlib
 import warnings 
-
+from skimage.measure import label as cc_label
 # logger = logging.getLogger(__name__)
 
 def init_task_cases(dataset_dir:str, exp_task_configs:dict): #, file_ext:str):
@@ -228,14 +228,16 @@ def init_task_cases(dataset_dir:str, exp_task_configs:dict): #, file_ext:str):
 
     #These are all required, for now, in order to merge them into structures which can be used downstream.
     transforms_configs = {
+        #Hardcoding some of the inputs for now.... TODO: Tidy this up later in a more abstracted capacity.
         'semantic_class_mapping':semantic_class_mapping,
+        'config_labels_dict': config_labels_dict, 
         'image_struct_mapping': extractor(exp_task_configs, ('data_sampling', 'image_conf')),
         'annotation_struct_mapping':extractor(exp_task_configs, ('data_sampling', 'annotation_conf'))
     }
 
     #Now we add any other non-semantic class mapping transforms, i.e. the more atypical ones (with respect to the current
     # common conventions). This is just a temporary hacky fix until we build a proper infrastructure for the dataloading pipeline.
-    transforms_configs.update({k:v for k,v in exp_task_configs['data_transforms'].items() if k != 'semantic_class_mapping'})
+    transforms_configs.update({'non_standard_transfs':{k:v for k,v in exp_task_configs['data_transforms'].items() if k != 'semantic_class_mapping'}})
 
     return config_labels_dict, dataloader_generator(case_list=case_list, image_keys=image_keys, label_keys=label_keys, transforms_configs=transforms_configs)
 
@@ -414,24 +416,376 @@ def create_case_list(
 
 
 
-
+# def debug_meta(data):
+#     print("Image meta:", data['image_T2w'].meta)
+#     print("Label meta:", data['annotator_1_semclassbackground_instance_1'].meta)
+#     return data
 
 def dataloader_generator(case_list:list, image_keys:list, label_keys:list, transforms_configs:dict):
     '''
     This function handles the construction of a dataset object for iterating through.
     '''
+    #Just the basic load transforms in order to load the files in for our custom transforms.
     load_transforms = [
-        LoadImaged(keys=['image', 'label'], reader="ITKReader", image_only=True),
-        EnsureChannelFirstd(keys=['image', 'label']),
-        Orientationd(keys=['image', 'label'], axcodes='RAS'),
-        EnsureTyped(keys=['image', 'label'], dtype=[torch.float64, torch.int64]),
+        LoadImaged(keys=image_keys+label_keys, reader="ITKReader", image_only=True),
+        EnsureChannelFirstd(keys=image_keys+label_keys),
+        Orientationd(keys=image_keys+label_keys, axcodes='RAS'),
+        EnsureTyped(keys=image_keys+label_keys, dtype=[torch.float64]*len(image_keys)+[torch.int64]*len(label_keys)),
     ]
-    dataset = Dataset(case_list, Compose(load_transforms))
+
+    #The basic transforms required for all tasks (at least with our current implementation: im_channel merging and sem. seg merging)
+    basic_transforms = [
+        #Hardcoding in some of these variables for now.
+        MergeImChannels(keys=image_keys, channel_list=transforms_configs['image_struct_mapping']['image_channel'] , output_key='image'),
+        MergeSegmentations(
+            keys=label_keys, 
+            sem_mapping=transforms_configs['semantic_class_mapping'], 
+            output_sem_code=transforms_configs['config_labels_dict'], 
+            output_key='label'),
+    ]
+
+    #Hardcoding in the misc transforms for now.. TODO: Add abstraction here!!
+    if transforms_configs['non_standard_transfs']:
+        if transforms_configs['non_standard_transfs'] == {'component_extraction':'cc_largest'}:
+            additional_transforms = [
+                KeepTopCC(
+                    keys=['label'], 
+                    operated_classes=[k for k in transforms_configs['config_labels_dict'] if k.capitalize() != 'Background'],
+                    class_code_map=transforms_configs['config_labels_dict'], 
+                    component_descriptor='cc_largest',
+                    connectivity=3
+                    )
+            ]
+        else:
+            raise Exception('There is a non-standard transform that is not supported. Only cc_largest is currently supported.')
+    else:
+        additional_transforms = []
+    all_transforms = load_transforms + basic_transforms + additional_transforms 
+    dataset = Dataset(case_list, Compose(all_transforms))    #Compose(load_transforms))
     # return DataLoader(dataset=dataset, batch_size=1, num_workers=1)
 
     #We switch from DataLoader to just using the Dataset as we do not want our meta dictionary to be endowed with any additional structure induced by the dataloader's
     #support for batch sizes > 1 at each iteration/callback. 
     return dataset  
+
+
+#We will temporarily put some of the custom transforms up here, but it will need to be reshuffled at a later point.
+class MergeImChannels:
+    #Transform which merges image channels together into a single image instance. Implicitly assumes that the channel_list is the
+    # same order as the sequence of the channel list strings. This corresponds to the config which is printed by the exp and also
+    # fed into the downstream application. 
+    def __init__(self, keys:Sequence, channel_list:list[str], output_key:str ='image'):
+        self.input_keys = keys #the set of keys which designate the corresponding locations of the image arrays which are being fused.
+        self.output_key = output_key #the key which the merged image will be stored to for downstream extraction. defaults to "image".
+        self.channel_list = channel_list #the list of channels which we will be merging.  
+
+        if not all([f'image_{channel}' in keys for channel in self.channel_list]):
+            raise Exception('We currently assume that missingness is not permitted, will require special treatment. There was the absence of a required image channel!')
+
+    def merge_channels(self):
+        #Method which actally merges the channels together in a MetaTensor construction. Not required for now as we will
+        #assume that the tasks are single-channel temporarily.
+        raise NotImplementedError('Not implemented yet! Needs to be capable of handling any relevant fields for the ' \
+        'multi-channel image data give that we have read-in single channel images.')
+
+    def __call__(self, data):
+        d = dict(data)
+        #Very hacky solution for now, this is not at all MONAI-like, in the sense that it is not going to iterate over
+        #the keys as one typically would approach these types of implementations.
+        if len(self.input_keys) == 1:
+            print('Single channel image data, just need to re-name the data-struct.')
+            d[self.output_key] = copy.deepcopy(d[self.input_keys[0]]) #Just deepcopy. We will handle any stripping of the 
+            #irrelevant or non-permitted meta-information downstream. 
+        else:
+            raise NotImplementedError('Attempted to use a configuration for handling multi-channel image data, which we have not yet configured.')
+
+        return d 
+    
+class MergeSegmentations:
+    #A temporary hack, which will assume single annotator, single instance (or instance as a dummy proxy for semantic seg 
+    # datasets)
+
+    #Not been hyperoptimised for efficiency yet as I am sleep deprived and just putting something that is readable for my sleep
+    #deprived brain.
+    def __init__(self, keys:Sequence, sem_mapping: dict[str, list[str]], output_sem_code: dict[str, int], output_key:str = 'label'):
+        self.input_keys = keys #input keys which contain all of the relevant segmentations which will need to be fused.
+        self.semantic_map_dict = sem_mapping #The strings which designated the semantic mapps/merging
+        if len(self.semantic_map_dict) != 2:
+            raise Exception('Hardcoded for now that it is only being applied to binary semantic seg, lets add as many sanity-checks along the way.')        
+        self.output_sem_code_dict = output_sem_code #The integer codes which designate what the values
+        #are after merging for each of the output-semantic classes.
+        
+        if self.semantic_map_dict.keys() != self.output_sem_code_dict.keys():
+            raise Exception('There was a discrepancy in the task-domain semantic class descriptors for the semantic-mapping dict,' \
+            'and the description of the integer-codes that will be allocated for each task-domain semantic class.')
+         
+        #This is a temporary hack where we presume only semantic labelling is being applied, for now. 
+        # Presumes no complexity is going to arise from handling multi-annotator setups or samples with multi-instance explicitly
+        # outlined in the input dataset.  
+        self.output_key = output_key 
+    
+    def merge_sem_seg(
+            self, 
+            seg_array_shape: tuple,
+            input_semantic_arrays: dict[str, np.ndarray]):
+            #We currently will assume for simplicity that all arrays have been pre-mapped into numpy arrays.
+            #TODO: Modify this func and accelerate. 
+        '''
+        #function which takes the input keys describing the arrays in the  data dictionary, and a description of how the
+        # semantic classes need to be mapped in order to generate a semantic segmentation for a basic single-annotator domain.
+        '''
+
+        if not isinstance(seg_array_shape, tuple):
+            raise TypeError
+        else:
+            merged_seg_array = np.zeros(seg_array_shape)
+
+        #we create a mapping between the keys describing the arrays, and how we want to merge them.
+        #we will be hard-coding with the assumption that we are working with single annotator and single_instance
+        #key descriptors for now.
+        #TODO: Generalise this function for panoptic & multi-annotator.
+
+        new_sem_mapping = dict() 
+        for output_sem, input_sems_list in self.semantic_map_dict.items():
+            new_sem_mapping[output_sem] = [f'annotator_1_semclass{sem}_instance_1' for sem in input_sems_list]
+
+        # Check for repeats across all lists. We need more modularity and unit-testing in order to scrap some of these
+        # checks! This is just as a precaution!! Cannot have one semantic class be mapped to multiple in the output.
+
+        all_items = [item for sublist in new_sem_mapping.values() for item in sublist]
+        if len(all_items) != len(set(all_items)):
+            raise ValueError("Duplicate entries found across all lists in new_sem_mapping.")
+        #we also check that all of the input/default semantic classes in the dataset have been accounted for, although
+        #this has probably been done before my brain cannot retain anything for longer than 10 minutes..we check it by proxy
+        #by examining the paths.
+
+        #TODO: This check does not make many assumptions about the source, number of instances etc... but was initially conceived
+        #for the single-annotator, single-"instance" semantic seg formulation.
+        if not all([input_sem_key in all_items for input_sem_key in self.input_keys]):
+            raise Exception('Unaccounted for initial semantic class in the description of the task domain seg task.')
+        #Just checking that all of the output semantic keys are available.
+        if not all([output_sem_key in self.output_sem_code_dict.keys() for output_sem_key in self.output_sem_code_dict.keys()]):
+            raise Exception('Unaccounted for output semantic classes.')
+        
+        #Now we iterate through and merge binary mask arrays within a task-domain semantic class together, and apply
+        #the corresponding integer code which is expected for this.....
+
+        #We recall that it comes in CHWD-like shape (more specifically 1HWD).
+        stored_sems = dict() 
+        for output_sem_key, sem_pointer_keys_list in new_sem_mapping.items():
+            arrays_to_merge = [input_semantic_arrays[sem_key] for sem_key in sem_pointer_keys_list]
+            #we check that there are no overlaps here, there must not be because we will be assuming that each voxel is described
+            #uniquely by a semantic class! 
+            if np.any(np.sum([mask > 0 for mask in arrays_to_merge], axis=0) > 1): 
+                #If any voxel has val > 1 then there was an overlap which shouldn't be possible.
+                raise ValueError("Overlap detected between diff input semantic class masks, cannot merge together. Re-check.")
+            else:
+                #Else, we just sum the "foregrounds"
+                semclass_arr = np.sum([mask > 0 for mask in arrays_to_merge], axis=0)
+                #we store a binary mask and then apply the integer code later.
+                stored_sems[output_sem_key] = semclass_arr
+        
+        #Now we will go through and ensure that there is zero overlap in the foregrounds.
+        # Ensure there is zero overlap in the foregrounds (no voxel assigned to more than one class)
+        if np.any(np.sum([mask > 0 for mask in stored_sems.values()], axis=0) > 1): 
+            #This converts each mask to a binary, then sums over all masks. If any voxel has val > 1 then there was an overlap.
+            raise ValueError("Overlap detected between semantic class masks in the merging operation.")
+        else:   
+            merged_seg_array[0, ...] = np.sum([stored_sems[class_lb] * class_code for class_lb, class_code in self.output_sem_code_dict.items()], axis=0)
+
+        
+        if merged_seg_array.sum() == 0:
+            warnings.warn('Beware, empty annotation! Please check if this is intended.')
+        return merged_seg_array 
+    
+    def __call__(self, data):
+        d = dict(data)
+        copied_metatensor_template = copy.deepcopy(d[self.input_keys[0]])
+        #We check that the metatensor_template is actually a metatensor.
+        if not isinstance(copied_metatensor_template, MetaTensor):
+            raise TypeError('The metatensor template for storing the merged segmentation merging was not a metatensor')
+        #TODO: Check whether the metadictionary or stored transforms will introduce problems downstream
+        #due to the memory of transforms applied............
+
+                
+        #deepcopy because monai metatensors can be weird with the transforms memory. we use .array for now instead of
+        #tensor based operations like .as_tensor(). 
+        input_semantic_arrays = copy.deepcopy({k:d[k].array for k in self.input_keys})
+        
+        #We check that the type of the structure is all uniform.
+        types = [type(arr) for arr in input_semantic_arrays.values()]
+        if len(set(types)) > 1:
+            raise TypeError(f"Not all arrays in input_semantic_arrays have the same instance type: {set(types)}")
+        # Check that all structures have the same dtype also.
+        dtypes = [arr.dtype for arr in input_semantic_arrays.values()]
+        if len(set(dtypes)) > 1:
+            raise TypeError(f"Not all arrays in input_semantic_arrays have the same dtype: {set(dtypes)}")
+        
+        #We assign what the output data structure should be like for saving using the .array = operation. 
+        output_type = types[0]  #We need to recall that this will be loaded as a numpy array due to the 
+        #way the .array operation works!
+        output_dtype = dtypes[0] 
+        
+
+        #We now map all the arrays into numpy arrays for simplicity.
+        # if output_type == torch.Tensor:
+            # input_semantic_arrays = {k:v.cpu().numpy() for k, v in input_semantic_arrays.items()}
+        if output_type == np.ndarray:
+            input_semantic_arrays = {k:np.array(v, copy=False) for k, v in input_semantic_arrays.items()} 
+        else:
+            raise Exception('Unsupported datatype obtained after the .array operation')
+
+        array_shapes = [arr.shape for arr in input_semantic_arrays.values()]
+        #hardcoding a check that it must be single-channel, 4D volume. TEMPORARY. We just reuse the array shapes.
+        if len(set(array_shapes)) > 1:
+            raise ValueError('There was an inconsistency in the shape of the arrays')
+        if any([len(array_shape) != 4 or array_shape[0] != 1 for array_shape in array_shapes]):
+            raise ValueError('There was an array which was either not single-channel or not 4D')
+        
+        output_shape = array_shapes[0] 
+        
+
+        merged_seg = self.merge_sem_seg(
+            seg_array_shape=output_shape,
+            input_semantic_arrays=input_semantic_arrays)
+
+        # assert isinstance(merged_seg, np.ndarray), 'For now we have written the transform to require handling of np arrays'
+        assert merged_seg.shape == output_shape, 'The merged seg did not have the correct shape as required for a 1HWD semantic seg.'
+
+        #Mapping the seg back into the expected datastructure.
+
+        # Preserve both type and dtype. For now the outputted merg_seg should always be a numpy array but we will
+        # just be careful anyways.
+        if output_type == np.ndarray:
+            if not isinstance(merged_seg, np.ndarray):
+                merged_seg = np.array(merged_seg)
+            merged_seg = merged_seg.astype(output_dtype, copy=False)
+        # elif output_type == torch.Tensor:
+        #     if not isinstance(merged_seg, torch.Tensor):
+        #         merged_seg = torch.from_numpy(merged_seg)
+        #     merged_seg = merged_seg.to(output_dtype)
+        else:
+            raise TypeError('The output array datatype must be a numpy array for the .array assignment mechanism')
+        #Placing back into the metatensor datastructure.
+        copied_metatensor_template.array = merged_seg 
+
+        d[self.output_key] = copied_metatensor_template 
+
+        return d  
+
+class KeepTopCC: 
+    #This transform is actually implemented in MONAI, but temporarily we will write our own because we have not yet consolidated 
+    # the different branches into one. For now we elect not to make use of class inheritance wrt wrapping the base Transform classes
+    # until the branches are merged. 
+
+    #Only keeps the largest region, not the N largest regions. 
+    def __init__(self, 
+                keys, 
+                operated_classes:list[str], 
+                class_code_map:dict[str, int],
+                component_descriptor = str,
+                connectivity: int = None):
+        self.keys = keys #Just a temporary hacky method. We implicitly assume that this transform will occur in-place.
+        
+        if component_descriptor != 'cc_largest':
+            raise NotImplementedError('We have only formulated this transform for the purpose of finding the largest cc of each semantic class.')
+        
+        if connectivity is None:
+            self.connectivity = None 
+            print('Performing n_dim connectivity for n_dim arrays.')
+        else:
+            self.connectivity = connectivity
+        #The number of orthogonal jumps permitted. Should by default set this to n_dim, which it will for None. 
+
+        self.operated_classes = operated_classes #This designates the classes for which this operation will be applied.
+        if 'background' in self.operated_classes or 'Background' in self.operated_classes:
+            raise Exception('Should not be operating CC analysis on the background semantic classes as it has 0 meaning for objectness!')
+        self.class_code_map = class_code_map 
+        #This is a dictionary which will denote the numeric representation for the classes
+        #which are being operated upon for the connected component analysis! 
+
+    def get_largest_cc(self, mask):
+        #As of now, this function is only designed with semantic segmentation in mind. We are assuming that voxels are uniquely
+        #assigned. Although this is unlikely to change for panoptic segmentation, it is worthy to note for when I have less
+        #weary eyes.
+        largest_cc = np.zeros(shape=mask.shape, dtype=mask.dtype)
+        if not largest_cc.ndim == 4:
+            raise Exception('Currently we are only working in the domain of volumetric segmentation.')
+        if not largest_cc.shape[0] == 1:
+            raise Exception('Currently we assume only semantic segmentation implementation, and so we require that the input seg be single channel!')
+        #We must be aware that the image array will be 4-dimensional (1HWD structure) and so we must account for that when
+        #extracting the connected component masks! 
+        analysed_mask = mask[0] #extracting the actual spatial component only.
+
+        #for simplicitly, we will create a set of arrays by semantic class, and then fuse them afterwards.
+        stored_ccs = dict()
+        for class_lb, class_code in self.class_code_map.items():
+            if class_lb.capitalize() == 'Background':
+                if class_code != 0:
+                    raise ValueError('We assert that the background semantic class will always be assigned to a voxel value of 0.' \
+                    'Another potentially pointless check in case my sleep-deprived brain has not recalled' \
+                    'I put this check elsewhere already.')
+                #Meaningless to perform cc analysis on the background semantic class. Just return a binary mask!
+                #NOTE: Implicitly assumes that the semantic code for background is always going to be 0 for this implementation!
+                stored_ccs[class_lb] = np.zeros(analysed_mask.shape).astype(int)
+            if class_lb not in self.operated_classes:
+                #We will only be performing on the classes which are designated as being operated upon.
+                #in this case just return the binary mask!
+                stored_ccs[class_lb] = np.where(analysed_mask == class_code, 1, 0).astype(int) 
+            else:
+                fg_mask = np.where(analysed_mask == class_code, 1, 0).astype(int) 
+                cc_analysed_mask, num_cc = cc_label(label_image=fg_mask, background=0, return_num=True, connectivity=self.connectivity)
+                if num_cc == 0 or cc_analysed_mask.sum() == 0:
+                    warnings.warn(f'Pre-warning, empty fg in the semantic class {class_lb}')
+                    stored_ccs[class_lb] = np.zeros(analysed_mask.shape).astype(int)
+                    # We return an empty array.
+                else:
+                    largest_region_code = np.argmax(np.bincount(cc_analysed_mask.flat)[1:]) + 1 # + 1 because we indexed out the bg, 
+                    #but np.argmax will return values 0 indexed, which could give us largest_region_code = 0 despite this being bg!!
+                    if not largest_region_code > 0 or not largest_region_code <= num_cc:
+                        raise ValueError('Somehow we managed to get an invalid number of cc under the subloop which handles cases which were not empty')
+                    stored_ccs[class_lb] = np.where(cc_analysed_mask == largest_region_code, 1, 0)
+
+        #Now we will go through and ensure that there is zero overlap in the foregrounds.
+        # Ensure there is zero overlap in the foregrounds (no voxel assigned to more than one class)
+        if np.any(np.sum([mask > 0 for mask in stored_ccs.values()], axis=0) > 1): 
+            #This converts each mask to a binary, then sums over all masks. If any voxel has val > 1 then there was an overlap.
+            raise ValueError("Overlap detected between semantic class masks in connected component outputs.")
+        else:
+            largest_cc[0, ...] = np.sum([stored_ccs[class_lb] * class_code for class_lb, class_code in self.class_code_map.items()], axis=0)
+         
+        return largest_cc
+
+    def __call__(self, data):
+        d = dict(data)
+        for key in self.keys:
+            orig_array = copy.deepcopy(d[key].array)
+            # if isinstance(orig_array, torch.Tensor): #Commented out because monai 1.4.0 operates on the assumption that
+            #it is a numpy array after using the .array operation.
+            #     numpified_array = orig_array.cpu().numpy()
+            if isinstance(orig_array, np.ndarray):
+                numpified_array = np.array(orig_array, copy=False)
+            else:
+                raise Exception('Unsupported datatype')
+            result = self.get_largest_cc(numpified_array)
+
+            # Preserve both type and dtype. For now the output should always be a numpy array but we will
+            # just be careful anyways.
+            if isinstance(orig_array, np.ndarray):
+                if not isinstance(result, np.ndarray):
+                    result = np.array(result)
+                result = result.astype(orig_array.dtype, copy=False)
+            # elif isinstance(orig_array, torch.Tensor):
+            #     if not isinstance(result, torch.Tensor):
+            #         result = torch.from_numpy(result)
+            #     result = result.to(dtype=orig_array.dtype)
+            else:
+                raise TypeError('Expected output for .array opteration is np.ndarray datatype')
+            d[key].array = result
+            assert result.shape[0] == 1, 'We currently only assume this implementation is meant to semantic segmentation, will require expansion.'
+        return d
+
+
 
 def iterate_dataloader_check(data_instance):
     
@@ -446,11 +800,17 @@ def iterate_dataloader_check(data_instance):
         except:
             raise Exception('The loaded data instance does not contain a meta dictionary')
 
-        #We assert that the data must be single modality for our current application!
-        if int(im_meta_dict['pixdim[4]']) > 1:
-            raise ValueError('This application only supports single modality implementations.')
-        if int(label_meta_dict['pixdim[4]']) > 1:
-            raise ValueError('This application only supports single modality implementations')
+
+        #TODO: Put back in some checks on the metadata potentially... although i am going to wipe almost all of it anyways.
+        #TODO: Need to expand this to be flexible to multi-instance and multi-annotator setups. 
+
+        #We assert that the data must be single channel for our current application!
+        # if int(im_meta_dict['pixdim[4]']) != 1:
+        if data_instance['image'].shape[0] != 1: 
+            raise ValueError('This application only currently supports single channel implementations.')
+        # if int(label_meta_dict['pixdim[4]']) != 1:
+        if data_instance['label'].shape[0] != 1:
+            raise ValueError('This application only currently supports semantic segmentation implementations')
     else:
         raise TypeError("The loaded image and label data must be a MetaTensor")
 
@@ -467,14 +827,17 @@ def data_instance_reformat(data_instance:dict):
     if not isinstance(data_instance, dict) or not data_instance:
         raise Exception('Data instance is assumed to be a non-empty dictionary format..')
 
-    #We extract the paths from the meta info:
+    #We extract the paths from the meta info: Deprecated.
 
-    im_path = copy.deepcopy(data_instance['image'].meta['filename_or_obj'])
-    label_path = copy.deepcopy(data_instance['label'].meta['filename_or_obj'])
+    # im_path = copy.deepcopy(data_instance['image'].meta['filename_or_obj'])
+    # label_path = copy.deepcopy(data_instance['label'].meta['filename_or_obj'])
 
-    if not os.path.exists(im_path) or not os.path.exists(label_path):
-        raise Exception('One of the paths does not exist! Or the full absolute path was not provided to the dataset constructor')
+    # if not os.path.exists(im_path) or not os.path.exists(label_path):
+    #     raise Exception('One of the paths does not exist! Or the full absolute path was not provided to the dataset constructor')
     
+    #We will deepcopy like a paranoid person for now.
+    case_name = copy.deepcopy(data_instance['case_name'])
+
     im_tensor = copy.deepcopy(data_instance['image'])
     label_tensor = copy.deepcopy(data_instance['label'])
 
@@ -547,13 +910,14 @@ def data_instance_reformat(data_instance:dict):
         }
     } 
     
-    if os.path.split(im_path)[1].split('.')[0] != os.path.split(label_path)[1].split('.')[0]:
-        raise Exception('The name for the provided image and label needs to be the same!')
+    # if os.path.split(im_path)[1].split('.')[0] != os.path.split(label_path)[1].split('.')[0]:
+    #     raise Exception('The name for the provided image and label needs to be the same!')
     
 
-    patient_name = os.path.split(im_path)[1].split('.')[0]
+    # patient_name = os.path.split(im_path)[1].split('.')[0]
 
-    return reformat_data_instance, patient_name
+    
+    return reformat_data_instance, case_name #patient_name
 
 
 def read_jsons(dataset_abs_path:str, exp_data_type:str, fold :Union[str, None]):
