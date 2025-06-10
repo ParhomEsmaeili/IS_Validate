@@ -15,7 +15,7 @@
 		"data_transforms":
 			{"semantic_class_mapping":{
 				"background":["background","edema"],
-				"tumour_core":["enhancing tumour","non-enhancing tumour"]
+				"tumour_core":["enhancing tumour","non-enhancing tumor"]
 				}
 			}
 	}
