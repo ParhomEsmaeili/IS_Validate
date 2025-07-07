@@ -227,6 +227,7 @@ class FrontEndSimulator:
         inference app, generating metrics, saving metrics etc.
         '''
         self.metrics_handler = MetricsHandler(
+            calc_device=self.args['device'], 
             dice_termination_threshold=self.args['dice_termination_thresh'],
             metrics_configs=self.args['metrics_configs'],
             metrics_savepaths=self.args['metrics_savepaths'],
@@ -697,6 +698,8 @@ class FrontEndSimulator:
                 #First we store the prior output paths here:
                 self.update_tracked_paths(output_paths=output_paths, inf_call_config={'mode': 'Interactive Edit', 'edit_num': iter_num})
 
+                if iter_num == 99:
+                    print('pause')
 
                 #Generate the inference request and initialises the inference interaction memory:
                 request, inf_im = self.infer_app_request_generator(
@@ -705,6 +708,7 @@ class FrontEndSimulator:
                     im=inf_im,
                     prev_output_data=prev_output_data
                 )
+                
                 #Take the generated request dict, and pass it through the callable application.
                 prev_output_data = self.infer_app(request)
                 #This generates the non-processed output data.

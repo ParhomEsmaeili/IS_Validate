@@ -10,6 +10,7 @@ import warnings
 sys.path.append(up(up(up(up(up(os.path.abspath(__file__)))))))
 from src.prompt_generators.heuristics.spatial_utils.distance_maps import edt_from_back
 import torch
+import gc
 
 def uniform_random(binary_mask, n):
     '''
@@ -21,19 +22,34 @@ def uniform_random(binary_mask, n):
     device = binary_mask.device
     #Generate tensor of spatial coords: is Ncoords x N_dim
     
-    possible_coords = torch.argwhere(binary_mask).to(device=device)
+    possible_coords = torch.argwhere(binary_mask.to(device=device, dtype=torch.int32))
+    #NOTE: We use int32 here because it is more than enough to represent the coordinates in the range of the input binary mask.
     
     if possible_coords.shape[0] >= n:
         #If there are sufficient voxels, return N
         idxs = torch.sort(torch.randint(0, possible_coords.shape[0] - n + 1,(n,), device=device)).values + torch.arange(0, n, device=device)
-        coords = possible_coords[idxs, :].to(dtype=torch.int64)
+        coords = possible_coords[idxs, :].to(dtype=torch.int32) 
+        #We can use int32 because it would be more than enough to represent the coordinates in the range of the input binary mask.
+        
+        #HACK: Just dump and clear the memory.
+        del possible_coords
+        gc.collect() 
+        torch.cuda.empty_cache()
         return list(coords.split(1, 0))
     elif possible_coords.shape[0] < n and possible_coords.shape[0] != 0:
         #If there are not sufficient voxels, return the max quantity?
         #idxs = torch.sort(torch.randint(0, 1,(possible_coords.shape[0],), device=device)).values + torch.arange(0, possible_coords.shape[0], device=device)
-        coords = possible_coords.to(dtype=torch.int64)
-        return list(coords.split(1, 0))
+        coords = possible_coords.to(dtype=torch.int32)
+        #HACK: Just dump and clear the memory.
+        del possible_coords
+        gc.collect() 
+        torch.cuda.empty_cache()
+        return list(coords.split(1, 0)) 
     elif possible_coords.shape[0] == 0:
+        #HACK: Just dump and clear the memory.
+        del possible_coords
+        gc.collect() 
+        torch.cuda.empty_cache()
         return []
 
 def center():

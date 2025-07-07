@@ -6,6 +6,12 @@ from surface_distance import compute_surface_distances
 from surface_distance.metrics import compute_surface_dice_at_tolerance
 import copy 
 import warnings 
+import os 
+import sys
+import gc 
+sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
+from monai_version_hack import monai_version 
+
 
 class BaseScoringWrapper:
     '''
@@ -26,9 +32,11 @@ class BaseScoringWrapper:
     '''
     def __init__(
             self,
+            calc_device: torch.device, 
             metrics_configs:dict, 
             config_labels_dict:dict):
 
+        self.calc_device = calc_device
         self.metrics_configs = metrics_configs  
         self.config_labels_dict = config_labels_dict 
         self.metric_classes = {}
@@ -45,6 +53,7 @@ class BaseScoringWrapper:
     def init_dice(self): 
 
         self.metric_classes['Dice'] = Dice(
+            calc_device=self.calc_device,
             ignore_empty=self.metrics_configs['Dice']['ignore_empty'],
             include_background=self.metrics_configs['Dice']['include_background_metric'],
             include_per_class_scores=self.metrics_configs['Dice']['include_per_class_scores'],
@@ -53,6 +62,8 @@ class BaseScoringWrapper:
     def init_NSD(self):
 
         self.metric_classes['NSD'] = NSD(
+            calc_device=torch.device('cpu'), #NSD is not a GPU metric, it is a CPU metric, so we just use CPU for now.
+            #TEMPORARY. 
             ignore_empty=self.metrics_configs['NSD']['ignore_empty'],
             include_background=self.metrics_configs['NSD']['include_background_metric'],
             include_per_class_scores=self.metrics_configs['NSD']['include_per_class_scores'],
@@ -61,7 +72,7 @@ class BaseScoringWrapper:
             )
         
     def __call__(self,  
-                image_masks: dict, 
+                image_masks: tuple, 
                 pred: Union[torch.Tensor, MetaTensor], 
                 gt: Union[torch.Tensor, MetaTensor]):
         '''
@@ -95,11 +106,13 @@ class BaseScoringWrapper:
 class Dice:
 
     def __init__(self,
+        calc_device: torch.device,
         ignore_empty: bool,
         include_background: bool,
         include_per_class_scores: bool,
         config_labels_dict: dict[str, int]
     ):
+        self.calc_device = calc_device
         self.ignore_empty = ignore_empty
         self.include_background = include_background
         self.include_per_class_scores = include_per_class_scores
@@ -142,19 +155,35 @@ class Dice:
         if self.include_per_class_scores:
             per_class_scores = dict() 
             
+            pred =pred.to(device=self.calc_device, dtype=torch.uint8)
+            gt = gt.to(device=self.calc_device, dtype=torch.uint8)
+
             for class_label, class_integer_code in self.config_labels_dict.items():
 
                 if not self.include_background:
                     if class_label.title() == 'Background':
                         continue 
         
-                class_sep_pred = torch.where(pred == class_integer_code, 1, 0)
-                class_sep_gt = torch.where(gt == class_integer_code, 1, 0)
+                # class_sep_pred = torch.where(pred == class_integer_code, 1, 0)
+                # class_sep_gt = torch.where(gt == class_integer_code, 1, 0)
 
 
-                per_class_scores[class_label] = self.dice_score_per_class(class_sep_pred, class_sep_gt, per_class_masks[class_label])
+                per_class_scores[class_label] = self.dice_score_per_class(
+                    torch.where(pred == class_integer_code, 1, 0),
+                    torch.where(gt == class_integer_code, 1, 0),
+                    #TODO: check whether this mask is going to get stuck in cuda memory.
+                    per_class_masks[class_label].to(device=self.calc_device, dtype=torch.uint8)
+                ).to(device='cpu', dtype=torch.float32) 
+
+                #Trying to minimise the memory usage by not storing the class_sep_pred and class_sep_gt tensors, as they are not needed after the dice_score_per_class computation
+
+                    # class_sep_pred, class_sep_gt, per_class_masks[class_label])
                 assert type(per_class_scores[class_label]) == torch.Tensor and per_class_scores[class_label].size() == torch.Size([1]), 'Generation of dice score failed because the score for a specific class was not a torch tensor of size 1'
         
+                pred = pred.to(device='cpu', dtype=torch.uint8) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
+                gt = gt.to(device='cpu', dtype=torch.uint8) #Just to be careful, we don't need this anymore, so we can delete it to save memory.        
+                gc.collect()
+                torch.cuda.empty_cache() #Just to be careful, we don't need this anymore, so we can delete it to save memory.
 
             assert type(cross_class) == torch.Tensor and cross_class.size() == torch.Size([1]), 'Generation of dice score failed because the cross-class score was not a torch tensor of size 1'
         
@@ -169,7 +198,6 @@ class Dice:
 
         y_o = torch.sum(torch.where(class_sep_gt > 0, 1, 0) * image_mask)
         y_hat_o = torch.sum(torch.where(class_sep_pred > 0, 1, 0) * image_mask)
-        
         denom = y_o + y_hat_o
         # weighted_pred = class_sep_pred * image_mask 
         # weighted_gt = class_sep_gt * image_mask 
@@ -193,6 +221,12 @@ class Dice:
         '''
         image mask here is the cross-class image mask which is binarised.
         '''
+        pred = pred.to(device=self.calc_device, dtype=torch.uint8) 
+        #Ensuring that the pred is on the correct device and we can also assume pred is a discrete mask with relatively small
+        #values so uint8 is sufficient. 
+        gt = gt.to(device=self.calc_device, dtype=torch.uint8)
+        image_mask = image_mask.to(device=self.calc_device, dtype=torch.uint8)
+        #For now we assume that the image mask is a binarised mask (e.g. a binary window, if even that) so it is also uint8.
         if not self.include_background:
             #then background not included
             y_o = torch.sum(torch.where(gt > 0, 1, 0) * image_mask)
@@ -214,18 +248,33 @@ class Dice:
                         continue 
                 
 
-                pred_channel = torch.where(pred == class_code, 1, 0) 
+                # pred_channel = torch.where(pred == class_code, 1, 0) 
                 
-                gt_channel = torch.where(gt == class_code, 1, 0) 
+                # gt_channel = torch.where(gt == class_code, 1, 0) 
 
 
                 #NOTE: For weightmaps which are not a tensor of ones (and non binarised maps) the voxel values
                 # must have already been weighted by the corresponding values in the image mask, so that when we sum
                 # it already contains the weight.
 
-                intersection += torch.sum(torch.masked_select(image_mask, pred_channel * gt_channel > 0 )) 
+                # intersection += torch.sum(torch.masked_select(image_mask, pred_channel * gt_channel > 0 )) 
                               
+                intersection += torch.sum(
+                    torch.masked_select(
+                        image_mask, 
+                        (torch.where(pred == class_code, 1, 0) * torch.where(gt == class_code, 1, 0)) > 0)
+                )
 
+            pred = pred.to(device='cpu', dtype=torch.uint8) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
+            gt = gt.to(device='cpu', dtype=torch.uint8) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
+            image_mask = image_mask.to(device='cpu', dtype=torch.uint8) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
+            
+            intersection = intersection.to(device='cpu', dtype=torch.float64) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
+            y_o = y_o.to(device='cpu', dtype=torch.float64) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
+            y_hat_o = y_hat_o.to(device='cpu', dtype=torch.float64) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
+            #Now we can compute the dice score.
+            gc.collect() 
+            torch.cuda.empty_cache()
             return torch.tensor([(2.0 * intersection) / (y_o + y_hat_o)])
         
         
@@ -233,6 +282,13 @@ class Dice:
             #If we ignore empty, then just return a nan value if there was nothing in the "gt".
             return torch.tensor([float("nan")])
         denorm = y_o + y_hat_o
+        
+        denorm = denorm.to(device='cpu', dtype=torch.float64) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
+        y_o = y_o.to(device='cpu', dtype=torch.float64) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
+        y_hat_o = y_hat_o.to(device='cpu', dtype=torch.float64) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
+        gc.collect()
+        torch.cuda.empty_cache()
+
         if denorm <= 0:
             #If we do not ignore empties, then return a value of 1 if the denom is <=0 (i.e. when both are empty) to indicate full coverage...
             return torch.tensor([1.0])
@@ -242,7 +298,6 @@ class Dice:
                 image_masks, 
                 pred, 
                 gt):
-        
                                                                 #cross_class, per_class
         (cross_class_score, per_class_scores) = self.dice_score(image_masks[0], image_masks[1], pred, gt)
 
@@ -256,20 +311,22 @@ class NSD:
     #seg. 
     
     def __init__(self,
+        calc_device: torch.device,
+        #calc_device: torch.device, #Not currently going to do much as we will hardcode cpu as the underlying function which has been
+        # wrapped cannot be executed on gpu. But kept for consistency with the BaseScoringWrapper interface.
         ignore_empty: bool,
         include_background: bool,
         include_per_class_scores: bool,
         config_labels_dict: dict[str, int],
         tolerance_mm: float #temporarily we will assume the same tolerance is to be used across all classes, which will be reasonable in binary semantic seg. 
         #should ideally be overridden on a target by target basis, or some reasonable measure across an instance-by-instance basis.
-    ):
+    ):  
+        self.calc_device = calc_device
         self.ignore_empty = ignore_empty
         self.include_background = include_background
         self.include_per_class_scores = include_per_class_scores
         self.config_labels_dict = config_labels_dict
         self.tolerance_mm = tolerance_mm 
-
- 
  
     def NSD_calc(
             self, 
@@ -297,10 +354,13 @@ class NSD:
                 else:
                     warnings.warn('Background class is not that meaningful a class for surface dice computation, recommended to not include it')
 
-            class_sep_pred = torch.where(pred == class_integer_code, 1, 0)
-            class_sep_gt = torch.where(gt == class_integer_code, 1, 0)
+            # class_sep_pred = torch.where(pred == class_integer_code, 1, 0)
+            # class_sep_gt = torch.where(gt == class_integer_code, 1, 0)
 
-            per_class_scores[class_label] = self.NSD_binary(class_sep_pred, class_sep_gt)
+            per_class_scores[class_label] = self.NSD_binary(torch.where(pred == class_integer_code, 1, 0), torch.where(gt == class_integer_code, 1, 0))
+            #Minimising the memory usage by not storing the class_sep_pred and class_sep_gt tensors, as they are not needed after the NSD_binary computation.
+                
+                #class_sep_pred, class_sep_gt)
         
         #Compute the cross-class score, dummy method for now is to just average over the classes.        
         if self.ignore_empty:
@@ -335,28 +395,39 @@ class NSD:
         #Just to be careful because of weirdness about MetaTensor behaviours across MONAI versions we abuse deepcopy... temporary hacky method... so we don't break
         #any underlying obj... 
         
-        pred_copy = copy.deepcopy(class_sep_pred)
-        gt_copy = copy.deepcopy(class_sep_gt)
+        # pred_copy = copy.deepcopy(class_sep_pred)
+        # gt_copy = copy.deepcopy(class_sep_gt)
+    
+        #May need to remove the deepcopy if memory bloat is still an issue, but for now it is a temporary hacky method to 
+        # avoid breaking the underlying object.
 
-        if isinstance(pred_copy, MetaTensor):
-            #Version for other venvs
-            pred_np = copy.deepcopy(pred_copy.array) 
-
-            #Version for the segvol_venv:
-            # pred_np = copy.deepcopy(pred_copy.data.numpy())             
-        elif isinstance(pred_copy, torch.Tensor):
-            #Version for other venvs:
-            pred_np = copy.deepcopy(pred_copy.numpy())
-            
-            #Version for the segvol_venv:
-            # pred_np = copy.deepcopy(pred_copy.numpy())
-
-        if isinstance(gt_copy, MetaTensor):
-            #Version for other venvs:
-            gt_np = copy.deepcopy(gt_copy.data.array)
-
-            #Version for the segvol_venv:
-            # gt_np = copy.deepcopy(gt_copy.data.numpy()) 
+        if isinstance(class_sep_pred, MetaTensor):
+            if monai_version == '1.4.0':
+                #Version for other venvs
+                pred_np = class_sep_pred.array #copy.deepcopy(class_sep_pred.array) 
+            elif monai_version == '0.9.0':
+                #Version for the segvol_venvs:
+                pred_np = class_sep_pred.data.numpy() #copy.deepcopy(class_sep_pred.data.numpy())
+            else:
+                raise Exception('Unknown MONAI version.')             
+        elif isinstance(class_sep_pred, torch.Tensor):
+            if monai_version == '1.4.0':
+                #Version for other venvs:
+                pred_np = class_sep_pred.numpy() #copy.deepcopy(class_sep_pred.numpy())
+            elif monai_version == '0.9.0':            
+                #Version for the segvol_venv:
+                pred_np = class_sep_pred.numpy() #copy.deepcopy(class_sep_pred.numpy())
+            else:
+                raise Exception('Unknown MONAI version')
+        if isinstance(class_sep_gt, MetaTensor):
+            if monai_version == '1.4.0':
+                #Version for other venvs:
+                gt_np = class_sep_gt.array  #copy.deepcopy(class_sep_gt.array)
+            elif monai_version == '0.9.0':
+                #Version for the segvol_venv:
+                gt_np = class_sep_gt.data.numpy() #copy.deepcopy(class_sep_gt.data.numpy())
+            else:
+                raise Exception('Unknown MONAI version') 
         else:
             raise Exception('Need the image spacing, therefore the underlying image spacing must be available from the reference annotation.')
 
@@ -382,7 +453,7 @@ class NSD:
 
 
 
-        val_dom_affine = gt_copy.meta['affine']
+        val_dom_affine = copy.deepcopy(class_sep_gt.meta['affine']) 
         #extracting the affine (in the domain of the validation, i.e. after orientation to RAS) to obtain the image spacing    
         if val_dom_affine is not None:
             if val_dom_affine.shape[0] != 4: 
@@ -391,9 +462,13 @@ class NSD:
             _m_key = (slice(-1), slice(-1))
             im_spacing = np.linalg.norm(val_dom_affine[_m_key] @ np.eye(dim), axis=0)
         #spacing_mm is the voxel-level image-spacing itself.
-        surface_distances = compute_surface_distances(mask_gt=gt_np.astype(bool), mask_pred=pred_np.astype(bool), spacing_mm=im_spacing)
+        # surface_distances = compute_surface_distances(mask_gt=gt_np.astype(bool), mask_pred=pred_np.astype(bool), spacing_mm=im_spacing)
         #tolerance_mm is the tolerance in mm for the surface dice.
-        surface_dice = compute_surface_dice_at_tolerance(surface_distances=surface_distances, tolerance_mm=self.tolerance_mm)
+        surface_dice = compute_surface_dice_at_tolerance(
+            surface_distances=compute_surface_distances(mask_gt=gt_np.astype(bool), mask_pred=pred_np.astype(bool), spacing_mm=im_spacing), 
+            tolerance_mm=self.tolerance_mm)
+        
+        # del surface_distances #just to be careful, we don't need this anymore, so we can delete it to save memory.
 
         if np.isnan(surface_dice): #in this case the pred and gt must both be empty.
             if gt_np.sum() != 0 or pred_np.sum() != 0:

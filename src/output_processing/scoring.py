@@ -6,13 +6,14 @@ import torch
 from monai.data import MetaTensor 
 from typing import Union 
 import warnings 
-
+import gc
 from src.results_utils.metric_save_util import write_to_csvs
 from src.results_utils.base_metrics.scoring_base_utils import BaseScoringWrapper
 
 class MetricsHandler:
     def __init__(
         self,
+        calc_device: torch.device, 
         dice_termination_threshold: float,
         metrics_configs: dict[str, dict],
         metrics_savepaths: dict[str, dict[str, Union[str, None, dict]]],
@@ -35,6 +36,7 @@ class MetricsHandler:
         per-class (Optional) scores for the given metric. CSVs are pre-initialised in the runscript.
 
         '''
+        self.calc_device = calc_device 
         self.termination_thresh = dice_termination_threshold 
         self.metrics_configs = metrics_configs
         self.metrics_savepaths = metrics_savepaths 
@@ -110,6 +112,7 @@ class MetricsHandler:
         #Extracting the metric configs for the base metric types ONLY.
         base_metrics_configs = {key:val for key, val in self.metrics_configs.items() if key in self.base_metrics}
         self.base_computer = BaseScoringWrapper(
+            calc_device=self.calc_device, 
             metrics_configs=base_metrics_configs,
             config_labels_dict=self.config_labels_dict
         )
@@ -188,7 +191,10 @@ class MetricsHandler:
         extracted_gt = self.extract_spatial_dims(data_instance['label']['metatensor'])[0] #We use 0 index as it should be len 1
 
         tracked_metrics, terminate_bool = self.exec_base_metrics(extracted_pred, extracted_gt, tracked_metrics, infer_call_info)
-    
+        
+        del extracted_gt
+        del extracted_pred
+        gc.collect()
         return tracked_metrics, terminate_bool
 
     def save_metrics(

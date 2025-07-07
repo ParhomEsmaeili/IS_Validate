@@ -8,7 +8,6 @@ import tempfile
 import importlib
 import torch 
 import warnings 
-
 codebase_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__))) 
 sys.path.append(codebase_dir)
 from src.front_back_interactor.pseudo_ui import FrontEndSimulator 
@@ -17,6 +16,9 @@ from src.utils.dict_utils import extractor
 from src.data.utils import data_instance_reformat, iterate_dataloader_check, init_task_cases
 from src.results_utils.metric_save_util import init_all_csvs
 
+original_stdout = sys.stdout
+sys.stdout = open(os.devnull, 'w')
+# warnings.filterwarnings("ignore")
 
 def set_parse():
     # %% set up parser
@@ -29,12 +31,12 @@ def set_parse():
     # parser.add_argument('--dataloading_type', type=str, default='basic')
     
     #Experimental process/method related args 
-    parser.add_argument('--app_name', type=str, default='Sample_SAMMed3D')#default='Sample_TEST') #This acts as the name of the app, but also temporarily acts as the relative path name within the input_applications folder.
+    parser.add_argument('--app_name', type=str, default='Sample_SegVol')#default='Sample_TEST') #This acts as the name of the app, but also temporarily acts as the relative path name within the input_applications folder.
     parser.add_argument('--random_seed', type=int, default=341103)
     parser.add_argument('--device_idx', type=int, default=0)
     parser.add_argument('--infer_init', type=str, default='Interactive Init')
     parser.add_argument('--infer_not_edit_bool', action='store_false', default=True)
-    parser.add_argument('--infer_edit_nums', type=int, default=10)
+    parser.add_argument('--infer_edit_nums', type=int, default=100)
     parser.add_argument('--dice_termination_thresh', type=float, default=1.0)
 
     #Validation utilised constructors build args
@@ -50,14 +52,18 @@ def set_parse():
     parser.add_argument('--sim_empty_fg_automatic', action='store_true', default=False)
     #TODO: Put use_mem and other related args like that for the im etc in here. 
     parser.add_argument('--use_mem_inf_edit', action='store_true', default=False) #Whether im is used for conditioning prompt gen.
-    parser.add_argument('--im_conf_remove_init', action='store_true', default=False) #Bool for whether the init state in im will be removed from memory.
-    parser.add_argument('--im_conf_mem_len', type=int, default=-1) 
+    parser.add_argument('--im_conf_remove_init', action='store_true', default=True) 
+    #Bool for whether the init state in im will be removed from memory.
+    parser.add_argument('--im_conf_mem_len', type=int, default=1)#-1) 
     
     #Int which determines the memory length used at cleanup after the interaction memory is updated with the current edit iteration's interaction state (inclusive of current state). 
     # This functionally has the same thing as using a memory length of N (where N is our variable here) for conditioning
     #the prompt generation of the next iteration (if memory is being used for conditioning.) N is strictly > 0 or N = - 1, where N=-1 indicates full memory length paradoxically. 
     # as N = 0 would remove the current iteration's interaction for inference, and also would be the same as ignoring the memory for prompt generation (for which we have a separate variable.)
  
+    #For now we will set both these parameters to being true (i.e. to delete) because we are having lots of memory issues.
+
+
     #For the output processor/writing args which are optional.
     parser.add_argument('--is_seg_tmp', action='store_true', default=False)
     parser.add_argument('--save_prompts', action='store_true', default=False)
@@ -324,16 +330,18 @@ def init_infer_app(experiment_args:dict):
         
     return infer_app
 
-def run_instances(dataloader, fe_sim_obj):
+def run_instances(dataloader, fe_sim_obj, logger):
     #Function is intended for iterating through the constructed dataset.
     
     #Iterating through the dataloader.
-    for data_instance in dataloader:
+    for idx, data_instance in enumerate(dataloader):
         #Running a check on the data_instance loaded.
         iterate_dataloader_check(data_instance=data_instance)
         
         #Reformat the data instance
         data_instance, case_name = data_instance_reformat(data_instance=data_instance)
+        
+        logger.info(f'Sample {idx} of {len(dataloader)}, case_name: {case_name}')
         
         #Initialising the temporary directory.
         tempdir_obj = tempfile.TemporaryDirectory(dir=codebase_dir)
@@ -344,6 +352,7 @@ def run_instances(dataloader, fe_sim_obj):
         finally:
             tempdir_obj.cleanup() 
             # raise Exception('There was an error in the front-end simulator, running cleanup.')
+    logger.info('Successfully completed!')
 
 def init_fe(infer_app, experiment_args):
     #Function which initialises the front-end simulator.
@@ -447,7 +456,7 @@ def main():
 
     # Iterating through the dataset:
 
-    run_instances(dataloader=dataloader, fe_sim_obj=fe_sim_obj) 
+    run_instances(dataloader=dataloader, fe_sim_obj=fe_sim_obj, logger=exp_setup_logger) 
 
 if __name__=='__main__':
     main()

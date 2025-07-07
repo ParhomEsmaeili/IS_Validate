@@ -13,6 +13,8 @@ import logging
 import pathlib
 import warnings 
 from skimage.measure import label as cc_label
+from monai_version_hack import monai_version 
+import gc
 # logger = logging.getLogger(__name__)
 
 def init_task_cases(dataset_dir:str, exp_task_configs:dict): #, file_ext:str):
@@ -426,13 +428,24 @@ def dataloader_generator(case_list:list, image_keys:list, label_keys:list, trans
     This function handles the construction of a dataset object for iterating through.
     '''
     #Just the basic load transforms in order to load the files in for our custom transforms.
-    load_transforms = [
-        LoadImaged(keys=image_keys+label_keys, reader="ITKReader", image_only=True),
-        EnsureChannelFirstd(keys=image_keys+label_keys),
-        Orientationd(keys=image_keys+label_keys, axcodes='RAS'),
-        EnsureTyped(keys=image_keys+label_keys, dtype=[torch.float64]*len(image_keys)+[torch.int64]*len(label_keys)),
-    ]
-
+    if monai_version == '1.4.0':
+        load_transforms = [
+            LoadImaged(keys=image_keys+label_keys, reader="ITKReader", image_only=True),
+            EnsureChannelFirstd(keys=image_keys+label_keys),
+            Orientationd(keys=image_keys+label_keys, axcodes='RAS'),
+            EnsureTyped(keys=image_keys+label_keys, dtype=[torch.float32]*len(image_keys)+[torch.uint8]*len(label_keys)),
+        ]
+    elif monai_version == '0.9.0':
+        load_transforms = [    
+            LoadImaged(keys=image_keys+label_keys, image_only=False),
+            EnsureChannelFirstd(keys=image_keys+label_keys),
+            Orientationd(keys=image_keys+label_keys, axcodes='RAS'),
+            MetaTensorConstructor(keys=image_keys+label_keys, dtypes=[torch.float32]*len(image_keys)+[torch.uint8]*len(label_keys)),
+        ]
+    else:
+        raise Exception('Unknown monai version.')
+    
+    
     #The basic transforms required for all tasks (at least with our current implementation: im_channel merging and sem. seg merging)
     basic_transforms = [
         #Hardcoding in some of these variables for now.
@@ -462,11 +475,9 @@ def dataloader_generator(case_list:list, image_keys:list, label_keys:list, trans
         additional_transforms = []
     all_transforms = load_transforms + basic_transforms + additional_transforms 
     dataset = Dataset(case_list, Compose(all_transforms))    #Compose(load_transforms))
-    # return DataLoader(dataset=dataset, batch_size=1, num_workers=1)
-
-    #We switch from DataLoader to just using the Dataset as we do not want our meta dictionary to be endowed with any additional structure induced by the dataloader's
-    #support for batch sizes > 1 at each iteration/callback. 
-    return dataset  
+    # return DataLoader(dataset=dataset, batch_size=1, num_workers=4)
+ 
+    return dataset  #Until we can fix the dataloader just use the dataset.. will be slower.
 
 
 #We will temporarily put some of the custom transforms up here, but it will need to be reshuffled at a later point.
@@ -494,7 +505,8 @@ class MergeImChannels:
         #the keys as one typically would approach these types of implementations.
         if len(self.input_keys) == 1:
             print('Single channel image data, just need to re-name the data-struct.')
-            d[self.output_key] = copy.deepcopy(d[self.input_keys[0]]) #Just deepcopy. We will handle any stripping of the 
+            d[self.output_key] = d[self.input_keys[0]]   #Removing the deepcopy here... #copy.deepcopy(d[self.input_keys[0]]) 
+            #We will handle any stripping of the 
             #irrelevant or non-permitted meta-information downstream. 
         else:
             raise NotImplementedError('Attempted to use a configuration for handling multi-channel image data, which we have not yet configured.')
@@ -604,36 +616,44 @@ class MergeSegmentations:
         #We check that the metatensor_template is actually a metatensor.
         if not isinstance(copied_metatensor_template, MetaTensor):
             raise TypeError('The metatensor template for storing the merged segmentation merging was not a metatensor')
-        #TODO: Check whether the metadictionary or stored transforms will introduce problems downstream
+        #TODO: Re-check whether the metadictionary or stored transforms will introduce problems downstream
         #due to the memory of transforms applied............
-
-                
-        #deepcopy because monai metatensors can be weird with the transforms memory. we use .array for now instead of
-        #tensor based operations like .as_tensor(). 
-        input_semantic_arrays = copy.deepcopy({k:d[k].array for k in self.input_keys})
         
-        #We check that the type of the structure is all uniform.
-        types = [type(arr) for arr in input_semantic_arrays.values()]
-        if len(set(types)) > 1:
-            raise TypeError(f"Not all arrays in input_semantic_arrays have the same instance type: {set(types)}")
-        # Check that all structures have the same dtype also.
+        #Our hand is temporarily forced to use such a hacky method for generating a MetaTensor because we require the 
+        #trace of the transform/transform history! Same reason we also didn't inherit from the base Transform class so that
+        #this transform could remain hidden.
+        
+        #TODO: Find a better resolution to this hack.
+        if monai_version == '1.4.0':
+            # input_semantic_arrays = copy.deepcopy({k:d[k].data for k in self.input_keys}) #copy.deepcopy({k:d[k].array for k in self.input_keys})
+            input_semantic_arrays = {k:d[k].data for k in self.input_keys}
+        elif monai_version == '0.9.0':
+            # input_semantic_arrays = copy.deepcopy({k:d[k].data for k in self.input_keys})
+            input_semantic_arrays = {k:d[k].data for k in self.input_keys}
+        else:
+            raise Exception('Unknown monai version!')
+
+        #We check that the datatype of the structure is all uniform. Ulimately the datastructure is implicitly contained.
         dtypes = [arr.dtype for arr in input_semantic_arrays.values()]
         if len(set(dtypes)) > 1:
-            raise TypeError(f"Not all arrays in input_semantic_arrays have the same dtype: {set(dtypes)}")
+            raise TypeError(f"Not all arrays in input_semantic_arrays have the same instance type: {set(dtypes)}")
         
-        #We assign what the output data structure should be like for saving using the .array = operation. 
-        output_type = types[0]  #We need to recall that this will be loaded as a numpy array due to the 
-        #way the .array operation works!
+        #We assign what the output data structure should be like for storing. 
+        if isinstance(dtypes[0], torch.dtype):
+            output_type = torch.Tensor
+        elif isinstance(dtypes[0], np.dtype):
+            output_type = np.ndarray 
+        else:
+            raise TypeError('Unknown datatype')
         output_dtype = dtypes[0] 
-        
 
         #We now map all the arrays into numpy arrays for simplicity.
-        # if output_type == torch.Tensor:
-            # input_semantic_arrays = {k:v.cpu().numpy() for k, v in input_semantic_arrays.items()}
-        if output_type == np.ndarray:
+        if output_type == torch.Tensor:
+            input_semantic_arrays = {k:v.cpu().numpy() for k, v in input_semantic_arrays.items()}
+        elif output_type == np.ndarray:
             input_semantic_arrays = {k:np.array(v, copy=False) for k, v in input_semantic_arrays.items()} 
         else:
-            raise Exception('Unsupported datatype obtained after the .array operation')
+            raise Exception('Unsupported datatype obtained after the .data operation')
 
         array_shapes = [arr.shape for arr in input_semantic_arrays.values()]
         #hardcoding a check that it must be single-channel, 4D volume. TEMPORARY. We just reuse the array shapes.
@@ -660,15 +680,30 @@ class MergeSegmentations:
             if not isinstance(merged_seg, np.ndarray):
                 merged_seg = np.array(merged_seg)
             merged_seg = merged_seg.astype(output_dtype, copy=False)
-        # elif output_type == torch.Tensor:
-        #     if not isinstance(merged_seg, torch.Tensor):
-        #         merged_seg = torch.from_numpy(merged_seg)
-        #     merged_seg = merged_seg.to(output_dtype)
+        elif output_type == torch.Tensor:
+            if not isinstance(merged_seg, torch.Tensor):
+                merged_seg = torch.from_numpy(merged_seg)
+            merged_seg = merged_seg.to(output_dtype)
         else:
-            raise TypeError('The output array datatype must be a numpy array for the .array assignment mechanism')
+            raise TypeError('The output array datatype was unknown')
+        
         #Placing back into the metatensor datastructure.
-        copied_metatensor_template.array = merged_seg 
-
+        #TODO: Fix this when your brain is actually working again. You're pretty much moving between datatypes for
+        #no reason.
+        if monai_version == '1.4.0':
+            if isinstance(merged_seg, torch.Tensor):        
+                copied_metatensor_template.array = merged_seg.numpy() 
+            elif isinstance(merged_seg, np.ndarray):
+                copied_metatensor_template.array = merged_seg
+            else:
+                raise Exception 
+        elif monai_version == '0.9.0':
+            if isinstance(merged_seg, torch.Tensor):
+                copied_metatensor_template.data = merged_seg 
+            elif isinstance(merged_seg, np.ndarray):
+                copied_metatensor_template.data = torch.from_numpy(merged_seg)
+            else:
+                raise Exception 
         d[self.output_key] = copied_metatensor_template 
 
         return d  
@@ -686,6 +721,12 @@ class KeepTopCC:
                 component_descriptor = str,
                 connectivity: int = None):
         self.keys = keys #Just a temporary hacky method. We implicitly assume that this transform will occur in-place.
+        
+        warnings.warn('This transform is only intended, currently, for cases where num_components (connectivity-wise) should be low'
+        'although the connectivity function has been provided ample flexibility to prevent overflows (int32). ' \
+        'The downstream retained components are assumed to be sufficiently low in number to be able to be stored in a uint8 array. \n' \
+        'This is a temporary hack until we have a more robust implementation of the connected component analysis transform.'
+        'Very possible that this can cause memory issues even with int32.......')
         
         if component_descriptor != 'cc_largest':
             raise NotImplementedError('We have only formulated this transform for the purpose of finding the largest cc of each semantic class.')
@@ -727,62 +768,109 @@ class KeepTopCC:
                     'I put this check elsewhere already.')
                 #Meaningless to perform cc analysis on the background semantic class. Just return a binary mask!
                 #NOTE: Implicitly assumes that the semantic code for background is always going to be 0 for this implementation!
-                stored_ccs[class_lb] = np.zeros(analysed_mask.shape).astype(int)
+                stored_ccs[class_lb] = np.zeros(analysed_mask.shape).astype(dtype=mask.dtype)
             if class_lb not in self.operated_classes:
                 #We will only be performing on the classes which are designated as being operated upon.
                 #in this case just return the binary mask!
-                stored_ccs[class_lb] = np.where(analysed_mask == class_code, 1, 0).astype(int) 
+                stored_ccs[class_lb] = np.where(analysed_mask == class_code, 1, 0).astype(dtype=mask.dtype) 
             else:
-                fg_mask = np.where(analysed_mask == class_code, 1, 0).astype(int) 
+                fg_mask = np.where(analysed_mask == class_code, 1, 0).astype(dtype=np.int32) 
                 cc_analysed_mask, num_cc = cc_label(label_image=fg_mask, background=0, return_num=True, connectivity=self.connectivity)
                 if num_cc == 0 or cc_analysed_mask.sum() == 0:
                     warnings.warn(f'Pre-warning, empty fg in the semantic class {class_lb}')
-                    stored_ccs[class_lb] = np.zeros(analysed_mask.shape).astype(int)
+                    stored_ccs[class_lb] = np.zeros(analysed_mask.shape).astype(dtype=mask.dtype)
                     # We return an empty array.
                 else:
                     largest_region_code = np.argmax(np.bincount(cc_analysed_mask.flat)[1:]) + 1 # + 1 because we indexed out the bg, 
                     #but np.argmax will return values 0 indexed, which could give us largest_region_code = 0 despite this being bg!!
                     if not largest_region_code > 0 or not largest_region_code <= num_cc:
                         raise ValueError('Somehow we managed to get an invalid number of cc under the subloop which handles cases which were not empty')
-                    stored_ccs[class_lb] = np.where(cc_analysed_mask == largest_region_code, 1, 0)
-
+                    stored_ccs[class_lb] = np.where(cc_analysed_mask == largest_region_code, 1, 0).astype(dtype=mask.dtype)
+                    # warnings.warn(f'Not really a warning, but voxel count in remaining component for semantic class {class_lb} had {stored_ccs[class_lb].sum()} voxels')
         #Now we will go through and ensure that there is zero overlap in the foregrounds.
         # Ensure there is zero overlap in the foregrounds (no voxel assigned to more than one class)
         if np.any(np.sum([mask > 0 for mask in stored_ccs.values()], axis=0) > 1): 
             #This converts each mask to a binary, then sums over all masks. If any voxel has val > 1 then there was an overlap.
             raise ValueError("Overlap detected between semantic class masks in connected component outputs.")
+        elif np.any([np.where(mask_check == self.class_code_map[class_lb],1,0).sum() > np.where(analysed_mask == self.class_code_map[class_lb], 1, 0).sum() for class_lb, mask_check in stored_ccs.items()]):
+            #This checks that none of the stored ccs have more voxels than the original fg for each semantic class.
+            raise ValueError("At least one of the semantic classes has more voxels in the retained connected components than the original foreground mask. \n" \
+            'This is likely due to a bug in the connected component analysis implementation, please re-check.')
         else:
-            largest_cc[0, ...] = np.sum([stored_ccs[class_lb] * class_code for class_lb, class_code in self.class_code_map.items()], axis=0)
-         
+            largest_cc[0, ...] = copy.deepcopy(np.sum([stored_ccs[class_lb] * class_code for class_lb, class_code in self.class_code_map.items()], axis=0))
+            #We deepcopy here because it should allow us to delete the other variables without references being kept so that
+            # the memory can be freed up.        
+        del fg_mask
+        del analysed_mask
+        del stored_ccs
+        gc.collect() #We will try to free up some memory here, although this is not guaranteed to work as there are references
+
         return largest_cc
 
     def __call__(self, data):
         d = dict(data)
         for key in self.keys:
-            orig_array = copy.deepcopy(d[key].array)
-            # if isinstance(orig_array, torch.Tensor): #Commented out because monai 1.4.0 operates on the assumption that
-            #it is a numpy array after using the .array operation.
-            #     numpified_array = orig_array.cpu().numpy()
-            if isinstance(orig_array, np.ndarray):
+            
+            if monai_version == '1.4.0':
+                orig_array = copy.deepcopy(d[key].data)
+            elif monai_version == '0.9.0':
+                orig_array = copy.deepcopy(d[key].data)
+            else:
+                raise Exception('Unknown monai version!')
+
+            output_dtype = orig_array.dtype
+            #We assign what the output data structure should be like for storing. 
+            if isinstance(output_dtype, torch.dtype):
+                output_type = torch.Tensor
+            elif isinstance(output_dtype, np.dtype):
+                output_type = np.ndarray             
+            else:
+                raise Exception('Unknown datastructure')
+
+            if output_type == torch.Tensor:
+                numpified_array = orig_array.cpu().numpy()
+            elif output_type == np.ndarray:
                 numpified_array = np.array(orig_array, copy=False)
             else:
                 raise Exception('Unsupported datatype')
+        
             result = self.get_largest_cc(numpified_array)
 
             # Preserve both type and dtype. For now the output should always be a numpy array but we will
             # just be careful anyways.
-            if isinstance(orig_array, np.ndarray):
+            if output_type == np.ndarray:
                 if not isinstance(result, np.ndarray):
                     result = np.array(result)
-                result = result.astype(orig_array.dtype, copy=False)
-            # elif isinstance(orig_array, torch.Tensor):
-            #     if not isinstance(result, torch.Tensor):
-            #         result = torch.from_numpy(result)
-            #     result = result.to(dtype=orig_array.dtype)
+                result = result.astype(output_dtype, copy=False)
+            elif output_type == torch.Tensor:
+                if not isinstance(result, torch.Tensor):
+                    result = torch.from_numpy(result)
+                result = result.to(dtype=output_dtype)
             else:
-                raise TypeError('Expected output for .array opteration is np.ndarray datatype')
-            d[key].array = result
+                raise TypeError('Unknown datastructure')
+            
             assert result.shape[0] == 1, 'We currently only assume this implementation is meant to semantic segmentation, will require expansion.'
+        
+            #Placing back into the metatensor datastructure.
+            if monai_version == '1.4.0':
+                if isinstance(result, torch.Tensor):  #Just in case. Should be a numpy array however.    
+                    d[key].array = result.numpy() 
+                elif isinstance(result, np.ndarray):
+                    d[key].array = result
+                else:
+                    raise Exception 
+            elif monai_version == '0.9.0':
+                if isinstance(result, torch.Tensor):
+                    d[key].data = result  
+                elif isinstance(result, np.ndarray):
+                    d[key].data = torch.from_numpy(result)
+                else:
+                    raise Exception 
+
+        del numpified_array
+        del orig_array 
+        gc.collect() 
+
         return d
 
 
@@ -835,7 +923,9 @@ def data_instance_reformat(data_instance:dict):
     # if not os.path.exists(im_path) or not os.path.exists(label_path):
     #     raise Exception('One of the paths does not exist! Or the full absolute path was not provided to the dataset constructor')
     
-    #We will deepcopy like a paranoid person for now.
+    #We will deepcopy like a paranoid person for now. 
+
+    #Actually deepcopying is going to kill the memory.
     case_name = copy.deepcopy(data_instance['case_name'])
 
     im_tensor = copy.deepcopy(data_instance['image'])
@@ -865,9 +955,9 @@ def data_instance_reformat(data_instance:dict):
     #Checking that the meta dict contains the affine arrays required.
 
     #First copying the meta dict to keep it separate from the metatensor. 
-
-    im_meta_dict = copy.deepcopy(im_tensor.meta)
-    label_meta_dict = copy.deepcopy(label_tensor.meta)
+    #NOTE: We will NOT be copying actually.
+    im_meta_dict = im_tensor.meta #copy.deepcopy(im_tensor.meta)
+    label_meta_dict = label_tensor.meta #copy.deepcopy(label_tensor.meta)
 
     original_affine_key = 'original_affine'
     current_affine_key = 'affine'
@@ -889,9 +979,10 @@ def data_instance_reformat(data_instance:dict):
     label_meta_dict = affine_checker(label_meta_dict, current_affine_key)
     
 
-    #Also applying this to the .meta attribute of the metatensors through reassignment.
-    im_tensor.meta = copy.deepcopy(im_meta_dict)
-    label_tensor.meta = copy.deepcopy(label_meta_dict)
+    #Also applying this to the .meta attribute of the metatensors through reassignment. 
+    #Probably should have already been altered because the reference is the same, but just to be sure.
+    im_tensor.meta = im_meta_dict #copy.deepcopy(im_meta_dict)
+    label_tensor.meta = label_meta_dict #copy.deepcopy(label_meta_dict)
     
 
 
@@ -916,7 +1007,11 @@ def data_instance_reformat(data_instance:dict):
 
     # patient_name = os.path.split(im_path)[1].split('.')[0]
 
-    
+    #HACK:
+    del data_instance 
+    gc.collect() #Garbage collection to free up memory, this is a hacky solution for now.
+    torch.cuda.empty_cache() #Emptying the cuda cache... unlikely that this would actually be required. 
+
     return reformat_data_instance, case_name #patient_name
 
 
@@ -980,3 +1075,30 @@ def read_jsons(dataset_abs_path:str, exp_data_type:str, fold :Union[str, None]):
             return data_store_dict[f"fold_{fold}"]
         else:
             raise KeyError('Invalid experiment data set type selected, must be Test or Val.')
+        
+
+class MetaTensorConstructor: 
+    #Very old and probably not robust for newer versions of monai, thankfully we won't need it for that anyways at a later point.
+    def __init__(self, keys, dtypes):
+        self.keys = keys
+        self.dtypes = dtypes 
+    def __call__(self, data):
+        if not monai_version == '0.9.0':
+            raise Exception('Constructor was only implemented as a temporary stand-in.')
+
+
+        d = dict(data)
+        for idx, key in enumerate(self.keys):
+            im = d[key] 
+            meta_dict = d[f'{key}_meta_dict']
+        
+            modif_im = torch.from_numpy(im).to(dtype=self.dtypes[idx])#torch.float32)
+            modif_meta = {
+                'original_affine': torch.from_numpy(meta_dict['original_affine']).to(dtype=torch.float32), 
+                'affine': torch.from_numpy(meta_dict['affine']).to(dtype=torch.float32), 
+                # 'filename_or_obj': meta_dict['filename_or_obj'],
+                # 'pixdim': meta_dict['pixdim']
+                }
+            
+            d[key] = MetaTensor(x=modif_im, meta=modif_meta)
+        return d

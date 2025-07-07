@@ -124,6 +124,7 @@ def get_label_ccp(mask_index: MetaTensor, use_gpu: bool = True) -> tuple[list[An
     torch_tensor = torch.from_numpy(labeled)
     masks = []
     for ncomp in range(1, ncomponents+1):
+        raise NotImplementedError("need to check if the memory is reasonably small to use this approach")
         masks.append(torch.where(torch_tensor == ncomp, 1, 0).to(dtype=torch.int64))
 
     return masks, ncomponents

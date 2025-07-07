@@ -11,7 +11,7 @@ import warnings
 from typing import Optional, Union
 from src.utils.dict_utils import extractor, dict_path_modif
 from src.write_utils.post import WriteOutput
-
+from monai_version_hack import write_segmentation
 
 # logger = logging.getLogger(__name__)
 
@@ -136,8 +136,13 @@ class OutputProcessor:
         'check_spatial_res' : lambda x,y : x.shape[1:]  == y.shape[1:], # x, y = Channel-first tensors.
         'check_num_dims' : lambda x,y : x.ndim == y.ndim, # x, y = Tensors 
         'check_num_channel' : lambda x,y : len(x) == y.shape[0], # x = class labels dict (inclusive of background), y = Channel-first tensor
-        'check_meta_affine': lambda x,y: torch.all(helper_lambdas['torch_conversion'](x.meta['affine']) == helper_lambdas['torch_conversion'](y.meta['affine'])) if isinstance(y, MetaTensor) else True, #x = MetaTensor, y = MetaTensor or torch Tensor
-        'check_metadict_affine': lambda x,y: torch.all(helper_lambdas['torch_conversion'](x) == helper_lambdas['torch_conversion'](y)), #x,y are either torch tensors or np arrays
+        #We make a slight adjustment to the affine check because an exact equivalence check can fail due to floating point precision even
+        # though the affine matrices are equivalent. We use torch.isclose to check that the values are close enough.
+        'check_meta_affine': lambda x,y: torch.all(torch.isclose(helper_lambdas['torch_conversion'](x.meta['affine']), helper_lambdas['torch_conversion'](y.meta['affine']))) if isinstance(y, MetaTensor) else True,
+        #torch.all(helper_lambdas['torch_conversion'](x.meta['affine']) == helper_lambdas['torch_conversion'](y.meta['affine'])) if isinstance(y, MetaTensor) else True, #x = MetaTensor, y = MetaTensor or torch Tensor
+        
+        'check_metadict_affine': lambda x,y: torch.all(torch.isclose(helper_lambdas['torch_conversion'](x), helper_lambdas['torch_conversion'](y)))
+        #torch.all(helper_lambdas['torch_conversion'](x) == helper_lambdas['torch_conversion'](y)), #x,y are either torch tensors or np arrays
         } 
 
         #The check_num_dims lambda function is intended to be used for checking that the #of dims match (standard
@@ -260,12 +265,20 @@ class OutputProcessor:
         
         self.check_output(data_instance, output_dict)
             
-        pred_path, probs_paths = self.write_maps(data_instance=data_instance, case_name=case_name, output_dict=output_dict, inf_call_config=infer_call_config, tmp_dir=tmp_dir)
-        # try:
-        #     output_paths = self.reformat_output(output_paths=output_paths, pred_path=pred_path, probs_paths=probs_paths)
-        # except:
-        #     raise Exception('Reformatting the output data dictionary failed due to the aforementioned error')
-        
+        if write_segmentation: #HACK: hacky fix to bypass the segmentation io writing limitations.
+            pred_path, probs_paths = self.write_maps(data_instance=data_instance, case_name=case_name, output_dict=output_dict, inf_call_config=infer_call_config, tmp_dir=tmp_dir)
+        else:
+            #HACK: We put a dummy in here so that the code won't break when trying to perform cleanup operations.
+            #We use raw bytes to be extremely fast.
+            with open(os.path.join(tmp_dir, 'dummy_pred.bin'), 'wb') as f:
+                f.write(b'dummy!')
+            pred_path = os.path.join(tmp_dir, 'dummy_pred.bin') 
+            probs_paths = []
+            for class_lb in self.config_labels_dict.keys():
+                with open(os.path.join(tmp_dir, f'dummy_prob_{class_lb}.bin'), 'wb') as f:
+                    f.write(b'dummy')
+                probs_paths.append(os.path.join(tmp_dir, f'dummy_prob_{class_lb}.bin'))
+
         return {'pred':pred_path, 'probs':probs_paths}
     
 if __name__ == '__main__':

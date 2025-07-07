@@ -10,8 +10,12 @@ from monai.transforms import (
 )
 import itk 
 import tempfile 
-import copy 
-
+import copy
+import os  
+import sys 
+sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
+from monai_version_hack import monai_version
+from concurrent.futures import ThreadPoolExecutor 
 
 class WriteOutput:
     def __init__(
@@ -95,12 +99,22 @@ class WriteOutput:
 
         if isinstance(duplicate_img, MetaTensor):
             #Extract array
-            array = duplicate_img.array 
-            duplicate_reference.array = array 
-
+            if monai_version == '1.4.0':
+                array = duplicate_img.array
+                duplicate_reference.array = array
+            elif monai_version == '0.9.0':
+                array = duplicate_img.data 
+                duplicate_reference.data  = array 
+            else:
+                raise Exception('Unknown MONAI version')
         elif isinstance(duplicate_img, torch.Tensor):
             #If torch tensor.
-            duplicate_reference.array = duplicate_img 
+            if monai_version == '1.4.0':
+                duplicate_reference.array = duplicate_img.numpy()
+            elif monai_version == '0.9.0':
+                duplicate_reference.data = duplicate_img 
+            else:
+                raise Exception('Unknown MONAI version')
         else:
             raise TypeError(f'The output {self.result_key} must be a MetaTensor or a torch Tensor.')
         
@@ -122,18 +136,37 @@ class WriteOutput:
                 orig_axcodes = nib.orientations.aff2axcodes(orig_affine)
                 inverse_transform = Orientation(axcodes=orig_axcodes)
                 # Apply inverse
-                with inverse_transform.trace_transform(False):
-                    result_reformat = inverse_transform(result_reformat)
+                if monai_version == '1.4.0':
+                    with inverse_transform.trace_transform(False):
+                        result_reformat = inverse_transform(result_reformat)
+                elif monai_version == '0.9.0':
+                    result_reformat = inverse_transform(result_reformat.data, result_reformat.affine)
+                else:
+                    raise Exception('Unknown MONAI version')
             else:
                 raise Exception("Failed invert orientation - original_affine is not on the image header")
             
         #We assume that we have already checked that the outputs are channel first, and that they meet the quantity of channels.
 
         #Add a line of code for extracting the channels, this also removes the channel dimension.
-        channel_split = list(result_reformat.array) 
-
+        if monai_version == '1.4.0':
+            channel_split = list(result_reformat.array) 
+        elif monai_version == '0.9.0':
+            # We assume that we have already checked that the outputs are channel first, and that they meet the quantity of channels.
+            #Result reformat now has a different structure, it is a tuple with (reoriented_tensor, pre-inversion affine, post-inversion affine) structure.
+            #Byproduct of the old monai version........
+            channel_split = list(result_reformat[0].numpy()) 
+        else:
+            raise Exception('unsupposed monai version.')
         #Make use of the writeitk and call it across each channel
-        path_list = [self.write_itk(channel, ref_meta_dict["original_affine"], tmp_dir) for channel in channel_split]
+        # path_list = [self.write_itk(channel, ref_meta_dict["original_affine"], tmp_dir) for channel in channel_split]
+
+        max_workers = min(32, (os.cpu_count() or 1) + 4)
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            path_list = list(executor.map(
+                lambda channel: self.write_itk(channel, ref_meta_dict["original_affine"], tmp_dir),
+                channel_split
+            ))
 
         #Return the list of paths for all of the temp files.
         return path_list

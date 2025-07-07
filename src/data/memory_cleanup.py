@@ -4,6 +4,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 from src.utils.cleanup import selected_tempfiles_cleanup
 from typing import Union 
 import warnings 
+import gc 
+import torch 
 #NOTE: This is compatible with NoneType interaction states also! It just deletes the state entirely.
 
 def memory_cleanup(
@@ -127,4 +129,6 @@ def memory_cleanup(
                 
     else:
         raise ValueError('The edit iter num must be greater than 0 (i.e. only should be called for cleanup on edit iters)')
+    gc.collect() 
+    torch.cuda.empty_cache() 
     return im, paths 
