@@ -1,7 +1,7 @@
 name: Task
 description: Raise a non-code task
 title: "[Task]: "
-type: Task
+# type: Task
 projects: ["2"]
 body:
   - type: input
