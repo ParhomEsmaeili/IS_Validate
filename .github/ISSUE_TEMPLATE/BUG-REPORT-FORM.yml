@@ -3,7 +3,7 @@ description: Raise a bug report
 title: "[Bug]: "
 labels: ["bug"]
 type: Bug
-projects: ["ParhomEsmaeili/2"]
+projects: ["2"]
 body:
   - type: input
     id: short-description
