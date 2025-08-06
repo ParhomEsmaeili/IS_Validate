@@ -9,7 +9,7 @@ body:
     id: short-description
     attributes:
       label: Description
-      placeholder: ex. The Central Hub database is not being updated with active projects' FL training progress
+      placeholder: The api request did not match the expected template.
     validations:
       required: true
   - type: textarea
@@ -25,7 +25,7 @@ body:
     attributes:
       label: Acceptance criteria
       description: What are one or more acceptance criteria that would be used to verify this bug has been fixed?
-      placeholder: ex. Each project's FL training status is updated every 24 hours in the relevant Central Hub database table
+      placeholder: ex. The API request now matches the expected template.
     validations:
       required: true
   - type: checkboxes
