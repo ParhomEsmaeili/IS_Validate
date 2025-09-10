@@ -120,7 +120,7 @@ def plot_evolution_metrics(metrics_storage_dict, output_folder, input_metrics, s
             labelspacing=1.2,
         )
 
-        output_path = os.path.join(output_folder, f'{summary_stat}_Dice_NSD_evolution.eps')
+        output_path = os.path.join(output_folder, f'{summary_stat}_Dice_NSD_evolution.png')
         plt.savefig(output_path, bbox_inches='tight')
         plt.close()
 
@@ -241,18 +241,18 @@ def plot_evolution_metrics_side_by_side(
             mlines.Line2D([], [], color='black', linestyle='-' if m == 'Dice' else (0, (3, 3)), label=m, linewidth=3)
             for m in input_metrics
         ]
-        # axes[0].legend(
-        #     handles + metric_handles,
-        #     [h.get_label() for h in handles + metric_handles],
-        #     title="App / Metric",
-        #     title_fontproperties=fm.FontProperties(weight='bold', size=12),  # smaller title
-        #     fontsize=12,  # smaller legend text
-        #     loc='upper left',
-        #     bbox_to_anchor=(0.025, 0.975),  # inside the axes, top left
-        #     borderaxespad=0.3,
-        #     labelspacing=0.7,  # less vertical space between entries
-        #     frameon=True
-        # )
+        axes[0].legend(
+            handles + metric_handles,
+            [h.get_label() for h in handles + metric_handles],
+            title="App / Metric",
+            title_fontproperties=fm.FontProperties(weight='bold', size=12),  # smaller title
+            fontsize=12,  # smaller legend text
+            loc='upper left',
+            bbox_to_anchor=(0.025, 0.975),  # inside the axes, top left
+            borderaxespad=0.3,
+            labelspacing=0.7,  # less vertical space between entries
+            frameon=True
+        )
         # axes[0].legend(
         #     handles + metric_handles,
         #     [h.get_label() for h in handles + metric_handles],
@@ -266,22 +266,22 @@ def plot_evolution_metrics_side_by_side(
         #     frameon=True,
         #     ncol=len(handles + metric_handles) // 2
         # )
-        axes[0].legend(
-            handles + metric_handles,
-            [h.get_label() for h in handles + metric_handles],
-            title="App / Metric",
-            title_fontproperties=fm.FontProperties(weight='bold', size=12),  # smaller title
-            fontsize=12,  # smaller legend text
-            loc='center right',
-            bbox_to_anchor=(0.95, 0.4),  # center right of the first subplot
-            borderaxespad=0.,
-            labelspacing=1.2,  # less vertical space between entries
-            frameon=True,
-            ncol=2
-        )
+        # axes[0].legend(
+        #     handles + metric_handles,
+        #     [h.get_label() for h in handles + metric_handles],
+        #     title="App / Metric",
+        #     title_fontproperties=fm.FontProperties(weight='bold', size=12),  # smaller title
+        #     fontsize=12,  # smaller legend text
+        #     loc='center right',
+        #     bbox_to_anchor=(0.95, 0.4),  # center right of the first subplot
+        #     borderaxespad=0.,
+        #     labelspacing=1.2,  # less vertical space between entries
+        #     frameon=True,
+        #     ncol=2
+        # )
 
         plt.tight_layout()
-        output_path = os.path.join(output_folder, f'{summary_stat}_side_by_side_evolution.eps')
+        output_path = os.path.join(output_folder, f'{summary_stat}_side_by_side_evolution.png')
         plt.savefig(output_path, bbox_inches='tight')
         plt.close()
 

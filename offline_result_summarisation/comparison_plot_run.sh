@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Set your arguments here
-DATASET_NAME="Dataset007_Pancreas"
-DATETIMES=("20250615_102156" "20250614_025617" "20250619_000045" "20250621_205840")
+DATASET_NAME="Dataset005_Prostate"
+DATETIMES=("20250620_091628" "20250622_221819" "20250620_010537" "20250621_024859")
 APP_NAMES=("SAMMed2D" "SAM2" "SAMMed3D" "SegVol")
 
 # Build the argument string for datetimes and app names

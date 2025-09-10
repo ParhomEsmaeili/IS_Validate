@@ -31,7 +31,7 @@ def set_parse():
     # parser.add_argument('--dataloading_type', type=str, default='basic')
     
     #Experimental process/method related args 
-    parser.add_argument('--app_name', type=str, default='Sample_SegVol')#default='Sample_TEST') #This acts as the name of the app, but also temporarily acts as the relative path name within the input_applications folder.
+    parser.add_argument('--app_name', type=str, default='Sample_SAMMed2D')#default='Sample_TEST') #This acts as the name of the app, but also temporarily acts as the relative path name within the input_applications folder.
     parser.add_argument('--random_seed', type=int, default=341103)
     parser.add_argument('--device_idx', type=int, default=0)
     parser.add_argument('--infer_init', type=str, default='Interactive Init')

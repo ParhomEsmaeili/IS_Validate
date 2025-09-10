@@ -78,11 +78,12 @@ def plot_evolution_metrics(metrics_storage_dict, output_folder, input_metrics, s
             marker=None,
             palette=custom_palette
         )
-        plt.title(f'Evolution of {summary_stat} Dice/NSD', fontsize=18, fontweight='bold')
+        plt.title(f'Whole Prostate', fontsize=18, fontweight='bold')
         plt.xlabel('Iteration', fontsize=15, fontweight='bold', color='black')
         plt.ylabel(f'{summary_stat} Score', fontsize=15, fontweight='bold', color='black')
         plt.xticks(fontsize=13, fontweight='bold', color='black')
         plt.yticks(fontsize=13, fontweight='bold', color='black')
+        plt.ylim(0, 1) 
         plt.tight_layout()
 
         ax = plt.gca()
@@ -100,7 +101,7 @@ def plot_evolution_metrics(metrics_storage_dict, output_folder, input_metrics, s
             title="App",
             title_fontproperties=fm.FontProperties(weight='bold', size=13),
             fontsize=12,
-            bbox_to_anchor=(1.05, 1),  # Top right
+            bbox_to_anchor=(1.025, 1),  # Top right
             loc='upper left',
             borderaxespad=0.,
             labelspacing=1.2,
@@ -123,8 +124,8 @@ def plot_evolution_metrics(metrics_storage_dict, output_folder, input_metrics, s
             labelspacing=1.2,
         )
 
-        output_path = os.path.join(output_folder, f'{summary_stat}_Dice_NSD_evolution.eps')
-        plt.savefig(output_path, bbox_inches='tight')
+        output_path = os.path.join(output_folder, f'{summary_stat}_Dice_NSD_evolution.png')
+        plt.savefig(output_path, bbox_inches='tight', pad_inches=0.4, dpi=300)
         plt.close()
 
 
