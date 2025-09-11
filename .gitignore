@@ -151,6 +151,7 @@ datasets
 #results
 results
 results_summary 
+segmentations
 
 # docs build
 docs/build

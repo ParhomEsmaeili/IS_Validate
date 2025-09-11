@@ -26,7 +26,7 @@ class OutputProcessor:
     '''
     Class which initialises the output processing class. Takes as initialisation args:
 
-    base_save_dir: Str - The abspath for the base directory in which all of the metric results and segmentations will be saved
+    base_save_dir: Str - The abspath for the base directory in which all of the segmentations will be saved
     config_labels_dict: Dict - The class-integer code mapping.
     is_seg_tmp: Bool - A boolean denoting whether the predicted segmentations should be saved as temporary files or permanent files.
     save_prompts: Bool - A boolean denoting whether the input prompts should be saved permanently. 

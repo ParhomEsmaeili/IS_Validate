@@ -16,22 +16,29 @@ from src.utils.dict_utils import extractor
 from src.data.utils import data_instance_reformat, iterate_dataloader_check, init_task_cases
 from src.results_utils.metric_save_util import init_all_csvs
 
-original_stdout = sys.stdout
-sys.stdout = open(os.devnull, 'w')
+# original_stdout = sys.stdout
+# sys.stdout = open(os.devnull, 'w')
 # warnings.filterwarnings("ignore")
 
 def set_parse():
     # %% set up parser
     parser = argparse.ArgumentParser()
     
-    #Data related args
-    parser.add_argument('--dataset_name', type=str, default='Dataset001_BrainTumour')#'BraTS2021_Training_Data_Split_True_proportion_0.8_channels_t2_resized_FLIRT_binarised')
+    #Data and application root related args
+    
+    parser.add_argument('--data_root', type=str, default=codebase_dir)
+    parser.add_argument('--dataset_name', type=str, default='Dataset001_BrainTumour')
+    parser.add_argument('--app_root', type=str, default=codebase_dir)
+    #This acts as the name of the app, but also temporarily acts as the relative path name within the input_applications folder in the app root folder.
+    parser.add_argument('--app_name', type=str, default='Sample_SAMMed2D')
+    parser.add_argument('--metrics_root', type=str, default=os.path.join(codebase_dir, 'results'))
+    parser.add_argument('--seg_root', type=str, default=os.path.join(codebase_dir, 'results'))
+
     # parser.add_argument('--test_mode', type=str, default='test')
     # parser.add_argument('--data_fold', type=str, default=None)
     # parser.add_argument('--dataloading_type', type=str, default='basic')
     
     #Experimental process/method related args 
-    parser.add_argument('--app_name', type=str, default='Sample_SAMMed2D')#default='Sample_TEST') #This acts as the name of the app, but also temporarily acts as the relative path name within the input_applications folder.
     parser.add_argument('--random_seed', type=int, default=341103)
     parser.add_argument('--device_idx', type=int, default=0)
     parser.add_argument('--infer_init', type=str, default='Interactive Init')
@@ -85,15 +92,32 @@ def gen_experiment_args(args):
     #Creating the relative path to the base build dir within the app.
     output_dict['build_app_rel_path'] = 'src_validate'
     #Temporarily creating an abspath using this relative path:
-    output_dict['build_app_abspath'] = os.path.join(codebase_dir, 'input_application', output_dict['app_name'], output_dict['build_app_rel_path'])
+    output_dict['build_app_abspath'] = os.path.join(args.app_root, 'input_application', output_dict['app_name'], output_dict['build_app_rel_path'])
+    # output_dict['build_app_abspath'] = os.path.join(codebase_dir, 'input_application', output_dict['app_name'], output_dict['build_app_rel_path'])
 
     #Paths for results and logging etc. 
-    output_dict['results_dir'] = os.path.join(codebase_dir, 'results')
-    output_dict['input_dataset_dir'] = os.path.join(codebase_dir, 'datasets', args.dataset_name)
-    output_dict['results_dataset_subdir'] = os.path.join(output_dict['results_dir'], args.dataset_name)
+    output_dict['metrics_root'] = args.metrics_root #For the metrics themselves.
+    output_dict['seg_root'] = args.seg_root #For the base directory for the segmentations. This will typically be the same as results, but in case of separate 
+    #mounts we want to be able to store these large files externally.
+    
+    if args.metrics_root == args.seg_root:
+        #In this case we are storing the metrics and the segmentations in the same root directory, and so will require subdirectories for each of these.
+        output_dict['root_match'] = True #Being EXPLICIT, we could have just set the variable to the bool directly.
+    else:
+        output_dict['root_match'] = False
+    
+
+    output_dict['input_dataset_dir'] = os.path.join(args.data_root, 'datasets', args.dataset_name) #os.path.join(codebase_dir, 'datasets', args.dataset_name)
+
+    output_dict['results_dataset_subdir'] = os.path.join(output_dict['metrics_root'], args.dataset_name) #Subdir for the dataset which is being used in the task
+    #of the experiment at hand
+    output_dict['seg_dataset_subdir'] = os.path.join(output_dict['seg_root'], args.dataset_name) #Subdir for the dataset which is being used in the task, this will
+    #typically be the same as the results dataset subdir, but in case of separate mounts we want to be able to store these large files externally.
+
+    #Experiment specific dirs (i.e. for a specific run of the evaluation script!)
     output_dict['exp_datetime'] = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     output_dict['exp_results_dir'] = os.path.join(output_dict['results_dataset_subdir'], output_dict['exp_datetime'])
-
+    output_dict['exp_seg_dir'] = os.path.join(output_dict['seg_dataset_subdir'], output_dict['exp_datetime'])
     ########################################################################################################################
 
     #Configuring more generic experiment related configs.
@@ -214,16 +238,20 @@ def gen_experiment_args(args):
     return output_dict 
 
 
-def create_seg_dirs(exp_results_dir, infer_run_conf):
+def create_seg_dirs(exp_seg_dir, infer_run_conf):
+    '''
+    Function which creates the directories for saving the segmentations (if desired), according to the inference run configuration.
+    Args: 
+        exp_seg_dir: str, the base dir for the experiment segmentations to be stored.
+        root_match: bool, whether the root of the segmentations is the same as the results root or not
+        infer_run_conf: dict, the inference run configuration dictionary.
+    '''
     #Function which creates the directories for saving the segmentations (if desired), according to the inference run configuration.
-    
-    #Create the segmentation directory within the experiment results directory.
-    seg_base_dir = os.path.join(exp_results_dir, 'segmentations')  
-    os.makedirs(seg_base_dir, exist_ok=False)
+    exp_seg_dir = os.path.join(exp_seg_dir, 'segmentations')
     #Create the subdirs for each of the iterations according to the infer_run_config dictionary.
 
     #Create the init (ALWAYS PROVIDED!) dir
-    init_dir = os.path.join(seg_base_dir, infer_run_conf['init'].title())
+    init_dir = os.path.join(exp_seg_dir, infer_run_conf['init'].title())
     os.makedirs(init_dir, exist_ok=False)
 
     #Create the edits (optional) dirs 
@@ -234,7 +262,7 @@ def create_seg_dirs(exp_results_dir, infer_run_conf):
 
             if isinstance(infer_run_conf['num_iters'], int):
                 for iter in range(1, infer_run_conf['num_iters'] + 1):
-                    os.makedirs(os.path.join(seg_base_dir, f'Interactive Edit Iter {iter}'), exist_ok=False)
+                    os.makedirs(os.path.join(exp_seg_dir, f'Interactive Edit Iter {iter}'), exist_ok=False)
             else:
                 raise TypeError('If running editing, needs to be an int type for the number of iterations performed.')
 
@@ -270,10 +298,10 @@ def log_config_writer(args_name, args_dict, logger):
             logger.info(f"{key}: {value}")
 
 
-def build_infer_app(app_name, dataset_info, device):
+def build_infer_app(build_app_path, dataset_info, device):
 
-    build_app_dir = os.path.join(codebase_dir, 'input_application', app_name, 'src_validate', 'build_app')
-    
+    build_app_dir = os.path.join(build_app_path, 'build_app')
+    print(build_app_dir)
     if not os.path.exists(build_app_dir):
         raise ValueError('The provided path does not exist')
     
@@ -302,10 +330,8 @@ def build_infer_app(app_name, dataset_info, device):
 def init_infer_app(experiment_args:dict): 
 
     #Function which finds and initialises the inference app using the build script, then checks it has the necessary methods. 
-            
-    #app_name: name of the app AND also the relative path from "input_application" to the app directory
-
-    infer_app = build_infer_app(experiment_args['app_name'], experiment_args['dataset_info'], experiment_args['device'])
+        
+    infer_app = build_infer_app(experiment_args['build_app_abspath'], experiment_args['dataset_info'], experiment_args['device'])
 
     if not callable(infer_app):
         raise Exception('The inference app must be callable class.')
@@ -344,7 +370,9 @@ def run_instances(dataloader, fe_sim_obj, logger):
         logger.info(f'Sample {idx} of {len(dataloader)}, case_name: {case_name}')
         
         #Initialising the temporary directory.
-        tempdir_obj = tempfile.TemporaryDirectory(dir=codebase_dir)
+        tempdir_obj = tempfile.TemporaryDirectory(dir=os.path.dirname(fe_sim_obj.args['seg_root'])) 
+        #By default it is the codebase_dir but if externally mounted drives for the results are
+        #required then this will be changed to the root of the directory which contains the segmentations directory)
 
         try:
             #Calling the front-end simulator
@@ -372,9 +400,10 @@ def init_fe(infer_app, experiment_args):
         'dice_termination_thresh',
         'metrics_savepaths',
         'exp_results_dir',
+        'seg_root',
+        'exp_seg_dir',
         'save_prompts',
     ]
-
     args = {key:val for key,val in experiment_args.items() if key in keep_key_list}
 
     return FrontEndSimulator(infer_app=infer_app, args=args)
@@ -405,20 +434,27 @@ def main():
     ############################## Initialisation of any required directories for this experiment ####################################################################
 
     #Initialise the base results folders if it doesn't exist.
-    os.makedirs(experiment_args['results_dir'], exist_ok=True)
+    os.makedirs(experiment_args['metrics_root'], exist_ok=True)
     
-    #Initialise the base results folder for the dataset at hand. 
+    #Initialise the base results and seg folders for the dataset at hand. 
     os.makedirs(experiment_args['results_dataset_subdir'], exist_ok=True) 
+    os.makedirs(experiment_args['seg_dataset_subdir'], exist_ok=True)
 
-    #Creating a base dir for the experiment to store results.
+    #Creating a base dir for the experiment to store metrics.
     os.makedirs(experiment_args['exp_results_dir'], exist_ok=False) #Should not already exist.
+
+    if not experiment_args['root_match']:
+        #If we store the metrics and segmentations in the same root, then we do not need to create the base directory again.
+
+        #Creating a base dir for the experiment segmentations to be stored.
+        os.makedirs(experiment_args['exp_seg_dir'], exist_ok=False) #Should not already exist for the current experimental run.
 
     #Creating the subdirectories and the csv files for the metrics, then returning a dict of the savepaths according to each and every one of these.
     experiment_args['metrics_savepaths'] = init_metrics_saves(exp_results_dir=experiment_args['exp_results_dir'], metrics_configs=experiment_args['metrics_configs'], configs_labels_dict=configs_labels_dict)
 
     #Based on whether the segmentation is being saved permanently, create the corresponding subdirectories or not. 
     if not experiment_args['is_seg_tmp']:
-        create_seg_dirs(exp_results_dir=experiment_args['exp_results_dir'], infer_run_conf=experiment_args['infer_run_configs'])
+        create_seg_dirs(exp_seg_dir=experiment_args['exp_seg_dir'], infer_run_conf=experiment_args['infer_run_configs'])
         
     #Save the info about the experiment args, save the info about the application config which should be spit out as a method of the callable infer class.
     
@@ -455,8 +491,7 @@ def main():
 
 
     # Iterating through the dataset:
-
-    run_instances(dataloader=dataloader, fe_sim_obj=fe_sim_obj, logger=exp_setup_logger) 
+    run_instances(dataloader=dataloader, fe_sim_obj=fe_sim_obj, logger=exp_setup_logger)
 
 if __name__=='__main__':
     main()

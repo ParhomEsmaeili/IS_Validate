@@ -164,7 +164,6 @@ class FrontEndSimulator:
         self.infer_app = infer_app
         self.args = args
 
-
         self.check_args()
         self.init_classes()
     
@@ -195,6 +194,10 @@ class FrontEndSimulator:
         
         #Initialising the output processors and writers.
         self.post_handlers_init()
+
+    def init_vars(self):
+        #initialising any remaining variables which are not class objects, i.e., variables which are derived from some input args.
+        pass 
 
     def set_seeds(self, seed: Union[int, None]): #, cuda_deterministic=True):
         if seed is None:
@@ -235,7 +238,7 @@ class FrontEndSimulator:
         )
 
         self.output_processor = OutputProcessor(
-            base_save_dir=self.args['exp_results_dir'],
+            base_save_dir=self.args['exp_seg_dir'],
             config_labels_dict=self.args['configs_labels_dict'],
             is_seg_tmp=self.args['is_seg_tmp'],
             save_prompts=self.args['save_prompts']
