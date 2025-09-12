@@ -16,9 +16,9 @@ from src.utils.dict_utils import extractor
 from src.data.utils import data_instance_reformat, iterate_dataloader_check, init_task_cases
 from src.results_utils.metric_save_util import init_all_csvs
 
-# original_stdout = sys.stdout
-# sys.stdout = open(os.devnull, 'w')
-# warnings.filterwarnings("ignore")
+original_stdout = sys.stdout
+sys.stdout = open(os.devnull, 'w')
+warnings.filterwarnings("ignore")
 
 def set_parse():
     # %% set up parser
