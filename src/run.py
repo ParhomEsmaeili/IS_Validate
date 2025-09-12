@@ -150,7 +150,7 @@ def gen_experiment_args(args):
 
     output_dict['dataset_info'] = {
     'dataset_name': args.dataset_name,
-    'dataset_channel': extract_config(os.path.join(codebase_dir, 'datasets', args.dataset_name, 'dataset.json'), 'channel_names'),
+    'dataset_channel': extract_config(os.path.join(args.data_root, 'datasets', args.dataset_name, 'dataset.json'), 'channel_names'),
     'task_channel': extractor(output_dict['task_configs'], ('data_sampling', 'image_conf', 'image_channel'))
     }
 
