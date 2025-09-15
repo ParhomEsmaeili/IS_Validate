@@ -30,6 +30,7 @@ class OutputProcessor:
     config_labels_dict: Dict - The class-integer code mapping.
     is_seg_tmp: Bool - A boolean denoting whether the predicted segmentations should be saved as temporary files or permanent files.
     save_prompts: Bool - A boolean denoting whether the input prompts should be saved permanently. 
+    write_segmentation: Bool - A temporary hack which overrides the is_seg_tmp flag to bypass the IO operations entirely. 
 
     '''
     def __init__(
@@ -38,12 +39,14 @@ class OutputProcessor:
       config_labels_dict:dict[str,int],
       is_seg_tmp:bool = False,
       save_prompts:bool = False, 
+      write_segmentation: bool = False
     ):
 
         self.base_save_dir = base_save_dir 
         self.config_labels_dict = config_labels_dict 
         self.is_seg_tmp = is_seg_tmp
         self.save_prompts = save_prompts
+        self.write_segmentation = write_segmentation
 
         #List of paths in the output dictionary that must be on cpu. Each item is in tuple format, index=depth of dict.
         self.check_cpu_info = [('probs','metatensor'), ('probs', 'meta_dict', 'affine'), ('pred','metatensor'), ('pred','meta_dict', 'affine')] 
@@ -265,11 +268,11 @@ class OutputProcessor:
         
         self.check_output(data_instance, output_dict)
             
-        if write_segmentation: #HACK: hacky fix to bypass the segmentation io writing limitations.
+        if self.write_segmentation: #HACK: hacky fix to bypass the segmentation io writing limitations.
             pred_path, probs_paths = self.write_maps(data_instance=data_instance, case_name=case_name, output_dict=output_dict, inf_call_config=infer_call_config, tmp_dir=tmp_dir)
         else:
             #HACK: We put a dummy in here so that the code won't break when trying to perform cleanup operations.
-            #We use raw bytes to be extremely fast.
+            #We use raw bytes to be extremely fast, faster to do this than refactor the cleanup code for now. 
             with open(os.path.join(tmp_dir, 'dummy_pred.bin'), 'wb') as f:
                 f.write(b'dummy!')
             pred_path = os.path.join(tmp_dir, 'dummy_pred.bin') 

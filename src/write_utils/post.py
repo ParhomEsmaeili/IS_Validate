@@ -14,7 +14,7 @@ import copy
 import os  
 import sys 
 sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
-from monai_version_hack import monai_version
+from version_handling import monai_version
 from concurrent.futures import ThreadPoolExecutor 
 
 class WriteOutput:

@@ -10,7 +10,7 @@ import os
 import sys
 import gc 
 sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
-from monai_version_hack import monai_version 
+from version_handling import monai_version 
 
 
 class BaseScoringWrapper:

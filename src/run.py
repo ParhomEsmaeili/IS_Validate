@@ -28,7 +28,7 @@ def set_parse():
     
     parser.add_argument('--data_root', type=str, default=codebase_dir)
     parser.add_argument('--dataset_name', type=str, default='Dataset001_BrainTumour')
-    parser.add_argument('--app_root', type=str, default=codebase_dir)
+    parser.add_argument('--app_root', type=str, default=os.path.join(codebase_dir, 'input_application'))
     #This acts as the name of the app, but also temporarily acts as the relative path name within the input_applications folder in the app root folder.
     parser.add_argument('--app_name', type=str, default='Sample_SAMMed2D')
     parser.add_argument('--metrics_root', type=str, default=os.path.join(codebase_dir, 'results'))
@@ -61,17 +61,17 @@ def set_parse():
     parser.add_argument('--use_mem_inf_edit', action='store_true', default=False) #Whether im is used for conditioning prompt gen.
     parser.add_argument('--im_conf_remove_init', action='store_true', default=True) 
     #Bool for whether the init state in im will be removed from memory.
-    parser.add_argument('--im_conf_mem_len', type=int, default=1)#-1) 
-    
+    parser.add_argument('--im_conf_mem_len', type=int, default=1)#-1)
     #Int which determines the memory length used at cleanup after the interaction memory is updated with the current edit iteration's interaction state (inclusive of current state). 
     # This functionally has the same thing as using a memory length of N (where N is our variable here) for conditioning
     #the prompt generation of the next iteration (if memory is being used for conditioning.) N is strictly > 0 or N = - 1, where N=-1 indicates full memory length paradoxically. 
     # as N = 0 would remove the current iteration's interaction for inference, and also would be the same as ignoring the memory for prompt generation (for which we have a separate variable.)
- 
     #For now we will set both these parameters to being true (i.e. to delete) because we are having lots of memory issues.
 
 
     #For the output processor/writing args which are optional.
+    parser.add_argument('--write_segmentation', action='store_true', default=False)
+    #Temporary hack overwriting is_seg_tmp args for whether to write the segmentations at all, or not (default is false for now)
     parser.add_argument('--is_seg_tmp', action='store_true', default=False)
     parser.add_argument('--save_prompts', action='store_true', default=False)
     
@@ -92,7 +92,7 @@ def gen_experiment_args(args):
     #Creating the relative path to the base build dir within the app.
     output_dict['build_app_rel_path'] = 'src_validate'
     #Temporarily creating an abspath using this relative path:
-    output_dict['build_app_abspath'] = os.path.join(args.app_root, 'input_application', output_dict['app_name'], output_dict['build_app_rel_path'])
+    output_dict['build_app_abspath'] = os.path.join(args.app_root, output_dict['app_name'], output_dict['build_app_rel_path'])
     # output_dict['build_app_abspath'] = os.path.join(codebase_dir, 'input_application', output_dict['app_name'], output_dict['build_app_rel_path'])
 
     #Paths for results and logging etc. 
@@ -181,7 +181,8 @@ def gen_experiment_args(args):
     output_dict['dice_termination_thresh'] = args.dice_termination_thresh 
     #####################################################################################
 
-    #Extracting the writer info. 
+    #Extracting the writer info.
+    output_dict['write_segmentation'] = args.write_segmentation
     output_dict['is_seg_tmp'] = args.is_seg_tmp
     output_dict['save_prompts'] = args.save_prompts
     ###########################################################################################
@@ -393,7 +394,6 @@ def init_fe(infer_app, experiment_args):
         'inf_init_prompt_config',
         'inf_edit_prompt_config',
         'random_seed',
-        'is_seg_tmp',
         'device',
         'use_mem_inf_edit',
         'im_config', 
@@ -403,6 +403,8 @@ def init_fe(infer_app, experiment_args):
         'seg_root',
         'exp_seg_dir',
         'save_prompts',
+        'is_seg_tmp',
+        'write_segmentation'
     ]
     args = {key:val for key,val in experiment_args.items() if key in keep_key_list}
 

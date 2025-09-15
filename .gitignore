@@ -144,6 +144,7 @@ input_application/Sample_SegVol
 input_application/Sample_SAMMed3D
 input_application/Sample_SAMMed2D
 input_application/Sample_SAM2
+input_application/deprecated 
 
 #data
 datasets

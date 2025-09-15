@@ -241,7 +241,8 @@ class FrontEndSimulator:
             base_save_dir=self.args['exp_seg_dir'],
             config_labels_dict=self.args['configs_labels_dict'],
             is_seg_tmp=self.args['is_seg_tmp'],
-            save_prompts=self.args['save_prompts']
+            save_prompts=self.args['save_prompts'],
+            write_segmentation=self.args['write_segmentation']
         )
     def inf_prompt_gen_init(self):
         '''

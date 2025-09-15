@@ -13,7 +13,7 @@ import logging
 import pathlib
 import warnings 
 from skimage.measure import label as cc_label
-from monai_version_hack import monai_version 
+from version_handling import monai_version 
 import gc
 # logger = logging.getLogger(__name__)
 
