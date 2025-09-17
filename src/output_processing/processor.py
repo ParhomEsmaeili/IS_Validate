@@ -11,7 +11,7 @@ import warnings
 from typing import Optional, Union
 from src.utils.dict_utils import extractor, dict_path_modif
 from src.write_utils.post import WriteOutput
-from monai_version_hack import write_segmentation
+# from monai_version_hack import write_segmentation
 
 # logger = logging.getLogger(__name__)
 
