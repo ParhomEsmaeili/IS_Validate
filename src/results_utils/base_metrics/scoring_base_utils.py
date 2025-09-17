@@ -173,7 +173,7 @@ class Dice:
                     torch.where(gt == class_integer_code, 1, 0),
                     #TODO: check whether this mask is going to get stuck in cuda memory.
                     per_class_masks[class_label].to(device=self.calc_device, dtype=torch.uint8)
-                ).to(device='cpu', dtype=torch.float32) 
+                ).to(device='cpu', dtype=torch.float64) 
 
                 #Trying to minimise the memory usage by not storing the class_sep_pred and class_sep_gt tensors, as they are not needed after the dice_score_per_class computation
 
@@ -203,6 +203,9 @@ class Dice:
         # weighted_gt = class_sep_gt * image_mask 
 
         intersection = torch.sum(torch.masked_select(image_mask, class_sep_pred * class_sep_gt > 0))
+
+        denom = denom.to(device='cpu', dtype=torch.float64) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
+        intersection = intersection.to(device='cpu', dtype=torch.float64) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
 
         if y_o > 0: #in this case we can always calculate a dice score because denom will not be zero.
             return torch.tensor([(2 * intersection)/(denom)])
@@ -281,15 +284,15 @@ class Dice:
         if self.ignore_empty:
             #If we ignore empty, then just return a nan value if there was nothing in the "gt".
             return torch.tensor([float("nan")])
-        denorm = y_o + y_hat_o
+        denom = y_o + y_hat_o
         
-        denorm = denorm.to(device='cpu', dtype=torch.float64) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
+        denom = denom.to(device='cpu', dtype=torch.float64) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
         y_o = y_o.to(device='cpu', dtype=torch.float64) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
         y_hat_o = y_hat_o.to(device='cpu', dtype=torch.float64) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
         gc.collect()
         torch.cuda.empty_cache()
 
-        if denorm <= 0:
+        if denom <= 0:
             #If we do not ignore empties, then return a value of 1 if the denom is <=0 (i.e. when both are empty) to indicate full coverage...
             return torch.tensor([1.0])
         return torch.tensor([0.0])

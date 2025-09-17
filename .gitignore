@@ -149,6 +149,9 @@ input_application/deprecated
 #data
 datasets
 
+#tempfiles
+tmp*
+
 #results
 results
 results_summary 
