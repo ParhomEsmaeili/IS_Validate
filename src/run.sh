@@ -1,1 +1,0 @@
-#This bash script will eventually be used in order to set the arguments for experiments.
