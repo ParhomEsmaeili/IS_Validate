@@ -18,7 +18,7 @@ from src.results_utils.metric_save_util import init_all_csvs
 original_stdout = sys.stdout
 sys.stdout = open(os.devnull, 'w')
 warnings.filterwarnings("ignore")
-os.environ["CUBLAS_WORKSPACE_CONFIG"]=":4096:2"
+os.environ["CUBLAS_WORKSPACE_CONFIG"]=":4096:8"
 
 def set_parse():
     # %% set up parser
@@ -40,8 +40,8 @@ def set_parse():
     
     #Experimental process/method related args 
     parser.add_argument('--random_seed', type=int, default=341103)
-    parser.add_argument('--cuda_deterministic_disable', action='store_false', default=True)
-    parser.add_argument('--torch_deterministic_disable', action='store_false', default=True)
+    parser.add_argument('--cuda_deterministic_disable', action='store_true', default=False)
+    parser.add_argument('--torch_deterministic_disable', action='store_true', default=False)
     parser.add_argument('--device_idx', type=int, default=0)
     parser.add_argument('--infer_init', type=str, default='Interactive Init')
     parser.add_argument('--infer_not_edit_bool', action='store_false', default=True)
