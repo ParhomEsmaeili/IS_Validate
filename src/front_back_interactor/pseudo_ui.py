@@ -199,7 +199,11 @@ class FrontEndSimulator:
         #initialising any remaining variables which are not class objects, i.e., variables which are derived from some input args.
         pass 
 
-    def set_seeds(self, seed: Union[int, None]): #, cuda_deterministic=True):
+    def set_seeds(
+        self, 
+        seed: Union[int, None], 
+        cuda_deterministic:bool,
+        torch_deterministic: bool):
         if seed is None:
             print('We do not have a fixed seed!')
         
@@ -214,15 +218,16 @@ class FrontEndSimulator:
             else:
                 raise TypeError('Seed must be an int if it is set for determinism.')
                     
-        #TODO: Once containerisation is implemented, we can re-implement this functionality for instances where a DL model may be used for
-        # prompt generation
-
-        # if cuda_deterministic:
-        #     cudnn.deterministic = True 
-        #     cudnn.benchmark = False
-        # else:
-        #     cudnn.deterministic=False 
-        #     cudnn.benchmark=True 
+        if cuda_deterministic:
+            torch.backends.cudnn.deterministic = True 
+            torch.backends.cudnn.benchmark = False
+        else:
+            torch.backends.cudnn.deterministic=False 
+            torch.backends.cudnn.benchmark=True
+        if torch_deterministic:
+            torch.use_deterministic_algorithms(True)
+        else:
+            torch.use_deterministic_algorithms(False)
 
     def post_handlers_init(self):
         '''
@@ -802,7 +807,7 @@ class FrontEndSimulator:
 
         #Calling on the set_seeds function to re-initialise the seeds for each data instance (this ensures early
         #termination would not cause deterministic runs to vary across different models.)
-        self.set_seeds(seed=self.args['random_seed'])
+        self.set_seeds(seed=self.args['random_seed'], cuda_deterministic=self.args['cuda_deterministic'], torch_deterministic=self.args['torch_deterministic'])
         
         #Re-assigning the tmp_dir_path attribute for each data instance. 
         self.tmp_dir_path = tmp_dir_path
