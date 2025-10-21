@@ -18,5 +18,25 @@
 				"tumour_core":["enhancing tumour","non-enhancing tumor"]
 				}
 			}
+	},
+	"task_id_2":{
+		"data_sampling":
+			{
+				"sample_group_category": ["all_test", "all_cases"],
+				"image_conf": {
+					"image_channel": ["T2w"]
+					},		
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_1"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "binary_tumour_core",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background","edema"],
+				"tumour_core":["enhancing tumour","non-enhancing tumor"]
+				}
+			}
 	}
 }

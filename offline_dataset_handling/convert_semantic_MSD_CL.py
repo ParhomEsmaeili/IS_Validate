@@ -1,8 +1,13 @@
-#Borrowing skeleton from nnU-Net convert_MSD_dataset.py, with some modifications for our own requirements. Only intended for re-structuring semantic segmentation
-#datasets. Panoptic, and instance segmentation as a subcategory will have to adhere to a structure provided (and it is not commonly used enough yet to have a good format!)
+#Borrowing skeleton from nnU-Net convert_MSD_dataset.py, with some modifications for our own requirements. Only intended for semantic segmentation
+#datasets. Panoptic, and instance segmentation as a subcategory will have to adhere to a structure provided (and it is not commonly used enough yet to 
+# have a good format!)
 
-#This script is not intended for converting datasets which do not already come with pre-determined hold-out test sets. Please see the other dataset conversion
-#scripts for this functionality.
+#This script is a modification of the original convert_semantic_MSD.py script, and is intended for being able to generate a hold-out test set for designing and
+# testing continually adaptive algorithms. It will also restructure the dataset into the format required for the framework. As opposed to depending on the json file provided with the datasets, it will generate its own json file
+#according to the loaded images which are correspondingly converted into train/val and hold-out test splits. 
+# 
+#NOTE: This script can reduce the statistical power of results on individual datasets as it will reduce the quantity of data available for evaluation, as such
+# a more conservative split is recommended
 
 import argparse
 import multiprocessing
@@ -12,7 +17,8 @@ import SimpleITK as sitk
 import os 
 import sys 
 import numpy as np
-import json
+import json 
+import random 
 datasets_path = os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))),'datasets')
 from utils import (
     check_dataset_existence, 
@@ -102,23 +108,21 @@ def split_4d_MSD_nifti(filename, output_folder):
             img_itk_new.SetDirection(direction)
             sitk.WriteImage(img_itk_new, os.path.join(output_folder, file_base[:-7] + "_%04.0d.nii.gz" % i))
 
-def convert_msd_dataset(source_folder: str, overwrite_target_id: Optional[int] = None,
-                        process_labelsTs: bool = False, 
-                        num_processes: int = 1) -> None:
+def convert_msd_dataset(source_folder: str, overwrite_target_id: Optional[int] = None, 
+                        num_processes: int = 1,
+                        methodology_fraction: float = 0.5) -> None:
     if source_folder.endswith('/') or source_folder.endswith('\\'):
         source_folder = source_folder[:-1] 
 
+    #We are going to use the training dataset for splitting into train/val, and the test dataset as the hold-out test set.
     labelsTr_path = os.path.join(source_folder, 'labelsTr')
     imagesTr_path = os.path.join(source_folder, 'imagesTr')
-    labelsTs_path = os.path.join(source_folder, 'labelsTs')
-    imagesTs_path = os.path.join(source_folder, 'imagesTs')
     
+
     assert os.path.isdir(labelsTr_path) and os.path.exists(labelsTr_path), f"labelsTr missing in source folder or was not a subdirectory."
-    assert os.path.isdir(imagesTs_path) and os.path.exists(imagesTs_path), f"imagesTs missing in source folder or was not a subdirectory."
     assert os.path.isdir(imagesTr_path) and os.path.exists(imagesTr_path), f"imagesTr missing in source folder or was not a subdirectory."
-    if process_labelsTs:
-        assert os.path.isdir(labelsTs_path) and os.path.exists(labelsTs_path), "labelsTs missing in source folder or was not a subdirectory."
-    
+
+    #We will extract the dataset json, as some of the information will still be useful for reformatting.
     dataset_json = os.path.join(source_folder, 'dataset.json')
     assert os.path.isfile(dataset_json), f"MSD formatted dataset.json was missing in source_folder"
 
@@ -142,8 +146,7 @@ def convert_msd_dataset(source_folder: str, overwrite_target_id: Optional[int] =
     os.makedirs(target_imagesTr, exist_ok=True)
     os.makedirs(target_imagesTs, exist_ok=True)
     os.makedirs(target_labelsTr, exist_ok=True)
-    if process_labelsTs:
-        os.makedirs(target_labelsTs, exist_ok=True) 
+    os.makedirs(target_labelsTs, exist_ok=True)
 
     #Loading the original dataset json, will be reformatted but also used for splitting semantic seg. labels.
     dataset_json = load_json(dataset_json)
@@ -152,14 +155,23 @@ def convert_msd_dataset(source_folder: str, overwrite_target_id: Optional[int] =
         results = []
 
         # convert 4d train images
-        source_images = [i for i in extract_nifti_files(imagesTr_path, join=False, sort=True) if
+        input_training_images = [i for i in extract_nifti_files(imagesTr_path, join=False, sort=True) if
                          not i.startswith('.') and not i.startswith('_')]
+        #Now we split the input image samples into a train/val and hold-out test set. 
+        random.shuffle(input_training_images)
+        num_total = len(input_training_images)
+        num_methodology = int(num_total * methodology_fraction)
+        methodology_image_names = input_training_images[:num_methodology]
+        test_image_names = input_training_images[num_methodology:]
+
         #appending the filename to the folder path.
-        source_images = [os.path.join(imagesTr_path, i) for i in source_images]
+
+        method_image_paths = [os.path.join(imagesTr_path, i) for i in methodology_image_names]
         
         #We partition the dataset into the "samples" folders, i.e., whatever the definition the MSD-formatted dataset uses to stratify images into a 
-        # given sample. This is with the assumption that these would come as 4D volumes. Other datasets, of course, do not assume this. What one can mean by a given
-        # "sample" depends on the context of the dataset. 
+        # given sample. This is with the assumption that these would come as 4D volumes. Other datasets, of course, do not assume this. 
+        # 
+        # What one can mean by a given "sample" depends on the context of the dataset. 
 
         # If using one machine it might be more straightforward: it might be different series' within a single study. With different machines these might be images 
         # from a reasonably short time interval, one assumes that they are are co-registered a priori, etc. It all depends on the dataset! We just assume that the 
@@ -167,29 +179,27 @@ def convert_msd_dataset(source_folder: str, overwrite_target_id: Optional[int] =
         
         #We perform this partition to correspond with the structure used for the annotations being used, for consistency. And also for readability.
 
-        target_sample_folders = [os.path.join(target_imagesTr, file_ext_splitter(full_path_splitter(i)[-1],suffix='.nii.gz')[0]) for i in source_images]
+        target_method_paths = [os.path.join(target_imagesTr, file_ext_splitter(full_path_splitter(i)[-1],suffix='.nii.gz')[0]) for i in method_image_paths]
         # split_4d_MSD_nifti(source_images[0], target_sample_folders[0])
         results.append(
             p.starmap_async(
-                split_4d_MSD_nifti, zip(source_images, target_sample_folders) #[target_imagesTr] * len(source_images))
+                split_4d_MSD_nifti, zip(method_image_paths, target_method_paths) #[target_imagesTr] * len(source_images))
             )
         )
 
-        # convert 4d test images
-        source_images = [i for i in extract_nifti_files(imagesTs_path, join=False, sort=True) if
-                         not i.startswith('.') and not i.startswith('_')]
-        source_images = [os.path.join(imagesTs_path, i) for i in source_images]
-        target_sample_folders = [os.path.join(target_imagesTs, file_ext_splitter(full_path_splitter(i)[-1],suffix='.nii.gz')[0]) for i in source_images]
+        #Now convert 4d test images, (i.e. the hold-out test set which we extracted from the training set).
+
+        test_image_paths = [os.path.join(imagesTr_path, i) for i in test_image_names]
+        target_test_paths = [os.path.join(target_imagesTs, file_ext_splitter(full_path_splitter(i)[-1],suffix='.nii.gz')[0]) for i in test_image_paths]
         results.append(
             p.starmap_async(
-                split_4d_MSD_nifti, zip(source_images, target_sample_folders)
+                split_4d_MSD_nifti, zip(test_image_paths, target_test_paths)
             )
         )
 
-        # convert training segmentations
-        source_images = [i for i in extract_nifti_files(labelsTr_path, join=False, sort=True) if
-                         not i.startswith('.') and not i.startswith('_')]
-        source_images = [os.path.join(labelsTr_path, i) for i in source_images]
+        #Now convert segmentations
+        methodology_segs_paths = [os.path.join(labelsTr_path, i) for i in methodology_image_names]
+
         #For MSD, in this script, we will just assume it is fully semantic segmentation. Not worth performing label remappings for segmentation tasks which are not 
         # fully disjoint in the loop of a dataloader, as it would be preferable to double check the outputs & because we don't have any good strategies for robustly
         # splitting semantic masks into instance or panoptic masks without connected component analysis (which is not good enough for all cases!) 
@@ -198,29 +208,23 @@ def convert_msd_dataset(source_folder: str, overwrite_target_id: Optional[int] =
         
         #MSD is single-annotator (only one annotation provided or pre-fused), instance_id = 1 for all semantic classes.  
         
-        # for s in source_images:
-        #     shutil.copy(os.path.join(labelsTr_path, s), os.path.join(target_labelsTr, s))
-        target_sample_folders = [os.path.join(target_labelsTr, file_ext_splitter(full_path_splitter(i)[-1],suffix='.nii.gz')[0], 'annotator_1') for i in source_images]
+        #Processing the labels for the methodology set:
+        target_method_seg_folders = [os.path.join(target_labelsTr, file_ext_splitter(full_path_splitter(i)[-1],suffix='.nii.gz')[0], 'annotator_1') for i in methodology_segs_paths]
         results.append(
             p.starmap_async(
-                split_semantic_seg_nifti, zip(source_images, target_sample_folders, [dataset_json['labels']] * len(source_images))
+                split_semantic_seg_nifti, zip(methodology_segs_paths, target_method_seg_folders, [dataset_json['labels']] * len(methodology_segs_paths))
             )
         )
+        #Processing the labels for the hold-out test sets
+        test_seg_paths = [os.path.join(labelsTr_path, i) for i in test_image_names]
 
-        #We add the option (in case the folder exists) to also process LabelsTs. We presume that this folder will have the same structure as LabelsTr in relation to 
-        #imagesTs.
-        if process_labelsTs:
-            source_images = [i for i in extract_nifti_files(labelsTs_path, join=False, sort=True) if
-                         not i.startswith('.') and not i.startswith('_')]
-            source_images = [os.path.join(labelsTs_path, i) for i in source_images]
-
-            target_sample_folders = [os.path.join(target_labelsTs, file_ext_splitter(full_path_splitter(i)[-1],suffix='.nii.gz')[0], 'annotator_1') for i in source_images]
-            # split_semantic_seg_nifti(source_images[0], target_sample_folders[0], dataset_json['labels'])
-            results.append(
-                p.starmap_async(
-                    split_semantic_seg_nifti, zip(source_images, target_sample_folders, [dataset_json['labels']] * len(source_images))
-                )
+        target_test_seg_folders = [os.path.join(target_labelsTs, file_ext_splitter(full_path_splitter(i)[-1],suffix='.nii.gz')[0], 'annotator_1') for i in test_seg_paths]
+        # split_semantic_seg_nifti(source_images[0], target_sample_folders[0], dataset_json['labels'])
+        results.append(
+            p.starmap_async(
+                split_semantic_seg_nifti, zip(test_seg_paths, target_test_seg_folders, [dataset_json['labels']] * len(test_seg_paths))
             )
+        )
         
         [i.get() for i in results]
 
@@ -339,36 +343,33 @@ def convert_msd_dataset(source_folder: str, overwrite_target_id: Optional[int] =
         case_dict["images"] = images_subdict 
 
         ######################################
-        
-        if process_labelsTs:
-            #Only if the labels are actually available. 
 
-            #Extracting case folder's relpath for the annotations
-            case_lb_relpath = f'./{os.path.relpath(os.path.join(target_labelsTs, case_name), target_folder)}'
-            #Just handling the annotation paths
-            annotations_subdict = dict() 
-            #We will now split the labels into the annotator -> semantic_class -> instances relpaths. We can assume that for MSD each annotator will always have a seg.
-            #In fact we only have "annotator 1" as we were only provided with 1 annotation per sample.
-            for annotator in annotator_descrip.keys():
-                annotator_subdict = dict()
-                for semantic_lb in semantic_labels_dict.keys():
-                    semantic_class_subdict = dict() 
-                    #Bit unnecessary but good to be somewhat consistent, this is a subdict which contains all the instances for a given 
-                    #semantic class. All the MSD dataset are semantic so only contain stuff, and we will make no strong assumptions a priori otherwise. In which case
-                    #instance num = 1 (it might even be empty/zeros!)
-                    for instance_idx, instance_path in enumerate(extract_subfiles(os.path.join(target_labelsTs, case_name, annotator, f"semantic_class_{semantic_lb}"))):
-                        #checking the suffix to make sure the instance idx matches the filename just in case.
-                        filename = file_ext_splitter(full_path_splitter(instance_path)[-1], file_ext)[0]
-                        #We check the number after the final _ evaluates to the same val as the instance id. 
-                        instance_id = filename.split("_")[-1]
-                        if int(instance_id) != instance_idx + 1:
-                            raise Exception("Inconsistent notation for the instance ids")
-                        semantic_class_subdict[f"instance_{instance_idx + 1}"] = os.path.join(case_lb_relpath, annotator, f"semantic_class_{semantic_lb}", filename + str(file_ext))   
-                    annotator_subdict[semantic_lb] = semantic_class_subdict 
+        #Extracting case folder's relpath for the annotations
+        case_lb_relpath = f'./{os.path.relpath(os.path.join(target_labelsTs, case_name), target_folder)}'
+        #Just handling the annotation paths
+        annotations_subdict = dict() 
+        #We will now split the labels into the annotator -> semantic_class -> instances relpaths. We can assume that for MSD each annotator will always have a seg.
+        #In fact we only have "annotator 1" as we were only provided with 1 annotation per sample.
+        for annotator in annotator_descrip.keys():
+            annotator_subdict = dict()
+            for semantic_lb in semantic_labels_dict.keys():
+                semantic_class_subdict = dict() 
+                #Bit unnecessary but good to be somewhat consistent, this is a subdict which contains all the instances for a given 
+                #semantic class. All the MSD dataset are semantic so only contain stuff, and we will make no strong assumptions a priori otherwise. In which case
+                #instance num = 1 (it might even be empty/zeros!)
+                for instance_idx, instance_path in enumerate(extract_subfiles(os.path.join(target_labelsTs, case_name, annotator, f"semantic_class_{semantic_lb}"))):
+                    #checking the suffix to make sure the instance idx matches the filename just in case.
+                    filename = file_ext_splitter(full_path_splitter(instance_path)[-1], file_ext)[0]
+                    #We check the number after the final _ evaluates to the same val as the instance id. 
+                    instance_id = filename.split("_")[-1]
+                    if int(instance_id) != instance_idx + 1:
+                        raise Exception("Inconsistent notation for the instance ids")
+                    semantic_class_subdict[f"instance_{instance_idx + 1}"] = os.path.join(case_lb_relpath, annotator, f"semantic_class_{semantic_lb}", filename + str(file_ext))   
+                annotator_subdict[semantic_lb] = semantic_class_subdict 
 
-                annotations_subdict[annotator] = annotator_subdict
+            annotations_subdict[annotator] = annotator_subdict
 
-            case_dict["labels"] = annotations_subdict
+        case_dict["labels"] = annotations_subdict
             
         test_samples_dict[case_name] = case_dict 
 
@@ -380,12 +381,12 @@ def convert_msd_dataset(source_folder: str, overwrite_target_id: Optional[int] =
         annotator_dict=annotator_descrip,
         channel_names=channel_names,
         semantic_labels=semantic_labels_dict,
-        num_training_cases=dataset_json['numTraining'],
+        num_training_cases=len(training_samples_dict),
         file_ext=file_ext,
         tensorImageSize=dataset_json['tensorImageSize'],
         reference=dataset_json['reference'],
         train_relpaths=training_samples_dict,
-        num_test_cases=dataset_json['numTest'],
+        num_test_cases=len(test_samples_dict),
         test_relpaths=test_samples_dict,
         citation='http://medicaldecathlon.com/',
         dataset_name=dataset_json['name'],
@@ -406,8 +407,7 @@ if __name__ == '__main__':
                         help='Overwrite the dataset id. If not set we use the id of the task (inferred from '
                              'folder name). Only use the defaults if you already have an static configuration for the dataset IDs, otherwise recommended to determine!'
                              'a common sense approach to structuring your datasets...')
-    parser.add_argument('-process_labelsTs', action='store_true', default=False)
     parser.add_argument('-np', type=int, required=False, default=1,
                         help=f'Number of processes used. Default: 1')
     args = parser.parse_args()
-    convert_msd_dataset(args.d_path, args.overwrite_id, args.process_labelsTs, args.np)
+    convert_msd_dataset(args.d_path, args.overwrite_id, args.np)

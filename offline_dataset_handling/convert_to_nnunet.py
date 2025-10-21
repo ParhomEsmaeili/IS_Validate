@@ -1,4 +1,5 @@
-# 
+#This script is intended for converting semantic segmentation datasets from the format provided to that required by nnU-Net as this serves as one of the baseline
+#comparisons for determining segmentation convergence. Only supports implementation for 
 
 import argparse
 import multiprocessing
@@ -121,59 +122,58 @@ def binarise_semantic_seg_nifti(
     
 def convert_dataset(
         our_processed_folder: str,
-        ori_dataset_path: str,
-        target_dataset_dir_path:str,          
-        dataset_name: str,            
+        target_dataset_dir_path:str,
+        task_config_path: str,   
+        split_name: str,
+        task_id: int,        
+        dataset_name: str,
+        extract_largest_cc: bool = False,         
         num_processes: int = 1) -> None:
     if our_processed_folder.endswith('/') or our_processed_folder.endswith('\\'):
         our_processed_folder = our_processed_folder[:-1] 
 
-
-    labelsTr_path = os.path.join(our_processed_folder, 'labelsTr')
-    imagesTr_path = os.path.join(our_processed_folder, 'imagesTr')
-    # labelsTs_path = os.path.join(our_processed_folder, 'labelsTs')
-    # imagesTs_path = os.path.join(our_processed_folder, 'imagesTs')
-    
-    assert os.path.isdir(labelsTr_path) and os.path.exists(labelsTr_path), f"labelsTr missing in source folder or was not a subdirectory."
-    # assert os.path.isdir(imagesTs_path) and os.path.exists(imagesTs_path), f"imagesTs missing in source folder or was not a subdirectory."
-    assert os.path.isdir(imagesTr_path) and os.path.exists(imagesTr_path), f"imagesTr missing in source folder or was not a subdirectory."
-    # if process_labelsTs:
-    #     assert os.path.isdir(labelsTs_path) and os.path.exists(labelsTs_path), "labelsTs missing in source folder or was not a subdirectory."
-    
     target_folder = os.path.join(target_dataset_dir_path, dataset_name)
-    target_imagesTr = os.path.join(target_folder, 'imagesTr')
-    # target_imagesTs = os.path.join(target_folder, 'imagesTs')
-    target_labelsTr = os.path.join(target_folder, 'labelsTr')
-    # target_labelsTs = os.path.join(target_folder, 'labelsTs')
+    os.makedirs(target_folder, exist_ok=True)
 
-    os.makedirs(os.path.join(target_dataset_dir_path, dataset_name), exist_ok=True)
+    if split_name == 'train':
+        labels_path = os.path.join(our_processed_folder, 'labelsTr')
+        images_path = os.path.join(our_processed_folder, 'imagesTr')
+        assert os.path.isdir(labels_path) and os.path.exists(labels_path), f"labelsTr missing in source folder or was not a subdirectory."
+        assert os.path.isdir(images_path) and os.path.exists(images_path), f"imagesTr missing in source folder or was not a subdirectory."
+        target_images = os.path.join(target_folder, 'imagesTr')
+        target_labels = os.path.join(target_folder, 'labelsTr')
+        os.makedirs(target_images, exist_ok=True)
+        os.makedirs(target_labels, exist_ok=True)
 
-    os.makedirs(target_imagesTr, exist_ok=True)
-    # os.makedirs(target_imagesTs, exist_ok=True)
-    os.makedirs(target_labelsTr, exist_ok=True)
-    # if process_labelsTs:
-    #     os.makedirs(target_labelsTs, exist_ok=True) 
+    elif split_name == 'test':
+        labels_path = os.path.join(our_processed_folder, 'labelsTs')
+        images_path = os.path.join(our_processed_folder, 'imagesTs')
 
+        assert os.path.isdir(images_path) and os.path.exists(images_path), f"imagesTs missing in source folder or was not a subdirectory."
+        assert os.path.isdir(labels_path) and os.path.exists(labels_path), "labelsTs missing in source folder or was not a subdirectory."
+        target_images = os.path.join(target_folder, 'imagesTs') 
+        target_labels = os.path.join(target_folder, 'labelsTs')
+        os.makedirs(target_images, exist_ok=True)
+        os.makedirs(target_labels, exist_ok=True)
+    else:
+        raise ValueError(f"Unsupported split name {split_name}, only 'train' and 'test' are supported.")
+    
 
-    #Loading the original dataset json to be reformatted.
-    orig_dataset_json = os.path.join(ori_dataset_path, 'dataset.json')
-    assert os.path.isfile(orig_dataset_json), f"MSD formatted dataset.json was missing in source_folder"
-
-    orig_dataset_json = load_json(orig_dataset_json)
-
+    #All json related information will be extracted from our reformatted dataset. 
+    
     #Extracting the task config file for merging. 
-    task_config_txt = os.path.join(f'/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/exp_configs/{dataset_name}/task_configs.txt')
 
     #Loading the dataset.json from our reformatted dataset for reference on the image channels. 
     our_dataset_json = os.path.join(our_processed_folder, 'dataset.json')
     our_dataset_json = load_json(our_dataset_json)
 
     #Loading the exp task configs so that we can use it to only select the image channels we want.......
-    task_configs = load_json(task_config_txt)
+    task_configs = load_json(task_config_path)
     channel_codes_our_json = our_dataset_json['channel_names']
-    channel_lbs_our_task = task_configs['task_id_1']['data_sampling']['image_conf']['image_channel']
+    channel_lbs_our_task = task_configs[f'task_id_{task_id}']['data_sampling']['image_conf']['image_channel']
 
-    class_labels_our_task = task_configs['task_id_1']['data_transforms']['semantic_class_mapping'] 
+    class_labels_our_task = task_configs[f'task_id_{task_id}']['data_transforms']['semantic_class_mapping'] 
+    #Extracting the list of foreground and background labels for mapping.
     for class_lb in class_labels_our_task.keys(): 
         if class_lb == 'background':
             background_labels = class_labels_our_task[class_lb]
@@ -183,26 +183,27 @@ def convert_dataset(
             # foreground_code = 1 
     
     if len(channel_lbs_our_task) != 1:
-        raise Exception 
+        raise Exception("Current only single channel implementations are being evaluated, hence multiple channels will not yet be supported for consistency.")
     
     if channel_lbs_our_task[0] not in channel_codes_our_json:
         raise Exception(f"Channel {channel_lbs_our_task[0]} not found in our dataset json. Please check the task config file.")
-
+    #Extracting the relevant channel code.
     channel_code = our_dataset_json['channel_names'][channel_lbs_our_task[0]]
 
-    list_of_cases = os.listdir(imagesTr_path)
-
-    
+    #Extracting the list of cases which will need to be processed.
+    data_split = os.path.join(our_processed_folder, 'dataset_split.json')
+    data_split = load_json(data_split)
+    print(data_split.keys())
+    if f'all_{split_name}' not in data_split['sampling'].keys():
+        raise Exception(f"Expected all_{split_name} key in dataset split json for processing, but it was not found. Please check the dataset split json.")
+    list_of_cases = data_split['sampling'][f'all_{split_name}']['all_cases']
+    print(f'Extracting largest cc? : {extract_largest_cc}')
     for case in list_of_cases:
-        shutil.copy(os.path.join(imagesTr_path, case, f'{case}' + '_%04.0d.nii.gz' % int(channel_code)), os.path.join(target_imagesTr, f'{case}' + '_%04.0d.nii.gz' % 0)) #always single channel so always maps to that too!
+        shutil.copy(os.path.join(images_path, case, f'{case}' + '_%04.0d.nii.gz' % int(channel_code)), os.path.join(target_images, f'{case}' + '_%04.0d.nii.gz' % 0)) 
+        #For now it is always single channel, so it always maps to that too!
         
-        if dataset_name != 'Dataset006_Lung':
-            binarise_semantic_seg_nifti(case_name=case, orig_folder=labelsTr_path, output_folder=target_labelsTr, foreground_class_lb=foreground_labels, extract_largest_cc=False)
-        else:
-            binarise_semantic_seg_nifti(case_name=case, orig_folder=labelsTr_path, output_folder=target_labelsTr, foreground_class_lb=foreground_labels, extract_largest_cc=True)
-
-        #The disparity arises because we extract the biggest connected component for the lung lesion dataset during IS evaluation, so we need
-        # to remain consistent with that.     
+        binarise_semantic_seg_nifti(case_name=case, orig_folder=labels_path, output_folder=target_labels, foreground_class_lb=foreground_labels, extract_largest_cc=extract_largest_cc)
+         
     
     #Now for the labels. We know that nnunet has region based training, but we want to just do the binary semantic segmentation, so we
     #will pre-binarise the labels.. 
@@ -213,21 +214,59 @@ def convert_dataset(
     # orig_dataset_json['file_ending'] = ".nii.gz"
     # orig_dataset_json["channel_names"] = 
     
-    output_json = {
-        'channel_names': {"0": channel_lbs_our_task[0]}, #single channel.
-        'labels': {'background': 0, task_configs['task_id_1']['seg_problem']:1},
-        'numTraining': orig_dataset_json['numTraining'], #Only have access to training set, so we will just use that.
-        'file_ending': '.nii.gz',
-
-    }
+    #First try reading the dataset.json from the output nnunet dataset. 
+    if os.path.exists(os.path.join(target_folder, 'dataset.json')):
+        existing_json = load_json(os.path.join(target_folder, 'dataset.json'))
+        if split_name == 'train':
+            existing_json.update({
+                'numTraining': len(list_of_cases)
+            })
+        else:
+            existing_json.update({
+                'numTest': len(list_of_cases)
+            })
+        output_json = existing_json
+    else:
+        if split_name == 'train':
+            numTraining = len(list_of_cases)
+            output_json = {
+            'channel_names': {"0": channel_lbs_our_task[0]}, #single channel.
+            'labels': {'background': 0, task_configs['task_id_1']['seg_problem']:1},
+            'numTraining': numTraining,
+            'file_ending': '.nii.gz',
+            }
+        else:
+            numTest = len(list_of_cases)
+            output_json = {
+            'channel_names': {"0": channel_lbs_our_task[0]}, #single channel.
+            'labels': {'background': 0, task_configs['task_id_1']['seg_problem']:1},
+            'numTest': numTest,
+            'file_ending': '.nii.gz',
+            }
 
     save_json(output_json, os.path.join(target_folder, 'dataset.json'), sort_keys=False)
     
 
 if __name__ == '__main__':
-    dataset_name = 'Dataset008_HepaticVessel'
-    msd_dataset_name = 'Task08_HepaticVessel' 
-    input_data_path = f'/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/{dataset_name}'
-    orig_data_path = f'/home/parhomesmaeili/Radiology_Datasets/MSD/{msd_dataset_name}'
-    target_path = '/home/parhomesmaeili/Helmholtz Group/MICCAI2025_nnunet'
-    convert_dataset(input_data_path, orig_data_path, target_path, dataset_name, False)
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument('--reference_dataset_path', type=str, required=True, help='Path to the reference dataset which is to be used for processing.')
+    argparser.add_argument('--target_dataset_basedir_path', type=str, required=True, help='Path to the target directory where the converted dataset will be stored.')
+    argparser.add_argument('--task_config_basepath', type=str, required=True, help='Path to the task config file for the given dataset')
+    argparser.add_argument('--split_name', type=str, default='train', help='Name of the split being processed')
+    argparser.add_argument('--reference_task_id', type=int, default=1, help='Task ID in the reference dataset task config to be used for the conversion process, \n' \
+    'it is typically assumed that the information from this task configuration is consistent across train and test splits for the processing applied here!')
+    argparser.add_argument('--extract_largest_cc', action='store_true', default=False, help='Whether to extract the largest connected component for relevant semantic classes (e.g., lung).')
+    argparser.add_argument('--num_workers', type=int, default=1, help='Number of workers to use for conversion.')
+    args = argparser.parse_args()
+    dataset_name = os.path.basename(os.path.dirname(args.reference_dataset_path))
+    print(dataset_name)
+    task_config_path = os.path.join(args.task_config_basepath, dataset_name, 'task_configs.txt')
+    convert_dataset(
+        args.reference_dataset_path, 
+        args.target_dataset_basedir_path, 
+        task_config_path, 
+        args.split_name, 
+        args.reference_task_id, 
+        dataset_name, 
+        args.extract_largest_cc, 
+        args.num_workers)

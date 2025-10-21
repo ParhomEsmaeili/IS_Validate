@@ -18,5 +18,25 @@
 				"whole_prostate":["PZ", "TZ"]
 				}
 			}
+	},
+	"task_id_2":{
+		"data_sampling":
+			{
+				"sample_group_category": ["all_test", "all_cases"],
+				"image_conf": {
+					"image_channel": ["T2"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_1"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_prostate",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_prostate":["PZ", "TZ"]
+				}
+			}
 	}
 }
