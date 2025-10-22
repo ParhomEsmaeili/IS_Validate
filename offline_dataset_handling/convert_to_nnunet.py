@@ -127,7 +127,7 @@ def convert_dataset(
         split_name: str,
         task_id: int,        
         dataset_name: str,
-        extract_largest_cc: bool = False,         
+        # extract_largest_cc: bool = False,         
         num_processes: int = 1) -> None:
     if our_processed_folder.endswith('/') or our_processed_folder.endswith('\\'):
         our_processed_folder = our_processed_folder[:-1] 
@@ -172,16 +172,6 @@ def convert_dataset(
     channel_codes_our_json = our_dataset_json['channel_names']
     channel_lbs_our_task = task_configs[f'task_id_{task_id}']['data_sampling']['image_conf']['image_channel']
 
-    class_labels_our_task = task_configs[f'task_id_{task_id}']['data_transforms']['semantic_class_mapping'] 
-    #Extracting the list of foreground and background labels for mapping.
-    for class_lb in class_labels_our_task.keys(): 
-        if class_lb == 'background':
-            background_labels = class_labels_our_task[class_lb]
-            # background_code = 0
-        else:
-            foreground_labels = class_labels_our_task[class_lb]
-            # foreground_code = 1 
-    
     if len(channel_lbs_our_task) != 1:
         raise Exception("Current only single channel implementations are being evaluated, hence multiple channels will not yet be supported for consistency.")
     
@@ -197,24 +187,49 @@ def convert_dataset(
     if f'all_{split_name}' not in data_split['sampling'].keys():
         raise Exception(f"Expected all_{split_name} key in dataset split json for processing, but it was not found. Please check the dataset split json.")
     list_of_cases = data_split['sampling'][f'all_{split_name}']['all_cases']
-    print(f'Extracting largest cc? : {extract_largest_cc}')
-    for case in list_of_cases:
-        shutil.copy(os.path.join(images_path, case, f'{case}' + '_%04.0d.nii.gz' % int(channel_code)), os.path.join(target_images, f'{case}' + '_%04.0d.nii.gz' % 0)) 
-        #For now it is always single channel, so it always maps to that too!
-        
-        binarise_semantic_seg_nifti(case_name=case, orig_folder=labels_path, output_folder=target_labels, foreground_class_lb=foreground_labels, extract_largest_cc=extract_largest_cc)
-         
-    
-    #Now for the labels. We know that nnunet has region based training, but we want to just do the binary semantic segmentation, so we
-    #will pre-binarise the labels.. 
 
-    # orig_dataset_json['labels'] = {'background': 0,
-    #                                 task_configs['task_id_1']['seg_problem']:1}
+    print(f"Checking for any data transforms specified in task config for dataset conversion...")
+    #Setting a default value for extract_largest_cc, hacky fix.
+    extract_largest_cc = False
+
+    for key, transforms in task_configs[f'task_id_{task_id}']['data_transforms'].items():
+        if 'semantic_class_mapping' == key:     
+            class_labels_our_task = task_configs[f'task_id_{task_id}']['data_transforms']['semantic_class_mapping'] 
+            #Extracting the list of foreground and background labels for mapping.
+            output_semantic_class_dict = dict()
+            for class_lb in class_labels_our_task.keys():
+                if class_lb == 'background':
+                    output_semantic_class_dict['background'] = class_labels_our_task[class_lb]
+                    print(f'Background class labels correspond to original class labels of: {output_semantic_class_dict["background"]}.')
+                else:
+                    output_semantic_class_dict[class_lb] = class_labels_our_task[class_lb] 
+                    print(f'{class_lb} labels correspond to original class labels of {output_semantic_class_dict[class_lb]} under key: {class_lb}.')
+
+        elif 'component_extraction' == key:
+            if transforms == 'cc_largest':
+                extract_largest_cc = True
+                print(f'Extracting largest cc? : {extract_largest_cc}')
+            else:
+                print(f'Extracting largest cc? : {extract_largest_cc}') 
+        else:
+            raise Exception('Unsupported data transform found in task config for conversion process.')
     
-    # orig_dataset_json['file_ending'] = ".nii.gz"
-    # orig_dataset_json["channel_names"] = 
+    if len(output_semantic_class_dict.keys()) == 2:
+        foreground_key = [key for key in output_semantic_class_dict.keys() if key != 'background'][0]
+        foreground_labels = output_semantic_class_dict[foreground_key]
+        print(f'Foreground labels for binarisation: {foreground_labels} under foreground key: {foreground_key}')
+        print(f'Background labels for binarisation: {output_semantic_class_dict["background"]}')
+        print(f'Largest CC extraction set to: {extract_largest_cc}')
+        for case in list_of_cases:
+            shutil.copy(os.path.join(images_path, case, f'{case}' + '_%04.0d.nii.gz' % int(channel_code)), os.path.join(target_images, f'{case}' + '_%04.0d.nii.gz' % 0)) 
+            #For now it is always single channel, so it always maps to that too!
+            foreground_key = [key for key in output_semantic_class_dict.keys() if key != 'background'][0]
+            foreground_labels = output_semantic_class_dict[foreground_key]
+            binarise_semantic_seg_nifti(case_name=case, orig_folder=labels_path, output_folder=target_labels, foreground_class_lb=foreground_labels, extract_largest_cc=extract_largest_cc)
+    else:
+        raise Exception("Current only binarisation in this conversion script.")
     
-    #First try reading the dataset.json from the output nnunet dataset. 
+
     if os.path.exists(os.path.join(target_folder, 'dataset.json')):
         existing_json = load_json(os.path.join(target_folder, 'dataset.json'))
         if split_name == 'train':
@@ -255,7 +270,7 @@ if __name__ == '__main__':
     argparser.add_argument('--split_name', type=str, default='train', help='Name of the split being processed')
     argparser.add_argument('--reference_task_id', type=int, default=1, help='Task ID in the reference dataset task config to be used for the conversion process, \n' \
     'it is typically assumed that the information from this task configuration is consistent across train and test splits for the processing applied here!')
-    argparser.add_argument('--extract_largest_cc', action='store_true', default=False, help='Whether to extract the largest connected component for relevant semantic classes (e.g., lung).')
+    # argparser.add_argument('--extract_largest_cc', action='store_true', default=False, help='Whether to extract the largest connected component for relevant semantic classes (e.g., lung).')
     argparser.add_argument('--num_workers', type=int, default=1, help='Number of workers to use for conversion.')
     args = argparser.parse_args()
     dataset_name = os.path.basename(os.path.dirname(args.reference_dataset_path))
@@ -268,5 +283,5 @@ if __name__ == '__main__':
         args.split_name, 
         args.reference_task_id, 
         dataset_name, 
-        args.extract_largest_cc, 
+        # args.extract_largest_cc, 
         args.num_workers)
