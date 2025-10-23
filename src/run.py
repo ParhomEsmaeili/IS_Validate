@@ -53,7 +53,7 @@ def set_parse():
     parser.add_argument('--prompt_conf_filename', type=str, default='prompts_configs.txt')
     parser.add_argument('--task_conf_filename', type=str, default='task_configs.txt')
     parser.add_argument('--metric_conf_name', type=str, default='prototype')
-    parser.add_argument('--task_conf_name', type=str, default='task_id_1')
+    parser.add_argument('--task_conf_name', type=str, default='task_id_2')
     parser.add_argument('--init_prompt_conf_name', type=str, default='prototype')
     parser.add_argument('--edit_prompt_conf_name', type=str, default='prototype')
     parser.add_argument('--metric_prompt_procedure_type', type=str, default='heuristic')
