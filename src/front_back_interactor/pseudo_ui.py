@@ -4,7 +4,8 @@ This script is intended for simulating inference from the pseudo-front end, as p
 from email.mime import image
 from typing import Callable, Union
 import logging
-import time 
+import time
+import copy
 import warnings
 import os
 import sys
@@ -59,9 +60,7 @@ class FrontEndSimulator:
         note that the codes are >= 0 with 0 = background always, and that the labels are pre-normalised. E.g., 0,1,2,3... and never 0,2,3,5.
 
         i_state: An interaction dictionary containing the current input interaction states:
-        
-            infer mode: Name and optionally (for Edit) the inference iter num (1, ...).       
-
+              
             Within the interaction state we also have prompt information stored under the following keys:
 
                 interaction_torch_format: A prompt-type separated dictionary containing the prompt information in list[torch.tensor] format 
@@ -442,10 +441,8 @@ class FrontEndSimulator:
             last_is_key = list(im.keys())[0]
     
             i_state = {
-                f'{last_is_key}': {
-                    'interaction_torch_format': im[last_is_key]['interaction_torch_format'],
-                    'interaction_dict_format': im[last_is_key]['interaction_dict_format'],
-                }
+                'interaction_torch_format': im[last_is_key]['interaction_torch_format'],
+                'interaction_dict_format': im[last_is_key]['interaction_dict_format'],
             } 
         else:
             #In this case we are going to have to search through the keys to find the last one 
@@ -453,10 +450,8 @@ class FrontEndSimulator:
             sorted_iterations = sort_infer_calls(iteration_names)
             last_is_key = sorted_iterations[-1]
             i_state = {
-                f'{last_is_key}': {
                     'interaction_torch_format': im[last_is_key]['interaction_torch_format'],
                     'interaction_dict_format': im[last_is_key]['interaction_dict_format'],
-                }
             }
 
         if not i_state:
@@ -706,7 +701,7 @@ class FrontEndSimulator:
         #objects, and basic pythonic datatypes.
         request['config_labels_dict'] = self.args['configs_labels_dict']
         request['dataset_info'] = self.args['dataset_info'] 
-        request['image'] = self.data_instance['image']
+        request['image'] = copy.deepcopy(self.data_instance['image'])
         request['image']['metatensor'] = torch.from_numpy(request['image']['metatensor'].clone().detach().numpy()) 
         i_state = self.im_to_is(im=im)        
         #Now we update the request with the interaction state and the dataset information.
