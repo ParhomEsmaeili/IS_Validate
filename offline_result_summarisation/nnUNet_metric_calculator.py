@@ -47,7 +47,8 @@ def calculate_nnUNet_metrics(scoring_wrapper, seg_folder, gt_folder, config_labe
 
     #now calculate the metrics for each file.
     metrics_dict = {}
-    for file in datalist:
+    for idx, file in enumerate(datalist):
+        print(f'Calculating metrics for case: {file}, {idx+1}/{len(datalist)}')
         seg_file_path = os.path.join(seg_folder, file + '.nii.gz')
         gt_file_path = os.path.join(gt_folder, file + '.nii.gz')
 
