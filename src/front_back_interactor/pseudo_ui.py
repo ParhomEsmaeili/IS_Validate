@@ -7,6 +7,7 @@ import time
 import warnings
 import os
 import sys
+import re 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 import torch
 import random
@@ -21,7 +22,7 @@ from src.utils_checks.pseudo_ui_check import (
     check_config_labels
 
 )
-from src.utils.dict_utils import dict_path_create
+from src.general_utils.dict_utils import dict_path_create, sort_infer_calls
 # logger = logging.getLogger(__name__)
 
 class FrontEndSimulator:
@@ -41,9 +42,9 @@ class FrontEndSimulator:
 
     NOTE: All input arrays, tensors etc, will be on CPU. NOT GPU. 
 
-    NOTE: Orientation convention is always assumed to be RAS! 
+    NOTE: Orientation convention is always assumed to be RAS+ (Nibabel)! 
 
-        image: A dictionary containing a path & a pre-loaded (UI) metatensor objects 
+        image: A dictionary containing a pre-loaded (UI) metatensor objects 
         {
         'metatensor':monai metatensor object containing image, torch.float datatype.
         'meta_dict': image_meta_dictionary, contains the original affine from loading and current affine array in the ui-domain.}
@@ -56,12 +57,58 @@ class FrontEndSimulator:
         config_labels_dict: A dictionary containing the class label - class integer code mapping relationship being used. note that the codes are >= 0 with 
         0 = background always, and that the labels are pre-normalised. E.g., 0,1,2,3... and never 0,2,3,5.
 
+        i_state: An interaction dictionary containing the current input interaction states:
+        
+            infer mode: Name and optionally (for Edit) the inference iter num (1, ...).       
 
-        im: An interaction memory dictionary containing the set of interaction states. 
+        Within the interaction state we also have prompt information stored under the following keys:
+
+            interaction_torch_format: A prompt-type separated dictionary containing the prompt information in list[torch.tensor] format 
+            {'interactions':dict[prompt_type_str[list[torch.tensor/metatensor] OR NONE ]], 
+            'interactions_labels':dict[prompt_type_str_labels [list[torch.tensor/metatensor] OR NONE]],
+            }
+        interaction_dict_format: A prompt-type separated dictionary containing the prompt info in class separated dict format
+            (where each prompt spatial coord is represented as a sublist).  
+            dict[prompt_type_str[class[list[list]] OR NONE]]
+
+
+            -------------------------------------------------------------------------------------------------------
+
+    Inference app must generate the output in a dict format with the following fields:
+
+    NOTE: Checks will be put in place to ensure that voxel count, spacing, orientation will be matching & otherwise 
+    the code will be non-functional.
+
+        'probs': Dict which contains the following fields:
+
+            'metatensor': MetaTensor or Torch tensor object, ((torch.float dtype)), multi-channel probs map (CHWD), where C = Number of Classes (channel first format)
+        
+            'meta_dict: Meta information in dict format,  ('affine must match the input-images' affine info).
+        
+        'pred': Dict which contains the following fields:
+            metatensor: MetaTensor or Torch tensor object ((torch.int dtype)) containing the discretised prediction (shape 1HWD)
+            meta_dict: Meta information in dict format, which corresponds to the header of the prediction (affine array must match the input image's meta-info)
+
+        NOTE: The meta dictionaries will be expected to contain a key:item pair denoted as "affine", containing the 
+        affine array. NOTE: The affine must be a torch tensor or numpy array.
+        
+        NOTE: MetaTensor objects are permitted as they are lightweight wrappers around torch tensors with meta-info, provided
+        as part of MONAI. However, they need not be used if the user prefers to use torch tensors and meta-dicts directly. 
+
+    NOTE: These outputs must be stored/provided on cpu at the inferface level.
+
+
+    --------------------------------------------------------------------------------------------------------------------------
+
+    The simulation process stores the memory of interaction states: this may optionally be used in future versions for guiding the
+    prompt generation process in a manner which is dependent on prior prompts and algorithm outputs.
+
+    im: An dictionary containing the history input interaction states
+
         Keys = Infer mode + optionally (for Edit) the inference iter num (1, ...).       
 
-        Within each interaction state in IM:    
-        
+        Within the interaction state:    
+         
         prev_probs: A dictionary containing: {
                 'metatensor': Non-modified (CHWD) metatensor/torch tensor that is forward-propagated from the prior output (CHWD).
                 'meta_dict': Non-modified meta dictionary that is forward propagated.
@@ -81,30 +128,10 @@ class FrontEndSimulator:
             (where each prompt spatial coord is represented as a sublist).  
             dict[prompt_type_str[class[list[list]] OR NONE]]
 
-
-            -------------------------------------------------------------------------------------------------------
-
-    Inference app must generate the output in a dict format with the following fields:
-
-    NOTE: Checks will be put in place to ensure that voxel count, spacing, orientation will be matching & otherwise 
-    the code will be non-functional.
-
-        'probs': Dict which contains the following fields:
-
-            'metatensor': MetaTensor or torch object, ((torch.float dtype)), multi-channel probs map (CHWD), where C = Number of Classes (channel first format)
-        
-            'meta_dict: Meta information in dict format,  ('affine must match the input-images' affine info).
-        
-        'pred': Dict which contains the following fields:
-            metatensor: MetaTensor or torch tensor object ((torch.int dtype)) containing the discretised prediction (shape 1HWD)
-            meta_dict: Meta information in dict format, which corresponds to the header of the prediction (affine array must match the input image's meta-info)
-
-        NOTE: The meta dictionaries will be expected to contain a key:item pair denoted as "affine", containing the 
-        affine array. NOTE: The affine must be a torch tensor or numpy array.
-
-    NOTE: These outputs must be stored/provided on cpu. 
-
+    The memory length (in discrete interaction states) is configurable at runtime via the im_config field in the input
+    arguments for the experimental run. 
     '''
+
     def __init__(self, 
                 infer_app: Callable, 
                 args: dict):
@@ -135,11 +162,11 @@ class FrontEndSimulator:
             metrics configs: metrics being computed, prompt generation configs for parameter-dependent metrics, etc.
             
             interaction memory configs: configs for how the interaction states will be stored to be passed through for
-            the infer_app call: contains fields 'im_len' (denotes the state memory, inclusive of the initialisation.)
+            the infer_app call: contains fields 'im_conf_memory_len' (denotes the state memory, inclusive of the initialisation.)
 
                 im_config = 
                     {
-                    'memory_len': int (this denotes the retained memory backwards, -1 denotes full memory, otherwise it 
+                    'im_conf_memory_len': int (this denotes the retained memory backwards, -1 denotes full memory, otherwise it 
                     denotes the memory retained relative to the "current" iter)
                     }  
 
@@ -280,7 +307,10 @@ class FrontEndSimulator:
         pass 
 
     def metric_im_handler(self, inf_im:dict, metric_im:Union[dict, None]):
-        '''
+        ''' 
+        NOTE: This function may be deprecated if memory proves to be obsolete (i.e., no metrics require interaction information,
+        which may be likely as it is extremely challenging to parameterise such metrics in a generalisable manner!)
+
         Function intended for interaction memory handling, but for instances where the generated data is used for metric
         computation. Uses the inference interaction memory to access new interaction info from the input prompts.
         Uses this to generate metric interaction memory/update metric interaction memory.
@@ -295,11 +325,10 @@ class FrontEndSimulator:
         if isinstance(metric_im, dict) and not metric_im:
             raise ValueError('If the metric im is a dict, it cannot be empty!')
 
-        #Does absolutely nothing for now.
+        #Does absolutely nothing for now. 
 
         return metric_im
-    def inf_im_handler(self,
-                # data_instance: dict, 
+    def prompting_im_handler(self,
                 infer_config: dict,
                 im:Union[dict, None],
                 prev_output_data: Union[dict, None],
@@ -311,9 +340,9 @@ class FrontEndSimulator:
             'mode': str - The mode that the inference call will be made for (Automatic Init, Interactive Init, Interactive Edit)
             'edit num': Union[int, None] - The current edit's iteration number or None for initialisations.
         
-        im: Union[Dict, None] - An optional dictionary containing the existing interaction memory (None for inits)
+        im: Union[Dict, None] - An optional dictionary containing the existing prompt-side interaction memory (None for inits)
         prev_output_data: Union[Dict, None] - An optional dictionary containing the post-processed output data from prior
-        iteration's inference call.
+        iterations' inference calls.
 
         Returns:
         The updated interaction memory, with any post-processing implemented for cleanup (if activated)
@@ -364,12 +393,57 @@ class FrontEndSimulator:
             im, self.tracked_paths = memory_cleanup(self.args['is_seg_tmp'], self.tmp_dir_path, self.args['im_config'], im, self.tracked_paths, infer_config)
         
         return im 
+    
+    def im_to_is(self, im:dict):
+        '''
+        This is a function which converts a prompting interaction memory dictionary into an interaction state dictionary which is
+        to be passed through into the inference app call.
 
+        inputs:
+        im: A dictionary containing the interaction memory object (a dictionary)
+
+        outputs: 
+        i_state: A dictionary containing the interaction state object (a dictionary), as described in the docstring of the class.
+        It only contains the prompting information! Everything else is expected to be stored by the application, as per their
+        own requirements.
+        '''
+        if not isinstance(im, dict) or not im:
+            raise Exception('The interaction memory must be a non-empty dictionary, should have been flagged earlier.')
+        
+
+        #We extract the current interaction state's name (last entry in the dictionary)
+        if len(im.keys()) == 1:
+            last_is_key = list(im.keys())[0]
+    
+            i_state = {
+                f'{last_is_key}': {
+                    'interaction_torch_format': im[last_is_key]['interaction_torch_format'],
+                    'interaction_dict_format': im[last_is_key]['interaction_dict_format'],
+                }
+            } 
+        else:
+            #In this case we are going to have to search through the keys to find the last one 
+            iteration_names = set(im.keys())     
+            sorted_iterations = sort_infer_calls(iteration_names)
+            last_is_key = sorted_iterations[-1]
+            i_state = {
+                f'{last_is_key}': {
+                    'interaction_torch_format': im[last_is_key]['interaction_torch_format'],
+                    'interaction_dict_format': im[last_is_key]['interaction_dict_format'],
+                }
+            }
+
+        if not i_state:
+            raise Exception('The interaction state dictionary could not be constructed from the interaction memory, \n ' \
+            'or was empty.')
+        return i_state
+    
     def update_tracked_paths(self, output_paths:dict, inf_call_config:dict):
         
         '''
         This function is intended for filling out the fields containing the strings for the segmentation paths in 
-        the output data for forward propagation. 
+        the output data for forward propagation. NOTE: This may become deprecated in future versions, depending on how
+        memory handling is adjusted on the validation-side. 
         
         inputs:
         
@@ -391,9 +465,6 @@ class FrontEndSimulator:
         from both the prev_output data dict, and the tracked paths dict.
         
         '''
-        
-        # if inf_call_config['mode'].title() != 'Interactive Edit':
-        #     raise ValueError('This should be called on the edit states only!')
         
         infer_config_dir = f'{inf_call_config["mode"]} Iter {inf_call_config["edit_num"]}' if inf_call_config['mode'].title() == 'Interactive Edit' else inf_call_config['mode'].title() 
             
@@ -525,7 +596,7 @@ class FrontEndSimulator:
         
             edit_num - The editing iteration number (1, ...) or NONE (for initialisation)
         
-        im - (Optional) The currently existing inference interaction memory (for edit) or NoneType (for initialisations) 
+        im - (Optional) The currently existing interaction memory (for edit) or NoneType (for initialisations) 
         
         prev_output_data - (Optional) The output dictionary from the prior iteration of inference (for editing modes). 
         or NoneType. 
@@ -533,7 +604,7 @@ class FrontEndSimulator:
         Returns:
 
         request - The input request dictionary for input to the app inference call.
-        im - The updated inference interaction memory dict for tracking.
+        im - The updated prompt interaction memory dict for tracking.
         '''
 
         if not isinstance(self.data_instance, dict) or not self.data_instance:
@@ -558,7 +629,7 @@ class FrontEndSimulator:
             if infer_call_config['edit_num'] is not None:
                 raise TypeError('The edit num in the infer call config dict should not exist for initialisation!')
             
-            im = self.inf_im_handler(
+            im = self.prompting_im_handler(
                 # data_instance=selfdata_instance 
                 infer_config=infer_call_config, 
                 im=None, 
@@ -567,11 +638,9 @@ class FrontEndSimulator:
             request = {
                 'image': self.data_instance['image'],
                 'model':'IS_autoseg', 
-                'config_labels_dict': self.args['configs_labels_dict'],
-                'im': im,
-                }
-            
-            return request, im
+                'config_labels_dict': self.args['configs_labels_dict']
+                }            
+            # return request, im
 
         elif infer_call_config['mode'].title() == 'Interactive Init':
             if prev_output_data is not None: #We choose an explicit check of Nonetype for the if statement
@@ -579,7 +648,7 @@ class FrontEndSimulator:
             if infer_call_config['edit_num'] is not None:
                 raise TypeError('The edit num in the infer call config dict should not exist for initialisation!')
             
-            im = self.inf_im_handler(
+            im = self.prompting_im_handler(
                 # data_instance=data_instance, 
                 infer_config=infer_call_config, 
                 im=None, 
@@ -590,18 +659,15 @@ class FrontEndSimulator:
                 'image': self.data_instance['image'],
                 'model': 'IS_interactive_init', 
                 'config_labels_dict': self.args['configs_labels_dict'],
-                'im': im
                 }
-            return request, im 
-        
+            
         elif infer_call_config['mode'].title() == 'Interactive Edit':
             if prev_output_data is None:
                 raise ValueError('There must be a dictionary containing the outputs of the prior inference call!')
             if infer_call_config['edit_num'] is None and not isinstance(infer_call_config['edit_num'], int):
                 raise TypeError('The edit num in the infer call config dict should be an int!')
             
-            im = self.inf_im_handler(
-                # data_instance=data_instance,
+            im = self.prompting_im_handler(
                 infer_config=infer_call_config,
                 im=im,
                 prev_output_data=prev_output_data
@@ -611,12 +677,15 @@ class FrontEndSimulator:
                 'image': self.data_instance['image'],
                 'model': 'IS_interactive_edit', 
                 'config_labels_dict': self.args['configs_labels_dict'],
-                'im':im,
                 }
-            return request, im
         else:
             raise ValueError('The inference mode is invalid for app request generation!')
         
+        i_state = self.im_to_is(im=im)
+        #Now we update the request with the interaction state
+        request['i_state'] = i_state
+        
+        return request, im
     def iterative_loop(self, empty_foreground:bool=False):
         '''
         ''' 

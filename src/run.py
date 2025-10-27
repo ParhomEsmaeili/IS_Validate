@@ -11,8 +11,8 @@ import warnings
 codebase_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__))) 
 sys.path.append(codebase_dir)
 from src.front_back_interactor.pseudo_ui import FrontEndSimulator 
-from src.utils.logging import experiment_args_logger
-from src.utils.dict_utils import extractor
+from src.general_utils.logging import experiment_args_logger
+from src.general_utils.dict_utils import extractor
 from src.data.utils import data_instance_reformat, iterate_dataloader_check, init_task_cases
 from src.results_utils.metric_save_util import init_all_csvs
 original_stdout = sys.stdout

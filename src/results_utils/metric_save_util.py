@@ -3,9 +3,9 @@ import os
 from os.path import dirname as up
 import sys
 sys.path.append(up(up(up(os.path.abspath(__file__)))))
-from src.utils.dict_utils import extractor 
+from src.general_utils.dict_utils import extractor, sort_infer_calls
 import csv
-import re 
+import re
 
 # import pandas
 
@@ -139,45 +139,6 @@ def init_all_csvs(
     
     return complete_paths_dicts
 
-def sort_infer_calls(infer_call_names):
-    '''
-    This function sorts the inference call names, and outputs them in a tuple format such that they are immutable.
-    '''
-
-    if len(infer_call_names) < 1:
-        raise Exception(f'At least one infer mode call subdict is required for metrics to be saved!')
-    
-    #We do not assume that the inference call names (or dict they were taken from) were ordered correctly, 
-    # even if it likely is incorrectly ordered.
-
-    infer_call_names_order = []
-    #Check if there is an initialisation: if so, place that first. 
-    init_modes  = {'Automatic Init', 'Interactive Init'}
-
-    if init_modes & infer_call_names:
-        #If the set is not empty
-        if len(init_modes & infer_call_names) > 1:
-            raise Exception('Cannot have two conflicting initialisation modes')
-        else:
-            infer_call_names_order.extend(init_modes & infer_call_names)
-        
-    #We already implemented a check to ensure that the infer call names are not empty! 
-
-    #Therefore, we just sort and append according to the iteration num of the edit iter. First finding asymmetric
-    #set diff.
-
-    edit_names_list = list(infer_call_names.difference(init_modes))
-    #Sorting this list.
-    edit_names_list.sort(key=lambda test_str : list(map(int, re.findall(r'\d+', test_str))))
-    
-    #Extending the infer call ordered list. 
-    #
-    infer_call_names_order.extend(edit_names_list) 
-    
-    #Returning it as a tuple so that it is immutable.
-
-    return tuple(infer_call_names_order)
-
 
 def try_float_or_keep(x):
     #Func which will convert a value to a float if possible. If presented with a datatype which cannot be converted, if 
@@ -290,7 +251,6 @@ def write_to_csvs(
         infer_call_names = set((metrics_dict.keys()))
         sorted_infer_calls = sort_infer_calls(infer_call_names=infer_call_names)
         
-
         #Writing the cross class scores, must always be provided.: 
         
         #Generating the tuples for the paths:

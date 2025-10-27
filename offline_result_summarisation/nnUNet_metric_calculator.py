@@ -6,7 +6,7 @@ import argparse
 import pandas as pd
 from src.results_utils.base_metrics.scoring_base_utils import BaseScoringWrapper
 from src.results_utils.metric_save_util import init_all_csvs, write_to_csvs
-from src.utils.dict_utils import extractor
+from src.general_utils.dict_utils import extractor
  
 import json 
 import torch 

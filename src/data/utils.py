@@ -7,7 +7,7 @@ from typing import Union, Optional, Sequence
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) #Adding the parent directory to the path so that we can import utils from there.
-from utils.dict_utils import extractor #This is a custom utility function for extracting dicts.
+from general_utils.dict_utils import extractor #This is a custom utility function for extracting dicts.
 import copy 
 import logging
 import pathlib

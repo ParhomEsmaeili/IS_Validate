@@ -14,7 +14,7 @@ from abc import abstractmethod
 sys.path.append(up(up(up(up(os.path.abspath(__file__))))))
 import gc
 from src.prompt_generators.heuristics.prompt_bases import PointBase, ScribbleBase, BboxBase
-from src.utils.dict_utils import extractor, dict_path_modif
+from src.general_utils.dict_utils import extractor, dict_path_modif
 from src.prompt_generators.heuristics.spatial_utils.component_extraction import get_label_ccp#, extract_connected_components
 from src.prompt_generators.heuristics.spatial_utils.update_binary_mask import update_binary_mask
 '''
