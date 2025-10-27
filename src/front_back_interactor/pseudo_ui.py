@@ -49,27 +49,27 @@ class FrontEndSimulator:
         'metatensor':monai metatensor object containing image, torch.float datatype.
         'meta_dict': image_meta_dictionary, contains the original affine from loading and current affine array in the ui-domain.}
 
-        model: A string denoting the inference "mode" being simulated, has three options: 
+        infer_mode: A string denoting the inference "mode" being simulated/requested, has three options: 
                 1) Automatic Segmentation, denoted: 'IS_autoseg' 
                 2) Interactive Initialisation: 'IS_interactive_init'
                 3) Interactive Editing: 'IS_interactive_edit'
         
-        config_labels_dict: A dictionary containing the class label - class integer code mapping relationship being used. note that the codes are >= 0 with 
-        0 = background always, and that the labels are pre-normalised. E.g., 0,1,2,3... and never 0,2,3,5.
+        config_labels_dict: A dictionary containing the semantic class label - class integer code mapping relationship being used. 
+        note that the codes are >= 0 with 0 = background always, and that the labels are pre-normalised. E.g., 0,1,2,3... and never 0,2,3,5.
 
         i_state: An interaction dictionary containing the current input interaction states:
         
             infer mode: Name and optionally (for Edit) the inference iter num (1, ...).       
 
-        Within the interaction state we also have prompt information stored under the following keys:
+            Within the interaction state we also have prompt information stored under the following keys:
 
-            interaction_torch_format: A prompt-type separated dictionary containing the prompt information in list[torch.tensor] format 
-            {'interactions':dict[prompt_type_str[list[torch.tensor/metatensor] OR NONE ]], 
-            'interactions_labels':dict[prompt_type_str_labels [list[torch.tensor/metatensor] OR NONE]],
-            }
-        interaction_dict_format: A prompt-type separated dictionary containing the prompt info in class separated dict format
-            (where each prompt spatial coord is represented as a sublist).  
-            dict[prompt_type_str[class[list[list]] OR NONE]]
+                interaction_torch_format: A prompt-type separated dictionary containing the prompt information in list[torch.tensor] format 
+                {'interactions':dict[prompt_type_str[list[torch.tensor/metatensor] OR NONE ]], 
+                'interactions_labels':dict[prompt_type_str_labels [list[torch.tensor/metatensor] OR NONE]],
+                }
+                interaction_dict_format: A prompt-type separated dictionary containing the prompt info in class separated dict format
+                    (where each prompt spatial coord is represented as a sublist).  
+                    dict[prompt_type_str[class[list[list]] OR NONE]]
 
 
             -------------------------------------------------------------------------------------------------------
@@ -580,12 +580,13 @@ class FrontEndSimulator:
         This function generates the app request (i.e. the input dictionary to the application) which is intended 
         to be called in the iterator.
 
-        Each request comes with field containing the app_(sub)name also: I.e., Autosegmentation, Interactive Init, Interactive Edit. Users can provide three separate
-        apps, or just repeat the same but it should be packaged in a manner such that the input request will be channeled appropriately for their requirements.
+        NOTE: Each request comes with field containing the infer_mode being requested also: I.e., Automatic Segmentation, Interactive Init, 
+        Interactive Edit. Users can provide three separate apps, or just repeat the same underlying algorithm but it should be packaged 
+        in a manner such that the input request will be channeled appropriately for their requirements.
         
         We use the following convention, for Automatic Init: 'IS_autoseg', Interactive Init: 'IS_interactive_init', Interactive Edit: 'IS_interactive_edit'.
 
-        This value will be stored under the "model" key in the input request. 
+        This value will be stored under the "infer_mode" key in the input request. 
 
 
         Inputs:
@@ -637,7 +638,7 @@ class FrontEndSimulator:
 
             request = {
                 'image': self.data_instance['image'],
-                'model':'IS_autoseg', 
+                'infer_mode':'IS_autoseg', 
                 'config_labels_dict': self.args['configs_labels_dict']
                 }            
             # return request, im
@@ -657,7 +658,7 @@ class FrontEndSimulator:
 
             request = {
                 'image': self.data_instance['image'],
-                'model': 'IS_interactive_init', 
+                'infer_mode': 'IS_interactive_init', 
                 'config_labels_dict': self.args['configs_labels_dict'],
                 }
             
@@ -675,7 +676,7 @@ class FrontEndSimulator:
 
             request = {
                 'image': self.data_instance['image'],
-                'model': 'IS_interactive_edit', 
+                'infer_mode': 'IS_interactive_edit', 
                 'config_labels_dict': self.args['configs_labels_dict'],
                 }
         else:
@@ -684,7 +685,7 @@ class FrontEndSimulator:
         i_state = self.im_to_is(im=im)
         #Now we update the request with the interaction state
         request['i_state'] = i_state
-        
+
         return request, im
     def iterative_loop(self, empty_foreground:bool=False):
         '''
