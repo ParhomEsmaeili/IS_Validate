@@ -20,7 +20,8 @@ import numpy as np
 import json 
 import random 
 datasets_path = os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))),'datasets')
-from utils import (
+sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
+from offline_dataset_handling.utils import (
     check_dataset_existence, 
     extract_nifti_files, 
     extract_subfiles, 

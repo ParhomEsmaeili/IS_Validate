@@ -28,9 +28,10 @@ def set_parse():
     
     parser.add_argument('--data_root', type=str, default=codebase_dir)
     parser.add_argument('--dataset_name', type=str, default='Dataset001_BrainTumour')
-    parser.add_argument('--app_root', type=str, default=os.path.join(codebase_dir, 'input_application', 'deprecated'))
+    parser.add_argument('--app_root', type=str, default= '/home/parhomesmaeili/IS_Codebase_Forks/SAM-Med2D_Fork')#NOTE:Just set for debugging purposes.
+                        #os.path.join(codebase_dir, 'input_application', 'deprecated'))
     #This acts as the name of the app, but also temporarily acts as the relative path name within the input_applications folder in the app root folder.
-    parser.add_argument('--app_name', type=str, default='Sample_SAMMed2D')
+    parser.add_argument('--app_name', type=str, default='SAMMed2D_App')#'Sample_SAMMed2D')
     parser.add_argument('--metrics_root', type=str, default=os.path.join(codebase_dir, 'results'))
     parser.add_argument('--seg_root', type=str, default=os.path.join(codebase_dir, 'results'))
 
@@ -152,7 +153,7 @@ def gen_experiment_args(args):
 
     output_dict['dataset_info'] = {
     'dataset_name': args.dataset_name,
-    'dataset_channel': extract_config(os.path.join(args.data_root, 'datasets', args.dataset_name, 'dataset.json'), 'channel_names'),
+    'dataset_image_channels': extract_config(os.path.join(args.data_root, 'datasets', args.dataset_name, 'dataset.json'), 'channel_names'),
     'task_channel': extractor(output_dict['task_configs'], ('data_sampling', 'image_conf', 'image_channel'))
     }
 
@@ -302,7 +303,7 @@ def log_config_writer(args_name, args_dict, logger):
             logger.info(f"{key}: {value}")
 
 
-def build_infer_app(build_app_path, dataset_info, device):
+def build_infer_app(build_app_path, device):
 
     build_app_dir = os.path.join(build_app_path, 'build_app')
     print(build_app_dir)
@@ -327,15 +328,14 @@ def build_infer_app(build_app_path, dataset_info, device):
         sys.modules["BuildInferApp"] = foo
         spec.loader.exec_module(foo)
         InferApp = foo.InferApp 
-
-    return InferApp(dataset_info, device) 
-
+    
+    return InferApp(device)
 
 def init_infer_app(experiment_args:dict): 
 
     #Function which finds and initialises the inference app using the build script, then checks it has the necessary methods. 
         
-    infer_app = build_infer_app(experiment_args['build_app_abspath'], experiment_args['dataset_info'], experiment_args['device'])
+    infer_app = build_infer_app(experiment_args['build_app_abspath'], experiment_args['device'])
 
     if not callable(infer_app):
         raise Exception('The inference app must be callable class.')
@@ -389,27 +389,35 @@ def run_instances(dataloader, fe_sim_obj, logger):
 def init_fe(infer_app, experiment_args):
     #Function which initialises the front-end simulator.
     keep_key_list = [
-        'configs_labels_dict',
+        ##Variables related to the experimental configuration
+        'configs_labels_dict', #NOTE: Currently just assuming semantic segmentation support. 
+        #Variable related to handling empty foreground cases for automatic segmentation configurations
         'sim_empty_fg_automatic',
         'infer_run_configs',
         'metrics_configs',
         'inf_prompt_procedure_type',
         'inf_init_prompt_config',
         'inf_edit_prompt_config',
+        #Variables related to reproducibility and device.
         'random_seed',
         'cuda_deterministic',
         'torch_deterministic',
         'device',
+        #Variables related to interaction memory
         'use_mem_inf_edit',
         'im_config', 
+        #Variables related to metrics and saving metrics/
         'dice_termination_thresh',
         'metrics_savepaths',
         'exp_results_dir',
+        #Variables related to saving segmentations and prompt info
         'seg_root',
         'exp_seg_dir',
         'save_prompts',
         'is_seg_tmp',
-        'write_segmentation'
+        'write_segmentation',
+        #Variables related to api-structure
+        'dataset_info'
     ]
     args = {key:val for key,val in experiment_args.items() if key in keep_key_list}
 

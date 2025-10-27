@@ -1,6 +1,7 @@
 '''
 This script is intended for simulating inference from the pseudo-front end, as part of the front-end to back-end setup of an end-to-end interactive seg. application. 
 '''
+from email.mime import image
 from typing import Callable, Union
 import logging
 import time 
@@ -141,39 +142,64 @@ class FrontEndSimulator:
         infer_app: Initialised inference application which can be called to process an input request (structure noted above).
         
         args: Dictionary containing the information required for performing the experiment, e.g.: 
-
-            random_seed: The optional int denoting the seed being used for this instance of validation. Otherwise, it is
-            None and there is no determinism.  
-
-            sim_empty_fg_automatic: Boolean denoting whether to simulate/attempt automatic segmentation in cases where the foreground are empty (non-background). 
-
-            config_labels_dict: Dictionary mapping class labels and integer codes.
+        
+        Variables related to the experimental configuration
+        config_labels_dict: Dictionary mapping class labels and integer codes #NOTE: Currently just assuming semantic segmentation support. 
             
-            inf_prompt_procedure_type: String denoting the inference prompt generator type: Heuristic is the only 
-            one with support currently.
-
-            inf_init_prompt_config (and inf_edit_prompt_config): "use mode" specific prompt generation config 
-            dictionaries for inference prompt generation.
-
-            metric_init_prompt_config (and metric_edit_prompt_config): Same thing but for the metrics, currently not supported. 
+        #Variable related to handling empty foreground cases for automatic segmentation configurations
+        
+        sim_empty_fg_automatic: Boolean denoting whether to simulate/attempt automatic segmentation in cases where the foreground are empty (non-background). 
+        infer_run_configs: Dict containing inference run configs: (e.g., modes, number of refinement iterations)
+    
+        metrics_configs: metrics being computed, prompt generation configs for parameter-dependent metrics (NOTE: latter not yet supported), etc.
             
-            inference run configs: (e.g., modes, number of refinement iterations)
+        
+        inf_prompt_procedure_type: inf_prompt_procedure_type: String denoting the inference prompt generator type: Heuristic is the only 
+        one with support currently.
+
+        inf_init_prompt_config
+        inf_edit_prompt_config
+        {"use mode" specific prompt generation config dictionaries for inference prompt generation}
+
+        metric_init_prompt_config (and metric_edit_prompt_config): Same thing but for the metrics NOTE: currently not supported. 
             
-            metrics configs: metrics being computed, prompt generation configs for parameter-dependent metrics, etc.
             
-            interaction memory configs: configs for how the interaction states will be stored to be passed through for
-            the infer_app call: contains fields 'im_conf_memory_len' (denotes the state memory, inclusive of the initialisation.)
 
-                im_config = 
-                    {
-                    'im_conf_memory_len': int (this denotes the retained memory backwards, -1 denotes full memory, otherwise it 
-                    denotes the memory retained relative to the "current" iter)
-                    }  
+        #Variables related to reproducibility and device.
+        random_seed: The optional int denoting the seed being used for this instance of validation. Otherwise, it is
+        None and there is no determinism. 
 
-            etc.
+        cuda_deterministic - Boolean denoting whether to use deterministic algorithms for CUDA operations.
+        torch_deterministic - Boolean denoting whether to use deterministic algorithms for PyTorch operations.
+        device - torch device
 
-        TODO: Add a full exhaustive list of the dictionary fields.
+        #Variables related to interaction memory
+        use_mem_inf_edit: 
+        im_config : configs for how the interaction states will be stored for prompting, 
+        Latter contains fields 'im_conf_memory_len' (denotes the state memory, inclusive of the initialisation.)
+        E.g., im_config = 
+        {
+            'im_conf_memory_len': int (this denotes the retained memory backwards, -1 denotes full memory, otherwise it 
+            denotes the memory retained relative to the "current" iter)
+        }  
+        
+        #Variables related to metrics and saving metrics/
+        dice_termination_thresh - threshold for early termination based on dice score.
+        metrics_savepaths - dictionary mapping metric names to their save paths.
+        exp_results_dir - base directory for saving experimental results.
 
+        #Variables related to saving segmentations and prompt info
+        
+        seg_root - Root directory for saving segmentations.
+        exp_seg_dir - Directory for saving experiment segmentations.
+        save_prompts - Boolean denoting whether to save the prompts used during inference.
+        is_seg_tmp - Boolean denoting whether to use a temporary directory for saving segmentations.
+        write_segmentation - Boolean denoting whether to write the segmentation results to disk.
+
+        #Variables related to api-structure
+        dataset_info - Dictionary containing dataset information required for the application API structure (e.g., name, 
+        modality, etc.)
+        
         '''
         
         if not callable(infer_app):
@@ -636,10 +662,8 @@ class FrontEndSimulator:
                 im=None, 
                 prev_output_data=None)
 
-            request = {
-                'image': self.data_instance['image'],
+            request = {   
                 'infer_mode':'IS_autoseg', 
-                'config_labels_dict': self.args['configs_labels_dict']
                 }            
             # return request, im
 
@@ -657,9 +681,7 @@ class FrontEndSimulator:
 
 
             request = {
-                'image': self.data_instance['image'],
                 'infer_mode': 'IS_interactive_init', 
-                'config_labels_dict': self.args['configs_labels_dict'],
                 }
             
         elif infer_call_config['mode'].title() == 'Interactive Edit':
@@ -675,16 +697,21 @@ class FrontEndSimulator:
             )
 
             request = {
-                'image': self.data_instance['image'],
                 'infer_mode': 'IS_interactive_edit', 
-                'config_labels_dict': self.args['configs_labels_dict'],
                 }
         else:
             raise ValueError('The inference mode is invalid for app request generation!')
         
-        i_state = self.im_to_is(im=im)
-        #Now we update the request with the interaction state
+        #Now we will perform some processing to ensure that the interface for the api-request is only dependent on torch
+        #objects, and basic pythonic datatypes.
+        request['config_labels_dict'] = self.args['configs_labels_dict']
+        request['dataset_info'] = self.args['dataset_info'] 
+        request['image'] = self.data_instance['image']
+        request['image']['metatensor'] = torch.from_numpy(request['image']['metatensor'].clone().detach().numpy()) 
+        i_state = self.im_to_is(im=im)        
+        #Now we update the request with the interaction state and the dataset information.
         request['i_state'] = i_state
+        
 
         return request, im
     def iterative_loop(self, empty_foreground:bool=False):

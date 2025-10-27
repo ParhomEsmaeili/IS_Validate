@@ -1,7 +1,8 @@
 import logging
 import torch
 from typing import Union 
-
+from monai.data.meta_tensor import MetaTensor 
+from version_handling import monai_version
 logger = logging.getLogger(__name__)
 
 class PromptReformatter:
@@ -12,7 +13,35 @@ class PromptReformatter:
 
         self.class_config = class_config_dict 
 
-    def points_reformat(self, prompts, labels):
+    def ensure_torch_datatype(self, prompts: list[torch.Tensor], prompts_labels: list[torch.Tensor]):
+        '''
+        Function which ensures that the provided data is a torch type object. If it is not, it raises an exception. One exception
+        to this is the use of metatensors. In this case we will detach the metatensor into a separate torch tensor.
+        '''
+        if not isinstance(prompts, list) or not isinstance(prompts_labels, list):
+            raise TypeError('The provided prompt and prompt label data must be list of torch tensors or metatensors')
+        else:
+            for prompt_idx, item in enumerate(prompts):
+                if type(item) == torch.Tensor and type(prompts_labels[prompt_idx]) == torch.Tensor:
+                    #Valid datatype, do nothing.
+                    pass
+                elif type(item) == MetaTensor and type(prompts_labels[prompt_idx]) == torch.Tensor:
+                    #Convert to a torch tensor.
+                    if monai_version == '0.9.0':
+                        #NOTE: Hacky solution for stripping away the metainformation, as the version of MONAI does not provide
+                        # a direct way to extract just the torch tensor.
+                        prompts[prompt_idx] = torch.from_numpy(item.clone().detach().numpy())
+                    elif monai_version == '1.4.0':
+                        prompts[prompt_idx] = torch.from_numpy(item.clone().detach().numpy())
+                    else:
+                        raise Exception('Unsupported MONAI version used in datatype handling for the generated prompts')
+                else:
+                    raise TypeError('The provided prompt data must be a list of torch tensors or metatensors \n'
+                    'and the provided prompt labels must be a list of torch tensors')
+
+        return prompts, prompts_labels
+
+    def points_reformat_dict(self, prompts, labels):
         '''
         Reformatter which reformats from the list[tensor] format to the class separated dictionary format.
         
@@ -36,7 +65,7 @@ class PromptReformatter:
         
         return prompt_reformat 
     
-    def scribble_reformat(self, prompts, labels):
+    def scribble_reformat_dict(self, prompts, labels):
         '''
         Function which reformats scribbles from the list[torch]-type format (with a separate set of labels) into a dict format
         in which the scribble sets are separated by class, but where the spatial coords are encoded as lists.
@@ -64,7 +93,7 @@ class PromptReformatter:
 
         return prompt_reformat 
     
-    def bbox_reformat(self, prompts, labels):
+    def bbox_reformat_dict(self, prompts, labels):
         '''
         Function which reformats the bboxes from list[torch]-type format into the class-separated dict type format.
 
@@ -87,7 +116,7 @@ class PromptReformatter:
         
         return prompt_reformat 
     
-    def reformat_prompts(self, prompt_type:str, prompts: Union[list[torch.Tensor], None], prompts_labels: Union[list[torch.Tensor], None]):
+    def reformat_to_dict(self, prompt_type:str, prompts: Union[list[torch.Tensor], None], prompts_labels: Union[list[torch.Tensor], None]):
         
         if prompts is None and prompts_labels is None:
             return None
@@ -95,11 +124,11 @@ class PromptReformatter:
             raise Exception('The prompts and the prompts labels must be the same datatype (i.e. both lists of tensors, or both Nonetypes)')
         else:
             if prompt_type.title() == 'Points':
-                return self.points_reformat(prompts, prompts_labels)
+                return self.points_reformat_dict(prompts, prompts_labels)
             elif prompt_type.title() == 'Scribbles':
-                return self.scribble_reformat(prompts, prompts_labels)
+                return self.scribble_reformat_dict(prompts, prompts_labels)
             elif prompt_type.title() == 'Bboxes':
-                return self.bbox_reformat(prompts, prompts_labels)
+                return self.bbox_reformat_dict(prompts, prompts_labels)
             else:
                 raise NotImplementedError('The currently selected prompt type is not supported')
 
