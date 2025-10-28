@@ -21,9 +21,9 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
         interactive modes. Moreover, for editing iters, at least one refinement prompt must be provided! Users would 
         not otherwise interact with a system! 
         
-        Interaction state is defined as a dict which contains the following key:value pairs:
+        Interaction state for a prompt generator is defined as a dict which contains the following key:value pairs:
             
-            Image - A dictionary: 1) MetaTensor of the image itself 2) tensor representing the affine of the image in the ui-domain. 
+            Image - A dictionary: 1) MetaTensor/Tensor of the image itself 2) tensor representing the affine of the image in the ui-domain. 
             
             Prompts (currently supports points, scribbles, bbox). The prompts and labels provided with
             two types of formats:

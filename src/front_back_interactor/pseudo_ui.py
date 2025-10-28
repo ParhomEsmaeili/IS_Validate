@@ -44,11 +44,17 @@ class FrontEndSimulator:
 
     NOTE: All input arrays, tensors etc, will be on CPU. NOT GPU. 
 
+    NOTE: Although the string referring to the image is designated as  MetaTensor, this is deprecated. It has been adjusted to
+    torch tensors ONLY for the API-interface. The string has been untouched for the sake of minimising checking breakages.
+
+    NOTE: MetaTensor objects are still used internally within the validation framework for handling meta-information which might
+    be required for processing, but are not used at the interface level!
+
     NOTE: Orientation convention is always assumed to be RAS+ (Nibabel)! 
 
         image: A dictionary containing a pre-loaded (UI) metatensor objects 
         {
-        'metatensor':monai metatensor object containing image, torch.float datatype.
+        'metatensor':torch tensor object containing image, torch.float datatype.
         'meta_dict': image_meta_dictionary, contains the original affine from loading and current affine array in the ui-domain.}
 
         infer_mode: A string denoting the inference "mode" being simulated/requested, has three options: 
@@ -64,8 +70,8 @@ class FrontEndSimulator:
             Within the interaction state we also have prompt information stored under the following keys:
 
                 interaction_torch_format: A prompt-type separated dictionary containing the prompt information in list[torch.tensor] format 
-                {'interactions':dict[prompt_type_str[list[torch.tensor/metatensor] OR NONE ]], 
-                'interactions_labels':dict[prompt_type_str_labels [list[torch.tensor/metatensor] OR NONE]],
+                {'interactions':dict[prompt_type_str[list[torch.tensor] OR NONE ]], 
+                'interactions_labels':dict[prompt_type_str_labels [list[torch.tensor] OR NONE]],
                 }
                 interaction_dict_format: A prompt-type separated dictionary containing the prompt info in class separated dict format
                     (where each prompt spatial coord is represented as a sublist).  
@@ -81,19 +87,20 @@ class FrontEndSimulator:
 
         'probs': Dict which contains the following fields:
 
-            'metatensor': MetaTensor or Torch tensor object, ((torch.float dtype)), multi-channel probs map (CHWD), where C = Number of Classes (channel first format)
+            'metatensor': Torch tensor object, ((torch.float dtype)), multi-channel probs map (CHWD), where C = Number of Classes (channel first format)
         
             'meta_dict: Meta information in dict format,  ('affine must match the input-images' affine info).
         
         'pred': Dict which contains the following fields:
-            metatensor: MetaTensor or Torch tensor object ((torch.int dtype)) containing the discretised prediction (shape 1HWD)
+            metatensor: Torch tensor object ((torch.int dtype)) containing the discretised prediction (shape 1HWD)
             meta_dict: Meta information in dict format, which corresponds to the header of the prediction (affine array must match the input image's meta-info)
 
         NOTE: The meta dictionaries will be expected to contain a key:item pair denoted as "affine", containing the 
         affine array. NOTE: The affine must be a torch tensor or numpy array.
         
-        NOTE: MetaTensor objects are permitted as they are lightweight wrappers around torch tensors with meta-info, provided
-        as part of MONAI. However, they need not be used if the user prefers to use torch tensors and meta-dicts directly. 
+        NOTE: MetaTensor objects are NO LONGER supported and add additional headache with minimising code-breakage and leakage of
+        metainformation into the algorithm. Any relevant meta-information will be separately provided in the meta_dict field of the
+        input request. 
 
     NOTE: These outputs must be stored/provided on cpu at the inferface level.
 
@@ -110,11 +117,11 @@ class FrontEndSimulator:
         Within the interaction state:    
          
         prev_probs: A dictionary containing: {
-                'metatensor': Non-modified (CHWD) metatensor/torch tensor that is forward-propagated from the prior output (CHWD).
+                'metatensor': Non-modified (CHWD) torch tensor that is forward-propagated from the prior output (CHWD).
                 'meta_dict': Non-modified meta dictionary that is forward propagated.
                 }
         prev_pred: A dictionary containing: {
-                'metatensor': Non-modified metatensor/torch tensor that is forward-propagated from the prior output (1HWD).
+                'metatensor': Non-modified torch tensor that is forward-propagated from the prior output (1HWD).
                 'meta_dict': Non-modified meta dictionary that is forward propagated.
                 }
 
