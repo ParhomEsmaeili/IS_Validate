@@ -140,7 +140,8 @@ class WriteOutput:
                     with inverse_transform.trace_transform(False):
                         result_reformat = inverse_transform(result_reformat)
                 elif monai_version == '0.9.0':
-                    result_reformat = inverse_transform(result_reformat.data, result_reformat.affine)
+                    result_reformat = inverse_transform(torch.from_numpy(result_reformat.numpy()), result_reformat.affine)
+                    # result_reformat = inverse_transform(result_reformat.data, result_reformat.affine)
                 else:
                     raise Exception('Unknown MONAI version')
             else:
@@ -153,11 +154,13 @@ class WriteOutput:
             channel_split = list(result_reformat.array) 
         elif monai_version == '0.9.0':
             # We assume that we have already checked that the outputs are channel first, and that they meet the quantity of channels.
-            #Result reformat now has a different structure, it is a tuple with (reoriented_tensor, pre-inversion affine, post-inversion affine) structure.
+            #Result reformat now has a different structure, it is a tuple with 
+            # (reoriented_tensor, pre-inversion affine, post-inversion affine) structure -  or more technically:
+            # (reoriented tensor, pre-transform axcodes, post-transform axcodes)
             #Byproduct of the old monai version........
             channel_split = list(result_reformat[0].numpy()) 
         else:
-            raise Exception('unsupposed monai version.')
+            raise Exception('unsupported monai version.')
         #Make use of the writeitk and call it across each channel
         # path_list = [self.write_itk(channel, ref_meta_dict["original_affine"], tmp_dir) for channel in channel_split]
 
