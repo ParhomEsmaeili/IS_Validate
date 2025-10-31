@@ -9,8 +9,8 @@ from monai.data import MetaTensor
 import logging
 import warnings 
 from typing import Optional, Union
-from src.utils.dict_utils import extractor, dict_path_modif
-from src.write_utils.post import WriteOutput
+from src.general_utils.dict_utils import extractor, dict_path_modif
+from src.write_image_utils.post import WriteOutput
 # from monai_version_hack import write_segmentation
 
 # logger = logging.getLogger(__name__)
@@ -49,27 +49,48 @@ class OutputProcessor:
         self.write_segmentation = write_segmentation
 
         #List of paths in the output dictionary that must be on cpu. Each item is in tuple format, index=depth of dict.
-        self.check_cpu_info = [('probs','metatensor'), ('probs', 'meta_dict', 'affine'), ('pred','metatensor'), ('pred','meta_dict', 'affine')] 
-       
-        #Dictionary containing the reference dict (paths), output_dict (paths) and the corresponding checks being examined.
+        
+        # NOTE: These are checks which do not require a reference for validating the integrity of the output data/i.e., they are
+        # static checks based on the output data structure and types.
 
+        #For ensuring that the output data is on cpu device.
+        self.check_device_info = [('probs','metatensor'), ('probs', 'meta_dict', 'affine'), ('pred','metatensor'), ('pred','meta_dict', 'affine')] 
+        #Checking that the probs and preds are torch objects.
+        self.check_obj_type_info = [('probs','metatensor'), ('pred','metatensor')]
+        
+        #NOTE: These are checks which are intended to ensure that the output data matches expected requirements with respect to
+        # some reference data, i.e. it is dynamic according to the experimental configuration or the API request.
+
+        #Dictionary containing the reference dict (paths), output_dict (paths) and the corresponding checks being examined.
         self.check_integrity_info  = {
             #Checking the number of dims for probs and pred. Must be channelfirst CHW(D) and match the quantity 
             #provided in the input image (which must be loaded as a channel first). Also checking the spatial resolution
-            #of the output HW(D) against the input. Also checking that if the returned obj is a MetaTensor, then the affine must match that of the image.
+            #of the output HW(D) against the input. 
+            
+            #Also checking that if the returned obj is a torch Tensor ONLY! NOTE: Big apologies for any confusion that arises from this
+            # I just didn't have the time to refactor all the variable namings to account for removing MetaTensors from the API, 
+            # so I just added comments to clarify.
+
+            # Checking that the affine information (the only currently supported meta-information) must match that of the 
+            # reference image.
             'check_probs':{
                 'reference_name':('reference', 'config_labels_dict'),
                 'reference_paths':(('image','metatensor'), None),
                 'output_paths': (('probs','metatensor'), ('probs', 'metatensor')),
-                'checks': (('check_num_dims','check_spatial_res', 'check_meta_affine'), ('check_num_channel',)),
+                #NOTE: check_meta_affine is DEPRECATED since MetaTensor is no longer used at the API level. We exclusively use the metadict to
+                # 'checks': (('check_num_dims','check_spatial_res', 'check_meta_affine'), ('check_num_channel',)),
+                'checks': (('check_num_dims','check_spatial_res'), ('check_num_channel',)),
                 },
             'check_pred':{
                 'reference_name':('reference',),
                 'reference_paths':(('image','metatensor'),),
                 'output_paths': (('pred','metatensor'),),
-                'checks': (('check_num_dims','check_spatial_res', 'check_meta_affine'),),
+                #NOTE: check_meta_affine is DEPRECATED since MetaTensor is no longer used at the API level. We exclusively use the metadict to
+                # 'checks': (('check_num_dims','check_spatial_res', 'check_meta_affine'),),
+                'checks': (('check_num_dims','check_spatial_res'),),
             },
             #Checking that the pred/probs meta dict item (affine array only!) matches that of the input request.
+            #
             'check_pred_meta_dict':{
                 'reference_name':('reference',),
                 'reference_paths':(('image', 'meta_dict', 'affine'),),
@@ -108,6 +129,15 @@ class OutputProcessor:
                 raise Exception(f'The output field {data_path} was not correctly processed to be placed on cpu during output processing')
             
         return data_dict 
+    
+    def check_obj_type(self, 
+                    data_dict: dict, 
+                    data_path: tuple[Union[str, tuple, int]]):
+        item = extractor(data_dict, data_path)
+        if not type(item) == torch.Tensor:
+            raise TypeError(f'Expected torch.Tensor ONLY in at path: {data_path}, but got {type(item)}')
+        
+        return data_dict
 
     def check_integrity(self,
                         reference_dict: dict,
@@ -132,6 +162,8 @@ class OutputProcessor:
 
         checks: A tuple of keys denoting the points of comparison being used (e.g. spatial_res, meta_info)
         '''
+
+        #Lambdas for performing checks and/or providing helper functions.
         helper_lambdas = {
         'torch_conversion': lambda x: torch.from_numpy(x) if isinstance(x, np.ndarray) else (x if isinstance(x, torch.Tensor) else None) #Presumes that it can only be torch tensor or numpy array.
         }
@@ -141,17 +173,20 @@ class OutputProcessor:
         'check_num_channel' : lambda x,y : len(x) == y.shape[0], # x = class labels dict (inclusive of background), y = Channel-first tensor
         #We make a slight adjustment to the affine check because an exact equivalence check can fail due to floating point precision even
         # though the affine matrices are equivalent. We use torch.isclose to check that the values are close enough.
-        'check_meta_affine': lambda x,y: torch.all(torch.isclose(helper_lambdas['torch_conversion'](x.meta['affine']), helper_lambdas['torch_conversion'](y.meta['affine']))) if isinstance(y, MetaTensor) else True,
-        #torch.all(helper_lambdas['torch_conversion'](x.meta['affine']) == helper_lambdas['torch_conversion'](y.meta['affine'])) if isinstance(y, MetaTensor) else True, #x = MetaTensor, y = MetaTensor or torch Tensor
         
+        # NOTE: check_meta_affine is DEPRECATED since MetaTensor is no longer used at the API level. We exclusively use the metadict to
+        # cross-reference the meta information. 
+        # 'check_meta_affine': lambda x,y: torch.all(torch.isclose(helper_lambdas['torch_conversion'](x.meta['affine']), helper_lambdas['torch_conversion'](y.meta['affine']))) if isinstance(y, MetaTensor) else True,        
         'check_metadict_affine': lambda x,y: torch.all(torch.isclose(helper_lambdas['torch_conversion'](x), helper_lambdas['torch_conversion'](y)))
-        #torch.all(helper_lambdas['torch_conversion'](x) == helper_lambdas['torch_conversion'](y)), #x,y are either torch tensors or np arrays
+        #It is assumed that the affine information is provided as torch tensor or numpy array.
         } 
 
         #The check_num_dims lambda function is intended to be used for checking that the #of dims match (standard
         #intended use case is for checking if a tensor is channel-first by comparison to one that is,
         # but can be used to check num_spatial dims too)
 
+        #The x variable in the lambdas are for the reference information, the y variable is for the output
+        #data which is being cross-referenced for correctness.
         try: 
             x = extractor(reference_dict, reference_path)
         except:
@@ -162,8 +197,6 @@ class OutputProcessor:
             raise Exception['The data dict did not have the right structure, or the tuple provided did not.']
         
         #Testing true for all the provided fields:
-        # if not all([lambdas[field](x,y) for field in fields]):
-        #     raise Exception['One of the tests failed']
         for check in checks:
             if not lambdas[check](x,y):
                 raise Exception(f'Failed test: {check}, for reference: \n {reference_path} \n in \n {reference_dict} \n against data: \n {data_path} in \n {data_dict}')
@@ -184,10 +217,20 @@ class OutputProcessor:
 
         '''
 
+        #Static Checks:
+
         #Performing the checks that the pred, probs, and their meta dict's affine array are on cpu. (or placing them on cpu)
-        for field in self.check_cpu_info:
+        for field in self.check_device_info:
             output_data = self.check_device(output_data, field)
         
+        #Performing the checks that the pred, probs are torch objects.
+        for field in self.check_obj_type_info:
+            output_data = self.check_obj_type(output_data, field)
+
+        #####################################################################################################################
+
+        #Dynamic checks (i.e., experiment or API request dependent):
+
         #Performing the checks that the pred, probs, and their meta info match the "pseudo-UI" domain's 
         #expected requirements.
 
@@ -284,25 +327,3 @@ class OutputProcessor:
 
         return {'pred':pred_path, 'probs':probs_paths}
     
-if __name__ == '__main__':
-
-    pass 
-
-
-    # check_class = OutputProcessor('dummy', 'dummy', 'dummy', 'dummy')
-
-    # #Setting some dummy variables.
-    # testing_dict = {'hi':{'hey':1, 'hello':2, 'bye':3}}
-    # testing_tuple = ('hi', 'hey')
-    # testing_tuple_len1 = ('hi',)
-
-    # #Testing the item extraction function from a dict using a tuple path:
-    # print(check_class.extractor(testing_dict, testing_tuple))
-    # print(check_class.extractor(testing_dict, testing_tuple_len1))
-    # # print(check_class.extractor({}, testing_tuple))
-
-    # #Testing the dict path modification function:
-    # print(check_class.dict_path_modif(testing_dict, testing_tuple, 40))
-    # print(check_class.dict_path_modif(testing_dict, testing_tuple_len1, 40))
-
-    # check_class.check_output({}, {})

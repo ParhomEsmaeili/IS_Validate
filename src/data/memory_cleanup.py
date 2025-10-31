@@ -1,7 +1,7 @@
 import os 
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from src.utils.cleanup import selected_tempfiles_cleanup
+from src.general_utils.cleanup import selected_tempfiles_cleanup
 from typing import Union 
 import warnings 
 import gc 

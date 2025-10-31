@@ -113,7 +113,7 @@ class BasicSpatialPromptGenerator(PromptReformatter):
         pass
     
     
-    def reformat_to_dict(self, torch_format_prompts: dict, torch_format_labels: dict):
+    def output_reformatting(self, torch_format_prompts: dict, torch_format_labels: dict):
         '''
         This function converts the torch format prompts into a dictionary format. Assumed convention:
     
@@ -154,15 +154,21 @@ class BasicSpatialPromptGenerator(PromptReformatter):
         prompt_dict_format = dict()
 
         for prompt_type in self.prompt_types:
-            prompts = torch_format_prompts[prompt_type]
-            prompts_labels = torch_format_labels[f'{prompt_type}_labels']
+            prompts, prompts_labels = torch_format_prompts[prompt_type], torch_format_labels[f'{prompt_type}_labels']
 
             if prompts is None or prompts_labels is None:
                 prompt_dict_format[prompt_type] = None 
             else:
-                prompt_dict_format[prompt_type] = self.reformat_prompts(prompt_type, prompts, prompts_labels)    
-
-        return prompt_dict_format 
+                reformatted_torch_format_prompts, reformatted_torch_format_labels = self.ensure_torch_datatype(prompts, prompts_labels)
+                prompt_dict_format[prompt_type] = self.reformat_to_dict(
+                    prompt_type=prompt_type,
+                    prompts=reformatted_torch_format_prompts, 
+                    prompts_labels=reformatted_torch_format_labels
+                    )    
+                torch_format_prompts[prompt_type] = reformatted_torch_format_prompts
+                torch_format_labels[f'{prompt_type}_labels'] = reformatted_torch_format_labels
+                
+        return torch_format_prompts, torch_format_labels, prompt_dict_format 
         
     def generate_prompt(self, data: dict):
         
@@ -178,17 +184,13 @@ class BasicSpatialPromptGenerator(PromptReformatter):
         in the processor called in the pseudo-ui front-end.
        
         Two relevant fields for prompt generation contained are the: 
-            pred: A dictionary containing 2, optionally 3 subfields:
-                1) "path": Path to the prediction file (optionally)
-                And two relevant subfields
-                2) "metatensor" A Metatensor or torch tensor (1HW(D)) containing the previous segmentation in the native image domain 
-                3) "meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
+            pred: A dictionary containing 2 subfields:
+                1) "metatensor" A Metatensor or torch tensor (1HW(D)) containing the previous segmentation in the native image domain 
+                2) "meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
             
             probs:
-                1) "paths": List of paths to the prediction file (optionally)
-                And two relevant subfields
-                2) "metatensor" A Metatensor or torch tensor (CHW(D)) containing the previous segmentation in the native image domain 
-                3) "meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
+                1) "metatensor" A Metatensor or torch tensor (CHW(D)) containing the previous segmentation in the native image domain 
+                2) "meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
         
         im: (NOTE: OPTIONAL, NoneType for initialisation mode.) the interaction memory dictionary as defined in
         `<https://github.com/IS_Validate/blob/main/src/front_back_interactor/pseudo_ui.py>`   
@@ -212,8 +214,8 @@ class BasicSpatialPromptGenerator(PromptReformatter):
             if not isinstance(data['im'], dict):
                 raise TypeError('The interaction memory must be a dict if it is not a NoneType')
             
-        p_torch_format, plabels_torch_format = self.interactive_prompter(data) 
-        p_dict_format = self.reformat_to_dict(p_torch_format, plabels_torch_format)
+        p_torch_format, plabels_torch_format = self.interactive_prompter(data)
+        p_torch_format, plabels_torch_format, p_dict_format = self.output_reformatting(p_torch_format, plabels_torch_format)
 
         return p_torch_format, plabels_torch_format, p_dict_format
     
