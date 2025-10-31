@@ -27,11 +27,11 @@ def set_parse():
     #Data and application root related args
     
     parser.add_argument('--data_root', type=str, default=codebase_dir)
-    parser.add_argument('--dataset_name', type=str, default='Dataset001_BrainTumour')
-    parser.add_argument('--app_root', type=str, default= '/home/parhomesmaeili/IS_Codebase_Forks/SAM-Med2D_Fork')#NOTE:Just set for debugging purposes.
+    parser.add_argument('--dataset_name', type=str, default='Dataset006_Lung')
+    parser.add_argument('--app_root', type=str, default= '/home/parhomesmaeili/IS_Codebase_Forks/SAM-Med3D_Fork')#NOTE:Just set for debugging purposes.
                         #os.path.join(codebase_dir, 'input_application', 'deprecated'))
     #This acts as the name of the app, but also temporarily acts as the relative path name within the input_applications folder in the app root folder.
-    parser.add_argument('--app_name', type=str, default='SAMMed2D_App')#'Sample_SAMMed2D')
+    parser.add_argument('--app_name', type=str, default='SAM2_App')#'Sample_SAMMed2D')
     parser.add_argument('--metrics_root', type=str, default=os.path.join(codebase_dir, 'results'))
     parser.add_argument('--seg_root', type=str, default=os.path.join(codebase_dir, 'results'))
 
@@ -154,7 +154,7 @@ def gen_experiment_args(args):
     output_dict['dataset_info'] = {
     'dataset_name': args.dataset_name,
     'dataset_image_channels': extract_config(os.path.join(args.data_root, 'datasets', args.dataset_name, 'dataset.json'), 'channel_names'),
-    'task_channel': extractor(output_dict['task_configs'], ('data_sampling', 'image_conf', 'image_channel'))
+    'task_channels': extractor(output_dict['task_configs'], ('data_sampling', 'image_conf', 'image_channel'))
     }
 
 
@@ -283,7 +283,7 @@ def extract_config(path, name):
     #Function which extracts configs dicts from json or txt files. Takes the path to the file, and the name of the specific config desired.
 
     if not os.path.exists(path):
-        raise Exception('The path was not a valid one. Please check.')    
+        raise Exception(f'The path {path} was not a valid one. Please check.')    
 
     #Loading the file:
     with open(path) as f:
