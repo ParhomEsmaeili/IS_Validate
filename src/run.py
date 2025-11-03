@@ -27,15 +27,15 @@ def set_parse():
     parser = argparse.ArgumentParser()
     
     #Experimental name/job-continuation related args
-    parser.add_argument('--experiment_name', type=str, required=False, default=None)#'20251102_212204') #None
+    parser.add_argument('--experiment_name', type=str, required=False, default=None) #None
     parser.add_argument('--continue_execution', action='store_true', default=False)
-    parser.add_argument('--continue_exec_root', type=str, default='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/continue_execution_files') #None
+    parser.add_argument('--continue_exec_root', type=str, default=None) #'/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/continue_execution_files') #None
     #Data and application root related args
     
     parser.add_argument('--data_root', type=str, default=codebase_dir)
     parser.add_argument('--dataset_name', type=str, default='Dataset006_Lung')
-    parser.add_argument('--app_root', type=str, default= '/home/parhomesmaeili/IS_Codebase_Forks/SAM2')#NOTE:Just set for debugging purposes.
-                        #os.path.join(codebase_dir, 'input_application', 'deprecated'))
+    parser.add_argument('--app_root', type=str, default= '/home/parhomesmaeili/IS_Codebase_Forks/SAM2') #NOTE:Just set for debugging purposes.
+                       
     #This acts as the name of the app, but also temporarily acts as the relative path name within the input_applications folder in the app root folder.
     parser.add_argument('--app_name', type=str, default='SAM2_App')#'Sample_SAMMed2D')
     parser.add_argument('--metrics_root', type=str, default=os.path.join(codebase_dir, 'results'))
@@ -49,7 +49,7 @@ def set_parse():
     parser.add_argument('--device_idx', type=int, default=0)
     parser.add_argument('--infer_init', type=str, default='Interactive Init')
     parser.add_argument('--infer_not_edit_bool', action='store_false', default=True)
-    parser.add_argument('--infer_edit_nums', type=int, default=1)
+    parser.add_argument('--infer_edit_nums', type=int, default=5)
     parser.add_argument('--dice_termination_thresh', type=float, default=1.0)
 
     #Validation utilised constructors build args
@@ -77,8 +77,9 @@ def set_parse():
 
     #For the output processor/writing args which are optional.
     parser.add_argument('--write_segmentation', action='store_true', default=False)
-    #Temporary hack overwriting is_seg_tmp args for whether to write the segmentations at all, or not (default is false for now)
+    # Whether to write the segmentations at all, or not (default is false for now)
     parser.add_argument('--is_seg_tmp', action='store_true', default=False)
+    # Whether the segmentations are written as temp files, if they are written. Or whether they are permanent files.
     parser.add_argument('--save_prompts', action='store_true', default=False)
     
 
@@ -499,7 +500,7 @@ def run_instances(
                 )
         
         except Exception as e:
-            print(f'Exception occurred in simulation for case {case_name}, running cleanup. Exception details: {e}')
+            logger.info(f'Exception occurred in simulation for case {case_name}, running cleanup. Exception details: {e}')
         
         finally:
             tempdir_obj.cleanup()

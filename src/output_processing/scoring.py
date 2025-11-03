@@ -215,6 +215,10 @@ class MetricsHandler:
         case_name: A string (extracted from the loaded data_instance on the pseudo-ui front-end) denoting the name
         of the case. 
 
+        empty_foreground: A bool denoting whether the foreground was empty for the given data instance, this is required for
+        cases where the experiment was configured to assess algorithm behaviour when requesting inference for an empty foreground
+        (i.e. sim_empty_fg_automatic config set to True).
+
         terminated_early: A bool denoting whether the iterative refinement process terminated early due to the segmentation
         quality reaching an adequate level. 
 
@@ -239,15 +243,21 @@ class MetricsHandler:
                   }
 
         '''
+        if type(temporary_iter_lims[1]) != int:
+            raise Exception('The upper iteration limit must be an integer denoting the final iteration to be saved/padded to.')
+         
         if temporary_iter_lims[1] == 0:
             #If the upper limit is 0 then we are not performing editing iteration, so no need to provide handling.
             print('The upper budget limit of the iterations is 0 as we only do init, so we will not need to provide any special handling for additional iterations')
         else:
             if empty_foreground:
-                #In this case we will pad the tracked metrics with "empty_foreground" denoting that the foreground was empty and so we could not
-                #perform any editing iterations.
+                #In this case we will pad the tracked metrics with "empty_foreground" denoting that the foreground was empty 
+                # and so we could not perform any editing iterations.
                 warnings.warn('The foreground was empty and the sim_empty_fg_automatic config was set to True, so if performing interactive edits we will pad the tracked metrics with a string denoting empty foreground')
                 for metric_type, metric_subdict in tracked_metrics.items():
+                    if temporary_iter_lims[0] != 0:
+                        raise Exception('If the foreground is empty, the bottom iteration limit must be 0, as there are no edits possible.')
+
                     for iter_num in range(temporary_iter_lims[0] + 1, temporary_iter_lims[1] + 1):
                         #We will be starting at the first iteration after the stopping point, and by default we always have the init, so 
                         #we will only be padding the interactive edit iterations.
@@ -261,12 +271,20 @@ class MetricsHandler:
                                     continue 
                                 #We will pad the per-class scores with a string denoting empty foreground.
                                 metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'][class_lb] = 'empty_foreground'
+            
             elif terminated_early: #Terminated early but not because of a fully empty foreground.
                 warnings.warn('The process terminated early, given that determining the early termination is a design choice that is not fully covered,'
                 ' the current implementation will pad with a string denoting early termination')
                 # raise NotImplementedError('No implementation for handling the tracked metrics when the process terminated early')
 
                 for metric_type, metric_subdict in tracked_metrics.items():
+                    if type(temporary_iter_lims[0]) != int:
+                        raise Exception('If the process terminated early, the bottom iteration limit must be an integer denoting the last completed iteration.')
+                    if not temporary_iter_lims[1] > temporary_iter_lims[0]:
+                        raise Exception('The upper iteration limit must be greater than the bottom iteration limit when handling \n' \
+                        'early termination. Because, either the process did not terminate early (in which case no padding is needed), \n' \
+                        'or the upper limit must be greater than the last completed iteration to allow for padding.')
+                     
                     for iter_num in range(temporary_iter_lims[0] + 1, temporary_iter_lims[1] + 1):
                         #We will be starting at the first iteration after the stopping point, and by default we always have the init, so 
                         #we will only be padding the interactive edit iterations.
@@ -281,6 +299,9 @@ class MetricsHandler:
                                 #We will pad the per-class scores with a string denoting early termination.
                                 metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'][class_lb] = 'terminated_early'
             else:
-                print('The process did not terminate early, so we will save the tracked metrics as they are without modification')
+                if temporary_iter_lims[0] != None:
+                    raise Exception('If the process did not terminate early, the bottom iteration limit must be a NoneType. There is \n' \
+                    'no need to pad the tracked metrics.')
+                # print('The process did not terminate early, so we will save the tracked metrics as they are without modification')
 
         write_to_csvs(case_name=case_name, csv_paths=self.metrics_savepaths, tracked_metrics=tracked_metrics)  

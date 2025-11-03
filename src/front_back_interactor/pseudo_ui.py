@@ -65,7 +65,7 @@ class FrontEndSimulator:
         config_labels_dict: A dictionary containing the semantic class label - class integer code mapping relationship being used. 
         note that the codes are >= 0 with 0 = background always, and that the labels are pre-normalised. E.g., 0,1,2,3... and never 0,2,3,5.
 
-        i_state: An interaction dictionary containing the current input interaction states:
+        i_state: An interaction dictionary containing the current input interaction states OR a NoneType for automatic segmentation mode.:
               
             Within the interaction state we also have prompt information stored under the following keys:
 
@@ -385,13 +385,13 @@ class FrontEndSimulator:
         if not isinstance(infer_config, dict) or not infer_config:
             raise TypeError('The inference call config must be a dictionary which is non-empty.')
         
-        if not isinstance(im, dict) and im is not None:
+        if not isinstance(im, dict) and im != None:
             raise TypeError('The inference interaction memory should be a dict or a NoneType')
         
         if isinstance(im, dict) and not im:
             raise Exception('If the inference interaction memory exists, then it must not be empty')
 
-        if not isinstance(prev_output_data, dict) and prev_output_data is not None:
+        if not isinstance(prev_output_data, dict) and prev_output_data != None:
             raise TypeError('The prev output data should be a dict or a NoneType')
         
         if isinstance(prev_output_data, dict) and not prev_output_data:
@@ -446,24 +446,39 @@ class FrontEndSimulator:
         #We extract the current interaction state's name (last entry in the dictionary)
         if len(im.keys()) == 1:
             last_is_key = list(im.keys())[0]
-    
-            i_state = {
-                'interaction_torch_format': im[last_is_key]['interaction_torch_format'],
-                'interaction_dict_format': im[last_is_key]['interaction_dict_format'],
-            } 
+
+            if im[last_is_key] == None:
+                if not last_is_key.title() == 'Automatic Init':
+                    raise Exception('The interaction memory for the last interaction state was None, but the last interaction state was not Automatic Init!')
+                else:
+                    i_state = None 
+            else:
+                i_state = {
+                    'interaction_torch_format': im[last_is_key]['interaction_torch_format'],
+                    'interaction_dict_format': im[last_is_key]['interaction_dict_format'],
+                } 
         else:
             #In this case we are going to have to search through the keys to find the last one 
             iteration_names = set(im.keys())     
             sorted_iterations = sort_infer_calls(iteration_names)
             last_is_key = sorted_iterations[-1]
-            i_state = {
+            if im[last_is_key] == None:
+                if not last_is_key.title() == 'Automatic Init':
+                    raise Exception('The interaction memory for the last interaction state was None, but the last interaction state was not Automatic Init!')
+                i_state = None 
+            else:
+                i_state = {
                     'interaction_torch_format': im[last_is_key]['interaction_torch_format'],
                     'interaction_dict_format': im[last_is_key]['interaction_dict_format'],
             }
 
-        if not i_state:
-            raise Exception('The interaction state dictionary could not be constructed from the interaction memory, \n ' \
-            'or was empty.')
+        if last_is_key.title() == 'Automatic Init':
+            if i_state is not None:
+                raise Exception('The interaction state for automatic init must be a NoneType!')
+        else:
+            if not isinstance(i_state, dict) or not i_state: #Second is just a bool check to ensure it is not empty.
+                raise Exception('The interaction state dictionary could not be constructed from the interaction memory, \n ' \
+                'or was empty.')
         return i_state
     
     def update_tracked_paths(self, output_paths:dict, inf_call_config:dict):
@@ -640,11 +655,11 @@ class FrontEndSimulator:
             raise Exception('Data_instance should be a non-empty dictionary.')
         if not isinstance(infer_call_config, dict) or not infer_call_config:
             raise Exception('The infer call config should be a non-empty dictionary.')
-        if not isinstance(im, dict) and im is not None:
+        if not isinstance(im, dict) and im != None:
             raise TypeError('The im should either exist as a dictionary for edit request generation, or be a NoneType for init.')
         if isinstance(im, dict) and not im:
             raise ValueError('The im, if a dict, must be non-empty.')
-        if not isinstance(prev_output_data, dict) and prev_output_data is not None:
+        if not isinstance(prev_output_data, dict) and prev_output_data != None:
             raise TypeError('The prev_output_data should either exist as a dictionary for edit request generation, or be a NoneType for init.')
         if isinstance(prev_output_data, dict) and not prev_output_data:
             raise ValueError('The prev_output_data, if a dict, should be non-empty.')
@@ -652,10 +667,10 @@ class FrontEndSimulator:
 
 
         if infer_call_config['mode'].title() == 'Automatic Init':
-            if prev_output_data is not None: #We choose an explicit check of Nonetype for the if statement
+            if prev_output_data != None: #We choose an explicit check of Nonetype for the if statement
                 raise TypeError('The previous output should not exist for initialisation')
             
-            if infer_call_config['edit_num'] is not None:
+            if infer_call_config['edit_num'] != None:
                 raise TypeError('The edit num in the infer call config dict should not exist for initialisation!')
             
             im = self.prompting_im_handler(
@@ -687,9 +702,9 @@ class FrontEndSimulator:
                 }
             
         elif infer_call_config['mode'].title() == 'Interactive Edit':
-            if prev_output_data is None:
+            if prev_output_data == None:
                 raise ValueError('There must be a dictionary containing the outputs of the prior inference call!')
-            if infer_call_config['edit_num'] is None and not isinstance(infer_call_config['edit_num'], int):
+            if infer_call_config['edit_num'] == None and not isinstance(infer_call_config['edit_num'], int):
                 raise TypeError('The edit num in the infer call config dict should be an int!')
             
             im = self.prompting_im_handler(
@@ -738,14 +753,17 @@ class FrontEndSimulator:
         
         if empty_foreground:
             if infer_run_configs['init'].title() == 'Interactive Init':
-                #If the foreground is empty, we cannot perform an interactive initialisation with current prompting mechanisms, so if this is the config then we raise an error.
-                raise ValueError('Cannot currently perform interactive initialisation with empty foreground with our prompting mechanisms, this should have been flagged earlier!')    
-            
+                #If the foreground is empty, we cannot perform an interactive initialisation with current prompting 
+                # mechanisms, so if this is the config then we raise an error. We should NOT have reached this point.
+                raise ValueError('Cannot currently perform interactive initialisation with empty foreground with our prompting mechanisms, \n '
+                                'this should have been flagged earlier!')
+
             if self.args['sim_empty_fg_automatic']:
-                #We can perform the initialisation, but only the initialisation. We currently do not support any mechanisms for simulating prompts for empty foregrounds.
+                #We can perform the initialisation, but only the initialisation. We currently do not support any mechanisms 
+                # for simulating prompts for empty foregrounds.
                 warnings.warn('We have an empty foreground, with current prompting strategy we will only perform an automatic initialisation, if at all.')
                 #We will modify the infer_run_configs to only perform an automatic initialisation.
-                infer_run_configs['init'] == 'Automatic Init'
+                infer_run_configs['init'] = 'Automatic Init'
                 infer_run_configs['edit_bool'] = False
                 infer_run_configs['num_iters'] = 0
                 #This is only a temporary fix, we will implement a more robust solution in the future, but also it is only implemented for the current 
@@ -753,7 +771,7 @@ class FrontEndSimulator:
             elif not self.args['sim_empty_fg_automatic']:
                 raise Exception('There was an empty foreground and the sim_empty_fg_automatic flag was not set to True, this should have been flagged earlier!')
             else:
-                raise Exception('Unknown use-case.')
+                raise Exception('Unknown use-case for handling instance where foreground is empty.')
         
         #We use the initialisation mode provided in the inference run config to initialise the model.
         if len({infer_run_configs['init'].title()} & {'Automatic Init', 'Interactive Init'}) == 1:
@@ -806,9 +824,6 @@ class FrontEndSimulator:
                 #First we store the prior output paths here:
                 self.update_tracked_paths(output_paths=output_paths, inf_call_config={'mode': 'Interactive Edit', 'edit_num': iter_num})
 
-                if iter_num == 99:
-                    print('pause')
-
                 #Generate the inference request and initialises the inference interaction memory:
                 request, inf_im = self.infer_app_request_generator(
                     # data_instance=data_instance, 
@@ -855,8 +870,8 @@ class FrontEndSimulator:
             Contains the following fields:
 
                 'image': dict - A dictionary containing the following subfields
-                    'metatensor': Loaded MetaTensor in RAS orientation (pseudo-UI native domain) channelfirst 1HWD.
-                    'meta_dict': MetaTensor's meta_dict, contains the original affine array, and the pseudo-ui affine array
+                    'metatensor': Loaded MetaTensor in nibabel RAS+ orientation (pseudo-UI native domain) channelfirst 1HWD.
+                    'meta_dict': meta_dict, contains the original affine array, and the pseudo-ui domainaffine array
                 
                 'label': dict - A dictionary containing the same subfields as the image! Not one-hot encoded for the MetaTensors!
         
@@ -876,30 +891,31 @@ class FrontEndSimulator:
         if not isinstance(tmp_dir_path, str) or not tmp_dir_path:
             raise Exception('The tmp_dir path must be a string and non-empty.')
 
-        #Checking if the foreground for this instance is even non-empty... we will currently not be supporting this at all for interaction simulation. In most scenarios
-        # it would not make sense to simulate prompts for an empty foreground, as ultimately there usually would be some salient target to have prompted the user to interact
+        #Checking if the foreground for this instance is even non-empty. We will currently not be supporting this at all for 
+        # interaction simulation. In most scenarios it would not make sense to simulate prompts for an empty foreground, 
+        # as ultimately there usually would be some salient target to have prompted the user to interact
         # with the image in the first place.
+
+        #We initialise with a nonetype, and then update it if we have an empty foreground case which is also permitted to
+        #continue depending on the configuration flag (i.e., sim automated empty fg).
+        empty_foreground = None 
+
         if check_empty(data_instance['label']['metatensor'], self.args['configs_labels_dict']['background']):
             if self.args['infer_run_configs']['init'].title() == 'Automatic Init':
                 if not self.args['sim_empty_fg_automatic']:
                     warnings.warn(f'The gold standard segmentation for the task foreground is completely empty and sim_empty_fg_automatic flag is false, skipping... \n'
                         f'If this is not intended, please check the data instance provided. \n'
-                        f'Image path: {data_instance["image"]["path"]} \n'
-                        f'Ground truth path: {data_instance["label"]["path"]} \n'
                         f'Case name: {case_name} \n')
-                    return    
+                    return  #We return and just continue onto the next data instance.
                 else:
                     #If automatic initialisation is being used, in this case we want the algorithm to be able to appropriately handle the empty foreground case.
                     warnings.warn(f'The gold standard seg. for the foreground is empty, but the sim_empty_fg_automatic flag is set to True, so we will only perform an automatic initialisation. \n'
-                        f'Image path: {data_instance["image"]["path"]} \n'
-                        f'Ground truth path: {data_instance["label"]["path"]} \n'
                         f'Case name: {case_name} \n')
                     empty_foreground = True
+                    #We set empty foreground flag to true, so that the iterative loop can handle this case appropriately.
             else:
                 warnings.warn(f'The gold standard segmentation for the task foreground is completely empty, skipping... \n'
                     f'If this is not intended, please check the data instance provided. \n'
-                    f'Image path: {data_instance["image"]["path"]} \n'
-                    f'Ground truth path: {data_instance["label"]["path"]} \n'
                     f'Case name: {case_name} \n')
                 return # We return here, since we do not want to raise an exception for this case, but rather skip the instance.
         
@@ -924,12 +940,26 @@ class FrontEndSimulator:
         #First we initialise the dictionary for storing the set of output paths. 
         self.tracked_paths = {}
 
-        #Executing the iterative loop.
-        try:       
-            iter_num, terminated_early = self.iterative_loop(empty_foreground=empty_foreground)
-        except:
-            iter_num, terminated_early = self.iterative_loop()
-            empty_foreground = False       
+        #Executing the iterative loop. 
+        
+        #NOTE: We only reach here after checking for empty foregrounds, where we have a flag
+        #which permits continuation of evaluation if automatic initialisation is permitted to be used in these edge cases. 
+        
+        #If empty_foreground is not True, then it was FALSE, and so we proceed as normal.
+        if empty_foreground == None:
+            empty_foreground = False
+        else:
+            assert empty_foreground == True, 'The empty_foreground flag should either be True or False at this point.'
+        
+        iter_num, terminated_early = self.iterative_loop(empty_foreground=empty_foreground)
+        
+        # DEPRECATED: # try:       
+        #     iter_num, terminated_early = self.iterative_loop(empty_foreground=empty_foreground)
+        # # except:
+        #     iter_num, terminated_early = self.iterative_loop()
+        #     empty_foreground = False       
+        
+        
         #Saving the final set of tracked metrics....
 
         self.metrics_handler.save_metrics(
