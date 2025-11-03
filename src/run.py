@@ -49,7 +49,7 @@ def set_parse():
     parser.add_argument('--device_idx', type=int, default=0)
     parser.add_argument('--infer_init', type=str, default='Interactive Init')
     parser.add_argument('--infer_not_edit_bool', action='store_false', default=True)
-    parser.add_argument('--infer_edit_nums', type=int, default=5)
+    parser.add_argument('--infer_edit_nums', type=int, default=100)
     parser.add_argument('--dice_termination_thresh', type=float, default=1.0)
 
     #Validation utilised constructors build args
