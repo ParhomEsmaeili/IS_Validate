@@ -6,8 +6,10 @@ import os
 import datetime
 import tempfile 
 import importlib
-import torch 
-import warnings 
+import torch
+import pickle 
+import warnings
+from typing import Optional
 codebase_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__))) 
 sys.path.append(codebase_dir)
 from src.front_back_interactor.pseudo_ui import FrontEndSimulator 
@@ -24,29 +26,30 @@ def set_parse():
     # %% set up parser
     parser = argparse.ArgumentParser()
     
+    #Experimental name/job-continuation related args
+    parser.add_argument('--experiment_name', type=str, required=False, default=None)#'20251102_212204') #None
+    parser.add_argument('--continue_execution', action='store_true', default=False)
+    parser.add_argument('--continue_exec_root', type=str, default='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/continue_execution_files') #None
     #Data and application root related args
     
     parser.add_argument('--data_root', type=str, default=codebase_dir)
     parser.add_argument('--dataset_name', type=str, default='Dataset006_Lung')
-    parser.add_argument('--app_root', type=str, default= '/home/parhomesmaeili/IS_Codebase_Forks/SAM-Med3D_Fork')#NOTE:Just set for debugging purposes.
+    parser.add_argument('--app_root', type=str, default= '/home/parhomesmaeili/IS_Codebase_Forks/SAM2')#NOTE:Just set for debugging purposes.
                         #os.path.join(codebase_dir, 'input_application', 'deprecated'))
     #This acts as the name of the app, but also temporarily acts as the relative path name within the input_applications folder in the app root folder.
     parser.add_argument('--app_name', type=str, default='SAM2_App')#'Sample_SAMMed2D')
     parser.add_argument('--metrics_root', type=str, default=os.path.join(codebase_dir, 'results'))
     parser.add_argument('--seg_root', type=str, default=os.path.join(codebase_dir, 'results'))
 
-    # parser.add_argument('--test_mode', type=str, default='test')
-    # parser.add_argument('--data_fold', type=str, default=None)
-    # parser.add_argument('--dataloading_type', type=str, default='basic')
-    
-    #Experimental process/method related args 
+    #Experimental process/method related args
+    parser.add_argument('--shuffle_cases', action='store_true', default=False)
     parser.add_argument('--random_seed', type=int, default=341103)
     parser.add_argument('--cuda_deterministic_disable', action='store_true', default=False)
     parser.add_argument('--torch_deterministic_disable', action='store_true', default=False)
     parser.add_argument('--device_idx', type=int, default=0)
     parser.add_argument('--infer_init', type=str, default='Interactive Init')
     parser.add_argument('--infer_not_edit_bool', action='store_false', default=True)
-    parser.add_argument('--infer_edit_nums', type=int, default=100)
+    parser.add_argument('--infer_edit_nums', type=int, default=1)
     parser.add_argument('--dice_termination_thresh', type=float, default=1.0)
 
     #Validation utilised constructors build args
@@ -86,7 +89,6 @@ def gen_experiment_args(args):
     #Takes an argparse namedspace obj and constructs a dictionary required for the the run script (most of which will be inherited for the front end init).
 
     output_dict = dict() 
-
     #Setting the app name for the experiment, also available for the build script. 
     output_dict['app_name'] = args.app_name 
 
@@ -117,10 +119,30 @@ def gen_experiment_args(args):
     output_dict['seg_dataset_subdir'] = os.path.join(output_dict['seg_root'], args.dataset_name) #Subdir for the dataset which is being used in the task, this will
     #typically be the same as the results dataset subdir, but in case of separate mounts we want to be able to store these large files externally.
 
-    #Experiment specific dirs (i.e. for a specific run of the evaluation script!)
-    output_dict['exp_datetime'] = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_dict['exp_results_dir'] = os.path.join(output_dict['results_dataset_subdir'], output_dict['exp_datetime'])
-    output_dict['exp_seg_dir'] = os.path.join(output_dict['seg_dataset_subdir'], output_dict['exp_datetime'])
+    #Experiment logging related arguments (i.e. for a specific run of the evaluation script!)
+    if args.continue_execution:
+        if args.experiment_name is None:
+            raise ValueError('If configured for continuing an experiment execution, must provide the experiment name to \n ' \
+            'continue from otherwise we cannot proceed.')
+        else:
+            output_dict['experiment_name'] = args.experiment_name
+        
+        if args.continue_exec_root is None:
+            raise ValueError('If continuing an experiment execution, must provide the root directory of the \n'
+            'files to write/read where to continue from.')
+        else:
+            output_dict['continue_exec_path'] = os.path.join(args.continue_exec_root, args.experiment_name + '.pkl')
+    else:
+        if args.experiment_name is None:
+            output_dict['experiment_name'] = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        else:
+            raise Exception('If not continuing an experiment execution, cannot provide an experiment name, \n'
+            'this is redundant.')
+    output_dict['continue_execution'] = args.continue_execution #Storing this boolean.
+    output_dict['exp_results_dir'] = os.path.join(output_dict['results_dataset_subdir'], output_dict['experiment_name'])
+    output_dict['exp_seg_dir'] = os.path.join(output_dict['seg_dataset_subdir'], output_dict['experiment_name'])
+
+
     ########################################################################################################################
 
     #Configuring more generic experiment related configs.
@@ -176,7 +198,7 @@ def gen_experiment_args(args):
     # output_dict['metrics_prompts_configs']
     
     #Extracting the random seed/randomness related info:
-
+    output_dict['shuffle_cases'] = args.shuffle_cases
     output_dict['random_seed'] = args.random_seed
     output_dict['cuda_deterministic'] = not args.cuda_deterministic_disable
     output_dict['torch_deterministic'] = not args.torch_deterministic_disable
@@ -243,7 +265,7 @@ def gen_experiment_args(args):
     return output_dict 
 
 
-def create_seg_dirs(exp_seg_dir, infer_run_conf):
+def create_seg_dirs(exp_seg_dir, infer_run_conf, exist_ok=False):
     '''
     Function which creates the directories for saving the segmentations (if desired), according to the inference run configuration.
     Args: 
@@ -257,7 +279,7 @@ def create_seg_dirs(exp_seg_dir, infer_run_conf):
 
     #Create the init (ALWAYS PROVIDED!) dir
     init_dir = os.path.join(exp_seg_dir, infer_run_conf['init'].title())
-    os.makedirs(init_dir, exist_ok=False)
+    os.makedirs(init_dir, exist_ok=exist_ok)
 
     #Create the edits (optional) dirs 
     if not isinstance(infer_run_conf['edit_bool'], bool):
@@ -267,7 +289,7 @@ def create_seg_dirs(exp_seg_dir, infer_run_conf):
 
             if isinstance(infer_run_conf['num_iters'], int):
                 for iter in range(1, infer_run_conf['num_iters'] + 1):
-                    os.makedirs(os.path.join(exp_seg_dir, f'Interactive Edit Iter {iter}'), exist_ok=False)
+                    os.makedirs(os.path.join(exp_seg_dir, f'Interactive Edit Iter {iter}'), exist_ok=exist_ok)
             else:
                 raise TypeError('If running editing, needs to be an int type for the number of iterations performed.')
 
@@ -360,30 +382,139 @@ def init_infer_app(experiment_args:dict):
         
     return infer_app
 
-def run_instances(dataloader, fe_sim_obj, logger):
-    #Function is intended for iterating through the constructed dataset.
+def write_to_checkpoint(
+        checkpoint_path:str,
+        event: str,
+        checkpoint_info: dict,
+        updated_fields: dict | None,
+    ):
+    if checkpoint_path is None:
+        raise ValueError('Checkpoint path cannot be None when writing a checkpoint.')
+    else:
+        if event == 'pre_loop':
+            #In this case we are writing the initial info before the loop starts, in case the subprocess fails before any
+            # sample completed
+            pass #NOTE: No need to update fields here. 
+
+        elif event == 'pre_subprocess':
+            if updated_fields is None:
+                raise ValueError('When writing a checkpoint pre_subprocess, must provide the updated fields dict.')
+            #In this case, we are writing some initial info before a sample is passed through for evaluation.
+            
+            #NOTE: We will be measured about what variables can be updated here. We do not want to be too hasty.
+            required_fields = ('current_temp_dir',)
+            if not all([key in updated_fields.keys() for key in required_fields]):
+                raise ValueError(f'When writing a checkpoint pre_subprocess, must only update the following fields: {required_fields}')
+
+            checkpoint_info.update(updated_fields)
+
+        elif event == 'post_subprocess':
+            if updated_fields is None:
+                raise ValueError('When writing a checkpoint post_subprocess, must provide the updated fields dict.')
+            
+            required_fields = ('last_completed_case', 'last_completed_idx',)
+            if not all([key in updated_fields.keys() for key in required_fields]):
+                raise ValueError(f'When writing a checkpoint post_subprocess, must only update the following fields: {required_fields}')
+            checkpoint_info.update(updated_fields)
+        elif event == 'post_cleanup':
+            #Only intended for when the temporary dir path is to be removed after cleanup.
+            if updated_fields is None:
+                raise ValueError('When writing a checkpoint post_cleanup, must provide the updated fields dict.')
+            required_fields = ('current_temp_dir',)
+            if not all([key in updated_fields.keys() for key in required_fields]):
+                raise ValueError(f'When writing a checkpoint post_cleanup, must only update the following fields: {required_fields}')
+            checkpoint_info.update(updated_fields)
+        else:
+            raise ValueError(f'Event type {event} not recognised for writing to checkpoint.')
+
+        #Finally writing the checkpoint info to the checkpoint path.
+        with open(checkpoint_path, 'wb') as f:
+                pickle.dump(checkpoint_info, f) 
+ 
+def run_instances(
+        dataloader, 
+        fe_sim_obj, 
+        logger, 
+        loaded_experiment_checkpoint:dict = None,
+        experiment_checkpoint_path:str = None,
+        resume_bool: bool = False
+    ):
     
+    if resume_bool:
+        logger.info(f'Resuming after {loaded_experiment_checkpoint["last_completed_case"]} from {dataloader.data[0]["case_name"]}')
+        resumed_idx = loaded_experiment_checkpoint['last_completed_idx'] + 1
+
+    if experiment_checkpoint_path is not None:
+        write_to_checkpoint(
+            checkpoint_path=experiment_checkpoint_path,
+            event='pre_loop',
+            checkpoint_info=loaded_experiment_checkpoint,
+            updated_fields=None
+
+    )
+
     #Iterating through the dataloader.
-    for idx, data_instance in enumerate(dataloader):
+    for case_idx, data_instance in enumerate(dataloader):
         #Running a check on the data_instance loaded.
         iterate_dataloader_check(data_instance=data_instance)
         
-        #Reformat the data instance
+
+        #Reformat the data instance to pass into the simulation.
         data_instance, case_name = data_instance_reformat(data_instance=data_instance)
         
-        logger.info(f'Sample {idx} of {len(dataloader)}, case_name: {case_name}')
+        #Logging the progress.
+        if resume_bool:
+            true_idx = case_idx + resumed_idx
+            logger.info(f'Sample {true_idx + 1} of {len(dataloader) + resumed_idx}, case_name: {case_name}')
+        else:
+            logger.info(f'Sample {case_idx + 1} of {len(dataloader)}, case_name: {case_name}')
         
-        #Initialising the temporary directory.
+
+        #Initialising the temporary directory for this data instance.
         tempdir_obj = tempfile.TemporaryDirectory(dir=os.path.dirname(fe_sim_obj.args['seg_root'])) 
         #By default it is the codebase_dir but if externally mounted drives for the results are
         #required then this will be changed to the root of the directory which contains the segmentations directory)
 
+        if experiment_checkpoint_path is not None:
+            write_to_checkpoint(
+                checkpoint_path=experiment_checkpoint_path,
+                event='pre_subprocess',
+                checkpoint_info=loaded_experiment_checkpoint,
+                updated_fields={'current_temp_dir': tempdir_obj.name}
+
+        )
         try:
             #Calling the front-end simulator
             fe_sim_obj(data_instance=data_instance, case_name=case_name, tmp_dir_path=tempdir_obj.name) 
+            
+            if experiment_checkpoint_path is not None:
+                write_to_checkpoint(
+                    checkpoint_path=experiment_checkpoint_path,
+                    event='post_subprocess',
+                    checkpoint_info=loaded_experiment_checkpoint,
+                    updated_fields={
+                        'last_completed_case': case_name, 
+                        'last_completed_idx': true_idx if resume_bool else case_idx
+                        }
+                )
+        
+        except Exception as e:
+            print(f'Exception occurred in simulation for case {case_name}, running cleanup. Exception details: {e}')
+        
         finally:
-            tempdir_obj.cleanup() 
+            tempdir_obj.cleanup()
+
+            if experiment_checkpoint_path is not None:
+                write_to_checkpoint(
+                    checkpoint_path=experiment_checkpoint_path,
+                    event='post_cleanup',
+                    checkpoint_info=loaded_experiment_checkpoint,
+                    updated_fields={
+                        'current_temp_dir': None
+                    }
+                )
             # raise Exception('There was an error in the front-end simulator, running cleanup.')
+        
     logger.info('Successfully completed!')
 
 def init_fe(infer_app, experiment_args):
@@ -436,15 +567,6 @@ def main():
     #Reformulate the args into the format required for the experiment:
     experiment_args = gen_experiment_args(args)
 
-    ################################## Configuration and extraction of data-related info.  ######################################################################
-    
-    #Extraction of the config labels dictionary, and the initialisation of the dataloader
-    configs_labels_dict, dataloader = init_task_cases(
-        dataset_dir=experiment_args['input_dataset_dir'],
-        exp_task_configs=experiment_args['task_configs'])
-    
-    #We append the config labels dict to the experiment args. 
-    experiment_args['configs_labels_dict'] = configs_labels_dict
 
     ############################## Initialisation of any required directories for this experiment ####################################################################
 
@@ -455,32 +577,104 @@ def main():
     os.makedirs(experiment_args['results_dataset_subdir'], exist_ok=True) 
     os.makedirs(experiment_args['seg_dataset_subdir'], exist_ok=True)
 
+    ############################## Loading a pickle file if continuing an experiment execution ##############################################################
+    
+    loaded_experiment_checkpoint = None 
+    if experiment_args['continue_execution']:
+        if os.path.exists(experiment_args['continue_exec_path']):
+            with open(experiment_args['continue_exec_path'], 'rb') as f:
+                loaded_experiment_checkpoint = pickle.load(f)
+        #Only update the checkpoint variables if the file existed and was loaded.
+
+    #Checking that the random seed is the same if continuing an experiment execution.
+    if loaded_experiment_checkpoint is not None:
+        if loaded_experiment_checkpoint['random_seed'] != experiment_args['random_seed']:
+            raise ValueError(f'Random seed has changed from {loaded_experiment_checkpoint["random_seed"]} to {experiment_args["random_seed"]}.')
+
+        if loaded_experiment_checkpoint['shuffle_cases'] != experiment_args['shuffle_cases']:
+            raise ValueError(f'Shuffle cases boolean has changed from {loaded_experiment_checkpoint["shuffle_cases"]} to {experiment_args["shuffle_cases"]}.')
+        
+        #################################### Clearing any untidied temp files ############################
+        if loaded_experiment_checkpoint['current_temp_dir'] is not None:
+            if os.path.exists(loaded_experiment_checkpoint['current_temp_dir']):
+                #If the temp dir still exists, we remove it.
+                try:
+                    import shutil
+                    shutil.rmtree(loaded_experiment_checkpoint['current_temp_dir'])
+                except Exception as e:
+                    raise Exception(f'Could not remove the temporary directory at {loaded_experiment_checkpoint["current_temp_dir"]} during cleanup before resuming experiment execution. Exception details: {e}')
+        experiment_args['resume_bool'] = True
+    else:
+        experiment_args['resume_bool'] = False
+
+    #################################### END OF LOADING CONTINUATION FILE  ###############################################################
+
+
+    ################################## Configuration and extraction of data-related info.  ######################################################################
+    
+    #Extraction of the config labels dictionary, and the initialisation of the dataloader
+    configs_labels_dict, dataloader = init_task_cases(
+        dataset_dir=experiment_args['input_dataset_dir'],
+        exp_task_configs=experiment_args['task_configs'],
+        shuffle_bool=experiment_args['shuffle_cases'],
+        random_seed=experiment_args['random_seed'],
+        last_completed_case=loaded_experiment_checkpoint['last_completed_case'] if loaded_experiment_checkpoint is not None else None,
+        last_completed_idx=loaded_experiment_checkpoint['last_completed_idx'] if loaded_experiment_checkpoint is not None else None
+        )
+    
+    #We append the config labels dict to the experiment args. 
+    experiment_args['configs_labels_dict'] = configs_labels_dict
+
+    # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
     #Creating a base dir for the experiment to store metrics.
-    os.makedirs(experiment_args['exp_results_dir'], exist_ok=False) #Should not already exist.
+    if not experiment_args['continue_execution'] or loaded_experiment_checkpoint is None:
+        os.makedirs(experiment_args['exp_results_dir'], exist_ok=False) 
+        #Should not already exist, if continuing is not configured.
+        if not experiment_args['root_match']:
+            #If we store the metrics and segmentations in the same root, then we do not need to create the base directory again.
 
-    if not experiment_args['root_match']:
-        #If we store the metrics and segmentations in the same root, then we do not need to create the base directory again.
-
-        #Creating a base dir for the experiment segmentations to be stored.
-        os.makedirs(experiment_args['exp_seg_dir'], exist_ok=False) #Should not already exist for the current experimental run.
+            #Creating a base dir for the experiment segmentations to be stored.
+            #Should not already exist for the current experimental run if not configured to permit continuation.
+            os.makedirs(experiment_args['exp_seg_dir'], exist_ok=False)
+    else:
+        pass #If continuing an experiment execution and the checkpoint was loaded, then these directories should already exist.
 
     #Creating the subdirectories and the csv files for the metrics, then returning a dict of the savepaths according to each and every one of these.
-    experiment_args['metrics_savepaths'] = init_metrics_saves(exp_results_dir=experiment_args['exp_results_dir'], metrics_configs=experiment_args['metrics_configs'], configs_labels_dict=configs_labels_dict)
+    if loaded_experiment_checkpoint is None:
+        experiment_args['metrics_savepaths'] = init_metrics_saves(exp_results_dir=experiment_args['exp_results_dir'], metrics_configs=experiment_args['metrics_configs'], configs_labels_dict=configs_labels_dict)
+    else:
+        #We will load the path from the experiment's configuration pickle file.
+        experiment_args['metrics_savepaths'] = loaded_experiment_checkpoint['metrics_savepaths']
+    
 
     #Based on whether the segmentation is being saved permanently, create the corresponding subdirectories or not. 
     if not experiment_args['is_seg_tmp']:
-        create_seg_dirs(exp_seg_dir=experiment_args['exp_seg_dir'], infer_run_conf=experiment_args['infer_run_configs'])
-        
+        create_seg_dirs(
+            exp_seg_dir=experiment_args['exp_seg_dir'], 
+            infer_run_conf=experiment_args['infer_run_configs'], 
+            exist_ok=experiment_args['continue_execution'] #If continuation capability has been configured, then
+            # we permit existing dirs.
+        )
+
     #Save the info about the experiment args, save the info about the application config which should be spit out as a method of the callable infer class.
-    
-    logger_save_name = f'experiment_{experiment_args["exp_datetime"]}_logs'
+
+    logger_save_name = f'experiment_{experiment_args["experiment_name"]}_logs'
     experiment_args_logger(logger_save_name=logger_save_name, root_dir=experiment_args['exp_results_dir'], screen=True, tofile=True)
     exp_setup_logger = logging.getLogger(logger_save_name)
-    exp_setup_logger.info(f'Starting up! {os.linesep}')
+    
+    
+    #Here we will load the existing information from the interrupted run, if continuing an experiment execution is configured.
+    #NOTE: The file might not yet exist if this is the first time we are starting an experiment! We will only be creating
+    # this file on the first instance where a case is completely finished! 
 
-    log_config_writer('Experiment Args', experiment_args, exp_setup_logger)
+    if loaded_experiment_checkpoint is None:
+        #In this case, nothing to continue. So we start from scratch.
+        exp_setup_logger.info(f'Starting up! {os.linesep}')
+        log_config_writer('Experiment Args', experiment_args, exp_setup_logger)
 
-    exp_setup_logger.info(f'Moving onto build now!: {os.linesep} {os.linesep} {os.linesep}')
+        exp_setup_logger.info(f'Moving onto build now!: {os.linesep} {os.linesep} {os.linesep}')
 
     #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     #Now we move onto building the app
@@ -493,10 +687,10 @@ def main():
     if not app_config_dict:
         raise Exception('Should at least return the application name in the app_configs method.')
 
-    #Writing app configs. 
-    log_config_writer('Application Args', app_config_dict, exp_setup_logger)
-
-
+    #Writing app configs, only if we are not continuing an experiment.
+    if loaded_experiment_checkpoint is None:
+        log_config_writer('Application Args', app_config_dict, exp_setup_logger)
+    
 
     #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -506,7 +700,26 @@ def main():
 
 
     # Iterating through the dataset:
-    run_instances(dataloader=dataloader, fe_sim_obj=fe_sim_obj, logger=exp_setup_logger)
+
+    if loaded_experiment_checkpoint is None and experiment_args['continue_execution']:
+        #Here we will create the first dictionary for saving the experiment checkpoint info.
+        loaded_experiment_checkpoint = {
+            'metrics_savepaths': experiment_args['metrics_savepaths'],
+            'random_seed': experiment_args['random_seed'],
+            'shuffle_cases': experiment_args['shuffle_cases'],
+            'last_completed_case': None,
+            'last_completed_idx': -1,
+            'current_temp_dir': None
+        }
+
+    run_instances(
+        dataloader=dataloader, 
+        fe_sim_obj=fe_sim_obj, 
+        logger=exp_setup_logger, 
+        loaded_experiment_checkpoint=loaded_experiment_checkpoint,
+        experiment_checkpoint_path=experiment_args['continue_exec_path'] if experiment_args['continue_execution'] else None,
+        resume_bool=experiment_args['resume_bool']
+        )
 
 if __name__=='__main__':
     main()

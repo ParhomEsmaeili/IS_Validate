@@ -152,6 +152,9 @@ datasets
 #tempfiles
 tmp*
 
+#load_files 
+continue_execution_files
+
 #results
 results
 results_summary 

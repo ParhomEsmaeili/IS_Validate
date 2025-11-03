@@ -16,18 +16,26 @@ from skimage.measure import label as cc_label
 from version_handling import monai_version 
 import gc
 # logger = logging.getLogger(__name__)
+import random 
 
-def init_task_cases(dataset_dir:str, exp_task_configs:dict): #, file_ext:str):
+def init_task_cases(
+    dataset_dir:str, 
+    exp_task_configs:dict, 
+    shuffle_bool:bool=False, 
+    random_seed:Optional[int]=None,
+    last_completed_case:Optional[str]=None,
+    last_completed_idx: Optional[int]=None
+    ): #, file_ext:str):
     '''
     This function creates a dictionary of the task cases, which is then used, alongside some dataloader utilities, in order to create
     a dataset object which can be used for iterating through the cases in the task.
 
     inputs: 
     dataset_dir (path to the dataset directory)
-    dataloading_type (currently only designates between a basic dataloading, i.e. just doing a very basic loading, fusion of semantic class 
-    labels and orientation into the RAS convention, and a non-basic dataloading (which will inspect the dataloader transforms in the task configs
-    dictionary))
     exp_task_configs (a dictionary which contains information about the description of the task for loading the cases/building them.)
+    shuffle_bool: bool, whether the shuffle the case list before returning it. Default = False.
+    random_seed: Optional[int], the random seed for the experiment to use for shuffling the case list. Default = None.
+    last_completed_case: Optional[str], the case id of the last completed case. If provided, only cases after this case will be included in the returned case list.
     '''
 
     #Reading the dataset.json file which will contain the base information about the dataset as initially formulated offline.
@@ -72,11 +80,12 @@ def init_task_cases(dataset_dir:str, exp_task_configs:dict): #, file_ext:str):
     # Check that there are no repeated cases in the case list, even though the dataset constructor permits this as it only 
     #requires the use of a list and not a dict construction in the input argument.
     if len(case_list) != len(set(case_list)):
-        raise NotImplementedError('Duplicate cases found in the case list. Repeats are currently not supported for the interpretation of downstream calculations'
+        raise Exception('Duplicate cases found in the case list. Repeats are not supported for the interpretation of downstream calculations'
         '.Caution is required.')
     if not isinstance(case_list, list) or not case_list:
         #If the case list is not a list or is empty, we raise an error.
         raise TypeError('The case list must be a list of strings denoting each case folder to be used.')
+
 
     #Now we extract the metadata.
     sampling_metadata = extractor(data_sampling_configs, sampling_metadata_path)
@@ -213,6 +222,31 @@ def init_task_cases(dataset_dir:str, exp_task_configs:dict): #, file_ext:str):
         if len(config_labels_dict) != 2:
             raise NotImplementedError('Hardcoded exception, downstream apps are only designed to handle binary semantic segmentation problems.')
     
+
+
+
+    ########################### Now, some handling for shuffling and re-continuation. ##########################  
+    
+    # If shuffling is enabled, we will shuffle the case list.
+    if shuffle_bool:
+        if random_seed is None:
+            raise ValueError('If shuffle_bool is True, then a random_seed must be provided for reproducibility.')
+        else:
+            random.Random(random_seed).shuffle(case_list)
+
+    #Now we will filter the case list to only include cases after the last completed case, if provided.
+    if last_completed_case is not None:
+        if last_completed_case not in case_list:
+            raise ValueError('The last_completed_case provided is not in the case list.')
+        last_index = case_list.index(last_completed_case)
+        if last_index != last_completed_idx:
+            raise ValueError('The last_completed_idx does not match the index of the last_completed_case in the case list.')
+        else:
+            case_list = case_list[last_index + 1 :]
+
+
+    #Now we create the case list dictionary which will be used for passing through to the dataloader.
+
     case_list, image_keys, label_keys = create_case_list(
         dataset_dir=dataset_dir, 
         ds_configs=ds_configs,

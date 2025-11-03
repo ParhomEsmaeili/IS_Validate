@@ -11,7 +11,8 @@ def experiment_args_logger(logger_save_name, root_dir, level=logging.INFO, scree
     log_time = get_timestamp()
     if tofile:
         log_file = os.path.join(root_dir, "{}.log".format(logger_save_name))
-        fh = logging.FileHandler(log_file, mode="w")
+        # fh = logging.FileHandler(log_file, mode="w")
+        fh = logging.FileHandler(log_file, mode="a")
         fh.setFormatter(formatter)
         lg.addHandler(fh)
     if screen:
