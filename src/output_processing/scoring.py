@@ -128,8 +128,8 @@ class MetricsHandler:
         cross_class_mask and the per_class_masks.
         '''
         return (
-            torch.ones_like(tensor, dtype=torch.int64), #'cross_class_mask':
-            {class_lab:torch.ones_like(tensor,dtype=torch.int64) for class_lab in self.config_labels_dict.keys()} #'per_class_masks': 
+            torch.ones_like(tensor, dtype=torch.uint8), #'cross_class_mask':
+            {class_lab:torch.ones_like(tensor,dtype=torch.uint8) for class_lab in self.config_labels_dict.keys()} #'per_class_masks': 
         )
     
     def exec_base_metrics(self, 
@@ -195,6 +195,7 @@ class MetricsHandler:
         del extracted_gt
         del extracted_pred
         gc.collect()
+        torch.cuda.empty_cache()
         return tracked_metrics, terminate_bool
 
     def save_metrics(
