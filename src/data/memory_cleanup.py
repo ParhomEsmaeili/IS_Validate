@@ -129,6 +129,7 @@ def memory_cleanup(
                 
     else:
         raise ValueError('The edit iter num must be greater than 0 (i.e. only should be called for cleanup on edit iters)')
-    gc.collect() 
+    # gc.collect() #Didn't do anything really for the VRAM for interactive init, nor for the RAM. Probably as no image-sized tensors.
+    # For editing iterations, it doesn't do anything either? So we will remove this as its just slowing things down.
     torch.cuda.empty_cache() 
     return im, paths 

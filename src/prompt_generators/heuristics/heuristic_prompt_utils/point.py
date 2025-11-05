@@ -28,27 +28,27 @@ def uniform_random(binary_mask, n):
     if possible_coords.shape[0] >= n:
         #If there are sufficient voxels, return N
         idxs = torch.sort(torch.randint(0, possible_coords.shape[0] - n + 1,(n,), device=device)).values + torch.arange(0, n, device=device)
-        coords = possible_coords[idxs, :].to(dtype=torch.int32) 
+        coords = possible_coords[idxs, :].clone().to(dtype=torch.int32) 
         #We can use int32 because it would be more than enough to represent the coordinates in the range of the input binary mask.
         
-        #HACK: Just dump and clear the memory.
-        del possible_coords
-        gc.collect() 
+        #NOTE: Don't think the garbage collector is actually doing anything here, so will be commenting it out as it is slowing down
+        # del possible_coords
+        # gc.collect() 
         torch.cuda.empty_cache()
         return list(coords.split(1, 0))
     elif possible_coords.shape[0] < n and possible_coords.shape[0] != 0:
         #If there are not sufficient voxels, return the max quantity?
         #idxs = torch.sort(torch.randint(0, 1,(possible_coords.shape[0],), device=device)).values + torch.arange(0, possible_coords.shape[0], device=device)
         coords = possible_coords.to(dtype=torch.int32)
-        #HACK: Just dump and clear the memory.
-        del possible_coords
-        gc.collect() 
+        #NOTE: Don't think the garbage collector is actually doing anything here, so will be commenting it out as it is slowing down
+        # del possible_coords
+        # gc.collect() 
         torch.cuda.empty_cache()
         return list(coords.split(1, 0)) 
     elif possible_coords.shape[0] == 0:
-        #HACK: Just dump and clear the memory.
-        del possible_coords
-        gc.collect() 
+        #NOTE: Don't think the garbage collector is actually doing anything here, so will be commenting it out as it is slowing down
+        # del possible_coords
+        # gc.collect() 
         torch.cuda.empty_cache()
         return []
 

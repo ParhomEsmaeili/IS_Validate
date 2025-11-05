@@ -149,7 +149,9 @@ class Dice:
         #For multi-class (or binary class where self-include background is TRUE)
 
         #We weight/mask this according to the class-separated image_masks (BINARISED).  
-
+        if len(self.config_labels_dict) > 2:
+            raise NotImplementedError('Optimal multi-class dice score computation not yet implemented for class-imbalance \n'
+            'handling.')
         cross_class = self.dice_score_multiclass(pred, gt, cross_class_mask) 
 
         if self.include_per_class_scores:
@@ -168,21 +170,23 @@ class Dice:
                 # class_sep_gt = torch.where(gt == class_integer_code, 1, 0)
 
 
+                # per_class_scores[class_label] = self.dice_score_per_class(
+                #     torch.where(pred == class_integer_code, 1, 0).to(dtype=torch.uint8),
+                #     torch.where(gt == class_integer_code, 1, 0).to(dtype=torch.uint8),
+                #     #TODO: check whether this mask is going to get stuck in cuda memory.
+                #     per_class_masks[class_label].to(device=self.calc_device, dtype=torch.uint8)
+                # ).to(device='cpu', dtype=torch.float64) 
+
                 per_class_scores[class_label] = self.dice_score_per_class(
-                    torch.where(pred == class_integer_code, 1, 0),
-                    torch.where(gt == class_integer_code, 1, 0),
-                    #TODO: check whether this mask is going to get stuck in cuda memory.
-                    per_class_masks[class_label].to(device=self.calc_device, dtype=torch.uint8)
-                ).to(device='cpu', dtype=torch.float64) 
-
-                #Trying to minimise the memory usage by not storing the class_sep_pred and class_sep_gt tensors, as they are not needed after the dice_score_per_class computation
-
-                    # class_sep_pred, class_sep_gt, per_class_masks[class_label])
+                    pred == class_integer_code,
+                    gt == class_integer_code,
+                    image_mask=per_class_masks[class_label].to(device=self.calc_device, dtype=torch.bool)
+                )
                 assert type(per_class_scores[class_label]) == torch.Tensor and per_class_scores[class_label].size() == torch.Size([1]), 'Generation of dice score failed because the score for a specific class was not a torch tensor of size 1'
         
-                pred = pred.to(device='cpu', dtype=torch.uint8) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
-                gt = gt.to(device='cpu', dtype=torch.uint8) #Just to be careful, we don't need this anymore, so we can delete it to save memory.        
-                gc.collect()
+                pred = pred.to(device='cpu', dtype=torch.bool) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
+                gt = gt.to(device='cpu', dtype=torch.bool) #Just to be careful, we don't need this anymore, so we can delete it to save memory.        
+                # gc.collect() #Functionally is doing nothing other than slowing us down.
                 torch.cuda.empty_cache() #Just to be careful, we don't need this anymore, so we can delete it to save memory.
 
             assert type(cross_class) == torch.Tensor and cross_class.size() == torch.Size([1]), 'Generation of dice score failed because the cross-class score was not a torch tensor of size 1'
@@ -195,18 +199,28 @@ class Dice:
     
         
     def dice_score_per_class(self, class_sep_pred, class_sep_gt, image_mask):
-
-        y_o = torch.sum(torch.where(class_sep_gt > 0, 1, 0) * image_mask)
-        y_hat_o = torch.sum(torch.where(class_sep_pred > 0, 1, 0) * image_mask)
+        '''
+        Class_sep_pred: torch tensor, bool type. 
+        Class_sep_gt: torch tensor, bool type.
+        image_mask: torch tensor, bool type. 
+        '''
+        # y_o = torch.sum(torch.where(class_sep_gt > 0, 1, 0) * image_mask)
+        # y_hat_o = torch.sum(torch.where(class_sep_pred > 0, 1, 0) * image_mask)
+        y_o = torch.sum(class_sep_gt & image_mask)
+        y_hat_o = torch.sum(class_sep_pred & image_mask)
+        torch.cuda.empty_cache() # Clearing cache to minimise VRAM accumulation.
         denom = y_o + y_hat_o
         # weighted_pred = class_sep_pred * image_mask 
         # weighted_gt = class_sep_gt * image_mask 
 
-        intersection = torch.sum(torch.masked_select(image_mask, class_sep_pred * class_sep_gt > 0))
-
+        # intersection = torch.sum(torch.masked_select(image_mask, class_sep_pred * class_sep_gt > 0))
+        intersection = torch.sum(
+            torch.masked_select(image_mask, class_sep_pred & class_sep_gt)
+        )
         denom = denom.to(device='cpu', dtype=torch.float64) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
         intersection = intersection.to(device='cpu', dtype=torch.float64) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
-
+        
+        torch.cuda.empty_cache() # Clearing cache to minimise VRAM accumulation.        
         if y_o > 0: #in this case we can always calculate a dice score because denom will not be zero.
             return torch.tensor([(2 * intersection)/(denom)])
         
@@ -237,7 +251,10 @@ class Dice:
         else:
             #when background is included, it includes all voxels..
             y_o = torch.sum(torch.ones_like(gt) * image_mask)
-            y_hat_o = torch.sum(torch.ones_like(pred) * image_mask)
+            y_hat_o = torch.sum(torch.where(pred > 0, 1, 0) * image_mask)
+
+        #Free the memory used by the calculation
+        torch.cuda.empty_cache() 
 
         if y_o > 0:
             
@@ -245,7 +262,6 @@ class Dice:
             
             
             for class_label, class_code in self.config_labels_dict.items():
-                
                 if not self.include_background:
                     if class_label.title() == 'Background':
                         continue 
@@ -265,18 +281,19 @@ class Dice:
                 intersection += torch.sum(
                     torch.masked_select(
                         image_mask, 
-                        (torch.where(pred == class_code, 1, 0) * torch.where(gt == class_code, 1, 0)) > 0)
-                )
+                        (pred == class_code) & (gt == class_code))
+                ) #More memory efficient way of computing the intersection without generating intermediate full tensors. 
+                torch.cuda.empty_cache() #Emptying the cache to minimise VRAM usage.
 
-            pred = pred.to(device='cpu', dtype=torch.uint8) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
-            gt = gt.to(device='cpu', dtype=torch.uint8) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
-            image_mask = image_mask.to(device='cpu', dtype=torch.uint8) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
+            pred = pred.to(device='cpu', dtype=torch.bool) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
+            gt = gt.to(device='cpu', dtype=torch.bool) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
+            image_mask = image_mask.to(device='cpu', dtype=torch.bool) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
             
             intersection = intersection.to(device='cpu', dtype=torch.float64) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
             y_o = y_o.to(device='cpu', dtype=torch.float64) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
             y_hat_o = y_hat_o.to(device='cpu', dtype=torch.float64) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
             #Now we can compute the dice score.
-            gc.collect() 
+            # gc.collect() Doesn't do anything here. No loose variables to clean up.
             torch.cuda.empty_cache()
             return torch.tensor([(2.0 * intersection) / (y_o + y_hat_o)])
         
@@ -289,7 +306,7 @@ class Dice:
         denom = denom.to(device='cpu', dtype=torch.float64) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
         y_o = y_o.to(device='cpu', dtype=torch.float64) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
         y_hat_o = y_hat_o.to(device='cpu', dtype=torch.float64) #Just to be careful, we don't need this anymore, so we can delete it to save memory.
-        gc.collect()
+        # gc.collect() #Not needed as we have no variables we are cleaning up.
         torch.cuda.empty_cache()
 
         if denom <= 0:
@@ -360,10 +377,10 @@ class NSD:
             # class_sep_pred = torch.where(pred == class_integer_code, 1, 0)
             # class_sep_gt = torch.where(gt == class_integer_code, 1, 0)
 
-            per_class_scores[class_label] = self.NSD_binary(torch.where(pred == class_integer_code, 1, 0), torch.where(gt == class_integer_code, 1, 0))
+            # per_class_scores[class_label] = self.NSD_binary(torch.where(pred == class_integer_code, 1, 0), torch.where(gt == class_integer_code, 1, 0))
+            
+            per_class_scores[class_label] = self.NSD_binary(pred == class_integer_code, gt == class_integer_code)
             #Minimising the memory usage by not storing the class_sep_pred and class_sep_gt tensors, as they are not needed after the NSD_binary computation.
-                
-                #class_sep_pred, class_sep_gt)
         
         #Compute the cross-class score, dummy method for now is to just average over the classes.        
         if self.ignore_empty:
@@ -397,12 +414,6 @@ class NSD:
         '''
         #Just to be careful because of weirdness about MetaTensor behaviours across MONAI versions we abuse deepcopy... temporary hacky method... so we don't break
         #any underlying obj... 
-        
-        # pred_copy = copy.deepcopy(class_sep_pred)
-        # gt_copy = copy.deepcopy(class_sep_gt)
-    
-        #May need to remove the deepcopy if memory bloat is still an issue, but for now it is a temporary hacky method to 
-        # avoid breaking the underlying object.
 
         if isinstance(class_sep_pred, MetaTensor):
             if monai_version == '1.4.0':

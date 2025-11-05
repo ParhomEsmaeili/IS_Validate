@@ -174,7 +174,8 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
                     'meta_dict': prev_output_data['pred']['meta_dict']
                 }
             }
-
+            #Lazily clearing up hanging VRAM
+            torch.cuda.empty_cache() 
 
             return interaction_state_dict 
 

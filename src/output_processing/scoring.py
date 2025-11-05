@@ -106,7 +106,7 @@ class MetricsHandler:
         '''
         Function which extracts the spatial dimensions of the input, assumed to be CHW(D). Returns it in torch.int64 dtype in a channel-split list.
         '''
-        return [input[i,:].to(dtype=torch.int64) for i in range(input.shape[0])]
+        return [input[i,:].to(dtype=torch.uint8) for i in range(input.shape[0])]
     
     def init_base_metrics(self):
         #Extracting the metric configs for the base metric types ONLY.
@@ -186,15 +186,22 @@ class MetricsHandler:
         #The output data must have been post-processed and checked to ensure that the output of the user is valid
         #prior to metric computation. 
         
-        extracted_pred = self.extract_spatial_dims(output_data['pred']['metatensor'])[0] #We use 0 index as it should be len 1
+        # extracted_pred = self.extract_spatial_dims(output_data['pred']['metatensor'])[0] #We use 0 index as it should be len 1
         # extracted_probs = self.extract_spatial_dims(output_data['probs']['metatensor']) #We do not index here, as the probs are channel-split.
-        extracted_gt = self.extract_spatial_dims(data_instance['label']['metatensor'])[0] #We use 0 index as it should be len 1
+        # extracted_gt = self.extract_spatial_dims(data_instance['label']['metatensor'])[0] #We use 0 index as it should be len 1
+        # tracked_metrics, terminate_bool = self.exec_base_metrics(extracted_pred, extracted_gt, tracked_metrics, infer_call_info)        
 
-        tracked_metrics, terminate_bool = self.exec_base_metrics(extracted_pred, extracted_gt, tracked_metrics, infer_call_info)
+        #Modified to be fully in-line, so that garbage collection is not necessary due to intermediate variables.
+        tracked_metrics, terminate_bool = self.exec_base_metrics(
+            self.extract_spatial_dims(output_data['pred']['metatensor'])[0], 
+            self.extract_spatial_dims(data_instance['label']['metatensor'])[0], 
+            tracked_metrics, 
+            infer_call_info
+            )
         
-        del extracted_gt
-        del extracted_pred
-        gc.collect()
+        # del extracted_gt
+        # del extracted_pred
+        # gc.collect() #Functionally this garbage collection is doing nothing! Lets remove it and speed things up.
         torch.cuda.empty_cache()
         return tracked_metrics, terminate_bool
 

@@ -12,6 +12,7 @@ from os.path import dirname as up
 import sys
 from abc import abstractmethod
 sys.path.append(up(up(up(up(os.path.abspath(__file__))))))
+import time
 import gc
 from src.prompt_generators.heuristics.prompt_bases import PointBase, ScribbleBase, BboxBase
 from src.general_utils.dict_utils import extractor, dict_path_modif
@@ -74,7 +75,7 @@ heuristic_mixtures_args:
 
 General Call Inputs:
 
-All of the following are in pseudo-ui native image space:
+All of the following are in pseudo-ui domain image space:
 
 data: This is a dictionary which contains the following information:
 
@@ -591,81 +592,113 @@ class BasicValidOnlyMixture(BaseMixture):
         sampling_regions_dict['gt'] = dict.fromkeys(self.config_labels_dict.keys(), None)
 
         #We then split the gt, by class for each class. 
+        accum = None
         for label, value  in self.config_labels_dict.items():
             #We split gt by label. 
-            gt_temp = torch.where(gt == value, 1, 0).to(dtype=torch.int8, device=self.sim_device) 
-            if gt_temp.sum() == 0:
+            if not (gt == value).sum(): #0 evaluates to bool False.
                 warnings.warn(f'Class {label} was empty in gt.')
                 sampling_regions_dict['gt'][label] = None 
             else:
-                sampling_regions_dict['gt'][label] = gt_temp 
-
-            #HACK: Trying to prevent segfaulting from OOM. 
-            del gt_temp 
+                sampling_regions_dict['gt'][label] = gt == value
             
+                if accum is None:
+                    accum = sampling_regions_dict['gt'][label]
+                else:
+                    #We cumulatively add the gt regions, checking for overlaps with the current region under consideration.
+                    if (accum & sampling_regions_dict['gt'][label]).sum():
+                        raise Exception(f'Overlap detected between gt regions') 
+                    #If it passes the overlap check, we add to the accum for the next region check.
+                    accum = accum | sampling_regions_dict['gt'][label]
+
+        accum = accum.to(device='cpu')
+        torch.cuda.empty_cache()
+        del accum
 
         if all([masks is None for label, masks in sampling_regions_dict['gt'].items() if label.title() != 'Background']):
             raise Exception('All of the foreground classes in the ground truth cannot be empty.')
         
-        if torch.all(torch.stack([i for i in sampling_regions_dict['gt'].values() if i is not None]).sum(dim=0) == torch.ones_like(gt)):
-            print('GT inclusive of background merged to a tensor of ones.')
-        else:
-            raise Exception('GT maps did not merge to a tensor of ones')
+        #Here we will be checking that the GT-split region has no overlaps and is inclusive of the entire image.
+
+        # if torch.all(torch.stack([i for i in sampling_regions_dict['gt'].values() if i is not None]).sum(dim=0) == torch.ones_like(gt)):
+        #     print('GT inclusive of background merged to a tensor of ones.')
+        # else:
+        #     raise Exception('GT maps did not merge to a tensor of ones')
+
+
+
         #if pred is None, then we just return the gts.
-        
         if pred is None:
             sampling_regions_dict['error_regions'] = None 
-            return sampling_regions_dict
+            return sampling_regions_dict #No need to calculate any error regions as there are no predictions!
         else: 
-            #Place pred on device and in int8 dtype. 
+            #Place pred on device and in int8 dtype (not bool yet!). 
 
             if not pred.device == self.sim_device:
                 warnings.warn('The pred mask must be placed on the sim device')
                 pred = pred.to(dtype=torch.int8, device=self.sim_device)
             
             #Find the false negative error region. 
-            error_map_bool = torch.where(pred != gt, 1, 0).to(dtype=torch.int8, device=self.sim_device)
+            # error_map_bool = torch.where(pred != gt, 1, 0).to(dtype=torch.int8, device=self.sim_device)
+            error_map_bool = pred != gt #We want it in bool format to minimise memory usage! Same memory usage as int8 though.
             
             #Create the error regions dict: 
             err_regions_dict = dict() 
 
+            accum = None
             for l1, v1 in self.config_labels_dict.items():
                 #Splitting into classes according to gt (i.e. voxels where an error occured and where the gt class exists)                
-                temp_gt = torch.where(gt == v1, 1, 0).to(dtype=torch.int8, device=self.sim_device)
-                #We recompute because calling from gt above, NoneType would break.
-                split_by_gt = error_map_bool * temp_gt 
-                
-                if split_by_gt.sum() == 0:
+                # temp_gt = torch.where(gt == v1, 1, 0).to(dtype=torch.int8, device=self.sim_device) #DEPRECATED NOT NEEDED USE OF MEMORY!
+
+                #We split error region by gt class, and because calling from gt above NoneType would break we also recompute the class-
+                # separated gt map.
+                # split_by_gt = error_map_bool & (gt == v1)  
+                # if split_by_gt.sum() == 0:
+                # if not split_by_gt.sum():
+                if not (error_map_bool & (gt == v1)).sum():
                     err_regions_dict[l1] = None 
                 else: 
-                    err_regions_dict[l1] = split_by_gt 
+                    # err_regions_dict[l1] = split_by_gt
+                    err_regions_dict[l1] = error_map_bool & (gt == v1) 
+                    if accum is None:
+                        accum = err_regions_dict[l1]
+                    else:
+                        #We cumulatively add the error regions, checking for overlaps with the current region under consideration.
+                        if (accum & err_regions_dict[l1]).sum():
+                            raise Exception(f'Overlap detected between error regions') 
+                        #If it passes the overlap check, we add to the accum for the next region check.
+                        accum = accum | err_regions_dict[l1]
 
+
+            #Dumping VRAM as quickly as possible. 
+            accum = accum.to(device='cpu')
+            error_map_bool = error_map_bool.to(device='cpu')
+            del accum, error_map_bool
+            torch.cuda.empty_cache()
 
             sampling_regions_dict['error_regions'] = err_regions_dict 
 
+            #We no longer need the gt and the pred. Lets dump VRAM as quickly as possible. 
+            pred = pred.to(device='cpu')
+            gt = gt.to(device='cpu')
+            del pred, gt, err_regions_dict
+            torch.cuda.empty_cache()
+
 
             #Checking the error regions:
-
             if all([masks is None for masks in sampling_regions_dict['error_regions'].values()]):
                 raise Exception('All of the error regions cannot be empty, should have terminated the iterative loop already..')
 
             #Extracting the valid (non-nonetype) error regions across all classes. (i.e. the general error region), if all error regions were None then it should break already.
-            err_regions = torch.stack([i for i in sampling_regions_dict['error_regions'].values() if i is not None]).sum(dim=0)
-            if torch.all((err_regions == 0) | (err_regions == 1)):
-                print('No error regions are overlapping as the  values of the sum across classes for the error region maps is 0 or 1 for each voxel!')
-            else:
-                raise Exception('There are overlapping error regions')
-        
-            #HACK: Just trying to prevent segfault from OOM:
-            del error_map_bool
-            del temp_gt
-            del split_by_gt
-            del err_regions_dict 
-            del gt 
-            del pred 
-            del err_regions 
-            gc.collect()
-            torch.cuda.empty_cache()
+            # err_regions_check = torch.stack([i for i in sampling_regions_dict['error_regions'].values() if i is not None]).sum(dim=0)
+            # if torch.all((err_regions_check == 0) | (err_regions_check == 1)):
+            #     print('No error regions are overlapping as the  values of the sum across classes for the error region maps is 0 or 1 for each voxel!')
+            # else:
+            #     raise Exception('There are overlapping error regions')
+
+            # err_regions_check = err_regions_check.to(device='cpu')
+            # torch.cuda.empty_cache()
+
+            # del err_regions_check
 
             return sampling_regions_dict
         
@@ -702,8 +735,7 @@ class BasicValidOnlyMixture(BaseMixture):
         if region_mask.device != self.sim_device:
             region_mask.to(device=self.sim_device)
 
-        
-        # for coords in refinement_prompts:
+        # for coords in refinement_prompts:  
         region_mask = update_binary_mask(coords, region_mask)    
         return region_mask
     
@@ -927,8 +959,7 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
         '''
         
         if self.toggling_dict['class_level'] is None:
-            
-            #Just checking for debugging..
+            #None = default behaviour.
             if samp_regions_dict['gt'] is None:
                 raise Exception('The entire ground truth cannot be a NoneType..otherwise we cannot even sample.')
             #Checking that at least one foreground class has a GT..., should already be handled in the front-end but just in case!
@@ -982,8 +1013,9 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                                 'gt':samp_regions_dict['gt'][class_lb], 
                                 'error_regions':samp_regions_dict['error_regions'][class_lb] 
                                 #NOTE: There is currently a potential logical conflict. 
-                                # We should theoretically not even require the gt for editing, but we had included it temporarily until we decided how to handle grounded
-                                #like prompts. The solution would therefore be to just perform a deterministic extraction at each iteration!
+                                # We should theoretically not even require the gt for editing, but we had included it temporarily until we 
+                                # decided how to handle grounded (i.e. non-editing) prompts. The solution would therefore be to 
+                                # just temporarily perform a deterministic extraction at each iteration!
                                 } 
 
                 gen_prompts = self.togg_inter_prompt_level(
@@ -1033,6 +1065,7 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
             raise Exception('Somehow an empty gt class got through, check the code logic')
 
         if self.toggling_dict['inter_prompt_level'] is None:
+            #None = default behaviour. 
 
             #We initialise the tracked prompts. We set NoneTypes for non-valid explicitly to help flag any errors. 
             tracked_prompts = dict.fromkeys(self.refinement_prompts_ls + self.grounded_prompts_ls, None)
@@ -1082,6 +1115,10 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                             #In this case, region is set to the default ground truth/grounded region. We use deepcopies to prevent potential leakages
                             #that could occur due to variable assignments.
                             region = copy.deepcopy(grounded_region)
+                            
+                            if region.dtype != torch.bool:
+                                raise TypeError('Sampling region masks must be of type torch.bool') 
+                            #We have already checked that the gt region is not empty at the start of this function.
             
                         elif ptype in self.refinement_prompts_ls:
                             
@@ -1109,7 +1146,10 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                                         raise Exception(f'The tracked prompts for valid ptype: {p} should never a NoneType.')
                                     region = self.update_error_region(region, tracked_prompts[p])
                                 
-                                if torch.all(region == torch.zeros_like(region)):
+                                if region.dtype != torch.bool:
+                                    raise TypeError('Sampling region masks must be of type torch.bool')
+                                # if torch.all(region == torch.zeros_like(region)):
+                                if not region.sum(): #If the sum is zero, then there is no region to sample from.
                                     print(f'The refinement sampling region has become filled by refinement prompts, skipping prompt type: {ptype} \n ')
                                     #NOTE: It is completely ok to do it like this because the outer level handles 
                                     # empty lists which will be returned.
@@ -1162,12 +1202,16 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
         #Only gets triggered for valid ptypes in the parent toggle level (inter-prompt toggle). 
 
         #Checking whether we have anything to even sample from:
-        if samp_region is None or torch.all(samp_region == torch.zeros_like(samp_region)):
+        if samp_region.dtype != torch.bool: #We require bool types, as our downstream checks are dependent on this.
+            raise TypeError('Sampling region tensor must be of type torch.bool')
+        if samp_region is None or not samp_region.sum(): #samp_region != 0 will evaluate to a bool=True. 
+            #torch.all(samp_region == torch.zeros_like(samp_region)):
             #Sampling region should have been flagged.
             raise Exception('Somehow an empty sampling region got through to the intra-prompt level, please check the code logic')
 
 
         if self.toggling_dict['intra_prompt_level'] is None:
+            #None = Default behaviour for the prototype. 
 
             #We initialise a list for the prompts:
             tracked_prompts = []
@@ -1186,9 +1230,16 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
         
                 if ptype in self.refinement_prompts_ls:
                     print(f'Filling in the sampling region for refinement prompt: {ptype} at the intra-prompt level \n')
-                    #For refinement prompts we are sampling without replacement.
+                    #For refinement prompts we are sampling without replacement at the intra-prompt level. 
+                    #NOTE: On the inter-prompt level we also sample without replacement, but that is across prompt types. We also
+                    #need to ensure that the intra-prompt level sampling without replacement is also implemented.
+
                     region = copy.deepcopy(samp_region)
-                    #NOTE: We do this from scratch each time just to be sure that there is no leakage as the update error will modify the mask in place permanently # which we currently do not want
+                    #NOTE: We do this from scratch each time just to be sure that there is no leakage as the 
+                    # update error will modify the mask in place permanently. It may not be the case that we are sampling with replacement
+                    # across prompt types, but it is better to keep these isolated. 
+
+                    ##TODO: Managing these sampling-regions will be key for further VRAM optimisation!
                     #NOTE: The update error region function can handle empty lists!
                     region = self.update_error_region(region, tracked_prompts)
 
@@ -1200,8 +1251,11 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                 
                 #If the sampling region in-filled/filtered is zeroes then we must terminate, no more prompts can 
                 # be placed. We do not check nonetypes because nonetypes should never be sampled nor passed through! 
-
-                if torch.all(region == torch.zeros_like(region)):
+                if region.dtype != torch.bool:
+                    raise TypeError('Sampling region masks must be of type torch.bool')
+                
+                # if torch.all(region == torch.zeros_like(region)):
+                if not region.sum():#If the sum is zero, then there is no region to sample from, so early termination for prompt gen.
                     print(f'Early termination of the prompt generation for ptype: {ptype} \n')
                     break 
                 else:
@@ -1218,13 +1272,16 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                         ptype: str,
                         heur: str, 
                         samp_region: Union[torch.Tensor, MetaTensor]):
+        if samp_region.dtype != torch.bool:
+            raise TypeError('Sampling region tensor must be of type torch.bool')
         
-        if samp_region is None or torch.all(samp_region == torch.zeros_like(samp_region)):
+        # if samp_region is None or torch.all(samp_region == torch.zeros_like(samp_region)):
+        if samp_region is None or not samp_region.sum(): #If the sum is zero, then there is no region to sample from.
             raise Exception('The sampling region needs to be able to be sampled, it is empty or None!!')
         
         if self.toggling_dict['intra_heur_level'] is None:
             raise Exception('There must be at the very minimum some heuristic level toggling/args otherwise we cannot call on abstract heuristics.')
-
+            #Default behaviour requires heuristic level arguments so that there is a function to call on for generating a prompt.
         else:
             #Else, then just extract the heuristic, and the params.
             heur_fnc =  self.heur_fn_dict[ptype][heur]
@@ -1236,7 +1293,6 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
             #Default prototype just considers the use of one argument: (number of prompt per heuristic call).
             n = params['n_max']
             generated_prompt = heur_fnc(samp_region, n)
-
             if not isinstance(generated_prompt, list):
                 raise Exception('The generated prompt must always be a list, even if it is empty!')
             
@@ -1250,24 +1306,20 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
 
         data: A dictionary containing the following fields: 
 
-        image: Torch tensor OR Metatensor containing the image in the native image domain (no pre-processing applied other than re-orientation in RAS)
-        gt: Torch tensor OR Metatensor containing the ground truth map in RAS orientation, but otherwise in the native image domain (no pre-processing other than RAS re-orientation).
-        
+        image: Torch tensor OR Metatensor containing the image in the pseudo-ui image domain (no pre-processing applied other than re-orientation in RAS)
+        gt: Torch tensor OR Metatensor containing the ground truth map in RAS orientation, but otherwise in the pseudo-ui image domain (no pre-processing other than RAS re-orientation).
+
         prev_output_data: (NOTE: OPTIONAL, is NONE otherwise) output dictionary from the inference call which has been post-processed 
         in the pseudo-ui front-end.
        
         Two relevant fields for prompt generation contained are the: 
-            pred: A dictionary containing 3 subfields:
-                1) "path": Path to the prediction file (Not Relevant)
-                And two relevant subfields
-                2) "metatensor" A Metatensor or torch tensor (1HW(D)) containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
-                3) "meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
-            
-            probs:
-                1) "paths": List of paths to the prediction file (Not Relevant)
-                And two potentially relevant subfields
-                2) "metatensor" A Metatensor or torch tensor (CHW(D)) containing the previous segmentation in the native image domain (no pre-processing applied other than re-orientation in RAS) 
-                3) "meta_dict" A dict containing (at least) the affine matrix for the image, containing native image domain relevant knowledge.
+            pred: A dictionary containig two relevant subfields
+                1) "metatensor" A Metatensor or torch tensor (1HW(D)) containing the previous segmentation in the pseudo-ui image domain (no pre-processing applied other than re-orientation in RAS) 
+                2) "meta_dict" A dict containing (at least) the affine matrix for the image, containing pseudo-ui image domain relevant knowledge.
+
+            probs: A dictionary containing two relevant subfields
+                1) "metatensor" A Metatensor or torch tensor (CHW(D)) containing the previous segmentation in the pseudo-ui image domain (no pre-processing applied other than re-orientation in RAS) 
+                2) "meta_dict" A dict containing (at least) the affine matrix for the image, containing pseudo-ui image domain relevant knowledge.
         
         im: Optional (or NoneType) dictionary containing the interaction memory from the prior interaction states.      
         '''
@@ -1292,43 +1344,35 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
         else:
             if data['prev_output_data'] is None:
                 print('We have no prior output data, please check that this is an initialisation! \n')
-                pred = None
+                # pred = None
                 init_bool = True 
 
                 if data['im'] is not None:
                     raise Exception('The interaction memory should be a NoneType for the initialisation.')
             else:
                 print('We have prior output data, please check that this is an editing iteration \n')
-                pred = data['prev_output_data']['pred']['metatensor'][0, :]
-                pred = pred.to(dtype=torch.int8, device=self.sim_device)
+                # pred = data['prev_output_data']['pred']['metatensor'][0, :]
+                # pred = pred.to(dtype=torch.int8, device=self.sim_device)
 
                 # gt = data['gt'][0,:].to(dtype=torch.int8, device=self.sim_device)
-                if not (isinstance(pred, torch.Tensor) or isinstance(pred, MetaTensor)):
+                if not (isinstance(data['prev_output_data']['pred']['metatensor'][0, :], torch.Tensor) or isinstance(data['prev_output_data']['pred']['metatensor'][0, :], MetaTensor)):
                     raise TypeError('The pred needs to be a torch tensor or a Monai MetaTensor')            
                 init_bool = False
 
                 if data['im'] is None:
                     raise Exception('The interaction memory (even if unused) should not be a NoneType for edits.')
-
-            #Loading the gt.
-            gt = data['gt'][0, :].to(dtype=torch.int8, device=self.sim_device)
-
-            if not isinstance(gt, MetaTensor):
+                
+            if not isinstance(data['gt'], MetaTensor):
                 raise TypeError('The gt needs to be a Monai MetaTensor')
             
             #Extracts a dict with fields 'gt' and 'error_regions'. Both class separated dicts.
-            sampling_regions_dict = self.init_sample_regions_no_components(pred, gt)
-		    # No need to adjust the tracked prompts or tracked prompts labels variable!
-
-
-            #HACK: Trying to patch the segfaulting for MSD Liver: 
-            del gt 
-            del pred 
-            gc.collect()
+            sampling_regions_dict = self.init_sample_regions_no_components(
+                pred=data['prev_output_data']['pred']['metatensor'][0, :].to(dtype=torch.int8, device=self.sim_device) if not init_bool else None,
+                #Loading the gt.
+                gt = data['gt'][0, :].to(dtype=torch.int8, device=self.sim_device)
+        )
+            #To prevent VRAM segfault for huge images just in case anything is lingering.
             torch.cuda.empty_cache() 
-
-
-
 
             #We initialise the prompt dictionaries on each call.
             tracked_prompts, tracked_prompts_lbs = self.init_prompts()
@@ -1344,15 +1388,17 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
             tracked_prompts, tracked_prompts_lbs = self.rm_intra_prompt_spat_repeats(tracked_prompts, tracked_prompts_lbs)
 
             tracked_prompts, tracked_prompts_lbs = self.output_processor(tracked_prompts, tracked_prompts_lbs)
-
             return tracked_prompts, tracked_prompts_lbs
+        
+
 #####################################################################################################################
 
 #Mixture registry is for classes which wrap together the prompt generation process with class/inter/intra-prompt 
 # relationships taken into account.
-#  
-#we also include protoype_pseudo_mixture (this is where there is absolutely no interaction between prompt generation 
-#and no complexities about how components or classes are handled at all).
+#
+#we also include prototype_pseudo_mixture (this is where there is absolutely no interaction between prompt generation
+#and no complexities about how components or classes are handled at all). It is very minimal, but still packaged under the mixture
+#registry for consistency.
 
 mixture_class_registry = {
     'prototype_pseudo_mixture': PrototypePseudoMixture,

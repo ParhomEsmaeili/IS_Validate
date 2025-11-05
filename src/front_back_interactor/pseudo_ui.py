@@ -1,7 +1,8 @@
 '''
 This script is intended for simulating inference from the pseudo-front end, as part of the front-end to back-end setup of an end-to-end interactive seg. application. 
 '''
-from email.mime import image
+from cProfile import Profile
+from pstats import SortKey, Stats 
 from typing import Callable, Union
 import logging
 import time
@@ -14,7 +15,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 import torch
 import random
 import numpy as np
-
 from src.data.interaction_state_construct import HeuristicInteractionState 
 from src.output_processing.processor import OutputProcessor
 from src.output_processing.scoring import MetricsHandler 
@@ -825,13 +825,14 @@ class FrontEndSimulator:
                 self.update_tracked_paths(output_paths=output_paths, inf_call_config={'mode': 'Interactive Edit', 'edit_num': iter_num})
 
                 #Generate the inference request and initialises the inference interaction memory:
+                
                 request, inf_im = self.infer_app_request_generator(
                     # data_instance=data_instance, 
                     infer_call_config={'mode': 'Interactive Edit', 'edit_num': iter_num},
                     im=inf_im,
                     prev_output_data=prev_output_data
                 )
-                
+            
                 #Take the generated request dict, and pass it through the callable application.
                 prev_output_data = self.infer_app(request)
                 #This generates the non-processed output data.
@@ -950,9 +951,8 @@ class FrontEndSimulator:
             empty_foreground = False
         else:
             assert empty_foreground == True, 'The empty_foreground flag should either be True or False at this point.'
-        
+
         iter_num, terminated_early = self.iterative_loop(empty_foreground=empty_foreground)
-        
         # DEPRECATED: # try:       
         #     iter_num, terminated_early = self.iterative_loop(empty_foreground=empty_foreground)
         # # except:
