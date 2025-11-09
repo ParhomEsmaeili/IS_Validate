@@ -2,6 +2,7 @@
 This script is intended for simulating inference from the pseudo-front end, as part of the front-end to back-end setup of an end-to-end interactive seg. application. 
 '''
 from cProfile import Profile
+import profile
 from pstats import SortKey, Stats 
 from typing import Callable, Union
 import logging
@@ -788,7 +789,7 @@ class FrontEndSimulator:
             #Take the generated request dict, and pass it through the callable application.
             prev_output_data = self.infer_app(request)
             #This generates the output data.
-        
+
             # We call on the output processor for processing of the prev_output_data dictionary for 
             # writing of segs, and generation of metrics for tracking
 

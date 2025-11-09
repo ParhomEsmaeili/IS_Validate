@@ -201,7 +201,7 @@ class MetricsHandler:
         
         # del extracted_gt
         # del extracted_pred
-        # gc.collect() #Functionally this garbage collection is doing nothing! Lets remove it and speed things up.
+        # gc.collect() #Functionally this garbage collection is doing nothing! Lets remove it and speed things up
         torch.cuda.empty_cache()
         return tracked_metrics, terminate_bool
 
@@ -271,11 +271,13 @@ class MetricsHandler:
                         #we will only be padding the interactive edit iterations.
                         
                         #First we pad the cross-class scores:
+                        metric_subdict['Interactive Edit Iter ' + str(iter_num)] = dict()
                         metric_subdict['Interactive Edit Iter ' + str(iter_num)]['cross_class_scores'] = 'empty_foreground'
                         #Then we pad the per-class scores, if include_per_class_scores config is True
                         if self.metrics_configs[metric_type]['include_per_class_scores']:
+                            metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'] = dict()
                             for class_lb in self.config_labels_dict.keys():
-                                if not self.metrics_configs[metric_type]['include_background_metric']:
+                                if class_lb.title() == 'Background' and not self.metrics_configs[metric_type]['include_background_metric']:
                                     continue 
                                 #We will pad the per-class scores with a string denoting empty foreground.
                                 metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'][class_lb] = 'empty_foreground'
@@ -298,11 +300,13 @@ class MetricsHandler:
                         #we will only be padding the interactive edit iterations.
                         
                         #First we pad the cross-class scores:
+                        metric_subdict['Interactive Edit Iter ' + str(iter_num)] = dict()
                         metric_subdict['Interactive Edit Iter ' + str(iter_num)]['cross_class_scores'] = 'terminated_early'
                         #Then we pad the per-class scores, if include_per_class_scores config is True
                         if self.metrics_configs[metric_type]['include_per_class_scores']:
+                            metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'] = dict()
                             for class_lb in self.config_labels_dict.keys():
-                                if not self.metrics_configs[metric_type]['include_background_metric']:
+                                if class_lb.title() == 'Background' and not self.metrics_configs[metric_type]['include_background_metric']:
                                     continue 
                                 #We will pad the per-class scores with a string denoting early termination.
                                 metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'][class_lb] = 'terminated_early'
