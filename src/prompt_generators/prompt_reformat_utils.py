@@ -1,7 +1,10 @@
 import logging
 import torch
 from typing import Union 
-from monai.data.meta_tensor import MetaTensor 
+from monai.data.meta_tensor import MetaTensor
+import os 
+import sys 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from version_handling import monai_version
 logger = logging.getLogger(__name__)
 
@@ -116,6 +119,11 @@ class PromptReformatter:
         
         return prompt_reformat 
     
+    def lasso_reformat_dict(self, prompts, labels):
+        #Expected structure is the same as the scribble reformatter, as the lasso is a scribble-like prompt endowed with
+        #additional structure (i.e., that it encloses a region). 
+        return self.scribble_reformat_dict(prompts, labels)
+    
     def reformat_to_dict(self, prompt_type:str, prompts: Union[list[torch.Tensor], None], prompts_labels: Union[list[torch.Tensor], None]):
         
         if prompts is None and prompts_labels is None:
@@ -129,7 +137,9 @@ class PromptReformatter:
                 return self.scribble_reformat_dict(prompts, prompts_labels)
             elif prompt_type.title() == 'Bboxes':
                 return self.bbox_reformat_dict(prompts, prompts_labels)
-            else:
+            elif prompt_type.title() == 'Lassos':
+                return self.lasso_reformat_dict(prompts, prompts_labels)
+            else: 
                 raise NotImplementedError('The currently selected prompt type is not supported')
 
 if __name__ == '__main__':
@@ -145,46 +155,50 @@ if __name__ == '__main__':
     bboxs_1 = [torch.Tensor([[1,2,3,4,5,6]]).to(dtype=torch.int64),
                torch.Tensor([[7,8,9,10,11,12]]).to(dtype=torch.int64)
             ]
-    
+    lassos_1 = scribbles_1     
 
     points_lb_1 = [torch.Tensor([1]).to(dtype=torch.int64), torch.Tensor([0]).to(dtype=torch.int64)]
     scribbles_lb_1 = [torch.Tensor([1]).to(dtype=torch.int64), torch.Tensor([0]).to(dtype=torch.int64), torch.Tensor([1]).to(dtype=torch.int64)] 
     bboxs_lb_1 = [torch.Tensor([1]).to(dtype=torch.int64), torch.Tensor([0]).to(dtype=torch.int64)] 
+    lassos_lb_1 = scribbles_lb_1 
 
     #Basic setup where not every class has a prompt simulated for each prompt type. 
     points_2 = points_1
     scribbles_2 = scribbles_1 
     bboxs_2 = bboxs_1 
+    lassos_2 = scribbles_2 
 
     points_lb_2 = [torch.Tensor([1]).to(dtype=torch.int64), torch.Tensor([1]).to(dtype=torch.int64)]
     scribbles_lb_2 = [torch.Tensor([1]).to(dtype=torch.int64), torch.Tensor([1]).to(dtype=torch.int64), torch.Tensor([1]).to(dtype=torch.int64)]
     bboxs_lb_2 = [torch.Tensor([1]).to(dtype=torch.int64), torch.Tensor([1]).to(dtype=torch.int64)] 
-
+    lassos_lb_2 = scribbles_lb_2 
     #Basic setup where we set Nonetypes for some prompt types (i.e. no prompt simulation)
     points_3 = points_1
     scribbles_3 = None 
     bboxs_3 = None 
+    lassos_3 = scribbles_3 
 
     points_lb_3 = points_lb_1
     scribbles_lb_3 = None 
     bboxs_lb_3 = None 
-
+    lassos_lb_3 = scribbles_lb_3
 
     # Running the tests/debugging.
     reformatter_class = PromptReformatter(class_config_dict=config_labels_dict)
 
-    print(reformatter_class.reformat_prompts('points', points_1, points_lb_1))
-    print(reformatter_class.reformat_prompts('points', points_2, points_lb_2))
+    print(reformatter_class.reformat_to_dict('points', points_1, points_lb_1))
+    print(reformatter_class.reformat_to_dict('points', points_2, points_lb_2))
     
-    print(reformatter_class.reformat_prompts('scribbles', scribbles_1, scribbles_lb_1))
-    print(reformatter_class.reformat_prompts('scribbles', scribbles_2, scribbles_lb_2))
+    print(reformatter_class.reformat_to_dict('scribbles', scribbles_1, scribbles_lb_1))
+    print(reformatter_class.reformat_to_dict('scribbles', scribbles_2, scribbles_lb_2))
     
-    print(reformatter_class.reformat_prompts('bboxes', bboxs_1, bboxs_lb_1))
-    print(reformatter_class.reformat_prompts('bboxes', bboxs_2, bboxs_lb_2))
-    
-    
-    print(reformatter_class.reformat_prompts('points', points_3, points_lb_3))
-    print(reformatter_class.reformat_prompts('scribbles', scribbles_3, scribbles_lb_3))
-    print(reformatter_class.reformat_prompts('bboxes', bboxs_3, bboxs_lb_3))
-    
-    # print(reformatter_class.reformat_prompts('granularity', points_1, points_lb_1))
+    print(reformatter_class.reformat_to_dict('bboxes', bboxs_1, bboxs_lb_1))
+    print(reformatter_class.reformat_to_dict('bboxes', bboxs_2, bboxs_lb_2))
+    print(reformatter_class.reformat_to_dict('lassos', lassos_1, lassos_lb_1))
+    print(reformatter_class.reformat_to_dict('lassos', lassos_2, lassos_lb_2))
+
+    print(reformatter_class.reformat_to_dict('points', points_3, points_lb_3))
+    print(reformatter_class.reformat_to_dict('scribbles', scribbles_3, scribbles_lb_3))
+    print(reformatter_class.reformat_to_dict('bboxes', bboxs_3, bboxs_lb_3))
+    print(reformatter_class.reformat_to_dict('lassos', lassos_3, lassos_lb_3))
+    # print(reformatter_class.reformat_to_dict('granularity', points_1, points_lb_1))

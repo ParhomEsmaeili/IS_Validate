@@ -122,13 +122,14 @@ class BasicSpatialPromptGenerator(PromptReformatter):
             Scribbles: List of scribbles, each scribble is a torch tensor with shape [N_s.p x N_dim] denoting the 
             positional coordinate. NOTE: N_s.p is highly dependent on the scribble length which can vary between scribbles! 
             Bboxes: List of N_box torch tensors, each tensor is a 1 x 2*N_dim shape (Extrema of the bbox with order [i_min, j_min, k_min, i_max, j_max, k_max] where ijk = RAS convention) 
-        
+            Lassos: List of N_lasso torch tensors, each lasso is a torch tensor with shape [N_lasso.p x N_dim]. This outlines a set of points which
+            describe the lasso. Downstream algorithms will be required to determine the enclosed region from this set.
         b) 'interactions_labels'
 
             Points_labels: List of torch tensors each with shape 1 (Values = class-integer code value for the given point: e.g. 0, 1, 2, 3...)
             Scribbles_labels: List of torch tensors, each with shape 1 (Values = class-integer code value for the given point: e.g. 0, 1, 2, 3... )
             Bboxes_labels: List of N_box torch tensors, each with shape 1 (Values = class-integer code value for the given point)
-
+            Lassos_labels: List of N_lasso torch tensors, each with shape 1 (Values = class-integer code value for the given lasso)
         "interactions" contains the prompts spatial coords info, and "interactions_labels" the corresponding
         labels for the prompts. 
         
@@ -143,7 +144,7 @@ class BasicSpatialPromptGenerator(PromptReformatter):
             Scribbles: Dictionary of class separated (by class label name) 3-fold nested list of lists: [Scribble Level List[Point Coordinate List[i,j,k]]]
             Bboxes: Dictionary of class separated (by class label name) 2-fold nested list of list [Box-level[List of length 2 * N_dim]]. 
             Each sublist denotes the extreme value of the points with order [i_min, j_min, k_min, i_max, j_max, k_max], where ijk=RAS convention. 
-        
+            Lassos: Dictionary of class separated (by class label name) 3-fold nested list of lists: [Lasso Level List[Point Coordinate List[i,j,k]]].
         NOTE: In instances where a prompt type is not at all being (or was not for a given iter) simulated, 
         the corresponding values will be a Nonetype. 
 
@@ -250,7 +251,7 @@ class HeuristicSpatialPromptGenerator(BasicSpatialPromptGenerator):
                             heuristic_mixtures=self.prompt_mixture_params)
 
 if __name__=='__main__':
-    generator = HeuristicSpatialPromptGenerator(sim_methods={'points':['uniform_random'], 'scribbles':None, 'bbox':None},
+    generator = HeuristicSpatialPromptGenerator(sim_methods={'points':['uniform_random'], 'scribbles':None, 'bbox':None, 'lassos':None},
                                     config_labels_dict={'tumour':1, 'background':0},
                                     sim_build_params=None, #{'points':None, 'scribbles':None, 'bbox':None},
                                     prompt_mixture_params=None)

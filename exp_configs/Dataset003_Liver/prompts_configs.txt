@@ -6,7 +6,8 @@
 				
 				"points":["uniform_random"],
 				"scribbles":null,
-				"bboxes":null
+				"bboxes":null,
+				"lassos":null
 				
 				},
 			"build_params":{
@@ -19,7 +20,8 @@
 					
 					},
 				"scribbles":null,
-				"bboxes":null
+				"bboxes":null,
+				"lassos":null
 				
 				},
 				

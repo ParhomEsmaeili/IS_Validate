@@ -97,8 +97,8 @@ class BuildHeuristic:
         self.heuristic_params = heuristic_params
         self.heuristic_mixtures = heuristic_mixtures 
 
-        self.refinement_prompts = ['points', 'scribbles']
-        self.grounded_prompts = ['bboxes'] 
+        self.free_form_prompts = ['points', 'scribbles']
+        self.partition_prompts = ['bboxes', 'lassos'] 
 
         self.heuristic_caller = self.initialise_heuristics()
 
@@ -143,13 +143,13 @@ class BuildHeuristic:
             if not any(generated_prompts.values()) or not any(generated_prompts_labels.values()):
                 raise ValueError('There must be at least one prompt!')
         elif mode == 'edit':
-            #The initial check is insufficient for edits, as bbox may be consistently present even without
-            #refinement at each iter! Needs consistent refinement also!.
             if not any(generated_prompts.values()) or not any(generated_prompts_labels.values()):
                 raise ValueError('There must be at least one prompt!')
-            
-            if not any([generated_prompts[key] for key in self.refinement_prompts]) or not any([generated_prompts_labels[f'{key}_labels'] for key in self.refinement_prompts]):
-                raise ValueError('There must be one refinement prompt in the editing iterations.')
+            # if not any([generated_prompts[key] for key in self.free_form_prompts]) or not any([generated_prompts_labels[f'{key}_labels'] for key in self.free_form_prompts]):
+                # raise ValueError('There must be one free_form prompt in the editing iterations.')
+            #NOTE: We have deprecated the above code, as it is not necessarily true that partition-based prompts (what we 
+            # previously were classifying as grounded prompts incorrectly) cannot be used for editing.
+
         else:
             raise Exception('Error in the implementation here.')
          
@@ -198,7 +198,8 @@ class BuildHeuristic:
                 heur_fn_dict=heur_fn_dict,                                
                 )
         else:
-            raise NotImplementedError('Implement the code for initialising non-prototype prompt mixture methods.')
+            raise NotImplementedError('Implement the code for initialising non-prototype prompt mixture methods. I.e., \n' \
+            'those for which heuristic_mixtures is not a NoneType.')
             '''
             Info: 
 
@@ -222,8 +223,7 @@ class BuildHeuristic:
         '''
         This function initialises then populates the generated prompts and labels using the heuristic caller.
 
-        Also calls on the output checker, to ensure that there is at least one prompt simulated (also handles 
-        instances where refinement iterations must have at least one refinement prompt!).
+        Also calls on the output checker, to ensure that there is at least one prompt simulated.
 
         Inputs:
 
@@ -250,6 +250,8 @@ class BuildHeuristic:
             self.at_least_one_prompt(generated_prompts, generated_prompt_labels, data)
 
             return generated_prompts, generated_prompt_labels
+        else: 
+            raise NotImplementedError('The heuristic mixture strategy has not yet been implemented')
 
     def __call__(self, data):
 

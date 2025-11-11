@@ -51,7 +51,7 @@ def memory_cleanup(
         #This variable handles whether the initialisation is always being retained, this is treated independent of
         #the editing iterations due to the keys used. 
         if not im_config['keep_init']:
-            warnings.warn('Are you sure you want to delete the initialisation information? This may contain information about grounded prompts.')
+            warnings.warn('Are you sure you want to delete the initialisation information?')
 
             deletion_set = set([mode for mode in im_keys if 'Init' in mode])
             if len(deletion_set) != 1:
