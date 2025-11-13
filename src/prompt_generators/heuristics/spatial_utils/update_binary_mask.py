@@ -3,7 +3,7 @@ import torch
 # import time
 # from cProfile import Profile
 # from pstats import Stats, SortKey
-def update_binary_mask(coords: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
+def update_binary_mask_freeform(coords: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
     """
     Modifies an existing binary mask by setting specified coordinates to zero.
     
@@ -51,15 +51,29 @@ def update_binary_mask(coords: torch.Tensor, mask: torch.Tensor) -> torch.Tensor
     torch.cuda.empty_cache() #Not sure if this is deallocating anything? #TODO diagnose this when we have more time.
     return mask.to(dtype=torch.bool) 
 
+def update_binary_mask_partition(prompt: list[list[torch.Tensor] | torch.Tensor], mask: torch.Tensor) -> torch.Tensor:
+    '''
+    Modifies an existing binary mask by setting specified partition region to zero.
+    
+    Args:
+        prompt (list[list[torch.Tensor] | torch.Tensor]): A list of prompts. Structure on a prompt-level depends on the underlying
+        prompt type. 
+        mask (torch.Tensor): An existing binary mask.
+    
+    Returns:
+        torch.Tensor: The modified binary mask with zeros at the specified partition locations.
+
+    '''
+    raise NotImplementedError("Partition-based binary mask updating is not implemented yet.") 
+
 if __name__ == "__main__":
     # Large 3D mask: 500 x 500 x 300 #Just checking the memory usage
     mask = torch.ones((500, 500, 700), dtype=torch.uint8, device='cuda')
     # 10 random coordinates to set to zero
     coords = torch.randint(0, 500, (10, 3))
     coords[:, 2] = torch.randint(0, 700, (10,))  # Set the 3rd dimension separately for correct range
-
     print("Coordinates to zero out:\n", coords)
-    updated_mask = update_binary_mask(coords, mask)
+    updated_mask = update_binary_mask_freeform(coords, mask)
     # Print the values at those coordinates to confirm they are zero
     for c in coords:
         print(f"Mask at {tuple(c.tolist())}: {updated_mask[tuple(c.tolist())].item()}")

@@ -34,10 +34,10 @@ def set_parse():
     
     parser.add_argument('--data_root', type=str, default=codebase_dir)
     parser.add_argument('--dataset_name', type=str, default='Dataset001_BrainTumour')
-    parser.add_argument('--app_root', type=str, default= '/home/parhomesmaeili/IS_Codebase_Forks/nnInteractive_Fork') #NOTE:Just set for debugging purposes.
+    parser.add_argument('--app_root', type=str, default= '/home/parhomesmaeili/IS_Codebase_Forks/SegVol_Fork') #NOTE:Just set for debugging purposes.
                        
     #This acts as the name of the app, but also temporarily acts as the relative path name within the input_applications folder in the app root folder.
-    parser.add_argument('--app_name', type=str, default='nnInteractive_App')#'Sample_SAMMed2D')
+    parser.add_argument('--app_name', type=str, default='SegVol_App')#'Sample_SAMMed2D')
     parser.add_argument('--metrics_root', type=str, default=os.path.join(codebase_dir, 'results'))
     parser.add_argument('--seg_root', type=str, default=os.path.join(codebase_dir, 'results'))
 
@@ -58,8 +58,8 @@ def set_parse():
     parser.add_argument('--task_conf_filename', type=str, default='task_configs.txt')
     parser.add_argument('--metric_conf_name', type=str, default='prototype')
     parser.add_argument('--task_conf_name', type=str, default='task_id_2')
-    parser.add_argument('--init_prompt_conf_name', type=str, default='prototype')
-    parser.add_argument('--edit_prompt_conf_name', type=str, default='prototype')
+    parser.add_argument('--init_prompt_conf_name', type=str, default='points_prototype_simplified') #'prototype')
+    parser.add_argument('--edit_prompt_conf_name', type=str, default='points_prototype_simplified') #'prototype')
     parser.add_argument('--metric_prompt_procedure_type', type=str, default='heuristic')
     parser.add_argument('--inf_prompt_procedure_type', type=str, default='heuristic')
     parser.add_argument('--sim_empty_fg_automatic', action='store_true', default=False)
@@ -466,7 +466,7 @@ def run_instances(
         #Logging the progress.
         if resume_bool:
             true_idx = case_idx + resumed_idx
-            logger.info(f'Sample {true_idx + 1} of {len(dataloader) + resumed_idx}, case_name: {case_name}')
+            logger.info(f'Sample  {true_idx + 1} of {len(dataloader) + resumed_idx}, case_name: {case_name}')
         else:
             logger.info(f'Sample {case_idx + 1} of {len(dataloader)}, case_name: {case_name}')
         

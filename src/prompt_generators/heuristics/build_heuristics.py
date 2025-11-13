@@ -16,7 +16,8 @@ class BuildHeuristic:
                 config_labels_dict:dict,
                 heuristics:dict,
                 heuristic_params: dict,
-                heuristic_mixtures: Union[dict, None] 
+                heuristic_mixtures: Union[dict, None],
+                heuristic_class_type: str
                 ):
         
         '''
@@ -34,7 +35,7 @@ class BuildHeuristic:
 
         
         
-        heuristics: Dict - Simulation methods used for generating each prompt (currently: [points, scribbles, bbox]). 
+        (REQUIRED) heuristics: Dict - Simulation methods used for generating each prompt (currently: [points, scribbles, bbox]). 
         
         Must always provide for all prompt types. A dictionary first separated by the prompt type:
 
@@ -87,16 +88,20 @@ class BuildHeuristic:
 
 
         NOTE: Can optionally be fully Nonetype i.e. default behaviour.
-        
+
+
+        REQUIRED (heuristic class_type): The heuristic class type to be used for prompt generation. This provides some basic 
+        structure which acts as a skeleton to be filled out with the prior arguments when generating the prompts. 
+
         '''
         
         self.sim_device = sim_device 
         self.use_mem = use_mem 
         self.config_labels_dict = config_labels_dict
-        self.heuristics = heuristics 
+        self.heuristics = heuristics
         self.heuristic_params = heuristic_params
         self.heuristic_mixtures = heuristic_mixtures 
-
+        self.heuristic_class_type = heuristic_class_type
         self.free_form_prompts = ['points', 'scribbles']
         self.partition_prompts = ['bboxes', 'lassos'] 
 
@@ -189,7 +194,7 @@ class BuildHeuristic:
                 
                 heur_fn_dict[prompt_type] = prompt_heur_fns
 
-            return mixture_class_registry['prototype_pseudo_mixture'](
+            return mixture_class_registry[self.heuristic_class_type](
                 config_labels_dict=self.config_labels_dict,
                 sim_device=self.sim_device,
                 use_mem=self.use_mem,

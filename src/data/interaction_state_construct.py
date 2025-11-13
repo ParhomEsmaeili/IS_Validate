@@ -94,7 +94,8 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
                             config_labels_dict=config_labels_dict,
                             sim_methods=prompt_configs['methods'], 
                             sim_build_params=prompt_configs['build_params'],
-                            prompt_mixture_params=prompt_configs['mixture_params'])
+                            prompt_mixture_params=prompt_configs['mixture_params'],
+                            prompter_class_type=prompt_configs['prompter_class_type'])
             
             self.init_modes = ['Interactive Init'] 
             self.edit_modes = ['Interactive Edit']

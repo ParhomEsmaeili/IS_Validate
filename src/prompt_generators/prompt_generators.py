@@ -20,6 +20,7 @@ class BasicSpatialPromptGenerator(PromptReformatter):
                 sim_methods: dict,
                 sim_build_params: dict,
                 prompt_mixture_params: Union[dict, None],
+                prompter_class_type: str
                 ):
         '''
         Prompt generation class for generating the interactive spatial prompts for an interaction state.
@@ -83,7 +84,9 @@ class BasicSpatialPromptGenerator(PromptReformatter):
 
 
         Can optionally be fully Nonetype (i.e., will perform a default behaviour)
-    
+
+        prompter_class_type: The class type to be used for prompt generation. This may provide some basic structure for
+        prompt generation which acts as a skeleton to be filled out with prior arguments when generating the prompts.
         '''
         super().__init__(config_labels_dict)
 
@@ -93,20 +96,13 @@ class BasicSpatialPromptGenerator(PromptReformatter):
         self.sim_methods = sim_methods
         self.sim_build_params = sim_build_params 
         self.prompt_mixture_params = prompt_mixture_params 
+        self.prompter_class_type = prompter_class_type
 
         self.prompt_types = list(sim_methods.keys()) 
 
         #Building the interactive prompter class, where the callback generates the prompts (and corresponding labels) in torch format.
         
         self.interactive_prompter = self.build_prompt_generator() 
-
-        # self.interactive_prompter = self.build_prompt_generator(sim_device,
-        #                                                         config_labels_dict,
-        #                                                         self.sim_methods, 
-        #                                                         self.sim_build_params, 
-        #                                                         self.prompt_mixture_params)
-
-        
 
     @abstractmethod
     def build_prompt_generator(self): #, sim_device, prompt_methods, prompt_build_params, prompt_mixture_params): 
@@ -229,7 +225,8 @@ class HeuristicSpatialPromptGenerator(BasicSpatialPromptGenerator):
                 config_labels_dict: dict[str, int],
                 sim_methods:dict, 
                 sim_build_params:dict,
-                prompt_mixture_params:Union[dict, None]):
+                prompt_mixture_params:Union[dict, None],
+                prompter_class_type: str):
         
         super().__init__(
                         sim_device=sim_device,
@@ -237,7 +234,8 @@ class HeuristicSpatialPromptGenerator(BasicSpatialPromptGenerator):
                         config_labels_dict=config_labels_dict,
                         sim_methods=sim_methods, 
                         sim_build_params=sim_build_params,
-                        prompt_mixture_params=prompt_mixture_params
+                        prompt_mixture_params=prompt_mixture_params,
+                        prompter_class_type=prompter_class_type
                         )  
 
     def build_prompt_generator(self):
@@ -248,7 +246,9 @@ class HeuristicSpatialPromptGenerator(BasicSpatialPromptGenerator):
                             config_labels_dict=self.config_labels_dict, 
                             heuristics=self.sim_methods, 
                             heuristic_params=self.sim_build_params,
-                            heuristic_mixtures=self.prompt_mixture_params)
+                            heuristic_mixtures=self.prompt_mixture_params,
+                            heuristic_class_type=self.prompter_class_type
+                            )
 
 if __name__=='__main__':
     generator = HeuristicSpatialPromptGenerator(sim_methods={'points':['uniform_random'], 'scribbles':None, 'bbox':None, 'lassos':None},
