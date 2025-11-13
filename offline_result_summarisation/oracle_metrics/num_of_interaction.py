@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import os
 import sys
+import json
 from scipy.stats import norm, t, laplace, beta
 parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(parent_dir)
@@ -46,53 +47,69 @@ def plot_fitted_distributions(data, fit_params, metric, fit_type, threshold, out
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Calculate number of interactions")
-    parser.add_argument('--datetime', type=str, default='20250614_025617', help='Path to the segmentation folder')
-    parser.add_argument('--metrics', type=str, nargs='+', help='Reference metric for the threshold', default=['Dice', 'NSD'])
+    parser.add_argument('--algo_results_path', type=str, required=True)
+    parser.add_argument('--output_result_root', type=str, required=True)
+    
+    parser.add_argument('--metric', type=str, required=True, action='append', help='Reference metric for the threshold')
     # parser.add_argument('--nnunet_fraction', type=float, nargs='+', default=[0.9,1], help='Fraction of nnUNet performance for thresholding against')
-    parser.add_argument('--nnunet_statistic', type=str, nargs='+', default=('gaussian', 'student', 'laplace', 'beta', 'quantile'), help='Statistical fit for selecting threshold.')
-    parser.add_argument('--nnunet_std_bound', type=float, default=1.0, help='Standard deviation below mean for the nnUNet metric thresholding.')
-    parser.add_argument('--dataset_name', type=str, default='Dataset007_Pancreas', help='Name of the dataset')
+    parser.add_argument('--reference_path', type=str, required=True)
+    parser.add_argument('--nnunet_statistic', type=str, action='append', help='Statistical fit for selecting threshold.')
+    parser.add_argument('--nnunet_bound', type=str, required=True, action='append', help='Bound for the nnUNet metric thresholding wrt statistic.')
+    parser.add_argument('--infer_info', type=str, required=True, help='json string containing a dictionary describing the inference for determinining the reference columns')
+    
     # parser.add_argument('--output_base_folder', type=str, required=True, help='Output folder for metrics')
     args = parser.parse_args()
+    os.makedirs(args.output_result_root, exist_ok=True)
+    # algo_input_folder = os.path.join(parent_dir, 'results', args.dataset_name, args.experiment_name, 'metrics')
+    # output_folder = os.path.join(parent_dir, 'results_summary', args.dataset_name, args.experiment_name) 
+    # nnunet_folder = os.path.join(parent_dir, 'results_summary', args.dataset_name, 'nnUNet_metrics')
 
-    algo_input_folder = os.path.join(parent_dir, 'results', args.dataset_name, args.datetime, 'metrics')
-    output_folder = os.path.join(parent_dir, 'results_summary', args.dataset_name, args.datetime) 
-    nnunet_folder = os.path.join(parent_dir, 'results_summary', args.dataset_name, 'nnUNet_metrics')
+    # edit_interaction_max = 100 
 
-    edit_interaction_max = 100 
+    std_bounded_statistics = ('gaussian', 'student', 'laplace', 'beta')
+    quantile_statistics = ('quantile',)
+
+    infer_info = json.loads(args.infer_info)
+    init = infer_info.get('init')
+    edit_interaction_max = infer_info.get('edit') 
+
+    if init is None:
+        raise ValueError("Inference info must contain 'init' key for initial metric column name.")
+    if edit_interaction_max is None:
+        raise ValueError("Inference info must contain 'edit' key for maximum number of edit interactions.")
+
     #now we read the csv files in the nnunet folder, and the reference algorithm as we want to calculate the 
     # metric for.
     algo_metrics_dfs = dict() 
 
-    for metric in args.metrics:
+    for metric in args.metric:
         #NOTE: Hardcoded the file name itself for now as we have only had the capability of running with binary semantic
         #segmentation tasks so far. 
-        input_file = os.path.join(algo_input_folder, metric, f'cross_class_scores.csv')
-        column_headers = ['Case_Name', 'Interactive Init'] + [f'Interactive Edit Iter {i + 1}' for i in range(edit_interaction_max)]
-        algo_metrics_dfs[metric] = pd.read_csv(input_file, skiprows=1, names=column_headers) 
+        
+        column_headers = ['Case_Name', init] + [f'Interactive Edit Iter {i + 1}' for i in range(edit_interaction_max)]
+        algo_metrics_dfs[metric] = pd.read_csv(args.algo_results_path, skiprows=1, names=column_headers) 
         #NOTE: This is because the first row contained
         #a column with a header describing the case ID which was messing with the pandas read function. 
 
     #Now we read the nnUNet metrics csv files.
     nnunet_metrics_dfs = dict()
-    for metric in args.metrics:
-        #NOTE: Hardcoded the file name itself for now as we have only had the capability of running with binary semantic
-        #segmentation tasks so far. 
-        input_file = os.path.join(nnunet_folder, metric, f'cross_class_scores.csv')
+    for id, metric in enumerate(args.metric):
         column_headers = ['Case_Name', 'Automatic Init']
-        nnunet_metrics_dfs[metric] = pd.read_csv(input_file, skiprows=1, names=column_headers) 
+        nnunet_metrics_dfs[metric] = pd.read_csv(args.reference_path, skiprows=1, names=column_headers) 
         #NOTE: This is because the first row contained
         #a column with a header describing the case ID which was messing with the pandas read function.
 
     noi_per_statistic = dict() #Number of interactions per fitting statistic.
     for fit in args.nnunet_statistic:
-        if args.nnunet_std_bound < 0:
-            raise ValueError(f"Invalid nnUNet std bound: {args.nnunet_std_bound}. It should be greater than 0")
+        if fit in std_bounded_statistics and (float(args.nnunet_bound[id]) < 0):
+            raise ValueError(f"Invalid nnUNet bound used")
+        if fit in quantile_statistics and (float(args.nnunet_bound[id]) < 0 or float(args.nnunet_bound[id]) > 1):
+            raise ValueError(f"Invalid nnUNet bound used")
 
         #Now we calculate the number of interactions for each case.
         num_interactions_dict = dict()
     
-        for metric in args.metrics:
+        for metric in args.metric:
             algo_df = algo_metrics_dfs[metric]
             nnunet_df = nnunet_metrics_dfs[metric]
 
@@ -109,7 +126,7 @@ if __name__ == "__main__":
 
                 # mean = nnunet_df['Automatic Init'].mean()
                 # std = nnunet_df['Automatic Init'].std()
-                threshold = mean - args.nnunet_std_bound * std
+                threshold = mean - float(args.nnunet_bound[id]) * std
 
             elif fit == 'student':
                 # Fit a Student's t-distribution to the nnUNet metric values
@@ -118,14 +135,14 @@ if __name__ == "__main__":
                 df, loc, scale = t.fit(nnunet_df['Automatic Init'])
                 mean = t.mean(df, loc=loc, scale=scale)
                 std = t.std(df, loc=loc, scale=scale)
-                threshold = mean - args.nnunet_std_bound * std
+                threshold = mean - float(args.nnunet_bound[id]) * std
 
             elif fit == 'laplace':
                 # Fit a Laplace distribution to the nnUNet metric values
                 loc, scale = laplace.fit(nnunet_df['Automatic Init'])
                 mean = laplace.mean(loc=loc, scale=scale)
                 std = laplace.std(loc=loc, scale=scale) 
-                threshold = mean - args.nnunet_std_bound * std
+                threshold = mean - args.nnunet_bound * std
 
             elif fit == 'beta':
                 #Fit a beta distribution to the nnUNet metric values as it is bounded between 0 and 1
@@ -138,31 +155,35 @@ if __name__ == "__main__":
                 a, b, loc, scale = beta.fit(data, floc=0, fscale=1) 
                 mean = beta.mean(a, b, loc=loc, scale=scale)
                 std = beta.std(a, b, loc=loc, scale=scale)
-                threshold = mean - args.nnunet_std_bound * std
+                threshold = mean - args.nnunet_bound * std
 
             elif fit == 'quantile':
                 #We use a quantile based thresholding for this... more ad-hoc.
-                percentile = nnunet_df['Automatic Init'].quantile(0.25) #We go for the lower quartile.
+                percentile = nnunet_df['Automatic Init'].quantile(float(args.nnunet_bound[id]))
                 threshold = percentile 
+            else:
+                NotImplementedError(f"Unknown fit type: {fit}. Supported types are 'gaussian', 'student', 'laplace', 'beta', 'quantile'.")
 
             if threshold < 0:
-                threshold = 0 
+                threshold = 0
                 warnings.warn(f"Threshold for {metric} is negative after applying std bound. Setting to 0.")
             
             #Just plotting the fitted distributions for sanity check.
             fit_params = {}
             if fit == 'gaussian':
                 fit_params['gaussian'] = (mean, std)
-            if fit == 'student':
+            elif fit == 'student':
                 fit_params['student'] = (df, loc, scale)
-            if fit == 'laplace':
+            elif fit == 'laplace':
                 fit_params['laplace'] = (loc, scale)
-            if fit == 'beta':
+            elif fit == 'beta':
                 fit_params['beta'] = (a, b, loc, scale)
             # Only plot once per metric (after all fits)
-            if fit == 'quantile':
+            elif fit == 'quantile':
                 fit_params['quantile'] = (percentile,)
-            
+            else:
+                raise NotImplementedError(f"Unknown fit type: {fit}. Supported types are 'gaussian', 'student', 'laplace', 'beta', 'quantile'.")
+
             data = nnunet_df['Automatic Init'].values
             plot_fitted_distributions(
                 data,
@@ -170,7 +191,7 @@ if __name__ == "__main__":
                 metric,
                 fit_type=fit,
                 threshold=threshold,
-                output_folder=output_folder
+                output_folder=args.output_result_root
             )
 
 
@@ -229,18 +250,17 @@ if __name__ == "__main__":
                 fail_list = noi_per_statistic[fit][metric]['failure_cases']
                 if case in cases:
                     idx = cases.index(case)
-                    row[f'NOI_{metric}_thr_{fit}_{args.nnunet_std_bound}'] = noi_list[idx]
-                    row[f'Fail_{metric}_thr_{fit}_{args.nnunet_std_bound}'] = fail_list[idx]
+                    row[f'NOI_{metric}_thr_{fit}_{float(args.nnunet_bound[id])}'] = noi_list[idx]
+                    row[f'Fail_{metric}_thr_{fit}_{float(args.nnunet_bound[id])}'] = fail_list[idx]
                 else:
-                    row[f'NOI_{metric}_thr_{fit}_{args.nnunet_std_bound}'] = None
-                    row[f'Fail_{metric}_thr_{fit}_{args.nnunet_std_bound}'] = None
+                    row[f'NOI_{metric}_thr_{fit}_{float(args.nnunet_bound[id])}'] = None
+                    row[f'Fail_{metric}_thr_{fit}_{float(args.nnunet_bound[id])}'] = None
         rows.append(row)
 
     casewise_df = pd.DataFrame(rows)
-    casewise_output_file = os.path.join(output_folder, 'casewise_num_interactions_fitting.csv')
+    casewise_output_file = os.path.join(args.output_result_root, 'casewise_num_interactions_fitting.csv')
     casewise_df.to_csv(casewise_output_file, index=False)
     print(f"Casewise number of interactions saved to {casewise_output_file}")
-
 
 
     #Now for the summarisation of the number of interactions metrics. 
@@ -249,9 +269,9 @@ if __name__ == "__main__":
     # interactions.
 
     summarised_noi = dict()
-    for fit in args.nnunet_statistic:
+    for id, fit in enumerate(args.nnunet_statistic):
         summarised_noi[fit] = {}
-        for metric in args.metrics:
+        for metric in args.metric:
             noi_data = noi_per_statistic[fit][metric]['noi']
             failure_cases = noi_per_statistic[fit][metric]['failure_cases']
             
@@ -275,7 +295,7 @@ if __name__ == "__main__":
 
     # Convert summarised_noi to a DataFrame
     summary_rows = []
-    for fit in summarised_noi:
+    for id, fit in enumerate(summarised_noi):
         for metric in summarised_noi[fit]:
             row = {
                 'Fit': fit,
@@ -289,14 +309,20 @@ if __name__ == "__main__":
             summary_rows.append(row)
 
     summarised_df = pd.DataFrame(summary_rows)
-    summarised_output_file = os.path.join(output_folder, 'summarised_num_interactions_fitting.csv')
+    summarised_output_file = os.path.join(args.output_result_root, 'summarised_num_interactions_fitting.csv')
     summarised_df.to_csv(summarised_output_file, index=False)
     print(f"Summarised number of interactions saved to {summarised_output_file}")
 
-    # #Now we write the summarised results to a csv file.
-    
-    # summarised_output_file = os.path.join(output_folder, 'summarised_num_interactions_fitting.csv')
-
-    # summarised_df.to_csv(summarised_output_file)
-    # print(f"Summarised number of interactions saved to {summarised_output_file}")
-    
+    #Now we write the config used for this particular processing method in order to contextualise the result.
+    config_output = {
+        'algo_results_path': args.algo_results_path,
+        'reference_path': args.reference_path,
+        'metric': args.metric,
+        'nnunet_statistic': args.nnunet_statistic,
+        'nnunet_bound': args.nnunet_bound,
+        'infer_info': infer_info,
+    }
+    config_output_file = os.path.join(args.output_result_root, 'num_of_interactions_fitting_config.json')
+    with open(config_output_file, 'w') as f:
+        json.dump(config_output, f, indent=4)
+    print(f"Configuration saved to {config_output_file}")
