@@ -6,7 +6,7 @@ import sys
 from scipy import integrate 
 import argparse
 # Add the parent directory to know how to find the saved metrics, very hacky.
-parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 def summarise_standard_metrics(
         input_folder, 

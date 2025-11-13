@@ -4,7 +4,7 @@ import pandas as pd
 import os
 import sys
 from scipy.stats import norm, t, laplace, beta
-parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(parent_dir)
 import warnings 
 
