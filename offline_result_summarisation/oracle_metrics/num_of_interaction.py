@@ -40,7 +40,7 @@ def plot_fitted_distributions(data, fit_params, metric, fit_type, threshold, out
     plt.ylabel('Density')
     plt.legend()
     plt.tight_layout()
-    plt.savefig(os.path.join(output_folder, f'fitted_distributions_{metric}_{fit_type}.png'))
+    plt.savefig(os.path.join(output_folder, f'fitted_oracle_distributions_{metric}_{fit_type}.png'))
     plt.close()
 
 

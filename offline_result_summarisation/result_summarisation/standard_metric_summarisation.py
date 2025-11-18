@@ -3,6 +3,7 @@ import csv
 import pandas as pd 
 import os 
 import sys
+import json
 from scipy import integrate 
 import argparse
 # Add the parent directory to know how to find the saved metrics, very hacky.
@@ -12,29 +13,34 @@ def summarise_standard_metrics(
         input_folder, 
         output_folder, 
         input_metrics,
-        interval_metric_epochs): #,
-        # output_interval_metric_types,
-        # peak_metric_types):
+        infer_info,
+        filename,
+        interval_metric_epochs): 
     """
     Summarises standard metrics from a CSV file and writes the results to a new CSV file.
     
     Parameters:
-    input_folder (str): Path to the folder containing the metrics. 
+    input_folder (str): Path to the folder containing the folders with CSV files with the metrics.
     output_folder (str): Path to the output folder where summarised metrics will be saved.
     output_filename (str): Name of the output CSV file. 
     input_metrics (tuple): Tuple of metrics to be summarised.
+    filename (str): Filename of the CSV file containing the metrics.
     interval_metric_epochs (tuple): Tuple of epochs for interval based metrics.
     # output_interval_metric_types (dict): Dictionary defining the types of interval metrics to be summarised.
     # peak_metric_types (dict): Dictionary defining the types of "peak" metrics to be summarised.
 
     """
+    init = infer_info.get('init')
+    edit_interaction_max = infer_info.get('edit') 
+    # print(output_folder)
     # Read the input CSV file
     metrics_dfs = dict()
     for metric in input_metrics:
         #NOTE: Hardcoded the file name itself for now as we have only had the capability of running with binary semantic
         #segmentation tasks so far. 
-        input_file = os.path.join(input_folder, metric, f'cross_class_scores.csv')
-        column_headers = ['Case_Name', 'Interactive Init'] + [f'Interactive Edit Iter {i + 1}' for i in range(interval_metric_epochs[-1])]
+        input_file = os.path.join(input_folder, metric, filename)
+        # print(input_file)
+        column_headers = ['Case_Name', init] + [f'Interactive Edit Iter {i + 1}' for i in range(edit_interaction_max)]
         metrics_dfs[metric] = pd.read_csv(input_file, skiprows=1, names=column_headers) #NOTE: This is because the first row contained
         #a column with a header describing the case ID which was messing with the pandas read function. 
 
@@ -103,7 +109,7 @@ def summarise_standard_metrics(
     
     
     #Now writing the summarised metrics to a new CSV file
-    
+    # print(metric_summaries)
     # Concatenate all metric summaries vertically for iteration-wise stats
     all_iteration_summaries = pd.concat([metric_summaries[metric] for metric in input_metrics], axis=1)
     all_iteration_summaries.to_csv(os.path.join(output_folder, 'all_iteration_summaries.csv'))
@@ -119,77 +125,31 @@ def summarise_standard_metrics(
 
 def set_parse():
     parser = argparse.ArgumentParser(description='Summarise standard metrics from a CSV file.')
-    parser.add_argument('--dataset_name', type=str, required=True, help='Name of the dataset')
-    parser.add_argument('--datetime', type=str, required=True, help='Datetime string for the results folder')
+    parser.add_argument('--algorithm_results_root', type=str, required=True, help='Root path to the algorithm results')
+    parser.add_argument('--output_folder_root', type=str, required=True, help='Root path to the output folder for results summarisation')
+    parser.add_argument('--infer_info', type=str, required=True, help='JSON string containing inference information such as init and edit interaction max')
+    parser.add_argument('--filename', type=str, required=True, help='Filename of the CSV file containing the metrics.')
     return parser.parse_args()
 
 if __name__ == "__main__":
     
     args = set_parse()
-    dataset_name = args.dataset_name
-    datetime = args.datetime
-    # dataset_name = 'Dataset001_BrainTumour'
-    # datetime = '20250614_035853' 
-    # Example: '20250614_035853' for 14th June 2025 at 03:58:53 AM
+   
+    input_results_root=  args.algorithm_results_root
+    output_folder = args.output_folder_root
+    filename = args.filename
 
-    input_folder =  os.path.join(parent_dir, 'results', dataset_name, datetime, 'metrics') # Replace with your input file path
-    output_folder = os.path.join(parent_dir, 'results_summary', dataset_name, datetime)
-
+    infer_info = json.loads(args.infer_info)
+    
     os.makedirs(output_folder, exist_ok=True) 
     input_metrics = ('Dice', 'NSD')
     interval_metric_epochs = ('Init', 1, 5, 50, 100) 
-
-    #Lets just comment this out for now and hardcode it in the function itself. 
-
-    # output_interval_metric_types = {
-    #     'Dice': {
-    #         'Mean',
-    #         'Std',
-    #         'Median',
-    #         'LQ',
-    #         'UQ'
-    #         'Mean Normalised AUC',
-    #         'Std Normalised AUC',
-    #         'Median Normalised AUC',
-    #         'LQ Normalised AUC',
-    #         'UQ Normalised AUC'
-    #     },
-    #     'NSD': {
-    #         'Mean NSD',
-    #         'Std NSD',
-    #         'Median NSD',
-    #         'LQ NSD',
-    #         'UQ NSD',
-    #         'Mean Normalised AUC',
-    #         'Std Normalised AUC',
-    #         'Median Normalised AUC',
-    #         'LQ Normalised AUC',
-    #         'UQ Normalised AUC'
-    #     }
-    
-    # }
-    # peak_metric_types = {
-    #     'Dice': {
-    #         'Mean Peak',
-    #         'Std Peak',
-    #         'Median Peak',
-    #         'LQ Peak',
-    #         'UQ Peak'
-    #     },
-    #     'NSD': {
-    #         'Mean Peak',
-    #         'Std Peak',
-    #         'Median Peak',
-    #         'LQ Peak',
-    #         'UQ Peak'
-    #     }
-    # }
-
+    # print(output_folder)
     summarise_standard_metrics(
-        input_folder, 
+        input_results_root, 
         output_folder, 
         input_metrics,
-        interval_metric_epochs) #,
-        # output_interval_metric_types,
-        # peak_metric_types)
+        infer_info,
+        filename,
+        interval_metric_epochs)
     

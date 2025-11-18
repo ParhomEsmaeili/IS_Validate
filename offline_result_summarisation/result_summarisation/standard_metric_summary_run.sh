@@ -1,28 +1,20 @@
 #!/bin/bash
 
+#Doubles as both a per-run summarisation script, and as a aggregated results summarisation script, depending on the "run_nums" arg.
 # Set your arguments here
-
-NNUNET_ROOT_PATH="/home/parhomesmaeili/Helmholtz Group/MIDL2025_nnunet/nnUNet_Metrics"
-#Experiment configuration variables.
 DATASET_NAMES=("Dataset001_BrainTumour" "Dataset003_Liver" "Dataset004_Hippocampus" "Dataset005_Prostate" "Dataset006_Lung" "Dataset007_Pancreas" "Dataset008_HepaticVessel" "Dataset010_Colon")
 DATASET_IDS=("001" "003" "004" "005" "006" "007" "008" "010") 
-APPS=("sammed3dv1" "segvolv1" "sammed2dv1" "sam2v1" "nnintv1")
+APP=("nnintv1" "sammed3dv1" "segvolv1" "sammed2dv1" "sam2v1" "nnintv1")
 PROMPTER="pointsonly"
-# RUN_NUMS=("1" "2" "3")
-RUN_NUMS=("-aggregated")
+RUN_NUMS=("-aggregated") #("1") #"2" "3")
 INFER_INFO='{"init": "Interactive Init", "edit": 100}'
 
-NNUNET_STATISTIC="quantile"
-NNUNET_BOUND="0.25"
-REFERENCE_METRIC="Dice"
 REFERENCE_FILE="cross_class_scores.csv"
-REFERENCE_COLUMN="Automatic Init"
 
 for index in ${!DATASET_NAMES[@]}; do
   DATASET_NAME=${DATASET_NAMES[$index]};
   DATASET_ID=${DATASET_IDS[$index]};
-  ALGORITHM_RESULTS_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/MIDL_DGX_Results/$DATASET_NAME"
-  for APP in "${APPS[@]}"; do
+  for APP in "${APP[@]}"; do
     echo "Processing application: $APP"
     for RUN_NUM in "${RUN_NUMS[@]}"; do
       if [ "$RUN_NUM" == "-aggregated" ]; then
@@ -32,18 +24,16 @@ for index in ${!DATASET_NAMES[@]}; do
         ALGORITHM_RESULTS_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/MIDL_DGX_Results/$DATASET_NAME";
         EXPERIMENT_NAME="$APP-dataset${DATASET_ID}-$PROMPTER-run$RUN_NUM";
       fi
-      # EXPERIMENT_NAME="$APP-dataset${DATASET_ID}-$PROMPTER-run$RUN_NUM";
       OUTPUT_SUBPATH="$APP/$DATASET_NAME/$PROMPTER/run$RUN_NUM"
       OUTPUT_RESULT_ROOT="/home/parhomesmaeili/IS-Validation-Framework/MIDL_DGX_Results_Summary/$OUTPUT_SUBPATH";
-      ALGORITHM_RESULTS_PATH="$ALGORITHM_RESULTS_ROOT_PATH/$EXPERIMENT_NAME/metrics/$REFERENCE_METRIC/$REFERENCE_FILE";
-      REFERENCE_RESULT_PATH="$NNUNET_ROOT_PATH/$DATASET_NAME/nnUNet_metrics/$REFERENCE_METRIC/$REFERENCE_FILE";
-      python3 "num_of_interaction.py" \
-          --algo_results_path="$ALGORITHM_RESULTS_PATH" \
-          --output_result_root="$OUTPUT_RESULT_ROOT" \
-          --metric="$REFERENCE_METRIC" \
-          --reference_path="$REFERENCE_RESULT_PATH" \
-          --nnunet_statistic="$NNUNET_STATISTIC" \
-          --nnunet_bound="$NNUNET_BOUND" \
+      ALGORITHM_RESULTS_ROOT="$ALGORITHM_RESULTS_ROOT_PATH/$EXPERIMENT_NAME/metrics";
+      echo ALGORITHM_RESULTS_ROOT: "$ALGORITHM_RESULTS_ROOT";
+      echo OUTPUT_RESULT_ROOT: "$OUTPUT_RESULT_ROOT";
+      echo filename: "$REFERENCE_FILE";
+      python3 "standard_metric_summarisation.py" \
+          --algorithm_results_root="$ALGORITHM_RESULTS_ROOT" \
+          --output_folder_root="$OUTPUT_RESULT_ROOT" \
+          --filename="$REFERENCE_FILE" \
           --infer_info="$INFER_INFO"; 
       done;
   done;
