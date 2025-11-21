@@ -139,35 +139,54 @@ class WriteOutput:
                 if monai_version == '1.4.0':
                     with inverse_transform.trace_transform(False):
                         result_reformat = inverse_transform(result_reformat)
+                    current_affine = result_reformat.affine
                 elif monai_version == '0.9.0':
                     result_reformat = inverse_transform(torch.from_numpy(result_reformat.numpy()), result_reformat.affine)
                     # result_reformat = inverse_transform(result_reformat.data, result_reformat.affine)
+                    current_affine = result_reformat[2]
                 else:
                     raise Exception('Unknown MONAI version')
             else:
                 raise Exception("Failed invert orientation - original_affine is not on the image header")
+        
+        
+            #Add a line of code for extracting the channels, this also removes the channel dimension.
+            if monai_version == '1.4.0':
+                channel_split = list(result_reformat.array) 
+            elif monai_version == '0.9.0':
+                # We assume that we have already checked that the outputs are channel first, and that they meet the quantity of channels.
+                #Result reformat now has a different structure, it is a tuple with 
+                # (reoriented_tensor, pre-inversion affine, post-inversion affine) structure -  or more technically:
+                # (reoriented tensor, pre-transform axcodes, post-transform axcodes)
+                #Byproduct of the old monai version........
+                channel_split = list(result_reformat[0].numpy()) 
+            else:
+                raise Exception('unsupported monai version.')
+        else:
+            if monai_version == '1.4.0':
+                current_affine = ref_meta_dict['affine']
+            elif monai_version == '0.9.0':
+                current_affine = ref_meta_dict['affine']
+            else:
+                raise Exception('Unknown MONAI version')
+        
+            #Add a line of code for extracting the channels, this also removes the channel dimension.
+            if monai_version == '1.4.0':
+                channel_split = list(result_reformat.array) 
+            elif monai_version == '0.9.0':
+                channel_split = list(result_reformat.data.numpy())
+            else:
+                raise Exception('unsupported monai version.')
             
         #We assume that we have already checked that the outputs are channel first, and that they meet the quantity of channels.
 
-        #Add a line of code for extracting the channels, this also removes the channel dimension.
-        if monai_version == '1.4.0':
-            channel_split = list(result_reformat.array) 
-        elif monai_version == '0.9.0':
-            # We assume that we have already checked that the outputs are channel first, and that they meet the quantity of channels.
-            #Result reformat now has a different structure, it is a tuple with 
-            # (reoriented_tensor, pre-inversion affine, post-inversion affine) structure -  or more technically:
-            # (reoriented tensor, pre-transform axcodes, post-transform axcodes)
-            #Byproduct of the old monai version........
-            channel_split = list(result_reformat[0].numpy()) 
-        else:
-            raise Exception('unsupported monai version.')
         #Make use of the writeitk and call it across each channel
         # path_list = [self.write_itk(channel, ref_meta_dict["original_affine"], tmp_dir) for channel in channel_split]
 
         max_workers = min(32, (os.cpu_count() or 1) + 4)
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             path_list = list(executor.map(
-                lambda channel: self.write_itk(channel, ref_meta_dict["original_affine"], tmp_dir),
+                lambda channel: self.write_itk(channel, current_affine, tmp_dir), #ref_meta_dict["original_affine"], tmp_dir),
                 channel_split
             ))
 

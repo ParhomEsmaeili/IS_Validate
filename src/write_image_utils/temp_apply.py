@@ -10,56 +10,6 @@ from typing import Union
 from post import WriteOutput
 import shutil
 
-
-def write_itk(image_np, output_file, affine, dtype, compress):
-    if isinstance(image_np, torch.Tensor):
-        image_np = image_np.numpy()
-    if isinstance(affine, torch.Tensor):
-        affine = affine.numpy()
-    if len(image_np.shape) >= 2:
-        image_np = image_np.transpose().copy()
-    if dtype:
-        image_np = image_np.astype(dtype)
-
-    result_image = itk.image_from_array(image_np)
-    
-    if affine is not None:
-        
-        convert_aff_mat = np.diag([-1, -1, 1, 1])
-        if affine.shape[0] == 3:  # Handle RGB (2D Image)
-            convert_aff_mat = np.diag([-1, -1, 1])
-        affine = convert_aff_mat @ affine
-
-        dim = affine.shape[0] - 1
-        _origin_key = (slice(-1), -1)
-        _m_key = (slice(-1), slice(-1))
-
-        origin = affine[_origin_key]
-        spacing = np.linalg.norm(affine[_m_key] @ np.eye(dim), axis=0)
-        direction = affine[_m_key] @ np.diag(1 / spacing)
-
-
-        result_image.SetDirection(itk.matrix_from_array(direction))
-        result_image.SetSpacing(spacing)
-        result_image.SetOrigin(origin)
-
-    itk.imwrite(result_image, output_file, compress)
-
-def converter(img:Union[torch.Tensor, MetaTensor], reference:MetaTensor):
-    duplicate_reference = copy.deepcopy(reference)
-    duplicate_img = copy.deepcopy(img)
-
-    if isinstance(duplicate_img, MetaTensor):
-        #Extract array
-        array = duplicate_img.array 
-        duplicate_reference.array = array 
-
-    elif isinstance(duplicate_img, torch.Tensor):
-        #If torch tensor.
-        duplicate_reference.array = duplicate_img 
-    
-    return duplicate_reference 
-
 if __name__ == '__main__':
     # data_dict = {'image':'/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/BraTS2021_Training_Data_Split_True_proportion_0.8_channels_t2_resized_FLIRT_binarised/imagesTr/BraTS2021_01242.nii.gz',
     #             'label':'/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/BraTS2021_Training_Data_Split_True_proportion_0.8_channels_t2_resized_FLIRT_binarised/imagesTr/labels/final/BraTS2021_01242.nii.gz'}
