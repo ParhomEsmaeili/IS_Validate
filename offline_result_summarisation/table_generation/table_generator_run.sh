@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Set your arguments here
-SPLIT_NAME="design_set"
+SPLIT_NAME="designset"
 REFERENCE_METRICS_ROOT="/home/parhomesmaeili/IS-Validation-Framework/MIDL_DGX_Results_Summary/$SPLIT_NAME"
-QUANTILE="0.25"
+QUANTILE="0.5"
 # AXIS_OF_COMPLEXITY_NAME="Algorithm Complexity Variation in Image Voxel Count - Quantile ${QUANTILE}"
 # DATASET_NAMES=("Dataset004_Hippocampus" "Dataset001_BrainTumour" "Dataset007_Pancreas"  "Dataset003_Liver" )
 
@@ -26,7 +26,7 @@ DATASET_NAMES=("Dataset001_BrainTumour" "Dataset003_Liver" "Dataset004_Hippocamp
 
 OUTPUT_ROOT="/home/parhomesmaeili/IS-Validation-Framework/MIDL_DGX_PrintedResults/$SPLIT_NAME/$AXIS_OF_COMPLEXITY_NAME"
 CAPTION="${AXIS_OF_COMPLEXITY_NAME} on $SPLIT_NAME Comparison Table"
-LABEL="tab:${AXIS_OF_COMPLEXITY_NAME}_$SPLIT_NAME" + "_comparison"
+LABEL="tab:${AXIS_OF_COMPLEXITY_NAME}_${SPLIT_NAME}_comparison"
 
 # APPS=("sammed2dv1" "sam2v1" "sammed3dv1" "segvolv1"  "nnintv1")
 APPS=("nnintv1")

@@ -9,7 +9,8 @@ APP=("nnintv1")
 PROMPTER="pointsonly"
 RUN_NUMS=("-aggregated") #("1") #"2" "3")
 INFER_INFO='{"init": "Interactive Init", "edit": 100}'
-SPLIT_NAME="design_set"
+# SPLIT_NAME="holdout_set"
+SPLIT_NAME="designset"
 REFERENCE_FILE="cross_class_scores.csv"
 
 for index in ${!DATASET_NAMES[@]}; do
