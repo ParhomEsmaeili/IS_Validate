@@ -7,8 +7,6 @@ from src.general_utils.dict_utils import extractor, dict_path_modif
 from typing import Dict, List, Any, Tuple
 import glob
 import pandas as pd
-from openpyxl import load_workbook
-from openpyxl.utils import get_column_letter
 
 RESULT_SEARCHSTRING = {
     'Dice': 'Dice',
@@ -59,7 +57,15 @@ ALGORITHM_MAPPING = {
     'sammed2dv1': 'SAM-Med2D',
     'sammed3dv1': 'SAM-Med3D',
     'segvolv1': 'SegVol',
-    'nnintv1': 'nnInteractive'
+    'nnintv1': 'nnInteractive',
+    'adaptiveISv1': 'AdaptiveIS'
+}
+
+iterable_metrics = {
+    'Dice_median',
+    'Dice_mean',
+    'NSD_median',
+    'NSD_mean'
 }
 #!/usr/bin/env python3
 """
@@ -151,20 +157,23 @@ def gather_metrics_from_folder(folder_path: str, metrics_config: Dict[str, List[
                 metric_dict[metric_name] = table.at[0, metric_name]
             else:
                 #In this case, we have some extraction information to use, e.g. specific rows we need to extract.
-                if 'iters' in extraction_info:
+                if 'rows' in extraction_info:
                     #We need to extract specific rows based on the iteration information provided. We will assume that 
                     #the first column contains the iteration information, but won't actually use this. Instead we will use
                     #string matching. 
-
-                    for search_str in extraction_info['iters']:
+                    for search_str in extraction_info['rows']:
                         mask = table.apply(lambda row: row.astype(str).str.contains(search_str, na=False)).any(axis=1)
                         indices = table.index[mask].tolist()
                         if len(indices) != 1:
                             raise ValueError(f"{len({indices})} rows found matching '{search_str}' in {metric_file} for metric {metric_name}. \n")
-                        if indices[0] == 0:
-                            metric_dict[f'{metric_name} Init.'] = table.at[indices[0], metric_name]
+                        
+                        if metric_name in iterable_metrics:
+                            if indices[0] == 0:
+                                metric_dict[f'{metric_name} Init.'] = table.at[indices[0], metric_name]
+                            else:
+                                metric_dict[f'{metric_name} Interactive Edit Iter {indices[0]}'] = table.at[indices[0], metric_name]
                         else:
-                            metric_dict[f'{metric_name} Interactive Edit Iter {indices[0]}'] = table.at[indices[0], metric_name]
+                            metric_dict[metric_name] = table.at[indices[0], metric_name]
                 else:
                     raise NotImplementedError("Unsupported extraction information provided in metrics config. Only iters is a supported \n" \
                     "configuration for multi-row extraction at the moment.")

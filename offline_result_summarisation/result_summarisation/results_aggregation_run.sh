@@ -3,7 +3,9 @@
 # Set your arguments here
 DATASET_NAMES=("Dataset001_BrainTumour" "Dataset003_Liver" "Dataset004_Hippocampus" "Dataset005_Prostate" "Dataset006_Lung" "Dataset007_Pancreas" "Dataset008_HepaticVessel" "Dataset010_Colon")
 DATASET_IDS=("001" "003" "004" "005" "006" "007" "008" "010") 
-APP=("nnintv1" "sammed3dv1" "segvolv1" "sammed2dv1" "sam2v1" "nnintv1")
+# APP=("nnintv1" "sammed3dv1" "segvolv1" "sammed2dv1" "sam2v1")
+APP=("nnintv1")
+SPLIT_NAME="design_set"
 PROMPTER="pointsonly"
 RUN_NUMS=("1" "2" "3")
 INFER_INFO='{"init": "Interactive Init", "edit": 100}'
@@ -13,7 +15,7 @@ REFERENCE_FILE="cross_class_scores.csv"
 for index in ${!DATASET_NAMES[@]}; do
   DATASET_NAME=${DATASET_NAMES[$index]};
   DATASET_ID=${DATASET_IDS[$index]};
-  ALGORITHM_RESULTS_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/MIDL_DGX_Results/$DATASET_NAME"
+  ALGORITHM_RESULTS_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/MIDL_DGX_Results/$SPLIT_NAME/$DATASET_NAME"
   for METRIC in "${METRICS[@]}"; do
     for APP in "${APP[@]}"; do
       echo "Processing application: $APP"
@@ -26,7 +28,7 @@ for index in ${!DATASET_NAMES[@]}; do
       done;
       echo ALGORITHM_RESULTS_ROOTS: "${ALGORITHM_RESULTS_ROOTS[@]}"
       OUTPUT_SUBPATH="$APP/$DATASET_NAME/$PROMPTER/run-aggregated"
-      OUTPUT_RESULT_ROOT="/home/parhomesmaeili/IS-Validation-Framework/MIDL_DGX_Results_Summary/$OUTPUT_SUBPATH";
+      OUTPUT_RESULT_ROOT="/home/parhomesmaeili/IS-Validation-Framework/MIDL_DGX_Results_Summary/$SPLIT_NAME/$OUTPUT_SUBPATH";
 
       python3 "result_aggregation.py" \
           --algorithm_result_roots "${ALGORITHM_RESULTS_ROOTS[@]}" \

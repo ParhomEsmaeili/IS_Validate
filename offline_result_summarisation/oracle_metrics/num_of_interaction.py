@@ -9,7 +9,7 @@ parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__f
 sys.path.append(parent_dir)
 import warnings 
 
-def plot_fitted_distributions(data, fit_params, metric, fit_type, threshold, output_folder):
+def plot_fitted_distributions(data, fit_params, metric, fit_type, threshold, line_name, output_folder):
     """
     Plot the histogram of the data and overlay the fitted distributions.
     fit_params: dict with keys 'gaussian', 'student', 'laplace' and values as tuples of fitted params.
@@ -32,7 +32,8 @@ def plot_fitted_distributions(data, fit_params, metric, fit_type, threshold, out
         plt.plot(x, beta.pdf(x, a, b, loc, scale), label='Beta', lw=2)
     elif fit_type == 'quantile':
         percentile = fit_params['quantile'][0]
-        plt.axvline(percentile, color='green', linestyle='--', label=f'LQ = {percentile:.2f}')
+        # line_name = f'Q = {percentile:.2f}'
+        plt.axvline(percentile, color='green', linestyle='--', label=line_name)
     else:
         raise ValueError(f"Unknown fit type: {fit_type}. Supported types are 'gaussian', 'student', 'laplace'.")
     plt.title(f"Fitted distributions for {metric}")
@@ -40,7 +41,7 @@ def plot_fitted_distributions(data, fit_params, metric, fit_type, threshold, out
     plt.ylabel('Density')
     plt.legend()
     plt.tight_layout()
-    plt.savefig(os.path.join(output_folder, f'fitted_oracle_distributions_{metric}_{fit_type}.png'))
+    plt.savefig(os.path.join(output_folder, f'fitted_oracle_distributions_{metric}_{fit_type}_{line_name}.png'))
     plt.close()
 
 
@@ -53,8 +54,8 @@ if __name__ == "__main__":
     parser.add_argument('--metric', type=str, required=True, action='append', help='Reference metric for the threshold')
     # parser.add_argument('--nnunet_fraction', type=float, nargs='+', default=[0.9,1], help='Fraction of nnUNet performance for thresholding against')
     parser.add_argument('--reference_path', type=str, required=True)
-    parser.add_argument('--nnunet_statistic', type=str, action='append', help='Statistical fit for selecting threshold.')
-    parser.add_argument('--nnunet_bound', type=str, required=True, action='append', help='Bound for the nnUNet metric thresholding wrt statistic.')
+    parser.add_argument('--nnunet_statistic', required=True, nargs='+', help='Statistical fit for selecting threshold.')
+    parser.add_argument('--nnunet_bound', required=True, nargs='+', help='Bound for the nnUNet metric thresholding wrt statistic.')
     parser.add_argument('--infer_info', type=str, required=True, help='json string containing a dictionary describing the inference for determinining the reference columns')
     
     # parser.add_argument('--output_base_folder', type=str, required=True, help='Output folder for metrics')
@@ -93,17 +94,18 @@ if __name__ == "__main__":
 
     #Now we read the nnUNet metrics csv files.
     nnunet_metrics_dfs = dict()
-    for id, metric in enumerate(args.metric):
+    for metric_id, metric in enumerate(args.metric):
         column_headers = ['Case_Name', 'Automatic Init']
         nnunet_metrics_dfs[metric] = pd.read_csv(args.reference_path, skiprows=1, names=column_headers) 
         #NOTE: This is because the first row contained
         #a column with a header describing the case ID which was messing with the pandas read function.
 
     noi_per_statistic = dict() #Number of interactions per fitting statistic.
-    for fit in args.nnunet_statistic:
-        if fit in std_bounded_statistics and (float(args.nnunet_bound[id]) < 0):
+    print(args.nnunet_statistic)
+    for statistic_id, fit in enumerate(args.nnunet_statistic):
+        if fit in std_bounded_statistics and (float(args.nnunet_bound[statistic_id]) < 0):
             raise ValueError(f"Invalid nnUNet bound used")
-        if fit in quantile_statistics and (float(args.nnunet_bound[id]) < 0 or float(args.nnunet_bound[id]) > 1):
+        if fit in quantile_statistics and (float(args.nnunet_bound[statistic_id]) < 0 or float(args.nnunet_bound[statistic_id]) > 1):
             raise ValueError(f"Invalid nnUNet bound used")
 
         #Now we calculate the number of interactions for each case.
@@ -119,6 +121,7 @@ if __name__ == "__main__":
 
             #We calculate the threshold for the nnUNet metric based on the specified statistic and standard deviation bound.
             if fit == 'gaussian':
+                raise NotImplementedError(f'Re-evaluating how to select a threshold with {fit} fitting.')
                 # Fit a Gaussian distribution to the nnUNet metric values
                 mu, sigma = norm.fit(nnunet_df['Automatic Init'])
                 mean = mu
@@ -126,25 +129,30 @@ if __name__ == "__main__":
 
                 # mean = nnunet_df['Automatic Init'].mean()
                 # std = nnunet_df['Automatic Init'].std()
-                threshold = mean - float(args.nnunet_bound[id]) * std
+                threshold = mean - float(args.nnunet_bound[statistic_id]) * std
 
             elif fit == 'student':
+                raise NotImplementedError(f'Re-evaluating how to select a threshold with {fit} fitting.')
+
                 # Fit a Student's t-distribution to the nnUNet metric values
                 # mean = nnunet_df['Automatic Init'].mean()
                 # std = nnunet_df['Automatic Init'].std()
                 df, loc, scale = t.fit(nnunet_df['Automatic Init'])
                 mean = t.mean(df, loc=loc, scale=scale)
                 std = t.std(df, loc=loc, scale=scale)
-                threshold = mean - float(args.nnunet_bound[id]) * std
+                threshold = mean - float(args.nnunet_bound[statistic_id]) * std
 
             elif fit == 'laplace':
+                raise NotImplementedError(f'Re-evaluating how to select a threshold with {fit} fitting.')
+
                 # Fit a Laplace distribution to the nnUNet metric values
                 loc, scale = laplace.fit(nnunet_df['Automatic Init'])
                 mean = laplace.mean(loc=loc, scale=scale)
                 std = laplace.std(loc=loc, scale=scale) 
-                threshold = mean - args.nnunet_bound * std
+                threshold = mean - args.nnunet_bound[statistic_id] * std
 
             elif fit == 'beta':
+                raise NotImplementedError(f'Re-evaluating how to select a threshold with {fit} fitting.')
                 #Fit a beta distribution to the nnUNet metric values as it is bounded between 0 and 1
                 #and flexible to asymmetric distributions. 
                 
@@ -155,12 +163,13 @@ if __name__ == "__main__":
                 a, b, loc, scale = beta.fit(data, floc=0, fscale=1) 
                 mean = beta.mean(a, b, loc=loc, scale=scale)
                 std = beta.std(a, b, loc=loc, scale=scale)
-                threshold = mean - args.nnunet_bound * std
+                threshold = mean - args.nnunet_bound[statistic_id] * std
 
             elif fit == 'quantile':
                 #We use a quantile based thresholding for this... more ad-hoc.
-                percentile = nnunet_df['Automatic Init'].quantile(float(args.nnunet_bound[id]))
-                threshold = percentile 
+                threshold = nnunet_df['Automatic Init'].quantile(float(args.nnunet_bound[statistic_id]))
+                # threshold = percentile
+                line_name = f'Q = {args.nnunet_bound[statistic_id]}'
             else:
                 NotImplementedError(f"Unknown fit type: {fit}. Supported types are 'gaussian', 'student', 'laplace', 'beta', 'quantile'.")
 
@@ -171,16 +180,20 @@ if __name__ == "__main__":
             #Just plotting the fitted distributions for sanity check.
             fit_params = {}
             if fit == 'gaussian':
+                raise NotImplementedError(f'Re-evaluating how to select a threshold with {fit} fitting.')
                 fit_params['gaussian'] = (mean, std)
             elif fit == 'student':
+                raise NotImplementedError(f'Re-evaluating how to select a threshold with {fit} fitting.')
                 fit_params['student'] = (df, loc, scale)
             elif fit == 'laplace':
+                raise NotImplementedError(f'Re-evaluating how to select a threshold with {fit} fitting.')
                 fit_params['laplace'] = (loc, scale)
             elif fit == 'beta':
+                raise NotImplementedError(f'Re-evaluating how to select a threshold with {fit} fitting.')
                 fit_params['beta'] = (a, b, loc, scale)
             # Only plot once per metric (after all fits)
             elif fit == 'quantile':
-                fit_params['quantile'] = (percentile,)
+                fit_params['quantile'] = (threshold,)
             else:
                 raise NotImplementedError(f"Unknown fit type: {fit}. Supported types are 'gaussian', 'student', 'laplace', 'beta', 'quantile'.")
 
@@ -191,6 +204,7 @@ if __name__ == "__main__":
                 metric,
                 fit_type=fit,
                 threshold=threshold,
+                line_name=line_name,
                 output_folder=args.output_result_root
             )
 
@@ -230,31 +244,37 @@ if __name__ == "__main__":
             } 
             #NOTE: The failure cases are to keep track of cases that did not manage to exceed the nnUNet metric.
 
-        noi_per_statistic[fit] = num_interactions_dict 
-    
+        # noi_per_statistic[fit] = num_interactions_dict
+        noi_per_statistic[f'{fit}_{line_name}'] = num_interactions_dict
+
     # Build a DataFrame for all cases, showing NOIs and failures for each threshold and metric
     all_cases = set()
-    for fit in noi_per_statistic:
-        for metric in noi_per_statistic[fit]:
-            all_cases.update(noi_per_statistic[fit][metric]['cases'])
+    # print(noi_per_statistic)
+    for threshold_name in noi_per_statistic:
+        for metric in noi_per_statistic[threshold_name]:
+            all_cases.update(noi_per_statistic[threshold_name][metric]['cases'])
 
     all_cases = sorted(all_cases)
     rows = []
 
     for case in all_cases:
         row = {'Case_Name': case}
-        for fit in noi_per_statistic:
-            for metric in noi_per_statistic[fit]:
-                cases = noi_per_statistic[fit][metric]['cases']
-                noi_list = noi_per_statistic[fit][metric]['noi']
-                fail_list = noi_per_statistic[fit][metric]['failure_cases']
+        for threshold_name in noi_per_statistic:
+            for metric in noi_per_statistic[threshold_name]:
+                cases = noi_per_statistic[threshold_name][metric]['cases']
+                noi_list = noi_per_statistic[threshold_name][metric]['noi']
+                fail_list = noi_per_statistic[threshold_name][metric]['failure_cases']
                 if case in cases:
                     idx = cases.index(case)
-                    row[f'NOI_{metric}_thr_{fit}_{float(args.nnunet_bound[id])}'] = noi_list[idx]
-                    row[f'Fail_{metric}_thr_{fit}_{float(args.nnunet_bound[id])}'] = fail_list[idx]
+                    # row[f'NOI_{metric}_thr_{threshold_name}_{float(args.nnunet_bound[id])}'] = noi_list[idx]
+                    # row[f'Fail_{metric}_thr_{threshold_name}_{float(args.nnunet_bound[id])}'] = fail_list[idx]
+                    row[f'NOI_{metric}_thr_{threshold_name}'] = noi_list[idx]
+                    row[f'Fail_{metric}_thr_{threshold_name}'] = fail_list[idx]
                 else:
-                    row[f'NOI_{metric}_thr_{fit}_{float(args.nnunet_bound[id])}'] = None
-                    row[f'Fail_{metric}_thr_{fit}_{float(args.nnunet_bound[id])}'] = None
+                    # row[f'NOI_{metric}_thr_{threshold_name}_{float(args.nnunet_bound[id])}'] = None
+                    # row[f'Fail_{metric}_thr_{threshold_name}_{float(args.nnunet_bound[id])}'] = None
+                    row[f'NOI_{metric}_thr_{threshold_name}'] = None 
+                    row[f'Fail_{metric}_thr_{threshold_name}'] = None
         rows.append(row)
 
     casewise_df = pd.DataFrame(rows)
@@ -269,12 +289,12 @@ if __name__ == "__main__":
     # interactions.
 
     summarised_noi = dict()
-    for id, fit in enumerate(args.nnunet_statistic):
-        summarised_noi[fit] = {}
+    for threshold_name in noi_per_statistic.keys():#args.nnunet_statistic):
+        summarised_noi[threshold_name] = {}
         for metric in args.metric:
-            noi_data = noi_per_statistic[fit][metric]['noi']
-            failure_cases = noi_per_statistic[fit][metric]['failure_cases']
-            
+            noi_data = noi_per_statistic[threshold_name][metric]['noi']
+            failure_cases = noi_per_statistic[threshold_name][metric]['failure_cases']
+
             # Calculate the median number of interactions
             median_noi = np.median(noi_data)
             #Calculate the mean number of interactions.
@@ -284,8 +304,9 @@ if __name__ == "__main__":
             normalised_median_noi = median_noi / max_noi
             normalised_mean_noi = mean_noi / max_noi 
 
-            summarised_noi[fit][metric] = {
+            summarised_noi[threshold_name][metric] = {
                 'median_noi': median_noi,
+                'mean_noi': mean_noi,
                 'normalised_median_noi': normalised_median_noi,
                 'normalised_mean_noi': normalised_mean_noi, 
                 'failure_cases': np.sum(failure_cases),  # Count of cases that failed to exceed nnUNet metric
@@ -295,16 +316,16 @@ if __name__ == "__main__":
 
     # Convert summarised_noi to a DataFrame
     summary_rows = []
-    for id, fit in enumerate(summarised_noi):
-        for metric in summarised_noi[fit]:
+    for threshold_name in summarised_noi:
+        for metric in summarised_noi[threshold_name]:
             row = {
-                'Fit': fit,
+                'Threshold_Name': threshold_name,
                 'Metric': metric,
-                'Median_NOI': summarised_noi[fit][metric]['median_noi'],
-                'Normalised_Median_NOI': summarised_noi[fit][metric]['normalised_median_noi'],
-                'Normalised_Mean_NOI': summarised_noi[fit][metric]['normalised_mean_noi'],
-                'Failure_Cases': summarised_noi[fit][metric]['failure_cases'],
-                'Failure_Cases_Fraction': summarised_noi[fit][metric]['failure_cases_fraction'],
+                'Median_NOI': summarised_noi[threshold_name][metric]['median_noi'],
+                'Normalised_Median_NOI': summarised_noi[threshold_name][metric]['normalised_median_noi'],
+                'Normalised_Mean_NOI': summarised_noi[threshold_name][metric]['normalised_mean_noi'],
+                'Failure_Cases': summarised_noi[threshold_name][metric]['failure_cases'],
+                'Failure_Cases_Fraction': summarised_noi[threshold_name][metric]['failure_cases_fraction'],
             }
             summary_rows.append(row)
 
