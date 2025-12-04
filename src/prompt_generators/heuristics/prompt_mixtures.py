@@ -849,14 +849,15 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
     '''
     def __init__(
             self,
-            config_labels_dict: dict,
-            sim_device: torch.device,
-            heur_fn_dict: dict,
-            build_args: dict,
-            mixture_args: dict = None,
-            use_mem: bool = False,
+            args: dict
             ):
         
+        config_labels_dict = args['config_labels_dict'] #Dict
+        sim_device = args['sim_device']
+        heur_fn_dict = args['heur_fn_dict']
+        build_args = args['build_args']
+        mixture_args = args['mixture_args']
+        use_mem = args['use_mem']
         super().__init__(
             use_mem=use_mem,
             config_labels_dict=config_labels_dict,
@@ -2644,8 +2645,17 @@ class RandomPromptTypeAgent(BasicValidOnlyMixture):
 #and no complexities about how components or classes are handled at all). It is very minimal, but still packaged under the mixture
 #registry for consistency.
 
+#Being careful, we use helper functions to only instantiate when required and avoid weird bugs about imports.
+
+def build_prototype_pseudo_mixture(args: dict):
+    return PrototypePseudoMixture(args)
+def build_simplified_prototype_pseudo_mixture(args: dict):
+    return SimplifiedPrototypePseudoMixture(args)
+def build_random_ptype_agent(args: dict):
+    return RandomPromptTypeAgent(args)
+
 mixture_class_registry = {
-    'prototype_pseudo_mixture': PrototypePseudoMixture,
-    'simplified_prototype_pseudo_mixture': SimplifiedPrototypePseudoMixture,
-    'random_ptype_agent': RandomPromptTypeAgent,
+    'prototype_pseudo_mixture': build_prototype_pseudo_mixture,
+    'simplified_prototype_pseudo_mixture': build_simplified_prototype_pseudo_mixture,
+    'random_ptype_agent': build_random_ptype_agent,
 }

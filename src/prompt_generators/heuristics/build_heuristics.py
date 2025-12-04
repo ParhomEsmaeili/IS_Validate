@@ -194,14 +194,23 @@ class BuildHeuristic:
                 
                 heur_fn_dict[prompt_type] = prompt_heur_fns
 
+            # return mixture_class_registry[self.heuristic_class_type](
+            #     config_labels_dict=self.config_labels_dict,
+            #     sim_device=self.sim_device,
+            #     use_mem=self.use_mem,
+            #     build_args=self.heuristic_params,
+            #     mixture_args=self.heuristic_mixtures,
+            #     heur_fn_dict=heur_fn_dict,                                
+            #     )
             return mixture_class_registry[self.heuristic_class_type](
-                config_labels_dict=self.config_labels_dict,
-                sim_device=self.sim_device,
-                use_mem=self.use_mem,
-                build_args=self.heuristic_params,
-                mixture_args=self.heuristic_mixtures,
-                heur_fn_dict=heur_fn_dict,                                
-                )
+                args={
+                    'config_labels_dict': self.config_labels_dict,
+                    'sim_device': self.sim_device,
+                    'use_mem': self.use_mem,
+                    'build_args': self.heuristic_params,
+                    'mixture_args': self.heuristic_mixtures,
+                    'heur_fn_dict': heur_fn_dict,                                
+                })
         else:
             raise NotImplementedError('Implement the code for initialising non-prototype prompt mixture methods. I.e., \n' \
             'those for which heuristic_mixtures is not a NoneType.')
