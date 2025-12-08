@@ -63,10 +63,12 @@ def split_semantic_seg_nifti(filename, output_folder, semantic_class_dict):
         #for "stuff" classes but use the same convention for consistency.
         for code, word in semantic_class_dict.items():
             if isinstance(code, int):
-                seg_class_word = np.where(seg_npy == code, 1, 0)
+                assert code < 2 ** 8, "Semantic code values must be less than 256 for int8 storage"
+                seg_class_word = np.where(seg_npy == code, 1, 0).astype(np.uint8)
             elif isinstance(code, str): 
                 code = int(code) #Throws an error if the code is a float, it must be an int even if expressed as a str.
-                seg_class_word = np.where(seg_npy == code, 1, 0)
+                assert code < 2 ** 8, "Semantic code values must be less than 256 for int8 storage"
+                seg_class_word = np.where(seg_npy == code, 1, 0).astype(np.uint8)
             
             seg_itk_new = sitk.GetImageFromArray(seg_class_word)
             seg_itk_new.SetSpacing(spacing)
