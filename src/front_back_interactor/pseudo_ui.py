@@ -972,8 +972,50 @@ class FrontEndSimulator:
             tracked_metrics=self.tracked_metrics
         )
 
-        #Nothing is returned here, everything except final tmp_dir cleanup needs to be handled during the loop!
-        #Final tmp_dir cleanup will occur in the script which calls this function.
+        if self.args['enable_adaptation']:
+            if self.args['provide_gold_standard_after_inference']:
+                self.infer_app.accept_new_sample(
+                    {
+                    'image': {
+                        'metatensor':torch.from_numpy(self.data_instance['image']['metatensor'].clone().detach().numpy()),
+                        'meta_dict':copy.deepcopy(self.data_instance['image']['meta_dict'])
+                        },
+                    'label': {
+                        'metatensor': torch.from_numpy(self.data_instance['label']['metatensor'].clone().detach().numpy()),
+                        'meta_dict': copy.deepcopy(self.data_instance['label']['meta_dict'])
+                        }
+                    }
+                )
+            else:
+                self.infer_app.accept_new_sample(
+                    {
+                    'image': {
+                        'metatensor':torch.from_numpy(self.data_instance['image']['metatensor'].clone().detach().numpy()),
+                        'meta_dict':copy.deepcopy(self.data_instance['image']['meta_dict'])
+                        },
+                    'label': None #Assumed that the label is to be stored internally for this sample.
+                    }
+                )
+
+            #Now we will make a callback to trigger a function which will handle the adaptation procedure (need not necessarily
+            #make a change at every data instance, depends on the algorithm). This is solely for isolating the process of returning
+            #updated meta-algorithm state for automatic continuation of experiment.
+            algorithm_state = self.infer_app.trigger_adaptation()       
+
+            if algorithm_state == None or list(algorithm_state['meta_algorithm_state'].keys()) == ['algo_cache_name']: 
+                #We need something more than the cache name! Nothing else was changed/saved!
+                raise ValueError('If adaptation is enabled, then the algorithm state cannot be a NoneType! This does not \n' \
+                'make sense as the adaptation procedure must have made some change to the algorithm state!')
+            elif type(algorithm_state) != dict:
+                raise TypeError('The algorithm state returned from adaptation must be a dictionary!')
+            else:
+                return algorithm_state 
+        else:
+            return {} #Algorithm state is empty dict if adaptation is not being used, could use a nonetype but for
+            # consistency on re-run we use None, even though functionally the state stored will not change!
+        
+            #Nothing else is returned here, everything except final tmp_dir cleanup needs to be handled during the loop!
+            #Final tmp_dir cleanup will occur in the script which calls this function.
 
 
 

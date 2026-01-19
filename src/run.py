@@ -9,6 +9,7 @@ import importlib
 import torch
 import pickle 
 import warnings
+import base64
 from typing import Optional
 codebase_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__))) 
 sys.path.append(codebase_dir)
@@ -27,22 +28,31 @@ def set_parse():
     parser = argparse.ArgumentParser()
     
     #Experimental name/job-continuation related args
-    parser.add_argument('--experiment_name', type=str, required=False, default=None) #None
-    parser.add_argument('--continue_execution', action='store_true', default=False)
-    parser.add_argument('--continue_exec_root', type=str, default=None) #'/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/continue_execution_files') #None
+    parser.add_argument('--experiment_name', type=str, required=False, default=None)#'debugging_continual_adapt')#None
+    parser.add_argument('--continue_execution', action='store_true', default=False)#True) #False)
+    parser.add_argument('--continue_exec_root', type=str, default='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/continue_execution_files') #None
     #Data and application root related args
     
     parser.add_argument('--data_root', type=str, default=codebase_dir)
-    parser.add_argument('--dataset_name', type=str, default='Dataset001_BrainTumour')
-    parser.add_argument('--app_root', type=str, default= '/home/parhomesmaeili/IS_Codebase_Forks/SegVol_Fork') #NOTE:Just set for debugging purposes.
-                       
+    parser.add_argument('--dataset_name', type=str, default='Dataset001_BrainTumour')#'Dataset005_Prostate')
+    parser.add_argument('--app_root', type=str, default= 
+                        '/home/parhomesmaeili/IS_Codebase_Forks/nnInteractive_Fork')
+                        #'/home/parhomesmaeili/MY METHOD') #NOTE:Just set for debugging purposes.
+
     #This acts as the name of the app, but also temporarily acts as the relative path name within the input_applications folder in the app root folder.
-    parser.add_argument('--app_name', type=str, default='SegVol_App')#'Sample_SAMMed2D')
+    parser.add_argument('--app_name', type=str, default='nnInteractive_App') #'AdaptiveIS')
     parser.add_argument('--metrics_root', type=str, default=os.path.join(codebase_dir, 'results'))
     parser.add_argument('--seg_root', type=str, default=os.path.join(codebase_dir, 'results'))
 
     #Experimental process/method related args
-    parser.add_argument('--shuffle_cases', action='store_true', default=False)
+    parser.add_argument('--adaptation_config_name', type=str, default=None)#'adapt_prototype_1') #None
+    parser.add_argument('--enable_adaptation', action='store_true', default=False)# True)#False)
+    parser.add_argument('--provide_gold_standard_after_inference', action='store_true', default=False)#True)#False)
+    #Adaptation requires the capability to enable the algorithm to adapt, and so requires some knowledge of the 
+    #annotation. This boolean controls whether adaptation is enabled or not. This also requires some extra handling for
+    #continuing execution, as checkpoints will need to be restored. In addition to other information, e.g. position in the
+    #data stream etc. 
+    parser.add_argument('--shuffle_cases', action='store_true', default=False) #True)
     parser.add_argument('--random_seed', type=int, default=341103)
     parser.add_argument('--cuda_deterministic_disable', action='store_true', default=False)
     parser.add_argument('--torch_deterministic_disable', action='store_true', default=False)
@@ -58,8 +68,8 @@ def set_parse():
     parser.add_argument('--task_conf_filename', type=str, default='task_configs.txt')
     parser.add_argument('--metric_conf_name', type=str, default='prototype')
     parser.add_argument('--task_conf_name', type=str, default='task_id_2')
-    parser.add_argument('--init_prompt_conf_name', type=str, default='points_prototype_simplified') #'prototype')
-    parser.add_argument('--edit_prompt_conf_name', type=str, default='points_prototype_simplified') #'prototype')
+    parser.add_argument('--init_prompt_conf_name', type=str, default='prototype')
+    parser.add_argument('--edit_prompt_conf_name', type=str, default='prototype')
     parser.add_argument('--metric_prompt_procedure_type', type=str, default='heuristic')
     parser.add_argument('--inf_prompt_procedure_type', type=str, default='heuristic')
     parser.add_argument('--sim_empty_fg_automatic', action='store_true', default=False)
@@ -122,27 +132,41 @@ def gen_experiment_args(args):
 
     #Experiment logging related arguments (i.e. for a specific run of the evaluation script!)
     if args.continue_execution:
-        if args.experiment_name is None:
+        if args.experiment_name == None:
             raise ValueError('If configured for continuing an experiment execution, must provide the experiment name to \n ' \
             'continue from otherwise we cannot proceed.')
         else:
             output_dict['experiment_name'] = args.experiment_name
         
-        if args.continue_exec_root is None:
+        if args.continue_exec_root == None:
             raise ValueError('If continuing an experiment execution, must provide the root directory of the \n'
             'files to write/read where to continue from.')
         else:
             output_dict['continue_exec_path'] = os.path.join(args.continue_exec_root, args.experiment_name + '.pkl')
     else:
-        if args.experiment_name is None:
+        if args.experiment_name == None:
             output_dict['experiment_name'] = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         else:
             raise Exception('If not continuing an experiment execution, cannot provide an experiment name, \n'
             'this is redundant.')
+    if args.enable_adaptation:
+        if not args.continue_execution:
+            raise ValueError('Adaptation almost certainly requires the capability to continue execution, please enable \n'
+            'the continue execution boolean flag to proceed for reassurance.')
+        else:
+            output_dict['adaptation_config_name'] = args.adaptation_config_name
+            output_dict['enable_adaptation'] = args.enable_adaptation
+            output_dict['provide_gold_standard_after_inference'] = args.provide_gold_standard_after_inference
+    else:
+        output_dict['enable_adaptation'] = args.enable_adaptation
+        assert args.adaptation_config_name == None, 'If adaptation is disabled, cannot provide adaptation config name, please check your input arguments.'
+        output_dict['adaptation_config_name'] = None #Irrelevant if adaptation is disabled.
+        assert args.provide_gold_standard_after_inference == False, 'If adaptation is disabled, cannot provide gold standard after inference, please set this flag or check your input arguments.'
+        output_dict['provide_gold_standard_after_inference'] = False #Irrelevant if adaptation is disabled.
+
     output_dict['continue_execution'] = args.continue_execution #Storing this boolean.
     output_dict['exp_results_dir'] = os.path.join(output_dict['results_dataset_subdir'], output_dict['experiment_name'])
     output_dict['exp_seg_dir'] = os.path.join(output_dict['seg_dataset_subdir'], output_dict['experiment_name'])
-
 
     ########################################################################################################################
 
@@ -215,7 +239,7 @@ def gen_experiment_args(args):
     ###########################################################################################
     
     #Extracting the inference and prompt gen device info. 
-    if args.device_idx is None:
+    if args.device_idx == None:
         output_dict['device'] = torch.device('cpu')
     elif isinstance(args.device_idx, int):
         try:
@@ -326,10 +350,16 @@ def log_config_writer(args_name, args_dict, logger):
             logger.info(f"{key}: {value}")
 
 
-def build_infer_app(build_app_path, device):
+def generate_base64_filename(length=12):
+    random_bytes = os.urandom(length)
+    encoded = base64.urlsafe_b64encode(random_bytes).decode('utf-8')
+    return encoded.rstrip('=')  # Remove padding
+
+
+def build_infer_app(build_app_path, device, adaptation_config_name, algorithm_state: dict, enable_adaptation: bool, algo_cache_name:str):
 
     build_app_dir = os.path.join(build_app_path, 'build_app')
-    print(build_app_dir)
+    # print(build_app_dir)
     if not os.path.exists(build_app_dir):
         raise ValueError('The provided path does not exist')
     
@@ -350,16 +380,69 @@ def build_infer_app(build_app_path, device):
         foo = importlib.util.module_from_spec(spec)
         sys.modules["BuildInferApp"] = foo
         spec.loader.exec_module(foo)
-        InferApp = foo.InferApp 
-    
-    return InferApp(device)
+        InferApp = foo.InferApp
 
-def init_infer_app(experiment_args:dict): 
+    return InferApp(device, adaptation_config_name, algorithm_state, enable_adaptation, algo_cache_name)
+
+def init_infer_app(experiment_args:dict, loaded_experiment_checkpoint: Optional[dict] = None): 
 
     #Function which finds and initialises the inference app using the build script, then checks it has the necessary methods. 
-        
-    infer_app = build_infer_app(experiment_args['build_app_abspath'], experiment_args['device'])
+    
+    #We will DEMAND that there is some algorithm state info, even if empty for a non adaptive algorithm. 
+    #Even if its an empty dict for a non-adapting model (this is just a hack for consistency).
+    
+    
+    #Algo state either = empty dict in checkpoint if auto continue enabled but not adapting,
+    # empty dict if not auto continue. 
+    # empty dict if adapting but not yet saved the checkpoint before starting evaluation.
+    enable_adaptation = experiment_args.get('enable_adaptation', False)
+    #Adding another safety check:
+    if not enable_adaptation:
 
+        assert experiment_args.get('adaptation_config_name') == None, 'If adaptation is disabled, cannot provide adaptation config name, please check your input arguments.'
+        #if not adapting then algorithm state is non-existent.
+        algorithm_state = {}
+        # ('If adaptation is not enabled, then the algorithm state in the loaded experiment checkpoint \n'    
+        # 'must be an empty dict (if auto-continue enabled). Please check your input arguments.')
+        algo_cache_name = None #cache name irrelevant if not adapting.
+    else:
+        #Another safety check
+        if not experiment_args['continue_execution']:
+            raise ValueError('If adaptation is enabled, must also enable continue execution to proceed safely.')
+        if experiment_args.get('algo_cache_name', None) == None:
+            raise ValueError('If adaptation is enabled, must provide a valid algo_cache_name in the experiment args \n'
+                             'to proceed.')
+        else:
+            algo_cache_name = experiment_args['algo_cache_name']
+
+        #If we have not yet stored any checkpoint then loaded checkpoint would be none, so lets set the algorithm state
+        #to an empty dict for now - i.e., we don't have any state to load at all!
+        if loaded_experiment_checkpoint == None:
+            algorithm_state = {}
+        elif loaded_experiment_checkpoint != None:
+            #Some checkpoint has been saved.
+            # For adaptation, even if the model has not adapted, we will need this info to restore the state of the algorithm 
+            # for auto-continuation.          
+            algorithm_state = loaded_experiment_checkpoint.get('algorithm_state')
+            if algorithm_state == None:
+                raise ValueError('If adaptation is enabled and a checkpoint is loaded, the algorithm state must be present in the checkpoint, even if empty')
+            
+            if loaded_experiment_checkpoint['eval_state']['last_completed_idx'] > -1 and loaded_experiment_checkpoint['algorithm_state'] == {}:
+                #The presumption here is that if a sample has been completed, then the algorithm state cannot be
+                #empty because it should have stored something about the meta-state of the algorithm.
+                raise ValueError('If adaptation is enabled and a sample is completed, the algorithm state in the loaded experiment checkpoint \n'
+                                'cannot be empty. Please provide a valid algorithm state.')
+
+        
+
+    infer_app = build_infer_app(
+        build_app_path=experiment_args['build_app_abspath'], 
+        device=experiment_args['device'], 
+        adaptation_config_name=experiment_args.get('adaptation_config_name', None),
+        algorithm_state=algorithm_state, 
+        enable_adaptation=enable_adaptation,
+        algo_cache_name=algo_cache_name)
+    
     if not callable(infer_app):
         raise Exception('The inference app must be callable class.')
     else:
@@ -375,6 +458,25 @@ def init_infer_app(experiment_args:dict):
         except:
             raise Exception('The inference app did not have a function app_configs (which can be empty!), for saving the app configs to the experiment logger file.')
 
+        if enable_adaptation:
+            #If adaptation is enabled, check if it has an accept_new_sample method.
+            try:
+                accept_new_sample_callback = getattr(infer_app, "accept_new_sample")
+            except:
+                raise Exception('The inference app did not have a function accept_new_sample required for adaptation.')
+
+            if not callable(accept_new_sample_callback):
+                raise Exception('The initialised inference app object had an accept_new_sample attribute which was not a callable function.')
+            
+            try:
+                trigger_adaptation_callback = getattr(infer_app, "trigger_adaptation")
+            except:
+                raise Exception('The inference app did not have a function trigger_adaptation required for adaptation.')
+            
+            if not callable(trigger_adaptation_callback):
+                raise Exception('The initialised inference app object had a trigger_adaptation attribute which was not a callable function.')
+
+
         if not callable(callback):
             raise Exception('The initialised inference app object had a __call__ attribute which was not a callable function.') 
         
@@ -386,51 +488,67 @@ def init_infer_app(experiment_args:dict):
 def write_to_checkpoint(
         checkpoint_path:str,
         event: str,
-        checkpoint_info: dict,
-        updated_fields: dict | None,
+        checkpoint_info: dict, 
+        updated_fields_eval: dict,
+        updated_fields_algo: dict
     ):
-    if checkpoint_path is None:
+    if checkpoint_path == None:
         raise ValueError('Checkpoint path cannot be None when writing a checkpoint.')
     else:
+        assert type(updated_fields_algo) == dict, 'The updated fields for the algorithm state must be provided as a dict (empty dict if no updates).'
+        assert type(updated_fields_eval) == dict, 'The updated fields for the evaluation state must be provided as a dict.'
         if event == 'pre_loop':
             #In this case we are writing the initial info before the loop starts, in case the subprocess fails before any
             # sample completed
             pass #NOTE: No need to update fields here. 
 
         elif event == 'pre_subprocess':
-            if updated_fields is None:
-                raise ValueError('When writing a checkpoint pre_subprocess, must provide the updated fields dict.')
+            if updated_fields_eval == {}: #Empty dict will have a falsey, but for CLARITY we will be explicit.
+                raise ValueError('When writing a checkpoint pre_subprocess, must provide the updated eval fields dict.')
             #In this case, we are writing some initial info before a sample is passed through for evaluation.
             
             #NOTE: We will be measured about what variables can be updated here. We do not want to be too hasty.
-            required_fields = ('current_temp_dir',)
-            if not all([key in updated_fields.keys() for key in required_fields]):
-                raise ValueError(f'When writing a checkpoint pre_subprocess, must only update the following fields: {required_fields}')
+            
+            required_eval_fields = ('current_temp_dir',)
+            if not all([key in updated_fields_eval.keys() for key in required_eval_fields]):
+                raise ValueError(f'When writing a checkpoint pre_subprocess, must only update the following fields: {required_eval_fields}')
 
-            checkpoint_info.update(updated_fields)
+            checkpoint_info["eval_state"].update(updated_fields_eval)
+            if updated_fields_algo != {}: #Empty dict will have a falsey, but for CLARITY we will be explicit.
+                checkpoint_info['algorithm_state'].update(updated_fields_algo) #We will not check any specifics
+                #because this is algorithm dependent. 
 
         elif event == 'post_subprocess':
-            if updated_fields is None:
+            if updated_fields_eval == {}: #Empty dict will have a falsey, but for CLARITY we will be explicit.
                 raise ValueError('When writing a checkpoint post_subprocess, must provide the updated fields dict.')
             
-            required_fields = ('last_completed_case', 'last_completed_idx',)
-            if not all([key in updated_fields.keys() for key in required_fields]):
-                raise ValueError(f'When writing a checkpoint post_subprocess, must only update the following fields: {required_fields}')
-            checkpoint_info.update(updated_fields)
+            required_eval_fields = ('last_completed_case', 'last_completed_idx',)
+            if not all([key in updated_fields_eval.keys() for key in required_eval_fields]):
+                raise ValueError(f'When writing a checkpoint post_subprocess, must only update the following fields: {required_eval_fields}')
+            checkpoint_info["eval_state"].update(updated_fields_eval)
+
+            if updated_fields_algo != {}: #Empty dict will have a falsey, but for CLARITY we will be explicit.
+                checkpoint_info['algorithm_state'].update(updated_fields_algo) #We will not check any specifics
+                #because this is algorithm dependent.
+
         elif event == 'post_cleanup':
             #Only intended for when the temporary dir path is to be removed after cleanup.
-            if updated_fields is None:
+            if updated_fields_eval == {}: #Empty dict will have a falsey, but for CLARITY we will be explicit.
                 raise ValueError('When writing a checkpoint post_cleanup, must provide the updated fields dict.')
-            required_fields = ('current_temp_dir',)
-            if not all([key in updated_fields.keys() for key in required_fields]):
-                raise ValueError(f'When writing a checkpoint post_cleanup, must only update the following fields: {required_fields}')
-            checkpoint_info.update(updated_fields)
+            required_eval_fields = ('current_temp_dir',)
+            if not all([key in updated_fields_eval.keys() for key in required_eval_fields]):
+                raise ValueError(f'When writing a checkpoint post_cleanup, must only update the following fields: {required_eval_fields}')
+            checkpoint_info["eval_state"].update(updated_fields_eval)
+
+            if updated_fields_algo != {}:
+                raise ValueError('When writing a checkpoint post_cleanup, cannot update any algorithm state info, as no algorithm changes occur at this point \n' \
+                'this is only intended for cleaning up temporary files and directories on the evaluation side.')
         else:
             raise ValueError(f'Event type {event} not recognised for writing to checkpoint.')
 
         #Finally writing the checkpoint info to the checkpoint path.
         with open(checkpoint_path, 'wb') as f:
-                pickle.dump(checkpoint_info, f) 
+            pickle.dump(checkpoint_info, f) 
  
 def run_instances(
         dataloader, 
@@ -438,20 +556,21 @@ def run_instances(
         logger, 
         loaded_experiment_checkpoint:dict = None,
         experiment_checkpoint_path:str = None,
+        enable_adaptation: bool = False,
         resume_bool: bool = False
     ):
     
     if resume_bool:
-        logger.info(f'Resuming after {loaded_experiment_checkpoint["last_completed_case"]} from {dataloader.data[0]["case_name"]}')
-        resumed_idx = loaded_experiment_checkpoint['last_completed_idx'] + 1
+        logger.info(f'Resuming after {loaded_experiment_checkpoint["eval_state"]["last_completed_case"]} from {dataloader.data[0]["case_name"]}')
+        resumed_idx = loaded_experiment_checkpoint["eval_state"]['last_completed_idx'] + 1
 
-    if experiment_checkpoint_path is not None:
+    if experiment_checkpoint_path != None:
         write_to_checkpoint(
             checkpoint_path=experiment_checkpoint_path,
             event='pre_loop',
             checkpoint_info=loaded_experiment_checkpoint,
-            updated_fields=None
-
+            updated_fields_eval={},
+            updated_fields_algo={} #Both are always empty dicts here. We are just writing the initial checkpoint to disk.
     )
 
     #Iterating through the dataloader.
@@ -466,56 +585,87 @@ def run_instances(
         #Logging the progress.
         if resume_bool:
             true_idx = case_idx + resumed_idx
-            logger.info(f'Sample  {true_idx + 1} of {len(dataloader) + resumed_idx}, case_name: {case_name}')
+            num_samples = len(dataloader) + resumed_idx
+            logger.info(f'Sample  {true_idx + 1} of {num_samples}, case_name: {case_name}')
         else:
-            logger.info(f'Sample {case_idx + 1} of {len(dataloader)}, case_name: {case_name}')
-        
+            num_samples = len(dataloader)
+            logger.info(f'Sample {case_idx + 1} of {num_samples}, case_name: {case_name}')
+
 
         #Initialising the temporary directory for this data instance.
         tempdir_obj = tempfile.TemporaryDirectory(dir=os.path.dirname(fe_sim_obj.args['seg_root'])) 
         #By default it is the codebase_dir but if externally mounted drives for the results are
         #required then this will be changed to the root of the directory which contains the segmentations directory)
-
-        if experiment_checkpoint_path is not None:
+        if experiment_checkpoint_path != None:
             write_to_checkpoint(
                 checkpoint_path=experiment_checkpoint_path,
                 event='pre_subprocess',
                 checkpoint_info=loaded_experiment_checkpoint,
-                updated_fields={'current_temp_dir': tempdir_obj.name}
+                updated_fields_eval={'current_temp_dir': tempdir_obj.name},
+                updated_fields_algo={} #No algo fields to update yet.
 
         )
+        saved_exc = saved_tb = None
         try:
             #Calling the front-end simulator
-            fe_sim_obj(data_instance=data_instance, case_name=case_name, tmp_dir_path=tempdir_obj.name) 
+            algorithm_state = fe_sim_obj(data_instance=data_instance, case_name=case_name, tmp_dir_path=tempdir_obj.name) 
             
-            if experiment_checkpoint_path is not None:
-                write_to_checkpoint(
-                    checkpoint_path=experiment_checkpoint_path,
-                    event='post_subprocess',
-                    checkpoint_info=loaded_experiment_checkpoint,
-                    updated_fields={
-                        'last_completed_case': case_name, 
-                        'last_completed_idx': true_idx if resume_bool else case_idx
-                        }
-                )
+            if experiment_checkpoint_path != None:
+                #In this case, we are writing the experiment checkpoints - i.e. auto-rerun is configured. 
+                if enable_adaptation and algorithm_state == {}:
+                    raise Exception('If auto-re run is being configured, then the algorithm state \n' \
+                    'cannot be a NoneType when adaptation is enabled. If no adaptation is being performed then' \
+                    'adaptation should not have been enabled in the first place.')
+
+                elif enable_adaptation and algorithm_state != {} and list(algorithm_state['meta_algorithm_state'].keys()) != ['algo_cache_name']:
+                    #ANOTHER checking point, we placed this condition on the ui-simulator, but being very careful! 
+                    write_to_checkpoint(
+                        checkpoint_path=experiment_checkpoint_path,
+                        event='post_subprocess',
+                        checkpoint_info=loaded_experiment_checkpoint,
+                        updated_fields_eval={
+                            'last_completed_case': case_name, 
+                            'last_completed_idx': true_idx if resume_bool else case_idx
+                            },
+                        updated_fields_algo=algorithm_state
+                    )
+                    if algorithm_state['meta_algorithm_state'].get('write_state', False):
+                        log_config_writer('Current meta-algo state after adaptation triggered', algorithm_state['meta_algorithm_state'], logger)
+                        log_config_writer('Number of samples in memory buffer', {'memory buffer num_samples': len(algorithm_state['meta_algorithm_state']['memory_buffer_disk'])}, logger)
+                elif not enable_adaptation:
+                    write_to_checkpoint(
+                            checkpoint_path=experiment_checkpoint_path,
+                            event='post_subprocess',
+                            checkpoint_info=loaded_experiment_checkpoint,
+                            updated_fields_eval={
+                                'last_completed_case': case_name, 
+                                'last_completed_idx': true_idx if resume_bool else case_idx
+                                },
+                            updated_fields_algo={} #No algo state fields to update if not adapting
+                        )
+                else:
+                    raise Exception('Unknown subroutine, something went wrong!')
         
         except Exception as e:
             logger.info(f'Exception occurred in simulation for case {case_name}, running cleanup. Exception details: {e}')
-        
+            saved_exc = e
+            saved_tb = sys.exc_info()[2]
         finally:
             tempdir_obj.cleanup()
 
-            if experiment_checkpoint_path is not None:
+            if experiment_checkpoint_path != None:
                 write_to_checkpoint(
                     checkpoint_path=experiment_checkpoint_path,
                     event='post_cleanup',
                     checkpoint_info=loaded_experiment_checkpoint,
-                    updated_fields={
+                    updated_fields_eval={
                         'current_temp_dir': None
-                    }
+                    },
+                    updated_fields_algo = {} #No algo state fields to update at cleanup currently.
                 )
-            # raise Exception('There was an error in the front-end simulator, running cleanup.')
-        
+            if saved_exc != None:
+                raise saved_exc.with_traceback(saved_tb)
+            
     logger.info('Successfully completed!')
 
 def init_fe(infer_app, experiment_args):
@@ -549,7 +699,9 @@ def init_fe(infer_app, experiment_args):
         'is_seg_tmp',
         'write_segmentation',
         #Variables related to api-structure
-        'dataset_info'
+        'dataset_info',
+        'enable_adaptation',
+        'provide_gold_standard_after_inference'
     ]
     args = {key:val for key,val in experiment_args.items() if key in keep_key_list}
 
@@ -588,25 +740,34 @@ def main():
         #Only update the checkpoint variables if the file existed and was loaded.
 
     #Checking that the random seed is the same if continuing an experiment execution.
-    if loaded_experiment_checkpoint is not None:
-        if loaded_experiment_checkpoint['random_seed'] != experiment_args['random_seed']:
-            raise ValueError(f'Random seed has changed from {loaded_experiment_checkpoint["random_seed"]} to {experiment_args["random_seed"]}.')
+    if loaded_experiment_checkpoint != None:
+        if loaded_experiment_checkpoint["eval_state"]['random_seed'] != experiment_args['random_seed']:
+            raise ValueError(f'Random seed has changed from {loaded_experiment_checkpoint["eval_state"]["random_seed"]} to {experiment_args["random_seed"]}.')
 
-        if loaded_experiment_checkpoint['shuffle_cases'] != experiment_args['shuffle_cases']:
-            raise ValueError(f'Shuffle cases boolean has changed from {loaded_experiment_checkpoint["shuffle_cases"]} to {experiment_args["shuffle_cases"]}.')
+        if loaded_experiment_checkpoint["eval_state"]['shuffle_cases'] != experiment_args['shuffle_cases']:
+            raise ValueError(f'Shuffle cases boolean has changed from {loaded_experiment_checkpoint["eval_state"]["shuffle_cases"]} to {experiment_args["shuffle_cases"]}.')
         
         #################################### Clearing any untidied temp files ############################
-        if loaded_experiment_checkpoint['current_temp_dir'] is not None:
-            if os.path.exists(loaded_experiment_checkpoint['current_temp_dir']):
+        if loaded_experiment_checkpoint["eval_state"]['current_temp_dir'] != None:
+            if os.path.exists(loaded_experiment_checkpoint["eval_state"]['current_temp_dir']):
                 #If the temp dir still exists, we remove it.
                 try:
                     import shutil
-                    shutil.rmtree(loaded_experiment_checkpoint['current_temp_dir'])
+                    shutil.rmtree(loaded_experiment_checkpoint["eval_state"]['current_temp_dir'])
                 except Exception as e:
-                    raise Exception(f'Could not remove the temporary directory at {loaded_experiment_checkpoint["current_temp_dir"]} during cleanup before resuming experiment execution. Exception details: {e}')
+                    raise Exception(f'Could not remove the temporary directory at {loaded_experiment_checkpoint["eval_state"]["current_temp_dir"]} during cleanup before resuming experiment execution. Exception details: {e}')
         experiment_args['resume_bool'] = True
+
+        if experiment_args['enable_adaptation']:
+            experiment_args['algo_cache_name'] = loaded_experiment_checkpoint['algorithm_state']['meta_algorithm_state'].get('algo_cache_name')
+            if experiment_args['algo_cache_name'] == None:
+                raise ValueError('If adaptation is enabled, the algorithm cache name must be provided in the loaded experiment checkpoint algorithm state to proceed.')
     else:
         experiment_args['resume_bool'] = False
+
+        #We generate a new algo cache name if adaptation is enabled, and we do not have a loaded checkpoint.
+        if experiment_args['enable_adaptation']:
+            experiment_args['algo_cache_name'] = generate_base64_filename(length=12)
 
     #################################### END OF LOADING CONTINUATION FILE  ###############################################################
 
@@ -619,10 +780,14 @@ def main():
         exp_task_configs=experiment_args['task_configs'],
         shuffle_bool=experiment_args['shuffle_cases'],
         random_seed=experiment_args['random_seed'],
-        last_completed_case=loaded_experiment_checkpoint['last_completed_case'] if loaded_experiment_checkpoint is not None else None,
-        last_completed_idx=loaded_experiment_checkpoint['last_completed_idx'] if loaded_experiment_checkpoint is not None else None
+        last_completed_case=loaded_experiment_checkpoint["eval_state"]['last_completed_case'] if loaded_experiment_checkpoint != None else None,
+        last_completed_idx=loaded_experiment_checkpoint["eval_state"]['last_completed_idx'] if loaded_experiment_checkpoint != None else None
         )
-    
+    #Appending some relevant dataset information to the experiment args for passing through to the front-end simulator.
+    num_samples = loaded_experiment_checkpoint["eval_state"]['last_completed_idx'] + 1 + len(dataloader) if loaded_experiment_checkpoint != None else len(dataloader)
+    experiment_args['dataset_info']['num_samples'] = num_samples
+
+
     #We append the config labels dict to the experiment args. 
     experiment_args['configs_labels_dict'] = configs_labels_dict
 
@@ -630,7 +795,7 @@ def main():
 
 
     #Creating a base dir for the experiment to store metrics.
-    if not experiment_args['continue_execution'] or loaded_experiment_checkpoint is None:
+    if not experiment_args['continue_execution'] or loaded_experiment_checkpoint == None:
         os.makedirs(experiment_args['exp_results_dir'], exist_ok=False) 
         #Should not already exist, if continuing is not configured.
         if not experiment_args['root_match']:
@@ -643,11 +808,11 @@ def main():
         pass #If continuing an experiment execution and the checkpoint was loaded, then these directories should already exist.
 
     #Creating the subdirectories and the csv files for the metrics, then returning a dict of the savepaths according to each and every one of these.
-    if loaded_experiment_checkpoint is None:
+    if loaded_experiment_checkpoint == None:
         experiment_args['metrics_savepaths'] = init_metrics_saves(exp_results_dir=experiment_args['exp_results_dir'], metrics_configs=experiment_args['metrics_configs'], configs_labels_dict=configs_labels_dict)
     else:
         #We will load the path from the experiment's configuration pickle file.
-        experiment_args['metrics_savepaths'] = loaded_experiment_checkpoint['metrics_savepaths']
+        experiment_args['metrics_savepaths'] = loaded_experiment_checkpoint["eval_state"]['metrics_savepaths']
     
 
     #Based on whether the segmentation is being saved permanently, create the corresponding subdirectories or not. 
@@ -662,15 +827,15 @@ def main():
     #Save the info about the experiment args, save the info about the application config which should be spit out as a method of the callable infer class.
 
     logger_save_name = f'experiment_{experiment_args["experiment_name"]}_logs'
-    experiment_args_logger(logger_save_name=logger_save_name, root_dir=experiment_args['exp_results_dir'], screen=True, tofile=True)
-    exp_setup_logger = logging.getLogger(logger_save_name)
+    exp_setup_logger = experiment_args_logger(logger_save_name=logger_save_name, root_dir=experiment_args['exp_results_dir'], screen=True, tofile=True)
+    # exp_setup_logger = logging.getLogger(logger_save_name)
     
     
     #Here we will load the existing information from the interrupted run, if continuing an experiment execution is configured.
     #NOTE: The file might not yet exist if this is the first time we are starting an experiment! We will only be creating
     # this file on the first instance where a case is completely finished! 
 
-    if loaded_experiment_checkpoint is None:
+    if loaded_experiment_checkpoint == None:
         #In this case, nothing to continue. So we start from scratch.
         exp_setup_logger.info(f'Starting up! {os.linesep}')
         log_config_writer('Experiment Args', experiment_args, exp_setup_logger)
@@ -679,9 +844,11 @@ def main():
 
     #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     #Now we move onto building the app
-    
-    infer_app = init_infer_app(experiment_args) 
-
+    if loaded_experiment_checkpoint != None:
+        #In this case we have a prior experiment checkpoint. 
+        infer_app = init_infer_app(experiment_args, loaded_experiment_checkpoint=loaded_experiment_checkpoint)
+    else:
+        infer_app = init_infer_app(experiment_args, loaded_experiment_checkpoint=None)
     #Extract the app configs using the required method. 
     app_config_dict = infer_app.app_configs()
 
@@ -689,7 +856,7 @@ def main():
         raise Exception('Should at least return the application name in the app_configs method.')
 
     #Writing app configs, only if we are not continuing an experiment.
-    if loaded_experiment_checkpoint is None:
+    if loaded_experiment_checkpoint == None:
         log_config_writer('Application Args', app_config_dict, exp_setup_logger)
     
 
@@ -702,16 +869,38 @@ def main():
 
     # Iterating through the dataset:
 
-    if loaded_experiment_checkpoint is None and experiment_args['continue_execution']:
+    if loaded_experiment_checkpoint == None and experiment_args['continue_execution']:
         #Here we will create the first dictionary for saving the experiment checkpoint info.
-        loaded_experiment_checkpoint = {
-            'metrics_savepaths': experiment_args['metrics_savepaths'],
-            'random_seed': experiment_args['random_seed'],
-            'shuffle_cases': experiment_args['shuffle_cases'],
-            'last_completed_case': None,
-            'last_completed_idx': -1,
-            'current_temp_dir': None
-        }
+        if experiment_args['enable_adaptation']:
+            loaded_experiment_checkpoint = {
+                "eval_state": {
+                    'metrics_savepaths': experiment_args['metrics_savepaths'],
+                    'random_seed': experiment_args['random_seed'],
+                    'shuffle_cases': experiment_args['shuffle_cases'],
+                    'last_completed_case': None,
+                    'last_completed_idx': -1,
+                    'current_temp_dir': None
+                    }
+                ,
+                'algorithm_state': 
+                {
+                    'meta_algorithm_state': {'algo_cache_name': experiment_args['algo_cache_name']},
+                }
+            }
+        else:
+            loaded_experiment_checkpoint = {
+                "eval_state": {
+                    'metrics_savepaths': experiment_args['metrics_savepaths'],
+                    'random_seed': experiment_args['random_seed'],
+                    'shuffle_cases': experiment_args['shuffle_cases'],
+                    'last_completed_case': None,
+                    'last_completed_idx': -1,
+                    'current_temp_dir': None
+                    }
+                ,
+                "algorithm_state": { }
+            }
+
 
     run_instances(
         dataloader=dataloader, 
@@ -719,6 +908,7 @@ def main():
         logger=exp_setup_logger, 
         loaded_experiment_checkpoint=loaded_experiment_checkpoint,
         experiment_checkpoint_path=experiment_args['continue_exec_path'] if experiment_args['continue_execution'] else None,
+        enable_adaptation=experiment_args['enable_adaptation'],
         resume_bool=experiment_args['resume_bool']
         )
 
