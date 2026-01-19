@@ -193,6 +193,21 @@ def write_row(
     .
     }
     ''' 
+    #Lets first check that there does not already exist a case name, if it does then we need to delete it
+    #to avoid duplicates.
+    with open(save_path,'r') as f:
+        reader = csv.reader(f)
+        rows = list(reader)
+        #We can just look at the last row because we always append at the end, and if we are restarting it is 
+        #only going to re-continue from a point where the checkpointing had not established the callback on this
+        #case name was done. 
+        if len(rows) > 1 and rows[-1][0] == case_name:
+            #In this case, we need to remove the last row.#Rewriting the file without the last row.
+            rows = rows[:-1]
+            with open(save_path,'w') as f_w:
+                writer = csv.writer(f_w)
+                writer.writerows(rows)
+    
     with open(save_path,'a') as f:
         writer = csv.writer(f)
         base_row = [case_name]
