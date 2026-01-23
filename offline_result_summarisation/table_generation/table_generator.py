@@ -47,7 +47,7 @@ DATASET_MAPPING = {
     'Dataset005_Prostate': 'Whole Prostate',
     'Dataset006_Lung': 'Whole Lung',
     'Dataset007_Pancreas': 'Whole Pancreas',
-    'Dataset008_HepaticVessels': 'Hepatic Vessels',
+    'Dataset008_HepaticVessel': 'Hepatic Vessels',
     'Dataset009_Spleen': 'Spleen',
     'Dataset010_Colon': 'Colon'
 }
