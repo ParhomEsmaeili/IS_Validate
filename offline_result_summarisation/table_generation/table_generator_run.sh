@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set your arguments here
-SPLIT_NAME="designset"
+SPLIT_NAME="holdoutset" #"designset"
 REFERENCE_METRICS_ROOT="/home/parhomesmaeili/IS-Validation-Framework/MIDL_DGX_Results_Summary/$SPLIT_NAME"
 QUANTILE="0.5"
 # AXIS_OF_COMPLEXITY_NAME="Algorithm Complexity Variation in Image Voxel Count - Quantile ${QUANTILE}"
@@ -28,8 +28,8 @@ OUTPUT_ROOT="/home/parhomesmaeili/IS-Validation-Framework/MIDL_DGX_PrintedResult
 CAPTION="${AXIS_OF_COMPLEXITY_NAME} on $SPLIT_NAME Comparison Table"
 LABEL="tab:${AXIS_OF_COMPLEXITY_NAME}_${SPLIT_NAME}_comparison"
 
-# APPS=("sammed2dv1" "sam2v1" "sammed3dv1" "segvolv1"  "nnintv1")
-APPS=("nnintv1")
+APPS=("sammed2dv1" "sam2v1" "sammed3dv1" "segvolv1"  "nnintv1")
+# APPS=("nnintv1")
 PROMPTER="pointsonly"
 # RUN_NUMS=("1" "2" "3")
 RUN_NAME="-aggregated"
