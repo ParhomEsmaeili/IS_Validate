@@ -22,6 +22,11 @@ original_stdout = sys.stdout
 sys.stdout = open(os.devnull, 'w')
 warnings.filterwarnings("ignore")
 os.environ["CUBLAS_WORKSPACE_CONFIG"]=":4096:8"
+run_vs_seed = {
+    'run_0': 341103,
+    'run_1': 54432,
+    'run_2': 754537
+}
 
 def set_parse():
     # %% set up parser
@@ -225,6 +230,19 @@ def gen_experiment_args(args):
     #Extracting the random seed/randomness related info:
     output_dict['shuffle_cases'] = args.shuffle_cases
     output_dict['random_seed'] = args.random_seed
+    if args.random_seed != None:
+        #Lets extract the run num. 
+        run_num = re.search(r'run-(\d+)', output_dict['experiment_name'])
+        assert output_dict and len(re.findall(r'run-(\d+)', output_dict['experiment_name'])) == 1, "Expected exactly one match"
+        run_num = run_num.group()
+
+        if run_num is None:
+            raise ValueError('Nothing was found at all!')
+        if run_num not in run_vs_seed:
+            raise ValueError(f'If a random seed is provided, the experiment name must contain run-num substring \n'
+            f'where {run_num} is in {run_vs_seed.keys()} to match the available seeds in the run_vs_seed dictionary.')
+        
+        assert run_vs_seed.get(run_num) == args.random_seed, f'The provided random seed {args.random_seed} does not match the expected seed {run_vs_seed.get(run_num)} for run num {run_num}. Please check your input arguments.'
     output_dict['cuda_deterministic'] = not args.cuda_deterministic_disable
     output_dict['torch_deterministic'] = not args.torch_deterministic_disable
 
