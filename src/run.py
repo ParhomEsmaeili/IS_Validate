@@ -24,9 +24,9 @@ sys.stdout = open(os.devnull, 'w')
 warnings.filterwarnings("ignore")
 os.environ["CUBLAS_WORKSPACE_CONFIG"]=":4096:8"
 run_vs_seed = {
-    'run_0': 341103,
-    'run_1': 54432,
-    'run_2': 754537
+    'run0': 341103,
+    'run1': 54432,
+    'run2': 754537
 }
 
 def set_parse():
@@ -233,8 +233,8 @@ def gen_experiment_args(args):
     output_dict['random_seed'] = args.random_seed
     if args.random_seed != None:
         #Lets extract the run num. 
-        run_num = re.search(r'run-(\d+)', output_dict['experiment_name'])
-        assert output_dict and len(re.findall(r'run-(\d+)', output_dict['experiment_name'])) == 1, "Expected exactly one match"
+        run_num = re.search(r'run(\d+)', output_dict['experiment_name'])
+        assert output_dict and len(re.findall(r'run(\d+)', output_dict['experiment_name'])) == 1, "Expected exactly one match"
         run_num = run_num.group()
 
         if run_num is None:
