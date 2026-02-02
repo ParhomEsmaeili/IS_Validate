@@ -25,7 +25,7 @@ warnings.filterwarnings("ignore")
 os.environ["CUBLAS_WORKSPACE_CONFIG"]=":4096:8"
 run_vs_seed = {
     'run1': 341103,
-    'run2': 54432,
+    'run2': 55432,
     'run3': 754537
 }
 
