@@ -24,9 +24,9 @@ sys.stdout = open(os.devnull, 'w')
 warnings.filterwarnings("ignore")
 os.environ["CUBLAS_WORKSPACE_CONFIG"]=":4096:8"
 run_vs_seed = {
-    'run0': 341103,
-    'run1': 54432,
-    'run2': 754537
+    'run1': 341103,
+    'run2': 54432,
+    'run3': 754537
 }
 
 def set_parse():
