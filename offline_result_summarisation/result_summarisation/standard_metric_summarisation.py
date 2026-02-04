@@ -76,13 +76,14 @@ def summarise_standard_metrics(
         })
         peak_summaries[metric] = peak_summary
 
-    #Now we need to calculate the normalised AUC metrics. 
+    #Now we need to calculate the normalised AUC metrics.
+    aucs = dict()
     auc_summaries = dict()
     for metric in input_metrics:
         df = metrics_dfs[metric]
         columns_to_summarise = [col for col in df.columns if col != 'Case_Name']
         auc_scores = []
-        for row in df[columns_to_summarise].iterrows():
+        for idx, row in enumerate(df[columns_to_summarise].iterrows()):
             scores=row[1].values
             #Calculate the normalised AUC.
 
@@ -95,19 +96,26 @@ def summarise_standard_metrics(
 
             normalised_auc = integrate.trapezoid(scores)/(len(scores) - 1)  
             #Normalised AUC calculation
-            auc_scores.append(normalised_auc)
+            auc_scores.append({'Case_Name': df.iloc[idx]['Case_Name'], f'{metric}_auc_scores': normalised_auc})
         
-        auc_scores = np.array(auc_scores)
+        aucs[metric] = pd.DataFrame(
+            auc_scores
+        )
+        auc_values = np.array([item[f'{metric}_auc_scores'] for item in auc_scores])
         auc_summary = pd.DataFrame({
-            f'{metric}_auc_mean': [auc_scores.mean()],
-            f'{metric}_auc_median': [np.median(auc_scores)],
-            f'{metric}_auc_std': [np.std(auc_scores)],
-            f'{metric}_auc_lq': [np.quantile(auc_scores, 0.25)],
-            f'{metric}_auc_uq': [np.quantile(auc_scores, 0.75)]
+            f'{metric}_auc_mean': [auc_values.mean()],
+            f'{metric}_auc_median': [np.median(auc_values)],
+            f'{metric}_auc_std': [np.std(auc_values)],
+            f'{metric}_auc_lq': [np.quantile(auc_values, 0.25)],
+            f'{metric}_auc_uq': [np.quantile(auc_values, 0.75)]
         })
         auc_summaries[metric] = auc_summary
     
     
+    #Lets write all the per-sample aucs to a csv file for statistical testing later on.
+    all_aucs = pd.concat([aucs[metric].set_index('Case_Name') for metric in input_metrics], axis=1)
+    os.makedirs(os.path.join(output_folder, 'metrics', 'AUC'), exist_ok=True)
+    all_aucs.to_csv(os.path.join(output_folder, 'metrics', 'AUC', 'casewise_aucs.csv'))
     #Now writing the summarised metrics to a new CSV file
     # print(metric_summaries)
     # Concatenate all metric summaries vertically for iteration-wise stats
@@ -152,4 +160,3 @@ if __name__ == "__main__":
         infer_info,
         filename,
         interval_metric_epochs)
-    

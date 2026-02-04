@@ -82,6 +82,21 @@ Values of the dictionary indicate the columns which need to be extracted for pri
 the metrics too when generating tables.
 """
 
+import re
+
+def map_algorithm_name(short_name):
+    """Map shortened algorithm names to full display names"""
+    patterns = {
+        r'adadesign(\d+)': r'AdaptiveDesignIS\1',
+        r'adatest(\d+)': r'AdaptiveTestIS\1',
+    }
+    
+    for pattern, replacement in patterns.items():
+        if re.match(pattern, short_name):
+            return re.sub(pattern, replacement, short_name)
+    
+    return short_name  # Return original if no match
+
 def filter_string_table(input_str: str):
     for key, val in TABLE_MAP.items():
         if key in input_str:
@@ -308,7 +323,9 @@ def generate_latex(df: pd.DataFrame, caption: str = "", label: str = "", output_
 
     # Generate LaTeX with MultiIndex columns
     df['Task'] = df['Task'].map(DATASET_MAPPING).fillna(df['Task'])
-    df['Algorithm'] = df['Algorithm'].map(ALGORITHM_MAPPING).fillna(df['Algorithm'])
+
+    #Lets apply a filter on the algorithm mapping. 
+    df['Algorithm'] = df['Algorithm'].map(ALGORITHM_MAPPING).fillna(df['Algorithm']).map(map_algorithm_name)
     latex_str = df.to_latex(index=False, multirow=True, multicolumn=True, longtable=False, caption=caption, label=label, na_rep="", float_format=lambda x: f'{x:g}')
     latex_str = merge_task_column_latex(latex_str, task_col=0)
 

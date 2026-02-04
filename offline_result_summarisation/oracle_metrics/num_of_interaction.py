@@ -278,7 +278,8 @@ if __name__ == "__main__":
         rows.append(row)
 
     casewise_df = pd.DataFrame(rows)
-    casewise_output_file = os.path.join(args.output_result_root, 'casewise_num_interactions_fitting.csv')
+    os.makedirs(os.path.join(args.output_result_root, 'metrics', 'NOI'), exist_ok=True)
+    casewise_output_file = os.path.join(args.output_result_root, 'metrics', 'NOI', 'casewise_noi.csv')
     casewise_df.to_csv(casewise_output_file, index=False)
     print(f"Casewise number of interactions saved to {casewise_output_file}")
 
@@ -343,7 +344,7 @@ if __name__ == "__main__":
         'nnunet_bound': args.nnunet_bound,
         'infer_info': infer_info,
     }
-    config_output_file = os.path.join(args.output_result_root, 'num_of_interactions_fitting_config.json')
+    config_output_file = os.path.join(args.output_result_root, 'metrics', 'NOI', 'num_of_interactions_fitting_config.json')
     with open(config_output_file, 'w') as f:
         json.dump(config_output, f, indent=4)
     print(f"Configuration saved to {config_output_file}")
