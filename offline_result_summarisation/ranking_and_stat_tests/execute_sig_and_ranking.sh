@@ -15,7 +15,7 @@ STATS_SIG_OUTPUT_ROOT="/home/parhomesmaeili/IS-Validation-Framework/Results_Stat
 RANKING_OUTPUT_ROOT="/home/parhomesmaeili/IS-Validation-Framework/Results_Ranking/$SPLIT_NAME"
 
 #SIG SUBPATHS
-SIG_METRICS_CONFIG='{"NOI": {"subpath": "metrics/NOI/casewise_noi.csv", "confs": {"NOI": {"cols": ["NOI_Dice_thr_quantile_Q = 0.5"]}, "NoF": {"cols": ["Fail_Dice_thr_quantile_Q = 0.5"]}}}, "AUC": {"subpath": "metrics/AUC/casewise_aucs.csv", "confs": {"Dice_AUC": {"cols": ["Dice_auc_scores"]}, "NSD_AUC": {"cols": ["NSD_auc_scores"]}}}, "Dice": {"subpath": "metrics/Dice/cross_class_scores.csv", "confs": {"Dice Interactive Init": {"cols": ["Interactive Init"]}, "Dice Interactive Edit Iter 100": {"cols": ["Interactive Edit Iter 100"]}}}, "NSD": {"subpath": "metrics/NSD/cross_class_scores.csv", "confs": {"NSD Interactive Init": {"cols": ["Interactive Init"]}, "NSD Interactive Edit Iter 100": {"cols": ["Interactive Edit Iter 100"]}}}}'
+SIG_METRICS_CONFIG='{"NOI": {"subpath": "metrics/NOI/casewise_noi.csv", "confs": {"NOI": {"cols": ["NOI_Dice_thr_quantile_Q = 0.5"]}, "NoF": {"cols": ["Fail_Dice_thr_quantile_Q = 0.5"]}}}, "AUC": {"subpath": "metrics/AUC/casewise_aucs.csv", "confs": {"Dice_AUC": {"cols": ["Dice_auc_scores"]}, "NSD_AUC": {"cols": ["NSD_auc_scores"]}}}, "Dice": {"subpath": "metrics/Dice/cross_class_scores.csv", "confs": {"Dice Init.": {"cols": ["Interactive Init"]}, "Dice Interactive Edit Iter 100": {"cols": ["Interactive Edit Iter 100"]}}}, "NSD": {"subpath": "metrics/NSD/cross_class_scores.csv", "confs": {"NSD Init.": {"cols": ["Interactive Init"]}, "NSD Interactive Edit Iter 100": {"cols": ["Interactive Edit Iter 100"]}}}}'
 SIG_SUBPATHS=()
 for DATASET_NAME in "${DATASET_NAMES[@]}"; do
     SIG_SUBPATHS+=("$DATASET_NAME/$PROMPTER/run$RUN_NAME")
@@ -27,9 +27,9 @@ RANKING_METRICS=(
     'NoF'
     'Dice_AUC'
     'NSD_AUC'
-    'Dice Interactive Init'
+    'Dice Init.'
     'Dice Interactive Edit Iter 100'
-    'NSD Interactive Init'
+    'NSD Init.'
     'NSD Interactive Edit Iter 100'
     )
 echo "=============================================="

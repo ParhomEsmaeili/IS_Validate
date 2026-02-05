@@ -52,9 +52,9 @@ ITERABLE_METRICS = {
 # }
 
 METRIC_TO_TEST = {
-    'Dice Interactive Init': 'wilcoxon',
+    'Dice Init': 'wilcoxon',
     'Dice Interactive Edit': 'wilcoxon', #Doesn't need to be the full string, but a substring match.
-    'NSD Interactive Init': 'wilcoxon',
+    'NSD Init': 'wilcoxon',
     'NSD Interactive Edit': 'wilcoxon',
     'Dice_AUC': 'wilcoxon',
     'NSD_AUC': 'wilcoxon',
@@ -63,9 +63,9 @@ METRIC_TO_TEST = {
 }
 
 MEASURE_OF_BETTERNESS = {
-    'Dice Interactive Init': 'mean_higher',
+    'Dice Init': 'mean_higher',
     'Dice Interactive Edit': 'mean_higher',
-    'NSD Interactive Init': 'mean_higher',
+    'NSD Init': 'mean_higher',
     'NSD Interactive Edit': 'mean_higher',
     'Dice_AUC': 'mean_higher',
     'NSD_AUC': 'mean_higher',
@@ -334,14 +334,14 @@ if __name__ == "__main__":
     #     "Dice": {
     #         'subpath': 'metrics/Dice/cross_class_scores.csv',
     #         'confs': {
-    #             'Dice Interactive Init': {"cols": ["Interactive Init"]},
+    #             'Dice Init': {"cols": ["Interactive Init"]},
     #             "Dice Interactive Edit Iter 100": {"cols": ["Interactive Edit Iter 100"]}
     #             },
     #     }, 
     #     "NSD": {
     #         'subpath': 'metrics/NSD/cross_class_scores.csv',
     #         'confs': {
-    #             'NSD Interactive Init': {"cols":["Interactive Init"]},
+    #             'NSD Init': {"cols":["Interactive Init"]},
     #             'NSD Interactive Edit Iter 100': {"cols": ["Interactive Edit Iter 100"]}
     #         }
     #     }

@@ -7,6 +7,7 @@ from src.general_utils.dict_utils import extractor, dict_path_modif
 from typing import Dict, List, Any, Tuple
 import glob
 import pandas as pd
+import copy
 
 RESULT_SEARCHSTRING = {
     'Dice': 'Dice',
@@ -29,6 +30,20 @@ TABLE_MAP = {
     'Normalised_Median_NOI': 'nNoI',
     'Interactive Edit Iter': 'Iter.',
     'Failure_Cases_Fraction': 'NoF'
+}
+
+RANKING_NON_ITERABLE_MAP = { #This is the mapping for the ranking table to what is displayed in the printed results
+    'NoI':{ #for each parent, we denote the substring in the child which needs to be matched in the
+        #ranking table
+        'NOI':'NOI',
+        'Failure_Cases_Fraction': 'NoF'
+    },
+    'Dice': {
+        'auc':'Dice_AUC',
+    },
+    'NSD': {
+        'auc':'NSD_AUC',
+    }
 }
 
 COLUMN_ORDERING = [
@@ -200,7 +215,16 @@ def gather_metrics_from_folder(folder_path: str, metrics_config: Dict[str, List[
     # reformatted_out = {v:out[k] for k,v in MAPPING_METRIC_CATEGORIES.items() if k in out}
     return metric_dict
 
+def pull_rankings_for_task_and_metric(folder_path: str, metrics: List[str]) -> Dict[str, Any]:
+    """
+    Searches a given folder for the rankings files specificied in metrics, then extracts the relevant rankings.
+    Returns a dictionary of extracted rankings flattened into dictionaries with single layer depth.
+
+    """
+    pass 
+    
 def build_table(
+    ranking_root: str,
     folders: dict[str],
     task_name: str,
     metrics_config: Dict[str, List[str]]) -> pd.DataFrame:
@@ -263,10 +287,64 @@ def build_table(
     flat_cols = [('Task', ''), ('Algorithm', '')]
     full_cols = pd.MultiIndex.from_tuples(flat_cols + tuples, names=["Metric Type", "Submetric"]) 
     rows = [] 
-    for alg_name, metrics in metrics_storage.items():
-        row = [task_name, alg_name]
-        row += [metrics[col[-1]] if len(col) > 1 else metrics[col] for col in tuples]
+    
+    if ranking_root is not None: #Its not necessary to create a table but we should have it.
+        rankings = pd.read_csv(os.path.join(ranking_root, task_name, 'per_metric_algorithm_rankings.csv'), index_col=0)
+        # print(rankings)
+    
+    bold_cells = set()
 
+    for idx, (alg_name, metrics) in enumerate(metrics_storage.items()):
+        if ranking_root is not None:
+            rankings_alg = rankings.loc[alg_name]
+            # print(rankings_alg)
+        row = [task_name, alg_name]
+        for col_idx, col in enumerate(tuples):
+            submetric = col[-1]
+            metric_value = metrics[submetric] if len(col) > 1 else metrics[col]
+            if ranking_root is not None:
+                # Cross-match ranking value for this submetric
+                #Lets find the name of the ranking metric in the rankings table convention.
+                
+                is_iterable = [metric for metric in iterable_metrics if metric in submetric]
+                assert len(is_iterable) <= 1, "Multiple iterable metrics matched, unexpected behaviour."
+                if is_iterable:
+                    #Then we need to look at the parent metric type to pull.
+                    parent_metric_type = col[0]
+                    #The column we look for has to hit on both the parent metric and
+                    #a substring of the submetric.
+                    #Lets strip the metric component from the submetric.
+                    #e.g. Dice_median Init to just Init.
+                    copy_submetric = copy.deepcopy(submetric)
+                    stripped_submetric = copy_submetric.replace(is_iterable[0], '').strip()
+                    ranking_name = parent_metric_type + f' {stripped_submetric}'
+                    #lets extract the rank now.
+                    
+                    ranking_value = rankings_alg[ranking_name]
+                    if ranking_value == 1:
+                        best_val = True
+                        #then it was the best one!
+                    else:
+                        best_val = False
+                else:
+                    # Handle non-iterable logic
+                    parent_metric_type = col[0]
+                    #Lets extract the colname in ranking from the dict.
+                    if parent_metric_type not in RANKING_NON_ITERABLE_MAP:
+                        raise ValueError(f"Parent metric type {parent_metric_type} not found in RANKING_NON_ITERABLE_MAP. Please update this mapping to include the relevant parent metric types and their corresponding ranking column names.")
+                    #Lets find which key we need to pull from.
+                    key_to_pull = [key for key in RANKING_NON_ITERABLE_MAP[parent_metric_type] if key in submetric]
+                    if len(key_to_pull) != 1:
+                        raise ValueError(f"Expected to find exactly one matching key in RANKING_NON_ITERABLE_MAP for parent metric type {parent_metric_type} and submetric {submetric}, but found {len(key_to_pull)}. Please update the mapping or check the submetric naming.")
+                    # print(submetric, key_to_pull, RANKING_NON_ITERABLE_MAP[parent_metric_type][key_to_pull[0]])
+                    ranking_value = rankings_alg[RANKING_NON_ITERABLE_MAP[parent_metric_type][key_to_pull[0]]]
+                    if ranking_value == 1:
+                        best_val = True
+                    else:
+                        best_val = False
+            if ranking_root is not None and best_val:
+                bold_cells.add((idx, col))  # Store row index and column tuple
+            row.append(metric_value)
         rows.append(row)
     df = pd.DataFrame(rows, columns=full_cols)
     
@@ -278,15 +356,38 @@ def build_table(
     numeric_cols = df.select_dtypes(include=['float64', 'int64']).columns
     df[numeric_cols] = df[numeric_cols].round(3)
 
+    # After creating df and rounding
+    df = df.astype(str)
+    for row_idx, col_tuple in bold_cells:
+        col_pos = df.columns.get_loc(col_tuple)
+        df.iloc[row_idx, col_pos] = f"**{df.iloc[row_idx, col_pos]}**"
+
     return df
 
-def write_excel(df: pd.DataFrame, folder_root: str) -> None:
-    """
-    Write DataFrame to Excel. Overwrites if exists.
-    """
-    # Ensure parent dir exists
-    os.makedirs(folder_root, exist_ok=True)
-    df.to_excel(os.path.join(folder_root, 'summary.xlsx'), sheet_name="summary")
+# def write_excel(df: pd.DataFrame, folder_root: str) -> None:
+#     """
+#     Write DataFrame to Excel with bold formatting applied to cells marked with **.
+#     """
+#     from openpyxl.styles import Font
+    
+#     # Ensure parent dir exists
+#     os.makedirs(folder_root, exist_ok=True)
+#     excel_path = os.path.join(folder_root, 'summary.xlsx')
+#     df.to_excel(excel_path, sheet_name="summary", index=False)
+    
+#     # Apply bold formatting to cells with ** markers
+#     from openpyxl import load_workbook
+#     wb = load_workbook(excel_path)
+#     ws = wb.active
+    
+#     for row in ws.iter_rows():
+#         for cell in row:
+#             if cell.value and isinstance(cell.value, str) and '**' in cell.value:
+#                 # Remove the ** markers and apply bold
+#                 cell.value = cell.value.replace('**', '')
+#                 cell.font = Font(bold=True)
+    
+#     wb.save(excel_path)
 
 def write_csv(df: pd.DataFrame, folder_root: str) -> None:
     """
@@ -326,6 +427,10 @@ def generate_latex(df: pd.DataFrame, caption: str = "", label: str = "", output_
 
     #Lets apply a filter on the algorithm mapping. 
     df['Algorithm'] = df['Algorithm'].map(ALGORITHM_MAPPING).fillna(df['Algorithm']).map(map_algorithm_name)
+    
+    # Convert ** markers to LaTeX bold before converting to LaTeX
+    df = df.map(lambda x: re.sub(r'\*\*(.*?)\*\*', r'\\textbf{\1}', str(x)) if isinstance(x, str) else x)
+    
     latex_str = df.to_latex(index=False, multirow=True, multicolumn=True, longtable=False, caption=caption, label=label, na_rep="", float_format=lambda x: f'{x:g}')
     latex_str = merge_task_column_latex(latex_str, task_col=0)
 
@@ -431,6 +536,7 @@ def merge_task_column_latex(latex_str, task_col=0):
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Generate summary table (Excel + LaTeX) from algorithm result folders.")
+    parser.add_argument("--ranking_root", type=str, required=False, help="Root path to the folder which contains the rankings across all the algorithms.")
     parser.add_argument("--metrics_root", type=str, required=True, help="Root path to the folder which contains the metrics across all the algorithms.")
     parser.add_argument("--algorithm_names", nargs="+", required=True, help="Names of algorithms to summarise.")
     #We explicitly pass algorithm names as we will use this to print the table!
@@ -450,7 +556,9 @@ def main():
     for experiment_subpath in args.experiment_subpath:
         folders = {alg_name: os.path.join(args.metrics_root, alg_name, experiment_subpath) for alg_name in args.algorithm_names}
         if os.name == 'posix':
-            df_cumulative = pd.concat([df_cumulative, build_table(folders, experiment_subpath.split('/')[0], cfg)])
+            df_cumulative = pd.concat([df_cumulative, build_table(args.ranking_root, folders, experiment_subpath.split('/')[0], cfg)])
+            
+            
         else:
             raise NotImplementedError("Windows OS is not currently supported for table generation.")
 

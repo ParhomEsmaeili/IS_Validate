@@ -6,6 +6,7 @@ APPS=("nnintv1" "adadesign1")
 
 # SPLIT_NAME="holdoutset"
 SPLIT_NAME="designset"
+RANKING_ROOT="/home/parhomesmaeili/IS-Validation-Framework/Results_Ranking/$SPLIT_NAME"
 REFERENCE_METRICS_ROOT="/home/parhomesmaeili/IS-Validation-Framework/Results_Summary/$SPLIT_NAME"
 QUANTILE="0.5"
 # AXIS_OF_COMPLEXITY_NAME="Algorithm Complexity Variation in Image Voxel Count - Quantile ${QUANTILE}"
@@ -24,7 +25,7 @@ QUANTILE="0.5"
 # DATASET_NAMES=("Dataset003_Liver" "Dataset010_Colon")
 
 AXIS_OF_COMPLEXITY_NAME="All Tasks Visualised - Quantile $QUANTILE"
-DATASET_NAMES=("Dataset001_BrainTumour" "Dataset003_Liver" "Dataset004_Hippocampus" "Dataset005_Prostate" "Dataset006_Lung" "Dataset007_Pancreas" "Dataset008_HepaticVessel") #"Dataset010_Colon")
+DATASET_NAMES=("Dataset001_BrainTumour" "Dataset003_Liver" "Dataset004_Hippocampus" "Dataset005_Prostate" "Dataset006_Lung" "Dataset007_Pancreas" "Dataset008_HepaticVessel" "Dataset010_Colon")
 
 
 
@@ -45,6 +46,7 @@ METRICS_CONFIG='{"all_auc_summaries.csv": {"Dice_auc_median": null, "NSD_auc_med
 
 # echo "${EXPERIMENT_SUBPATHS[@]}"
 python3 "table_generator.py" \
+    --ranking_root="$RANKING_ROOT" \
     --metrics_root="$REFERENCE_METRICS_ROOT" \
     --algorithm_names "${APPS[@]}" \
     --experiment_subpath "${EXPERIMENT_SUBPATHS[@]}" \
