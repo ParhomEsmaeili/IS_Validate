@@ -20,7 +20,32 @@ from scipy.stats import wilcoxon, fisher_exact
 import argparse
 import json
 
-
+ALGO_AXIS_OF_COMPLEXITY = {
+    "Image Voxel Count Variation": [
+        "Dataset004_Hippocampus",
+        "Dataset001_BrainTumour",
+        "Dataset003_Liver",
+        ],
+    "Target Size Variation": [
+        "Dataset006_Lung",
+        "Dataset007_Pancreas",
+        "Dataset003_Liver"
+    ],
+    "Image Anisotropy Variation": [
+        'Dataset005_Prostate',
+        'Dataset001_BrainTumour',
+    ],
+    "Target Shape Complexity Variation": [
+        'Dataset005_Prostate',
+        'Dataset001_BrainTumour',
+        'Dataset008_HepaticVessel'
+    ],
+    "Anatomical Site Variation": [
+        'Dataset003_Liver',
+        'Dataset010_Colon'
+    ]
+}
+        
 MAPPING_SUBCATEGORIES = {
     'AUC': 'nAUC',
     'Init.': 'Init.',
@@ -47,21 +72,45 @@ def compute_per_metric_rankings(per_metric_dfs: Dict[str, pd.DataFrame], apps: L
         stat_sig_df = dfs['stat_sig']
         who_is_better_df = dfs['who_is_better']
         assert stat_sig_df.shape == who_is_better_df.shape, f"Shape mismatch between stat sig and who-is-better for metric {metric}."
+        
+        
+        #Here we are going to cross-check the who-is-better table and the stat sig table to ensure that any cells marked as "tie" in the who-is-better table correspond to False in the stat sig table. This is a sanity check to ensure consistency between the two tables before 
+        # we proceed with the ranking computation. We will flag if there are any cells where there is a tie in the metric, but
+        # the stat sig test indicates a significant difference, as this would be an inconsistency that needs to be investigated.
+
+        #I.e., it means we have an assumption that needs to be revisited. E.g., when we used fisher-exact for NoF, 
+        #it was not looking at whether marginal rate differed. Only on a pair-wise disparity in failure/not. So a difference
+        #on failed samples could lead to a significant result, even if the overall marginal failure rates were not different. 
+        # This is an edge case that we should be aware of and investigate if it arises.
         mask = who_is_better_df.astype(str).apply(lambda col: col.str.contains('tie', regex=False, na=False))
         # Get locations (row, col) tuples
         locations = list(zip(*np.where(mask)))
         # Get the values
         values = stat_sig_df[mask].stack()
-        assert all(values == False), f"Tie found in who-is-better table but corresponding stat sig is True for metric {metric} at locations {locations}."
+        # print(dfs)
+        if not all(values == False):
+            print(f"Locations with tie in who-is-better table for metric {metric}: {locations}")
+            print(f"Apps at those locations: {[(who_is_better_df.iloc[row, col], who_is_better_df.columns[col]) for row, col in locations]}")
+            print(f"Corresponding stat sig values at those locations: {values}")
+        
+            raise Warning(f"Tie found in who-is-better table but corresponding stat sig is True for metric {metric} at locations {locations}. Check the printed details for debugging. \n"
+                          "This may indicate a bizarre inconsistency in the data, or an edge case where the who-is-better table has 'tie' for a pair of algorithms but the stat sig test is significant. This should be investigated further to understand the root cause.")
+            
+        
+        # assert all(values == False), f"Tie found in who-is-better table but corresponding stat sig is True for metric {metric} at locations {locations}."
 
         #Now compute rankings.
 
         #We filter the who is better according to the stat sig. 
             
         #It performs a cross-comparison of the stat sig test and the who-is-better test to determine this.
-        result = who_is_better_df.where(stat_sig_df.astype(bool), other='ignore')  # 'ignore' where not significant
-        #Now, for each algorithm, count how many times it is better than others, by counting the number of occurences
-        #of its own name in its column.
+        result = who_is_better_df.where(stat_sig_df.astype(bool) & (who_is_better_df != 'tie'), other='ignore') 
+        # 'ignore' where not significant, OR where a tie exists. This means only cells where there is a significant difference
+        #AND a winner for that metric will be counted. Theoretically, there should not be any cells where this happens if 
+        #We selected the statistical significance tests correctly, but this is a safety check to ensure we are only counting significant wins.
+    
+        #Now, for each algorithm, count how many times it is better (and significantly better) than others, 
+        # by counting the number of occurences of its own name in its column.
         counts = {}
         for app in apps:
             better_count = (result[app] == app).sum()  # Count occurrences of apps name within its own column.
@@ -81,6 +130,24 @@ def compute_per_metric_rankings(per_metric_dfs: Dict[str, pd.DataFrame], apps: L
         per_metric_rankings[metric] = pd_ranking 
     per_metric_rankings_df = pd.DataFrame(per_metric_rankings)
     return per_metric_rankings_df
+
+def group_and_rank_per_axis_of_complexity_rankings(per_dataset_rankings: pd.DataFrame, apps: List[str]) -> pd.DataFrame:
+    #We want to group the dataset rankings according to the axes of complexity.. not averaging, just displaying them together.
+    axis_grouped_rankings = {}
+    for axis, datasets in ALGO_AXIS_OF_COMPLEXITY.items():
+        per_axis_rankings = dict()
+        for dataset in datasets:
+            assert dataset in per_dataset_rankings, f"Dataset {dataset} in axis {axis} not found in per-dataset rankings."
+            per_axis_rankings[dataset] = per_dataset_rankings[dataset]
+        #First we group the datasets according to the axes of complexity.
+        axis_grouped_rankings[axis] = pd.DataFrame(per_axis_rankings)
+
+    #Now lets compute rankings for each axis of complexity by averaging the rankings across the datasets within that axis, and then ranking the algorithms based on that average.
+    axis_rankings = dict()
+    for axis, df in axis_grouped_rankings.items():
+        axis_rankings[axis] = df.mean(axis=1).rank(method='min', ascending=True).reindex(apps).astype(int)
+    axis_rankings_df = pd.DataFrame(axis_rankings)
+    return axis_grouped_rankings, axis_rankings_df
 
 def compute_dataset_ranking(per_metric_rankings: pd.DataFrame, apps: List[str]) -> pd.DataFrame:
     return per_metric_rankings.mean(axis=1).rank(method='min', ascending=True).reindex(apps).astype(int)
@@ -199,6 +266,9 @@ if __name__ == "__main__":
     
     dataset_rankings = dict()
     for dataset, per_metric_dfs in dataset_wise_dfs.items():
+        print('==============================')
+        print(f"Processing dataset: {dataset}")
+        print('==============================')
         per_metric_rankings = compute_per_metric_rankings(per_metric_dfs, args.algorithm_names)
         dataset_ranking = compute_dataset_ranking(per_metric_rankings, args.algorithm_names)
         
@@ -212,6 +282,18 @@ if __name__ == "__main__":
         per_dataset_path = os.path.join(args.output_root, dataset, "dataset_ranking.csv")
         os.makedirs(os.path.dirname(per_dataset_path), exist_ok=True)
         dataset_ranking.to_csv(per_dataset_path)
+
+    #Now compute axis of complexity rankings across datasets.
+    grouped_axis_rankings, axis_ranking = group_and_rank_per_axis_of_complexity_rankings(
+        per_dataset_rankings=dataset_rankings,
+        apps=args.algorithm_names
+    )
+    grouped_axis_rankings_paths = {k: os.path.join(args.output_root, 'axis_of_complexity', f"{k}_grouped.csv") for k in grouped_axis_rankings.keys()}
+    axis_of_complexity_path = os.path.join(args.output_root, 'axis_of_complexity', "axis_ranking.csv")
+    os.makedirs(os.path.dirname(axis_of_complexity_path), exist_ok=True)
+    for k, v in grouped_axis_rankings_paths.items():
+        grouped_axis_rankings[k].to_csv(v)
+    axis_ranking.to_csv(axis_of_complexity_path)
 
     #Now compute overall rankings across datasets.
     overall_rankings = compute_overall_ranking(dataset_rankings, args.algorithm_names)

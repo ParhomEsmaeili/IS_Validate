@@ -1,11 +1,23 @@
 #!/bin/bash
-
+SCRIPT_DIR="$( cd "$(dirname "${BASH_SOURCE[0]}")" && pwd )"
 # Set your arguments here
 # APPS=("sammed2dv1" "sam2v1" "sammed3dv1" "segvolv1"  "nnintv1")
-APPS=("nnintv1" "adadesign1")
+APPS=("${MASTER_APPS[@]}")
+# APPS=("nnintv1" "adadesign1")
 
 # SPLIT_NAME="holdoutset"
-SPLIT_NAME="designset"
+# SPLIT_NAME="designset"
+SPLIT_NAME=$MASTER_SPLIT
+
+echo "=============================================="
+echo "Running Result Table Generation"
+echo "=============================================="
+echo "Configuration:"
+echo "  Split: $SPLIT_NAME"
+echo "  Apps: ${APPS[@]}"
+echo "  Datasets: ${DATASET_NAMES[@]}"
+echo "=============================================="
+
 RANKING_ROOT="/home/parhomesmaeili/IS-Validation-Framework/Results_Ranking/$SPLIT_NAME"
 REFERENCE_METRICS_ROOT="/home/parhomesmaeili/IS-Validation-Framework/Results_Summary/$SPLIT_NAME"
 QUANTILE="0.5"
@@ -24,7 +36,7 @@ QUANTILE="0.5"
 # AXIS_OF_COMPLEXITY_NAME="Algorithm Complexity Variation in target heterogeneity or heterogeneity in pathological presentation - Quantile ${QUANTILE}"
 # DATASET_NAMES=("Dataset003_Liver" "Dataset010_Colon")
 
-AXIS_OF_COMPLEXITY_NAME="All Tasks Visualised - Quantile $QUANTILE"
+AXIS_OF_COMPLEXITY_NAME="All Tasks Visualised - Means, nnU-Net Quantile $QUANTILE" #Quantile $QUANTILE"
 DATASET_NAMES=("Dataset001_BrainTumour" "Dataset003_Liver" "Dataset004_Hippocampus" "Dataset005_Prostate" "Dataset006_Lung" "Dataset007_Pancreas" "Dataset008_HepaticVessel" "Dataset010_Colon")
 
 
@@ -42,10 +54,12 @@ for DATASET_NAME in "${DATASET_NAMES[@]}"; do
     EXPERIMENT_SUBPATHS+=("$DATASET_NAME/$PROMPTER/run$RUN_NAME")
 done
 # METRICS_CONFIG='{"all_auc_summaries.csv": {"Dice_auc_median": null, "NSD_auc_median": null}, "all_iteration_summaries.csv": {"Dice_median": {"rows": ["Interactive Init", "Interactive Edit Iter 100"]}, "NSD_median": {"rows": ["Interactive Init", "Interactive Edit Iter 100"]}}, "summarised_num_interactions_fitting.csv": {"Normalised_Median_NOI": null, "Failure_Cases_Fraction": null}}'
-METRICS_CONFIG='{"all_auc_summaries.csv": {"Dice_auc_median": null, "NSD_auc_median": null}, "all_iteration_summaries.csv": {"Dice_median": {"rows": ["Interactive Init", "Interactive Edit Iter 100"]}, "NSD_median": {"rows": ["Interactive Init", "Interactive Edit Iter 100"]}}, "summarised_num_interactions_fitting.csv": {"Normalised_Median_NOI": {"rows": ["quantile_Q = '${QUANTILE}'"]}, "Failure_Cases_Fraction": {"rows": ["quantile_Q = '${QUANTILE}'"]}}}'
+# METRICS_CONFIG='{"all_auc_summaries.csv": {"Dice_auc_median": null, "NSD_auc_median": null}, "all_iteration_summaries.csv": {"Dice_median": {"rows": ["Interactive Init", "Interactive Edit Iter 100"]}, "NSD_median": {"rows": ["Interactive Init", "Interactive Edit Iter 100"]}}, "summarised_num_interactions_fitting.csv": {"Normalised_Median_NOI": {"rows": ["quantile_Q = '${QUANTILE}'"]}, "Failure_Cases_Fraction": {"rows": ["quantile_Q = '${QUANTILE}'"]}}}'
+
+METRICS_CONFIG='{"all_auc_summaries.csv": {"Dice_auc_mean": null, "NSD_auc_mean": null}, "all_iteration_summaries.csv": {"Dice_mean": {"rows": ["Interactive Init", "Interactive Edit Iter 100"]}, "NSD_mean": {"rows": ["Interactive Init", "Interactive Edit Iter 100"]}}, "summarised_num_interactions_fitting.csv": {"Normalised_Mean_NOI": {"rows": ["quantile_Q = '${QUANTILE}'"]}, "Failure_Cases_Fraction": {"rows": ["quantile_Q = '${QUANTILE}'"]}}}'
 
 # echo "${EXPERIMENT_SUBPATHS[@]}"
-python3 "table_generator.py" \
+python3 "$SCRIPT_DIR/table_generator.py" \
     --ranking_root="$RANKING_ROOT" \
     --metrics_root="$REFERENCE_METRICS_ROOT" \
     --algorithm_names "${APPS[@]}" \

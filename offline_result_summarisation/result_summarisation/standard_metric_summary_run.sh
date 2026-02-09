@@ -1,23 +1,39 @@
 #!/bin/bash
 
+SCRIPT_DIR="$( cd "$(dirname "${BASH_SOURCE[0]}")" && pwd )"
+
 #Doubles as both a per-run summarisation script, and as a aggregated results summarisation script, depending on the "run_nums" arg.
 # Set your arguments here
 DATASET_NAMES=("Dataset001_BrainTumour" "Dataset003_Liver" "Dataset004_Hippocampus" "Dataset005_Prostate" "Dataset006_Lung" "Dataset007_Pancreas" "Dataset008_HepaticVessel" "Dataset010_Colon")
 DATASET_IDS=("001" "003" "004" "005" "006" "007" "008" "010") 
 # APPS=("nnintv1" "sammed3dv1" "segvolv1" "sammed2dv1" "sam2v1" "nnintv1")
-APPS=("nnintv1" "adadesign1")
+# APPS=("nnintv1" "adadesign1")
+
+echo "=============================================="
+echo "Running Algorithm-wise Result Summarisation"
+APPS=("${MASTER_APPS[@]}")
+SPLIT_NAME=$MASTER_SPLIT
+echo "Configuration:"
+echo "  Split: $SPLIT_NAME"
+echo "  Apps: ${APPS[@]}"
+echo "  Datasets: ${DATASET_NAMES[@]}"
+echo "=============================================="
+
 PROMPTER="pointsonly"
 RUN_NUMS=("-aggregated") #("1") #"2" "3")
 INFER_INFO='{"init": "Interactive Init", "edit": 100}'
 # SPLIT_NAME="holdoutset"
-SPLIT_NAME="designset"
+# SPLIT_NAME="designset"
+SPLIT_NAME=$MASTER_SPLIT
 REFERENCE_FILE="cross_class_scores.csv"
 
 for index in ${!DATASET_NAMES[@]}; do
   DATASET_NAME=${DATASET_NAMES[$index]};
   DATASET_ID=${DATASET_IDS[$index]};
   for APP in "${APPS[@]}"; do
+    echo "=============================================="
     echo "Processing application: $APP"
+    echo "=============================================="
     for RUN_NUM in "${RUN_NUMS[@]}"; do
       if [ "$RUN_NUM" == "-aggregated" ]; then
         ALGORITHM_RESULTS_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/Results_Summary/$SPLIT_NAME";
@@ -32,7 +48,7 @@ for index in ${!DATASET_NAMES[@]}; do
       echo ALGORITHM_RESULTS_ROOT: "$ALGORITHM_RESULTS_ROOT";
       echo OUTPUT_RESULT_ROOT: "$OUTPUT_RESULT_ROOT";
       echo filename: "$REFERENCE_FILE";
-      python3 "standard_metric_summarisation.py" \
+      python3 $SCRIPT_DIR/"standard_metric_summarisation.py" \
           --algorithm_results_root="$ALGORITHM_RESULTS_ROOT" \
           --output_folder_root="$OUTPUT_RESULT_ROOT" \
           --filename="$REFERENCE_FILE" \

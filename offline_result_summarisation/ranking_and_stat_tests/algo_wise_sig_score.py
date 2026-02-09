@@ -14,7 +14,8 @@ import re
 import pandas as pd
 import numpy as np
 from typing import Dict, List, Any
-from scipy.stats import wilcoxon, fisher_exact
+from scipy.stats import wilcoxon
+from statsmodels.stats.contingency_tables import mcnemar
 import argparse
 import json
 RESULT_SEARCHSTRING = {
@@ -59,7 +60,7 @@ METRIC_TO_TEST = {
     'Dice_AUC': 'wilcoxon',
     'NSD_AUC': 'wilcoxon',
     'NOI': 'wilcoxon',
-    'NoF': 'fisher_exact', #Not a continuous metric, so we use a different test.
+    'NoF': 'mcnemar', #McNemar's test for paired binary data.
 }
 
 MEASURE_OF_BETTERNESS = {
@@ -118,10 +119,25 @@ def compute_algo_wise_significance_score(output_path, df, apps, metric):
             if test_type == 'wilcoxon':
                 # Perform Wilcoxon signed-rank test
                 stat, p_value = wilcoxon(values1, values2)
-            elif test_type == 'fisher_exact':
-                #We have a contingency table, or at least columns of bools already.
-                contingency_table = pd.crosstab([values1], [values2], rownames=[f'{app1}'], colnames=[f'{app2}'], dropna=False)
-                _, p_value = fisher_exact(contingency_table)
+            elif test_type == 'mcnemar':
+                # McNemar's test for paired binary data
+                # Tests whether marginal distributions of failures differ
+                both_fail = ((values1 == True) & (values2 == True)).sum()
+                both_pass = ((values1 == False) & (values2 == False)).sum()
+                only_v1_fails = ((values1 == True) & (values2 == False)).sum()
+                only_v2_fails = ((values1 == False) & (values2 == True)).sum()
+                
+                # Create contingency table for McNemar's test
+                # Rows = algorithm 1, Columns = algorithm 2
+                contingency_table = np.array([[both_pass, only_v2_fails],
+                                              [only_v1_fails, both_fail]])
+                
+                print(f"McNemar's test for {app1} vs {app2} on metric {metric}:")
+                print(f"Both pass: {both_pass}, Both fail: {both_fail}")
+                print(f"Only {app1} fails: {only_v1_fails}, Only {app2} fails: {only_v2_fails}")
+                
+                result = mcnemar(contingency_table, exact=True)
+                p_value = result.pvalue
             else:
                 raise NotImplementedError(f"Test type {test_type} not implemented.")
 
@@ -165,18 +181,21 @@ def compute_algo_wise_better_name(output_path, df, apps, metric):
                 if values1.mean() == values2.mean():
                     better = None
                 else:
-                    better = values1.mean() >= values2.mean()
+                    better = values1.mean() > values2.mean()
             elif measure == 'mean_lower':
                 if values1.mean() == values2.mean():
                     better = None
                 else:
-                    better = values1.mean() <= values2.mean()
+                    better = values1.mean() < values2.mean() #We need to use strict inequality here to 
+                    #avoid ties falling into here...
             elif measure == 'raw_count_lower': #We count it as better if the number of bools that are True is lower.
                 if values1.sum() == values2.sum():
                     better = None
+                    if 'Dataset005_Prostate' in output_path:
+                        print(values1.sum(), values2.sum())
                 else:
                     if metric == 'NoF':
-                        better = (values1).sum() <= (values2).sum() 
+                        better = (values1).sum() < (values2).sum() 
                     else:
                         raise NotImplementedError(f"Betterment measure {measure} not implemented for metric {metric}.")
             else:
@@ -284,9 +303,9 @@ def gather_metrics_from_folder(folder_path: str, metrics_config: Dict[str, List[
 def parse_args():
 
     parser = argparse.ArgumentParser(description="Generate summary table (Excel + LaTeX) from algorithm result folders.")
+    parser.add_argument("--dataset_names", nargs="+", required=True, help="Names of datasets to compare.")
     parser.add_argument("--algorithm_names", nargs="+", required=True, help="Names of algorithms to compare.")
     parser.add_argument("--metrics_root", type=str, required=True, help="Root path to the folder which contains the metrics across all the algorithms.")
-    
     #We explicitly pass algorithm names to avoid relying on folder names.
     parser.add_argument("--experiment_subpath", nargs="+", required=True, help="Subpath under each algorithm folder where metrics are stored.")
     #NOTE: The subpath is assumed to be the same for all algorithms! 
@@ -311,7 +330,7 @@ if __name__ == "__main__":
     # ]
 
     # args.algorithm_names = ["nnintv1", "sammed3dv1", "segvolv1", "sammed2dv1", "sam2v1"] #["nnintv1", "adadesign1"]
-    # args.algorithm_names = ["nnintv1", "adadesign1"]
+    # args.algorithm_names = ["nnintv1", "adadesign1", "adadesign2"]
     # args.metrics_root="/home/parhomesmaeili/IS-Validation-Framework/Results_Summary/holdoutset" #designset"
     # args.metrics_root="/home/parhomesmaeili/IS-Validation-Framework/Results_Summary/designset"
     # args.output_root="/home/parhomesmaeili/IS-Validation-Framework/Results_StatSig/holdoutset" #designset"
@@ -347,7 +366,7 @@ if __name__ == "__main__":
     #     }
     # }
     # experiment_subpaths = []
-    # for d_name in dataset_names:
+    # for d_name in args.dataset_names:
     #     experiment_subpaths.append(f"{d_name}/pointsonly/run-aggregated")
     # args.experiment_subpath = experiment_subpaths
 
@@ -357,6 +376,9 @@ if __name__ == "__main__":
     for experiment_subpath in args.experiment_subpath:
         folders = {alg_name: os.path.join(args.metrics_root, alg_name, experiment_subpath) for alg_name in args.algorithm_names}
         if os.name == 'posix':
+            print('==============================')
+            print(f"Processing experiment subpath for algo wise sig scoring: {experiment_subpath}")
+            print('==============================')
             dataset_wise_dfs[experiment_subpath.split('/')[0]] = build_per_metric_dfs(folders, experiment_subpath.split('/')[0], cfg)
         else:
             raise NotImplementedError("Windows OS is not currently supported for table generation.")

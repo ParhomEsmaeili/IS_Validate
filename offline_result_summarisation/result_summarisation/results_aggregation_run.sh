@@ -1,11 +1,23 @@
 #!/usr/bin/env bash
 
+SCRIPT_DIR="$( cd "$(dirname "${BASH_SOURCE[0]}")" && pwd )"
 # Set your arguments here
 DATASET_NAMES=("Dataset001_BrainTumour" "Dataset003_Liver" "Dataset004_Hippocampus" "Dataset005_Prostate" "Dataset006_Lung" "Dataset007_Pancreas" "Dataset008_HepaticVessel" "Dataset010_Colon")
 DATASET_IDS=("001" "003" "004" "005" "006" "007" "008" "010") 
-APPS=("nnintv1" "adadesign1")
+# APPS=("nnintv1" "adadesign1" "adadesign2")
 # APPS=("nnintv1" "sammed3dv1" "segvolv1" "sammed2dv1" "sam2v1")
-SPLIT_NAME="designset"
+
+echo "=============================================="
+echo "Running Algorithm-wise Result Aggregation"
+APPS=("${MASTER_APPS[@]}")
+SPLIT_NAME=$MASTER_SPLIT
+echo "Configuration:"
+echo "  Split: $SPLIT_NAME"
+echo "  Apps: ${APPS[@]}"
+echo "  Datasets: ${DATASET_NAMES[@]}"
+echo "=============================================="
+
+# SPLIT_NAME="designset"
 # SPLIT_NAME="holdoutset"
 PROMPTER="pointsonly"
 RUN_NUMS=("1" "2" "3")
@@ -19,7 +31,9 @@ for index in ${!DATASET_NAMES[@]}; do
   ALGORITHM_RESULTS_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/Results/$SPLIT_NAME/$DATASET_NAME"
   for METRIC in "${METRICS[@]}"; do
     for APP in "${APPS[@]}"; do
+      echo "=============================================="
       echo "Processing application: $APP"
+      echo "=============================================="
       EXPERIMENT_BASENAME="$APP-dataset${DATASET_ID}-$PROMPTER-run";
       ALGORITHM_RESULTS_ROOTS=();
       for RUN_NUM in "${RUN_NUMS[@]}"; do
@@ -41,7 +55,7 @@ for index in ${!DATASET_NAMES[@]}; do
         OUTPUT_SUBPATH="$APP/$DATASET_NAME/$PROMPTER/run-aggregated"
         OUTPUT_RESULT_ROOT="/home/parhomesmaeili/IS-Validation-Framework/Results_Summary/$SPLIT_NAME/$OUTPUT_SUBPATH";
 
-        python3 "result_aggregation.py" \
+        python3 $SCRIPT_DIR/"result_aggregation.py" \
             --algorithm_result_roots "${ALGORITHM_RESULTS_ROOTS[@]}" \
             --output_result_root="$OUTPUT_RESULT_ROOT" \
             --metric="$METRIC" \

@@ -25,9 +25,14 @@ MAPPING_SUBCATEGORIES = {
 TABLE_MAP = {
     'Dice_median': '',
     'NSD_median': '',
+    'Dice_mean': '',
+    'NSD_mean': '',
     'Dice_auc_median': 'nAUC',
     'NSD_auc_median': 'nAUC',
+    'Dice_auc_mean': 'nAUC',
+    'NSD_auc_mean': 'nAUC',
     'Normalised_Median_NOI': 'nNoI',
+    'Normalised_Mean_NOI': 'nNoI',
     'Interactive Edit Iter': 'Iter.',
     'Failure_Cases_Fraction': 'NoF'
 }
@@ -348,16 +353,31 @@ def build_table(
         rows.append(row)
     df = pd.DataFrame(rows, columns=full_cols)
     
-    # Round numeric columns to 3 decimal places
-    if 'Failure_Cases_Fraction' in df.columns.get_level_values(1):
-        #We need to convert this to a fraction.
-        df[('NoI', 'Failure_Cases_Fraction')] = df[('NoI', 'Failure_Cases_Fraction')].to_numpy() / 100
+    #We filter out the bold cells where the column tuple has another match with another cell. this means they were
+    #tied for first place, so we should bold neither.
+    for col in set([col for _, col in bold_cells]):
+        tied_cells = [cell for cell in bold_cells if cell[1] == col]
+        if len(tied_cells) > 1:
+            for cell in tied_cells:
+                bold_cells.remove(cell)
 
+    # Round numeric columns to 3 decimal places
     numeric_cols = df.select_dtypes(include=['float64', 'int64']).columns
     df[numeric_cols] = df[numeric_cols].round(3)
 
-    # After creating df and rounding
-    df = df.astype(str)
+    # Convert NOI columns to percentage for readability
+    noi_cols = [col for col in df.columns if 'NOI' in col[1]]
+    for col in noi_cols:
+        df[col] = pd.to_numeric(df[col], errors='coerce') * 100
+
+    # Format numeric columns: 3 decimal places for Dice/NSD, 3 sig figs for NOI
+    for col in df.columns:
+        if col[0] in ['Dice', 'NSD']:
+            df[col] = df[col].apply(lambda x: f"{float(x):.3f}" if pd.notna(x) and str(x) != '' else str(x))
+        elif col[0] == 'NoI':
+            df[col] = df[col].apply(lambda x: f"{float(x):.3g}" if pd.notna(x) and str(x) != '' else str(x))
+
+    # Apply bold formatting to best-performing cells
     for row_idx, col_tuple in bold_cells:
         col_pos = df.columns.get_loc(col_tuple)
         df.iloc[row_idx, col_pos] = f"**{df.iloc[row_idx, col_pos]}**"

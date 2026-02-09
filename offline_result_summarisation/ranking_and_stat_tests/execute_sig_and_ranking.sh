@@ -1,11 +1,14 @@
 #!/bin/bash
 
+SCRIPT_DIR="$( cd "$(dirname "${BASH_SOURCE[0]}")" && pwd )"
 # Set your arguments here
 DATASET_NAMES=("Dataset001_BrainTumour" "Dataset003_Liver" "Dataset004_Hippocampus" "Dataset005_Prostate" "Dataset006_Lung" "Dataset007_Pancreas" "Dataset008_HepaticVessel" "Dataset010_Colon")
-APPS=("nnintv1" "adadesign1")
+APPS=("${MASTER_APPS[@]}")
+# APPS=("nnintv1" "adadesign1")
 # APPS=("nnintv1" "sammed3dv1" "segvolv1" "sammed2dv1" "sam2v1")
-SPLIT_NAME="designset"
+# SPLIT_NAME="designset"
 # SPLIT_NAME="holdoutset"
+SPLIT_NAME=$MASTER_SPLIT
 PROMPTER="pointsonly"
 RUN_NAME="-aggregated" 
 
@@ -44,7 +47,8 @@ echo "  Output Root: $STATS_SIG_OUTPUT_ROOT"
 echo "=============================================="
 
 # Run significance scoring
-python3 algo_wise_sig_score.py \
+python3 $SCRIPT_DIR/algo_wise_sig_score.py \
+    --dataset_names "${DATASET_NAMES[@]}" \
     --metrics_root "$RESULTS_SUMMARY_ROOT" \
     --metrics_config "${SIG_METRICS_CONFIG}" \
     --algorithm_names "${APPS[@]}" \
@@ -71,7 +75,7 @@ echo "  Output Root: $RANKING_OUTPUT_ROOT"
 echo "=============================================="
 
 # Run ranking generation
-python generate_algo_rankings.py \
+python3 $SCRIPT_DIR/generate_algo_rankings.py \
     --ref_root "$STATS_SIG_OUTPUT_ROOT" \
     --metrics "${RANKING_METRICS[@]}" \
     --task_names "${DATASET_NAMES[@]}" \

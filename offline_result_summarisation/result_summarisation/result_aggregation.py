@@ -2,7 +2,6 @@
 This is a script which aggregates standard metrics across multiple runs for a given algorithm and task. 
 '''
 import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
 import os
 import sys

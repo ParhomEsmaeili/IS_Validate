@@ -1,15 +1,25 @@
 #!/bin/bash
 
+SCRIPT_DIR="$( cd "$(dirname "${BASH_SOURCE[0]}")" && pwd )"
+
 # Set your arguments here
 
 #Experiment configuration variables.
 DATASET_NAMES=("Dataset001_BrainTumour" "Dataset003_Liver" "Dataset004_Hippocampus" "Dataset005_Prostate" "Dataset006_Lung" "Dataset007_Pancreas" "Dataset008_HepaticVessel" "Dataset010_Colon")
 DATASET_IDS=("001" "003" "004" "005" "006" "007" "008" "010") 
 # APPS=("sammed3dv1" "segvolv1" "sammed2dv1" "sam2v1" "nnintv1")
-APPS=("nnintv1" "adadesign1")
+# APPS=("nnintv1" "adadesign1")
 PROMPTER="pointsonly"
-# SPLIT_NAME="holdoutset"
-SPLIT_NAME="designset"
+echo "=============================================="
+echo "Running Algorithm-wise Number of Interactions Metrics Extraction"
+APPS=("${MASTER_APPS[@]}")
+SPLIT_NAME=$MASTER_SPLIT
+echo "Configuration:"
+echo "  Split: $SPLIT_NAME"
+echo "  Apps: ${APPS[@]}"
+echo "  Datasets: ${DATASET_NAMES[@]}"
+echo "=============================================="
+
 NNUNET_ROOT_PATH="/home/parhomesmaeili/Helmholtz Group/MICCAI2026_nnunet/nnUNet_Metrics_$SPLIT_NAME"
 # RUN_NUMS=("1" "2" "3")
 RUN_NUMS=("-aggregated")
@@ -26,7 +36,9 @@ for index in ${!DATASET_NAMES[@]}; do
   DATASET_ID=${DATASET_IDS[$index]};
   ALGORITHM_RESULTS_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/Results/$SPLIT_NAME/$DATASET_NAME"
   for APP in "${APPS[@]}"; do
+    echo "=============================================="
     echo "Processing application: $APP"
+    echo "=============================================="
     for RUN_NUM in "${RUN_NUMS[@]}"; do
       if [ "$RUN_NUM" == "-aggregated" ]; then
         ALGORITHM_RESULTS_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/Results_Summary/$SPLIT_NAME";
@@ -40,7 +52,7 @@ for index in ${!DATASET_NAMES[@]}; do
       OUTPUT_RESULT_ROOT="/home/parhomesmaeili/IS-Validation-Framework/Results_Summary/$SPLIT_NAME/$OUTPUT_SUBPATH";
       ALGORITHM_RESULTS_PATH="$ALGORITHM_RESULTS_ROOT_PATH/$EXPERIMENT_NAME/metrics/$REFERENCE_METRIC/$REFERENCE_FILE";
       REFERENCE_RESULT_PATH="$NNUNET_ROOT_PATH/$DATASET_NAME/nnUNet_metrics/$REFERENCE_METRIC/$REFERENCE_FILE";
-      python3 "num_of_interaction.py" \
+      python3 "$SCRIPT_DIR/num_of_interaction.py" \
           --algo_results_path="$ALGORITHM_RESULTS_PATH" \
           --output_result_root="$OUTPUT_RESULT_ROOT" \
           --metric="$REFERENCE_METRIC" \
