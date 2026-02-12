@@ -34,31 +34,38 @@ def set_parse():
     parser = argparse.ArgumentParser()
     
     #Experimental name/job-continuation related args
-    parser.add_argument('--experiment_name', type=str, required=False, default=None)#'debugging_continual_adapt')#None
-    parser.add_argument('--continue_execution', action='store_true', default=False)#True) #False)
+    parser.add_argument('--experiment_name', type=str, required=False, default=None)#debugging_continual_adapt
+    parser.add_argument('--continue_execution', action='store_true', default=True) #False)
     parser.add_argument('--continue_exec_root', type=str, default='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/continue_execution_files') #None
     #Data and application root related args
     
     parser.add_argument('--data_root', type=str, default=codebase_dir)
-    parser.add_argument('--dataset_name', type=str, default='Dataset001_BrainTumour')#'Dataset005_Prostate')
+    parser.add_argument('--dataset_name', type=str, default='Dataset005_Prostate')
     parser.add_argument('--app_root', type=str, default= 
-                        '/home/parhomesmaeili/IS_Codebase_Forks/nnInteractive_Fork')
-                        #'/home/parhomesmaeili/MY METHOD') #NOTE:Just set for debugging purposes.
+                        '/home/parhomesmaeili/MY METHOD') #NOTE:Just set for debugging purposes.
 
     #This acts as the name of the app, but also temporarily acts as the relative path name within the input_applications folder in the app root folder.
-    parser.add_argument('--app_name', type=str, default='nnInteractive_App') #'AdaptiveIS')
+    parser.add_argument('--app_name', type=str, default='AdaptiveIS')
     parser.add_argument('--metrics_root', type=str, default=os.path.join(codebase_dir, 'results'))
     parser.add_argument('--seg_root', type=str, default=os.path.join(codebase_dir, 'results'))
 
     #Experimental process/method related args
-    parser.add_argument('--adaptation_config_name', type=str, default=None)#'adapt_prototype_1') #None
-    parser.add_argument('--enable_adaptation', action='store_true', default=False)# True)#False)
-    parser.add_argument('--provide_gold_standard_after_inference', action='store_true', default=False)#True)#False)
+    parser.add_argument('--adaptation_config_name', type=str, default=None)
+    parser.add_argument('--enable_adaptation', action='store_true', default=False)
+    parser.add_argument('--execute_on_adapted', action='store_true', default=False)
+    parser.add_argument('--adaptation_episode', type=int, default=None)#0) #Episode number to pull checkpoint for inference
+    #ONLY INTENDED when execute_on_adapted is enabled.
+    parser.add_argument('--algo_cache_name', type=str, default=None) #'r3qsE9ieGDtlAWB_')
+    parser.add_argument('--reference_experiment_checkpoint', type=str, default=None)#'adadesign2-dataset005-pointsonly-run1.pkl') #This is a 
+    #string which denotes the reference name/run which we will be pulling episodes from.
+
+    #This is a bool which controls whether we execute on a pre-adapted method.
+    parser.add_argument('--provide_gold_standard_after_inference', action='store_true', default=False)
     #Adaptation requires the capability to enable the algorithm to adapt, and so requires some knowledge of the 
     #annotation. This boolean controls whether adaptation is enabled or not. This also requires some extra handling for
     #continuing execution, as checkpoints will need to be restored. In addition to other information, e.g. position in the
     #data stream etc. 
-    parser.add_argument('--shuffle_cases', action='store_true', default=False) #True)
+    parser.add_argument('--shuffle_cases', action='store_true', default=False)
     parser.add_argument('--random_seed', type=int, default=341103)
     parser.add_argument('--cuda_deterministic_disable', action='store_true', default=False)
     parser.add_argument('--torch_deterministic_disable', action='store_true', default=False)
@@ -156,10 +163,13 @@ def gen_experiment_args(args):
             raise Exception('If not continuing an experiment execution, cannot provide an experiment name, \n'
             'this is redundant.')
     if args.enable_adaptation:
+        assert not args.execute_on_adapted, 'If adaptation is enabled, then executing on pre-trained adapted should not be enabled, please check your input arguments.'
         if not args.continue_execution:
             raise ValueError('Adaptation almost certainly requires the capability to continue execution, please enable \n'
             'the continue execution boolean flag to proceed for reassurance.')
         else:
+            assert args.algo_cache_name is None, 'If adaptation is enabled, must not provide the algorithm cache name as an input argument, please check your input arguments. The algorithm cache name needs to be extracted from the adaptation experiment_checkpoint.'
+            assert args.adaptation_config_name is not None, 'If adaptation is enabled, must provide the adaptation config name as an input argument, please check your input arguments.'
             output_dict['adaptation_config_name'] = args.adaptation_config_name
             output_dict['enable_adaptation'] = args.enable_adaptation
             output_dict['provide_gold_standard_after_inference'] = args.provide_gold_standard_after_inference
@@ -170,6 +180,23 @@ def gen_experiment_args(args):
         assert args.provide_gold_standard_after_inference == False, 'If adaptation is disabled, cannot provide gold standard after inference, please set this flag or check your input arguments.'
         output_dict['provide_gold_standard_after_inference'] = False #Irrelevant if adaptation is disabled.
 
+    output_dict['execute_on_adapted'] = args.execute_on_adapted
+    if output_dict['execute_on_adapted']:
+        if args.enable_adaptation:
+            raise ValueError('If executing on adapted, then adaptation should not be enabled, as we are executing on a pre-adapted method, please check your input arguments.')
+        else:
+            output_dict['enable_adaptation'] = args.enable_adaptation
+            assert args.adaptation_episode is not None, 'If executing on adapted, must provide an adaptation episode number to pull the checkpoint from, please check your input arguments.'
+            output_dict['adaptation_episode'] = args.adaptation_episode
+            assert args.algo_cache_name is not None, 'If executing on adapted, must provide the algorithm cache name to pull the checkpoint from, please check your input arguments.'
+            output_dict['algo_cache_name'] = args.algo_cache_name
+            assert args.reference_experiment_checkpoint is not None, 'If executing on adapted, must provide the reference experiment checkpoint name to pull info from, please check your input arguments.'
+            output_dict['reference_experiment_checkpoint'] = os.path.join(args.continue_exec_root, args.reference_experiment_checkpoint)
+    else:
+        assert args.adaptation_episode is None, 'If not executing on adapted, cannot provide an adaptation episode number, please check your input arguments.'
+        output_dict['adaptation_episode'] = None
+        assert args.reference_experiment_checkpoint is None, 'If not executing on adapted, cannot provide a reference experiment checkpoint, please check your input arguments.'
+        output_dict['reference_experiment_checkpoint'] = None
     output_dict['continue_execution'] = args.continue_execution #Storing this boolean.
     output_dict['exp_results_dir'] = os.path.join(output_dict['results_dataset_subdir'], output_dict['experiment_name'])
     output_dict['exp_seg_dir'] = os.path.join(output_dict['seg_dataset_subdir'], output_dict['experiment_name'])
@@ -375,7 +402,15 @@ def generate_base64_filename(length=12):
     return encoded.rstrip('=')  # Remove padding
 
 
-def build_infer_app(build_app_path, device, adaptation_config_name, algorithm_state: dict, enable_adaptation: bool, algo_cache_name:str):
+def build_infer_app(
+    build_app_path, 
+    device, 
+    adaptation_config_name,
+    algorithm_state: dict, 
+    enable_adaptation: bool,
+    execute_on_adapted: bool,
+    adaptation_episode: int | None, 
+    algo_cache_name:str):
 
     build_app_dir = os.path.join(build_app_path, 'build_app')
     # print(build_app_dir)
@@ -401,9 +436,9 @@ def build_infer_app(build_app_path, device, adaptation_config_name, algorithm_st
         spec.loader.exec_module(foo)
         InferApp = foo.InferApp
 
-    return InferApp(device, adaptation_config_name, algorithm_state, enable_adaptation, algo_cache_name)
+    return InferApp(device, adaptation_config_name, algorithm_state, enable_adaptation, execute_on_adapted, adaptation_episode, algo_cache_name)
 
-def init_infer_app(experiment_args:dict, loaded_experiment_checkpoint: Optional[dict] = None): 
+def init_infer_app(experiment_args:dict, loaded_experiment_checkpoint: Optional[dict] = None, reference_experiment_checkpoint: Optional[dict] = None): 
 
     #Function which finds and initialises the inference app using the build script, then checks it has the necessary methods. 
     
@@ -419,11 +454,31 @@ def init_infer_app(experiment_args:dict, loaded_experiment_checkpoint: Optional[
     if not enable_adaptation:
 
         assert experiment_args.get('adaptation_config_name') == None, 'If adaptation is disabled, cannot provide adaptation config name, please check your input arguments.'
-        #if not adapting then algorithm state is non-existent.
-        algorithm_state = {}
-        # ('If adaptation is not enabled, then the algorithm state in the loaded experiment checkpoint \n'    
-        # 'must be an empty dict (if auto-continue enabled). Please check your input arguments.')
-        algo_cache_name = None #cache name irrelevant if not adapting.
+        if experiment_args.get('execute_on_adapted') == None:
+            raise Exception('The execute_on_adapted argument must be provided as a boolean in the experiment args, please check your input arguments.')
+        
+        if experiment_args.get('execute_on_adapted'):
+            if reference_experiment_checkpoint == None:
+                raise ValueError('We need a loaded experiment_checkpoint for loading adapted info')
+            else:
+                algorithm_state = reference_experiment_checkpoint['algorithm_state']
+
+            if experiment_args.get('algo_cache_name', None) == None:
+                raise ValueError('If exec on adapt is enabled, must provide a valid '
+                    'algo_cache_name in the experiment args \n'
+                    'to proceed.')
+            else:
+                algo_cache_name = experiment_args['algo_cache_name']
+            #sanity check!
+            assert algo_cache_name == algorithm_state['meta_algorithm_state']['algo_cache_name']
+            #
+
+        else:
+            #if not adapting then algorithm state is non-existent.
+            algorithm_state = {}
+            # ('If adaptation is not enabled, then the algorithm state in the loaded experiment checkpoint \n'    
+            # 'must be an empty dict (if auto-continue enabled). Please check your input arguments.')
+            algo_cache_name = None #cache name irrelevant if not adapting.
     else:
         #Another safety check
         if not experiment_args['continue_execution']:
@@ -460,6 +515,8 @@ def init_infer_app(experiment_args:dict, loaded_experiment_checkpoint: Optional[
         adaptation_config_name=experiment_args.get('adaptation_config_name', None),
         algorithm_state=algorithm_state, 
         enable_adaptation=enable_adaptation,
+        execute_on_adapted=experiment_args.get('execute_on_adapted', False),
+        adaptation_episode=experiment_args.get('adaptation_episode', None),
         algo_cache_name=algo_cache_name)
     
     if not callable(infer_app):
@@ -750,14 +807,22 @@ def main():
     os.makedirs(experiment_args['seg_dataset_subdir'], exist_ok=True)
 
     ############################## Loading a pickle file if continuing an experiment execution ##############################################################
-    
+    #Here we load the reference checkpoint for executing inference on an adapted model.
+    reference_experiment_checkpoint = None
+    if experiment_args['execute_on_adapted']:
+        if not os.path.exists(experiment_args['reference_experiment_checkpoint']): 
+            raise ValueError(f'The provided reference experiment checkpoint path {experiment_args["reference_experiment_checkpoint"]} does not exist, please check your input arguments.')
+        else:
+            with open(experiment_args['reference_experiment_checkpoint'], 'rb') as f:
+                reference_experiment_checkpoint = pickle.load(f) #Here we load the checkpoint for continuing an experiment execution, 
+            
     loaded_experiment_checkpoint = None 
     if experiment_args['continue_execution']:
         if os.path.exists(experiment_args['continue_exec_path']):
             with open(experiment_args['continue_exec_path'], 'rb') as f:
                 loaded_experiment_checkpoint = pickle.load(f)
         #Only update the checkpoint variables if the file existed and was loaded.
-
+    
     #Checking that the random seed is the same if continuing an experiment execution.
     if loaded_experiment_checkpoint != None:
         if loaded_experiment_checkpoint["eval_state"]['random_seed'] != experiment_args['random_seed']:
@@ -865,9 +930,9 @@ def main():
     #Now we move onto building the app
     if loaded_experiment_checkpoint != None:
         #In this case we have a prior experiment checkpoint. 
-        infer_app = init_infer_app(experiment_args, loaded_experiment_checkpoint=loaded_experiment_checkpoint)
+        infer_app = init_infer_app(experiment_args, loaded_experiment_checkpoint=loaded_experiment_checkpoint, reference_experiment_checkpoint=reference_experiment_checkpoint)
     else:
-        infer_app = init_infer_app(experiment_args, loaded_experiment_checkpoint=None)
+        infer_app = init_infer_app(experiment_args, loaded_experiment_checkpoint=None, reference_experiment_checkpoint=reference_experiment_checkpoint)
     #Extract the app configs using the required method. 
     app_config_dict = infer_app.app_configs()
 
