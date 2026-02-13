@@ -371,6 +371,8 @@ def create_case_list(
 
     #PLEASE FORGIVE ME FOR THIS MESSY ENTANGLED RECURSIVE CODE. 
     case_list = []
+    im_keys = None #We put this here in case case_list = [] and we never enter the for loop, but we still want to return something to avoid breaking.
+    annotation_keys = None #We put this here in case case_list = [] and we never enter the for loop, but we still want to return something to avoid breaking.
     for case_name, full_case_dict in default_case_dict.items():
         subdict = {'case_name':case_name}
         #Monai dataset constructor requires the use of lists, so we must put the case name as a field in the structure.
@@ -461,6 +463,16 @@ def dataloader_generator(case_list:list, image_keys:list, label_keys:list, trans
     '''
     This function handles the construction of a dataset object for iterating through.
     '''
+    if case_list == []:
+        assert image_keys == None, 'If case_list is empty, then image_keys must be None.'
+        assert label_keys == None, 'If case_list is empty, then label_keys must be None.'
+        #We set them to dummy variables/None for the sake of the dataloader construction, but they should not be used in any of the downstream transforms, and we will put checks in place to ensure that this is the case.
+        image_keys = ['dummy_image_key']
+        label_keys = ['dummy_label_key']
+    else:
+        assert image_keys != None, 'If case_list is not empty, then image_keys must not be None.'
+        assert label_keys != None, 'If case_list is not empty, then label_keys must not be None.'
+        
     #Just the basic load transforms in order to load the files in for our custom transforms.
     if monai_version == '1.4.0':
         load_transforms = [
