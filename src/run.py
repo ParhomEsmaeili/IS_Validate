@@ -985,16 +985,18 @@ def main():
                 "algorithm_state": { }
             }
 
-
-    run_instances(
-        dataloader=dataloader, 
-        fe_sim_obj=fe_sim_obj, 
-        logger=exp_setup_logger, 
-        loaded_experiment_checkpoint=loaded_experiment_checkpoint,
-        experiment_checkpoint_path=experiment_args['continue_exec_path'] if experiment_args['continue_execution'] else None,
-        enable_adaptation=experiment_args['enable_adaptation'],
-        resume_bool=experiment_args['resume_bool']
-        )
+    if len(dataloader) == 0:
+        exp_setup_logger.info('No samples to iterate through in the dataloader, finishing execution.')
+    else:
+        run_instances(
+            dataloader=dataloader, 
+            fe_sim_obj=fe_sim_obj, 
+            logger=exp_setup_logger, 
+            loaded_experiment_checkpoint=loaded_experiment_checkpoint,
+            experiment_checkpoint_path=experiment_args['continue_exec_path'] if experiment_args['continue_execution'] else None,
+            enable_adaptation=experiment_args['enable_adaptation'],
+            resume_bool=experiment_args['resume_bool']
+            )
 
 if __name__=='__main__':
     main()
