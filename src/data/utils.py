@@ -472,7 +472,7 @@ def dataloader_generator(case_list:list, image_keys:list, label_keys:list, trans
     else:
         assert image_keys != None, 'If case_list is not empty, then image_keys must not be None.'
         assert label_keys != None, 'If case_list is not empty, then label_keys must not be None.'
-        
+
     #Just the basic load transforms in order to load the files in for our custom transforms.
     if monai_version == '1.4.0':
         load_transforms = [
@@ -491,32 +491,39 @@ def dataloader_generator(case_list:list, image_keys:list, label_keys:list, trans
     else:
         raise Exception('Unknown monai version.')
     
-    
-    #The basic transforms required for all tasks (at least with our current implementation: im_channel merging and sem. seg merging)
-    basic_transforms = [
-        #Hardcoding in some of these variables for now.
-        MergeImChannels(keys=image_keys, channel_list=transforms_configs['image_struct_mapping']['image_channel'] , output_key='image'),
-        MergeSegmentations(
-            keys=label_keys, 
-            sem_mapping=transforms_configs['semantic_class_mapping'], 
-            output_sem_code=transforms_configs['config_labels_dict'], 
-            output_key='label'),
-    ]
+    if case_list == []:
+        #Then we will ignore the remaining transforms as they require some specific checks which are
+        #more annoying to implement for the dummy variables than they are worth, given that the dataset is empty and they won't actually be used for anything.
+        basic_transforms = []
+    else:
+        #The basic transforms required for all tasks (at least with our current implementation: im_channel merging and sem. seg merging)
+        basic_transforms = [
+            #Hardcoding in some of these variables for now.
+            MergeImChannels(keys=image_keys, channel_list=transforms_configs['image_struct_mapping']['image_channel'] , output_key='image'),
+            MergeSegmentations(
+                keys=label_keys, 
+                sem_mapping=transforms_configs['semantic_class_mapping'], 
+                output_sem_code=transforms_configs['config_labels_dict'], 
+                output_key='label'),
+        ]
 
-    #Hardcoding in the misc transforms for now.. TODO: Add abstraction here!!
-    if transforms_configs['non_standard_transfs']:
-        if transforms_configs['non_standard_transfs'] == {'component_extraction':'cc_largest'}:
-            additional_transforms = [
-                KeepTopCC(
-                    keys=['label'], 
-                    operated_classes=[k for k in transforms_configs['config_labels_dict'] if k.capitalize() != 'Background'],
-                    class_code_map=transforms_configs['config_labels_dict'], 
-                    component_descriptor='cc_largest',
-                    connectivity=3
-                    )
-            ]
+    if case_list == []:
+        #Hardcoding in the misc transforms for now.. TODO: Add abstraction here!!
+        if transforms_configs['non_standard_transfs']:
+            if transforms_configs['non_standard_transfs'] == {'component_extraction':'cc_largest'}:
+                additional_transforms = [
+                    KeepTopCC(
+                        keys=['label'], 
+                        operated_classes=[k for k in transforms_configs['config_labels_dict'] if k.capitalize() != 'Background'],
+                        class_code_map=transforms_configs['config_labels_dict'], 
+                        component_descriptor='cc_largest',
+                        connectivity=3
+                        )
+                ]
+            else:
+                raise Exception('There is a non-standard transform that is not supported. Only cc_largest is currently supported.')
         else:
-            raise Exception('There is a non-standard transform that is not supported. Only cc_largest is currently supported.')
+            additional_transforms = []
     else:
         additional_transforms = []
     all_transforms = load_transforms + basic_transforms + additional_transforms 
