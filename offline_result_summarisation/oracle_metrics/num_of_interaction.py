@@ -43,7 +43,10 @@ def plot_fitted_distributions(data, fit_params, metric, fit_type, threshold, lin
     plt.tight_layout()
     plt.savefig(os.path.join(output_folder, f'fitted_oracle_distributions_{metric}_{fit_type}_{line_name}.png'))
     plt.close()
-
+TRANSLATE_NNUNET_STATISTIC_TO_PSEUDOTIME_NAME = {
+    'quantile': {"0.25":"LQ", "0.5":"Median", "0.75":"UQ"},
+    'gaussian': {"0":"Mean"},
+}
 
 if __name__ == "__main__":
     import argparse
@@ -121,7 +124,7 @@ if __name__ == "__main__":
 
             #We calculate the threshold for the nnUNet metric based on the specified statistic and standard deviation bound.
             if fit == 'gaussian':
-                raise NotImplementedError(f'Re-evaluating how to select a threshold with {fit} fitting.')
+                # raise NotImplementedError(f'Re-evaluating how to select a threshold with {fit} fitting.')
                 # Fit a Gaussian distribution to the nnUNet metric values
                 mu, sigma = norm.fit(nnunet_df['Automatic Init'])
                 mean = mu
@@ -130,6 +133,7 @@ if __name__ == "__main__":
                 # mean = nnunet_df['Automatic Init'].mean()
                 # std = nnunet_df['Automatic Init'].std()
                 threshold = mean - float(args.nnunet_bound[statistic_id]) * std
+                line_name=f"Mean - {args.nnunet_bound[statistic_id]}*std"
 
             elif fit == 'student':
                 raise NotImplementedError(f'Re-evaluating how to select a threshold with {fit} fitting.')
@@ -180,7 +184,7 @@ if __name__ == "__main__":
             #Just plotting the fitted distributions for sanity check.
             fit_params = {}
             if fit == 'gaussian':
-                raise NotImplementedError(f'Re-evaluating how to select a threshold with {fit} fitting.')
+                # raise NotImplementedError(f'Re-evaluating how to select a threshold with {fit} fitting.')
                 fit_params['gaussian'] = (mean, std)
             elif fit == 'student':
                 raise NotImplementedError(f'Re-evaluating how to select a threshold with {fit} fitting.')
@@ -245,8 +249,10 @@ if __name__ == "__main__":
             #NOTE: The failure cases are to keep track of cases that did not manage to exceed the nnUNet metric.
 
         # noi_per_statistic[fit] = num_interactions_dict
-        noi_per_statistic[f'{fit}_{line_name}'] = num_interactions_dict
-
+        name = TRANSLATE_NNUNET_STATISTIC_TO_PSEUDOTIME_NAME.get(fit, {}).get(args.nnunet_bound[statistic_id], f"{fit}_{args.nnunet_bound[statistic_id]}")
+        print(f'Name: {name}')
+        noi_per_statistic[f'{name}'] = num_interactions_dict
+        # noi_per_statistic[f'{fit}_{args.nnunet_bound[statistic_id]}'] = num_interactions_dict
     # Build a DataFrame for all cases, showing NOIs and failures for each threshold and metric
     all_cases = set()
     # print(noi_per_statistic)
@@ -322,6 +328,7 @@ if __name__ == "__main__":
             row = {
                 'Threshold_Name': threshold_name,
                 'Metric': metric,
+                'Mean_NOI': summarised_noi[threshold_name][metric]['mean_noi'],
                 'Median_NOI': summarised_noi[threshold_name][metric]['median_noi'],
                 'Normalised_Median_NOI': summarised_noi[threshold_name][metric]['normalised_median_noi'],
                 'Normalised_Mean_NOI': summarised_noi[threshold_name][metric]['normalised_mean_noi'],

@@ -204,6 +204,9 @@ def gather_metrics_from_folder(folder_path: str, metrics_config: Dict[str, List[
     metric_dict: Dict[str, Any] = {}
     for metric_file, metric_info in metrics_config.items():
         #First read the file.
+        # print(folder_path)
+        # print(metric_file)
+        # print(metric_info)
         table = pd.read_csv(os.path.join(folder_path,metric_file))
 
         for metric_name, extraction_info in metric_info.items():
@@ -327,13 +330,13 @@ def build_table(
             rankings_alg = rankings.loc[alg_name]
             # print(rankings_alg)
         row = [task_name, alg_name]
-        for col_idx, col in enumerate(tuples):
+        for col_idx, col in enumerate(tuples):  
             submetric = col[-1]
             metric_value = metrics[submetric] if len(col) > 1 else metrics[col]
             if ranking_root is not None:
                 # Cross-match ranking value for this submetric
                 #Lets find the name of the ranking metric in the rankings table convention.
-                
+                # print(col)         
                 is_iterable = [metric for metric in iterable_metrics if metric in submetric]
                 assert len(is_iterable) <= 1, "Multiple iterable metrics matched, unexpected behaviour."
                 if is_iterable:
@@ -344,7 +347,11 @@ def build_table(
                     #Lets strip the metric component from the submetric.
                     #e.g. Dice_median Init to just Init.
                     copy_submetric = copy.deepcopy(submetric)
+                    # print(is_iterable, parent_metric_type, submetric, copy_submetric)
                     stripped_submetric = copy_submetric.replace(is_iterable[0], '').strip()
+                    #Next we strip the trajectory_AUC component.
+                    if '_trajectory_auc' in stripped_submetric:
+                        stripped_submetric = stripped_submetric.replace('_trajectory_auc', '')
                     ranking_name = parent_metric_type + f' {stripped_submetric}'
                     #lets extract the rank now.
                     
@@ -404,7 +411,12 @@ def build_table(
     for row_idx, col_tuple in bold_cells:
         col_pos = df.columns.get_loc(col_tuple)
         df.iloc[row_idx, col_pos] = f"**{df.iloc[row_idx, col_pos]}**"
-
+    
+    #Now we strip the _traj_auc component from the column names for submetric row for better display.
+    # print(df)
+    df.columns = pd.MultiIndex.from_tuples([
+        (lvl0, lvl1.replace('_trajectory_auc', '')) for lvl0, lvl1 in df.columns
+    ])
     return df
 
 # def write_excel(df: pd.DataFrame, folder_root: str) -> None:

@@ -43,6 +43,11 @@ ALGO_AXIS_OF_COMPLEXITY = {
     "Anatomical Site Variation": [
         'Dataset003_Liver',
         'Dataset010_Colon'
+    ],
+    "Dataset Size Variation": [
+        'Dataset005_Prostate',
+        'Dataset003_Liver',
+        'Dataset007_Pancreas'
     ]
 }
         
@@ -256,6 +261,8 @@ if __name__ == "__main__":
     #     experiment_subpaths.append(f"{d_name}")
     # args.experiment_subpath = experiment_subpaths
 
+    os.makedirs(args.output_root, exist_ok=True)
+    
     dataset_wise_dfs = dict()
     for subpath in args.task_names:
         folder = os.path.join(args.ref_root, subpath)

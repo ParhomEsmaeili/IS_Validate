@@ -186,7 +186,7 @@ class WriteOutput:
         max_workers = min(32, (os.cpu_count() or 1) + 4)
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             path_list = list(executor.map(
-                lambda channel: self.write_itk(channel, current_affine, tmp_dir), #ref_meta_dict["original_affine"], tmp_dir),
+                lambda channel: self.write_itk(channel.astype(np.float32), current_affine, tmp_dir), #ref_meta_dict["original_affine"], tmp_dir),
                 channel_split
             ))
 

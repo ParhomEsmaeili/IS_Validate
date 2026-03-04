@@ -60,7 +60,7 @@ METRIC_TO_TEST = {
     'Dice_AUC': 'wilcoxon',
     'NSD_AUC': 'wilcoxon',
     'NOI': 'wilcoxon',
-    'NoF': 'mcnemar', #McNemar's test for paired binary data.
+    'NoF': 'wilcoxon' #wicloxon is used as we have numeric fractions
 }
 
 def require_env(var):
@@ -139,9 +139,9 @@ def compute_algo_wise_significance_score(output_path, df, apps, metric):
                 contingency_table = np.array([[both_pass, only_v2_fails],
                                               [only_v1_fails, both_fail]])
                 
-                # print(f"McNemar's test for {app1} vs {app2} on metric {metric}:")
-                # print(f"Both pass: {both_pass}, Both fail: {both_fail}")
-                # print(f"Only {app1} fails: {only_v1_fails}, Only {app2} fails: {only_v2_fails}")
+                print(f"McNemar's test for {app1} vs {app2} on metric {metric}:")
+                print(f"Both pass: {both_pass}, Both fail: {both_fail}")
+                print(f"Only {app1} fails: {only_v1_fails}, Only {app2} fails: {only_v2_fails}")
                 
                 result = mcnemar(contingency_table, exact=True)
                 p_value = result.pvalue
