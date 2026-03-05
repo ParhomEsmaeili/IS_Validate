@@ -40,5 +40,215 @@
 				},
 			"component_extraction": "cc_largest"
 			}
-	}
+	},
+	"task_id_3":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_0"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_1"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "colon_cancer_primaries",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"colon_cancer_primaries":["colon cancer primaries"]
+				},
+			"component_extraction": "cc_largest"
+			}
+	},
+	"task_id_4":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_1"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_1"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "colon_cancer_primaries",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"colon_cancer_primaries":["colon cancer primaries"]
+				},
+			"component_extraction": "cc_largest"
+			}
+	},
+	"task_id_5":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_2"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_1"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "colon_cancer_primaries",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"colon_cancer_primaries":["colon cancer primaries"]
+				},
+			"component_extraction": "cc_largest"
+			}
+	},
+	"task_id_6":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_3"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_1"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "colon_cancer_primaries",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"colon_cancer_primaries":["colon cancer primaries"]
+				},
+			"component_extraction": "cc_largest"
+			}
+	},
+	"task_id_7":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_4"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_1"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "colon_cancer_primaries",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"colon_cancer_primaries":["colon cancer primaries"]
+				},
+			"component_extraction": "cc_largest"
+			}
+	},
+	"task_id_8":{
+		"data_sampling":
+		    {
+		        "sample_group_category": ["kfold_5_train", ["fold_1", "fold_2", "fold_3", "fold_4"]],
+		        "image_conf": {
+		            "image_channel": ["CT"]
+		            },	
+		         "annotation_conf": { 
+		         	"annotator": ["annotator_1"],
+		         	"instance_id": ["instance_1"]
+		         	}
+		    },
+		"seg_problem": "colon_cancer_primaries",
+		"data_transforms":
+		    {"semantic_class_mapping":{
+		        "background":["background"],
+		        "colon_cancer_primaries":["colon cancer primaries"]
+		        },
+		    "component_extraction": "cc_largest"
+		    }
+    	},
+    	"task_id_9":{
+		"data_sampling":
+		    {
+		        "sample_group_category": ["kfold_5_train", ["fold_0", "fold_2", "fold_3", "fold_4"]],
+		        "image_conf": {
+		            "image_channel": ["CT"]
+		            },	
+		         "annotation_conf": { 
+		         	"annotator": ["annotator_1"],
+		         	"instance_id": ["instance_1"]
+		         	}
+		    },
+		"seg_problem": "colon_cancer_primaries",
+		"data_transforms":
+		    {"semantic_class_mapping":{
+		        "background":["background"],
+		        "colon_cancer_primaries":["colon cancer primaries"]
+		        },
+		    "component_extraction": "cc_largest"
+		    }
+    	},
+    	"task_id_10":{
+		"data_sampling":
+		    {
+		        "sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_3", "fold_4"]],
+		        "image_conf": {
+		            "image_channel": ["CT"]
+		            },	
+		         "annotation_conf": { 
+		         	"annotator": ["annotator_1"],
+		         	"instance_id": ["instance_1"]
+		         	}
+		    },
+		"seg_problem": "colon_cancer_primaries",
+		"data_transforms":
+		    {"semantic_class_mapping":{
+		        "background":["background"],
+		        "colon_cancer_primaries":["colon cancer primaries"]
+		        },
+		    "component_extraction": "cc_largest"
+		    }
+    	},
+    	"task_id_11":{
+		"data_sampling":
+		    {
+		        "sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_2", "fold_4"]],
+		        "image_conf": {
+		            "image_channel": ["CT"]
+		            },	
+		         "annotation_conf": { 
+		         	"annotator": ["annotator_1"],
+		         	"instance_id": ["instance_1"]
+		         	}
+		    },
+		"seg_problem": "colon_cancer_primaries",
+		"data_transforms":
+		    {"semantic_class_mapping":{
+		        "background":["background"],
+		        "colon_cancer_primaries":["colon cancer primaries"]
+		        },
+		    "component_extraction": "cc_largest"
+		    }
+    	},
+    	"task_id_12":{
+		"data_sampling":
+		    {
+		        "sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_2", "fold_3"]],
+		        "image_conf": {
+		            "image_channel": ["CT"]
+		            },	
+		         "annotation_conf": { 
+		         	"annotator": ["annotator_1"],
+		         	"instance_id": ["instance_1"]
+		         	}
+		    },
+		"seg_problem": "colon_cancer_primaries",
+		"data_transforms":
+		    {"semantic_class_mapping":{
+		        "background":["background"],
+		        "colon_cancer_primaries":["colon cancer primaries"]
+		        },
+		    "component_extraction": "cc_largest"
+		    }
+    	}
 }

@@ -28,8 +28,16 @@
 # )
 
 jobs=(
-  "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset011_BrainTumour' --strategy=all --split=train"
-  "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset011_BrainTumour' --strategy=all --split=test" 
+  "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset001_BrainTumour' --strategy=kfold --split=train --k_folds=5"
+  # "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset002_Heart' --strategy=kfold --split=train --k_folds=5"
+  "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset003_Liver' --strategy=kfold --split=train --k_folds=5"
+  "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset004_Hippocampus' --strategy=kfold --split=train --k_folds=5"
+  "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset005_Prostate' --strategy=kfold --split=train --k_folds=5"
+  "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset006_Lung' --strategy=kfold --split=train --k_folds=5"
+  "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset007_Pancreas' --strategy=kfold --split=train --k_folds=5"
+  "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset008_HepaticVessel' --strategy=kfold --split=train --k_folds=5"
+  # "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset009_Spleen' --strategy=kfold --split=train --k_folds=5"
+  "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset010_Colon' --strategy=kfold --split=train --k_folds=5"
 )
 # Run jobs sequentially
 for job in "${jobs[@]}"; do

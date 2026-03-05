@@ -5,9 +5,7 @@
 #This script is a modification of the original convert_semantic_MSD.py script, and is intended for being able to generate a hold-out test set for designing and
 # testing continually adaptive algorithms. It will also restructure the dataset into the format required for the framework. As opposed to depending on the json file provided with the datasets, it will generate its own json file
 #according to the loaded images which are correspondingly converted into train/val and hold-out test splits. 
-# 
-#NOTE: This script can reduce the statistical power of results on individual datasets as it will reduce the quantity of data available for evaluation, as such
-# a more conservative split is recommended
+
 
 import argparse
 import multiprocessing
@@ -113,7 +111,7 @@ def split_4d_MSD_nifti(filename, output_folder):
 
 def convert_msd_dataset(source_folder: str, overwrite_target_id: Optional[int] = None, 
                         num_processes: int = 1,
-                        methodology_fraction: float = 0.5) -> None:
+                        methodology_fraction: float = 1) -> None:
     if source_folder.endswith('/') or source_folder.endswith('\\'):
         source_folder = source_folder[:-1] 
 
@@ -376,9 +374,9 @@ def convert_msd_dataset(source_folder: str, overwrite_target_id: Optional[int] =
             
         test_samples_dict[case_name] = case_dict 
 
-    
-    # dataset_json["test"] = test_samples_dict 
-
+    if len(test_samples_dict) == 0:
+        assert methodology_fraction == 1.0, "No test samples were extracted, please check the methodology_fraction parameter to ensure that it is not set to a value less than 1.0 by mistake."
+        test_samples_dict = None #We set this to None just to be explicit that there are no test samples, and to avoid any downstream issues with empty dicts.
     standard_dataset_json_gen(
         output_folder=os.path.join(datasets_path, target_dataset_name),
         annotator_dict=annotator_descrip,
@@ -389,7 +387,7 @@ def convert_msd_dataset(source_folder: str, overwrite_target_id: Optional[int] =
         tensorImageSize=dataset_json['tensorImageSize'],
         reference=dataset_json['reference'],
         train_relpaths=training_samples_dict,
-        num_test_cases=len(test_samples_dict),
+        num_test_cases=len(test_samples_dict) if test_samples_dict is not None else 0,
         test_relpaths=test_samples_dict,
         citation='http://medicaldecathlon.com/',
         dataset_name=dataset_json['name'],
@@ -412,5 +410,8 @@ if __name__ == '__main__':
                              'a common sense approach to structuring your datasets...')
     parser.add_argument('-np', type=int, required=False, default=1,
                         help=f'Number of processes used. Default: 1')
+    parser.add_argument('-methodology_fraction', type=float, required=False, default=1.0)
     args = parser.parse_args()
-    convert_msd_dataset(args.d_path, args.overwrite_id, args.np)
+    #we will default to sticking it all in the same split. not really enough data to have a 
+    # separate split for just running the final algorithm with a k-fold eval....
+    convert_msd_dataset(args.d_path, args.overwrite_id, args.np, methodology_fraction=args.methodology_fraction)

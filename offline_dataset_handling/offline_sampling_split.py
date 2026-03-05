@@ -8,24 +8,6 @@ import random
 # annotator in a multi-annotator setting, or the different instances in a multi-instance setting etc. It is only designed
 # to sample cases from a dataset structure defined in a dataset.json file, which is expected to be present in the dataset directory.
 
-# class SingleLineEncoder(json.JSONEncoder):
-#     """
-#     Custom encoder to print all list values (except 'meta') under all sample strategies as single-line arrays.
-#     """
-#     def encode(self, obj):
-#         s = super().encode(obj)
-#         if 'sampling' in obj:
-#             for strat_key, strat_dict in obj['sampling'].items():
-#                 for key, value in strat_dict.items():
-#                     if key != "meta" and isinstance(value, list):
-#                         arr_json = json.dumps(value, ensure_ascii=False)
-#                         s = re.sub(
-#                             rf'("{key}": )\[[\s\S]*?\]',
-#                             r'\1' + arr_json,
-#                             s
-#                         )
-#         return s
-
 def load_dataset_structure(dataset_dir):
     dataset_json_path = os.path.join(dataset_dir, "dataset.json")
     with open(dataset_json_path, 'r') as f:

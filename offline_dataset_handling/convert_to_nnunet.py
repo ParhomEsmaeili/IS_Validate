@@ -11,6 +11,7 @@ import sys
 import numpy as np
 import json
 import warnings
+import copy
 from skimage.measure import label as cc_label
 from utils import (
     load_json, 
@@ -125,7 +126,7 @@ def convert_dataset(
         target_dataset_dir_path:str,
         task_config_path: str,   
         split_name: str,
-        task_id: int,        
+        task_ids: list[int],        
         dataset_name: str,
         # extract_largest_cc: bool = False,         
         num_processes: int = 1) -> None:
@@ -170,7 +171,21 @@ def convert_dataset(
     #Loading the exp task configs so that we can use it to only select the image channels we want.......
     task_configs = load_json(task_config_path)
     channel_codes_our_json = our_dataset_json['channel_names']
-    channel_lbs_our_task = task_configs[f'task_id_{task_id}']['data_sampling']['image_conf']['image_channel']
+    if isinstance(task_ids, list):
+        channel_lbs_our_task = []
+        seg_problem_our_task = []
+        for tid in task_ids:
+            channel_lbs_our_task.append(task_configs[f'task_id_{tid}']['data_sampling']['image_conf']['image_channel'])
+            seg_problem_our_task.append(task_configs[f'task_id_{tid}']['seg_problem'])
+        #Now, we will assert that we have the same labels.
+        if not all(channel_lb == channel_lbs_our_task[0] for channel_lb in channel_lbs_our_task) or not all(seg_problem == seg_problem_our_task[0] for seg_problem in seg_problem_our_task):
+            raise Exception(f"Multiple task ids provided, but they do not have the same image channel labels. Please provide task ids with consistent image channel labels for the conversion process. Got channel labels: {channel_lbs_our_task}")
+        else:
+            channel_lbs_our_task = channel_lbs_our_task[0] #We will just take the first one since we have asserted they are all the same.
+            seg_problem_our_task = seg_problem_our_task[0] #We will just take the first one since we have asserted they are all the same.   
+    else:
+        # channel_lbs_our_task = task_configs[f'task_id_{task_id}']['data_sampling']['image_conf']['image_channel']
+        raise Exception("The argument for task_ids is now expected to be a list of task ids, but a single task id was provided. Please provide a list of task ids with consistent image channel labels for the conversion process. Got a single task id: %s" % task_ids)
 
     if len(channel_lbs_our_task) != 1:
         raise Exception("Current only single channel implementations are being evaluated, hence multiple channels will not yet be supported for consistency.")
@@ -184,35 +199,65 @@ def convert_dataset(
     data_split = os.path.join(our_processed_folder, 'dataset_split.json')
     data_split = load_json(data_split)
     print(data_split.keys())
-    if f'all_{split_name}' not in data_split['sampling'].keys():
-        raise Exception(f"Expected all_{split_name} key in dataset split json for processing, but it was not found. Please check the dataset split json.")
-    list_of_cases = data_split['sampling'][f'all_{split_name}']['all_cases']
-
+    if f'all_{split_name}' in data_split['sampling'].keys():
+        # raise Exception(f"Expected all_{split_name} key in dataset split json for processing, but it was not found. Please check the dataset split json.")
+        list_of_cases = data_split['sampling'][f'all_{split_name}']['all_cases']
+    else:
+        kfold_key = [key for key in data_split['sampling'].keys() if key.startswith(f'kfold') and key.endswith(f'_{split_name}')]
+        #lets take the first one we find.
+        assert len(kfold_key) > 0, f"Expected kfold key for split {split_name} in dataset split json for processing, but it was not found. Please check the dataset split json."
+        split_dict_name = kfold_key[0]
+        list_of_cases = [] 
+        for k, v in data_split['sampling'][split_dict_name].items():
+            if k.startswith('fold'):
+                list_of_cases.extend(v)
+        
     print(f"Checking for any data transforms specified in task config for dataset conversion...")
-    #Setting a default value for extract_largest_cc, hacky fix.
-    extract_largest_cc = False
 
-    for key, transforms in task_configs[f'task_id_{task_id}']['data_transforms'].items():
-        if 'semantic_class_mapping' == key:     
-            class_labels_our_task = task_configs[f'task_id_{task_id}']['data_transforms']['semantic_class_mapping'] 
-            #Extracting the list of foreground and background labels for mapping.
-            output_semantic_class_dict = dict()
-            for class_lb in class_labels_our_task.keys():
-                if class_lb == 'background':
-                    output_semantic_class_dict['background'] = class_labels_our_task[class_lb]
-                    print(f'Background class labels correspond to original class labels of: {output_semantic_class_dict["background"]}.')
+    prev_semantic_class_dict = None
+    prev_extract_largest_cc = None
+
+    if not isinstance(task_ids, list):
+        raise Exception("The argument for task_ids is now expected to be a list of task ids, but a single task id was provided. Please provide a list of task ids with consistent data transform settings for the conversion process. Got a single task id: %s" % task_ids)
+    
+    for id in task_ids:
+        #We will just put assertions that it is fixed
+        #config across all relevant folds! 
+
+        #Setting a default value for extract_largest_cc, hacky fix.
+        extract_largest_cc = False
+        for key, transforms in task_configs[f'task_id_{id}']['data_transforms'].items():
+            if 'semantic_class_mapping' == key:     
+                class_labels_our_task = task_configs[f'task_id_{id}']['data_transforms']['semantic_class_mapping'] 
+                #Extracting the list of foreground and background labels for mapping.
+                output_semantic_class_dict = dict()
+                for class_lb in class_labels_our_task.keys():
+                    if class_lb == 'background':
+                        output_semantic_class_dict['background'] = class_labels_our_task[class_lb]
+                        print(f'Background class labels correspond to original class labels of: {output_semantic_class_dict["background"]}.')
+                    else:
+                        output_semantic_class_dict[class_lb] = class_labels_our_task[class_lb] 
+                        print(f'{class_lb} labels correspond to original class labels of {output_semantic_class_dict[class_lb]} under key: {class_lb}.')
+                
+                #here we set a copy to compare across folds.
+                if prev_semantic_class_dict is not None:
+                    assert output_semantic_class_dict == prev_semantic_class_dict, f"Semantic class mapping specified in task config for conversion process is not consistent across folds. Please ensure the semantic class mapping is consistent across folds for the conversion process. Got {output_semantic_class_dict} and {prev_semantic_class_dict} in different folds."
                 else:
-                    output_semantic_class_dict[class_lb] = class_labels_our_task[class_lb] 
-                    print(f'{class_lb} labels correspond to original class labels of {output_semantic_class_dict[class_lb]} under key: {class_lb}.')
+                    prev_semantic_class_dict = copy.deepcopy(output_semantic_class_dict)
 
-        elif 'component_extraction' == key:
-            if transforms == 'cc_largest':
-                extract_largest_cc = True
-                print(f'Extracting largest cc? : {extract_largest_cc}')
+            elif 'component_extraction' == key:
+                if transforms == 'cc_largest':
+                    extract_largest_cc = True
+                    print(f'Extracting largest cc? : {extract_largest_cc}')
+                else:
+                    print(f'Extracting largest cc? : {extract_largest_cc}')
+                
+                if prev_extract_largest_cc is not None:
+                    assert extract_largest_cc == prev_extract_largest_cc, f"Component extraction setting specified in task config for conversion process is not consistent across folds. Please ensure the component extraction setting is consistent across folds for the conversion process. Got {extract_largest_cc} and {prev_extract_largest_cc} in different folds."
+                else:
+                    prev_extract_largest_cc = copy.deepcopy(extract_largest_cc)
             else:
-                print(f'Extracting largest cc? : {extract_largest_cc}') 
-        else:
-            raise Exception('Unsupported data transform found in task config for conversion process.')
+                raise Exception('Unsupported data transform found in task config for conversion process.')
     
     if len(output_semantic_class_dict.keys()) == 2:
         foreground_key = [key for key in output_semantic_class_dict.keys() if key != 'background'][0]
@@ -246,7 +291,7 @@ def convert_dataset(
             numTraining = len(list_of_cases)
             output_json = {
             'channel_names': {"0": channel_lbs_our_task[0]}, #single channel.
-            'labels': {'background': 0, task_configs['task_id_1']['seg_problem']:1},
+            'labels': {'background': 0, seg_problem_our_task:1},
             'numTraining': numTraining,
             'file_ending': '.nii.gz',
             }
@@ -254,7 +299,7 @@ def convert_dataset(
             numTest = len(list_of_cases)
             output_json = {
             'channel_names': {"0": channel_lbs_our_task[0]}, #single channel.
-            'labels': {'background': 0, task_configs['task_id_1']['seg_problem']:1},
+            'labels': {'background': 0, seg_problem_our_task:1},
             'numTest': numTest,
             'file_ending': '.nii.gz',
             }
@@ -268,7 +313,7 @@ if __name__ == '__main__':
     argparser.add_argument('--target_dataset_basedir_path', type=str, required=True, help='Path to the target directory where the converted dataset will be stored.')
     argparser.add_argument('--task_config_basepath', type=str, required=True, help='Path to the task config file for the given dataset')
     argparser.add_argument('--split_name', type=str, default='train', help='Name of the split being processed')
-    argparser.add_argument('--reference_task_id', type=int, default=1, help='Task ID in the reference dataset task config to be used for the conversion process, \n' \
+    argparser.add_argument('--reference_task_ids', type=int, nargs='+', default=[1], help='Task IDs in the reference dataset task config to be used for the conversion process, \n' \
     'it is typically assumed that the information from this task configuration is consistent across train and test splits for the processing applied here!')
     # argparser.add_argument('--extract_largest_cc', action='store_true', default=False, help='Whether to extract the largest connected component for relevant semantic classes (e.g., lung).')
     argparser.add_argument('--num_workers', type=int, default=1, help='Number of workers to use for conversion.')
@@ -281,7 +326,7 @@ if __name__ == '__main__':
         args.target_dataset_basedir_path, 
         task_config_path, 
         args.split_name, 
-        args.reference_task_id, 
+        args.reference_task_ids, 
         dataset_name, 
         # args.extract_largest_cc, 
         args.num_workers)

@@ -29,9 +29,9 @@ def map_algorithm_name(short_name):
     """Map shortened algorithm names to full display names"""
     # Numeric adatest mapping
     NUMERIC_MAP = {
-        "2": "CLoPA-Inst",
-        "5": "CLoPA-ConvNorm",
-        "6": "CLoPA-ConvNorm",
+        "2": "CLoPA-I.N",
+        "5": "CLoPA-C.N",
+        "6": "CLoPA-C.N",
         # Add more mappings as needed
     }
 
