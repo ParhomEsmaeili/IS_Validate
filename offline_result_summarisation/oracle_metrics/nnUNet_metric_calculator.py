@@ -134,7 +134,7 @@ if __name__ == "__main__":
         datalist = []
         for path in dictionary_split_paths:
             datalist.extend(extractor(data_split, path))
-
+    print(f"Number of cases in the datalist: {len(datalist)}")
 
 
     #Read the metric configurations from the file
