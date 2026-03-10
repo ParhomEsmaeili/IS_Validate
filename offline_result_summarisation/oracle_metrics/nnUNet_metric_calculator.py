@@ -87,7 +87,7 @@ if __name__ == "__main__":
     #For processing any specific experiment configs, or metric configs.
     parser.add_argument('--exp_configs_base_folder', type=str, default=os.path.join(parent_dir, 'exp_configs'), help='Path to the base folder containing experiment configs required for extracting metric and task configuration information')
     parser.add_argument('--reference_splits_base_folder', type=str, default=os.path.join(parent_dir, 'datasets'), help='Path to the base folder containing dataset folders with dataset_split.json files for reading the data splits.')
-    parser.add_argument('--task_conf_id', type=str, default='task_id_2', help='Task configuration ID to use for reading the task configs which are to be used in loading reference labels, etc.')
+    parser.add_argument('--task_conf_id', nargs='+', type=str, default='task_id_2', help='Task configuration ID to use for reading the task configs which are to be used in loading reference labels, etc.')
     parser.add_argument('--metric_config_id', type=str, default='prototype', help='ID or string for the metric configuration for the given task')
     #Data extraction parameters required to identify the datalist!
     parser.add_argument('--data_split', type=str, default='test', choices=['train', 'test'], help='Name of the data split to be used for calculating metric')
@@ -123,8 +123,8 @@ if __name__ == "__main__":
     if args.strategy_type == 'all':
         dictionary_split_paths = [('sampling', f'{args.strategy_type}_{args.data_split}', 'all_cases')]
     elif args.strategy_type == 'kfold':
-        if args.fold_num is None:
-            raise ValueError('If using kfold strategy, please specify the fold number using --fold_num argument.')
+        if args.total_folds is None:
+            raise ValueError('If using kfold strategy, please specify the number of folds using --total_folds argument.')
         dictionary_split_paths = [('sampling', f'{args.strategy_type}_{fold_num}_{args.data_split}', f'fold_{fold_num}') for fold_num in range(args.total_folds)]
     else:
         raise ValueError(f"Unknown strategy type: {args.strategy_type}")
