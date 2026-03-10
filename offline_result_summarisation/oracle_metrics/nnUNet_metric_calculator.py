@@ -125,7 +125,7 @@ if __name__ == "__main__":
     elif args.strategy_type == 'kfold':
         if args.total_folds is None:
             raise ValueError('If using kfold strategy, please specify the number of folds using --total_folds argument.')
-        dictionary_split_paths = [('sampling', f'{args.strategy_type}_{fold_num}_{args.data_split}', f'fold_{fold_num}') for fold_num in range(args.total_folds)]
+        dictionary_split_paths = [('sampling', f'{args.strategy_type}_{args.total_folds}', f'fold_{fold_num}') for fold_num in range(args.total_folds)]
     else:
         raise ValueError(f"Unknown strategy type: {args.strategy_type}")
     
