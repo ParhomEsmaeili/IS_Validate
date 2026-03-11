@@ -161,7 +161,8 @@ if __name__ == "__main__":
                     raise KeyError(f"Task configuration with ID {args.task_conf_id} does not contain fold-specific semantic class mapping for fold_{fold_idx}")
                 
             semantic_class_mappings = [task['data_transforms']['semantic_class_mapping'] for task in current_tasks]
-            if len(set(tuple(mapping.items()) for mapping in semantic_class_mappings)) != 1:
+            canonical_mappings = [json.dumps(m, sort_keys=True) for m in semantic_class_mappings]
+            if len(set(canonical_mappings)) != 1:
                 raise ValueError(f"Semantic class mappings are not the same across the tasks specified by task_conf_id {args.task_conf_id}. Please ensure they are the same, or specify a single task_conf_id corresponding to a single task configuration.")
             else:
                 config_labels_dict = semantic_class_mappings[0]
