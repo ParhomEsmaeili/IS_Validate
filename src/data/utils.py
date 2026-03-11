@@ -72,11 +72,25 @@ def init_task_cases(
         raise TypeError('The sample_group_category must be a string denoting the sampling category, e.g. "all_" or "kfold_".')
     if not sample_category.startswith(('all_', 'kfold_')):
         raise NotImplementedError('The sample_group_category must start with "all_" or "kfold_" for now. Other sampling categories are not yet supported.')
-    sampling_metadata_path = ('sampling', sample_category, 'meta')
-
-    #Now we will extract the case list and the metadata from the data_sampling_configs
-    case_list = extractor(data_sampling_configs, split_dict_path) 
     
+    sampling_metadata_path = ('sampling', sample_category, 'meta')
+    #Now we extract the metadata.
+    sampling_metadata = extractor(data_sampling_configs, sampling_metadata_path)
+    if not isinstance(sampling_metadata, dict) or not sampling_metadata:
+        #If the split metadata is not a dict or is empty, we raise an error.
+        raise TypeError('The split metadata must be a non-empty dictionary containing information about the split.')
+    
+    #Now we will extract the case list and the metadata from the data_sampling_configs
+    if type(split_dict_path[-1]) == str:
+        case_list = extractor(data_sampling_configs, split_dict_path)
+        num_folds = 1
+    else:
+        assert sampling_metadata['strategy_type'] == 'kfold' and sampling_metadata['k_folds'] > 1
+        case_list = []
+        for fold_name in split_dict_path[-1]:
+            fold_case_list = extractor(data_sampling_configs, split_dict_path[:-1] + (fold_name,))
+            case_list.extend(fold_case_list)
+        num_folds = len(split_dict_path[-1])
     # Check that there are no repeated cases in the case list, even though the dataset constructor permits this as it only 
     #requires the use of a list and not a dict construction in the input argument.
     if len(case_list) != len(set(case_list)):
@@ -87,12 +101,6 @@ def init_task_cases(
         raise TypeError('The case list must be a list of strings denoting each case folder to be used.')
 
 
-    #Now we extract the metadata.
-    sampling_metadata = extractor(data_sampling_configs, sampling_metadata_path)
-    if not isinstance(sampling_metadata, dict) or not sampling_metadata:
-        #If the split metadata is not a dict or is empty, we raise an error.
-        raise TypeError('The split metadata must be a non-empty dictionary containing information about the split.')
-    
     #We will put a sanity check here to ensure that the user is not attempting to provide a case list for which the dataset.json could 
     #quite possible not have produced any reasonable cases. 
     #
@@ -107,9 +115,13 @@ def init_task_cases(
         raise ValueError(f'The dataset.json file does not contain labels for all cases in the {sampling_metadata["split"]} set, but the mechanisms provided currently require annotations.')
 
 
-    #We now put some type checks to ensure that the quantity of cases is correct, corresponding to the number of cases in the dataset.json file,
+    #We now put some type checks to ensure that the quantity of cases is correct/reasonable, corresponding to the number of cases in the dataset.json file,
     #and the sampling category, which provides a description of the mechanism for sampling the cases. This is the final line of sanity
-    #checking that the sampling was done correctly offline. E.g., k-fold must have a specific structure. 
+    #checking that the sampling was done correctly offline. E.g., k-fold must have a specific structure.
+    # 
+    # Reasonably, for k-fold cross checks this is not that strict as the number of cases may not be divisible by the 
+    # number of folds. We have already checked for repeats in the case list, so this is more of a final sanity check..
+    #  
 
     #We extract the specific source for the data (i.e. train set or test set) from the metadata in the data_splits.json file, in order to 
     # cross reference against the dataset.json file. 
@@ -126,13 +138,15 @@ def init_task_cases(
         #If the sampling category is kfold then we assume that the cases are to be sampled from a k-fold cross-validation setup. 
         # We will check that the number of cases in the fold is feasible. i.e., that it is equivalent to the floor division of the 
         # number of cases in the dataset.json file by the number of folds. 
-        num_folds = int(sampling_metadata['k_folds']) 
-        expected_num = ds_configs[f'num{sampling_metadata["split"].capitalize()}'] // num_folds
-        if not len(case_list) == expected_num:
-            raise ValueError(
-                f'The number of cases in the dataset.json file does not match the number of cases in the {sampling_metadata["split"]} set for the k-fold cross-validation, '
-                f'expected {expected_num} but got {len(case_list)}'
-            )
+        total_k_folds = int(sampling_metadata['k_folds']) 
+        def ceiling_division(n, d):
+            return -(n // -d)
+        floor_div = ds_configs[f'num{sampling_metadata["split"].capitalize()}'] // total_k_folds
+        ceil_div = ceiling_division(ds_configs[f'num{sampling_metadata["split"].capitalize()}'], total_k_folds)
+
+        if not len(case_list) >= floor_div * num_folds or not len(case_list) <= ceil_div * num_folds:
+            raise ValueError(f'The min and max number of samples in a fold merge did not match what is possible from the dataset.json file \n'
+            f'We allow for some flexibility as the number of cases may not be perfectly divisble by the number of folds. We expected low bound of {floor_div * num_folds} and upper bound of {ceil_div * num_folds} and received {len(case_list)}')
     else:
         #We do not yet support any other sampling categories, so we raise an error.
         raise NotImplementedError('The sample category must be either "all_" or "kfold_" for now. Other sampling categories are not yet supported.')

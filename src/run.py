@@ -34,18 +34,22 @@ def set_parse():
     parser = argparse.ArgumentParser()
     
     #Experimental name/job-continuation related args
-    parser.add_argument('--experiment_name', type=str, required=False, default=None)#debugging_continual_adapt
-    parser.add_argument('--continue_execution', action='store_true', default=True) #False)
+    parser.add_argument('--experiment_basename', type=str, required=False, default='debugging_exp_naming')
+    parser.add_argument('--run_num', type=str, required=False, default='run1')
+    parser.add_argument('--split_name', type=str, required=False, default='kfold_5_train_fold_0_1_2_3')
+    parser.add_argument('--continue_execution', action='store_true', default=True)
     parser.add_argument('--continue_exec_root', type=str, default='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/continue_execution_files') #None
     #Data and application root related args
-    
+    parser.add_argument('--skip_metric_and_prompting', action='store_true', default=False) 
+    #Whether to skip the metric and prompt generation steps and just execute adaptation with gold-standard annotations.
     parser.add_argument('--data_root', type=str, default=codebase_dir)
     parser.add_argument('--dataset_name', type=str, default='Dataset005_Prostate')
     parser.add_argument('--app_root', type=str, default= 
-                        '/home/parhomesmaeili/MY METHOD') #NOTE:Just set for debugging purposes.
+                        '/home/parhomesmaeili/IS_Codebase_Forks/nnInteractive_Fork') 
+    #NOTE:Just set for debugging purposes.
 
     #This acts as the name of the app, but also temporarily acts as the relative path name within the input_applications folder in the app root folder.
-    parser.add_argument('--app_name', type=str, default='AdaptiveIS')
+    parser.add_argument('--app_name', type=str, default='nnInteractive_App')
     parser.add_argument('--metrics_root', type=str, default=os.path.join(codebase_dir, 'results'))
     parser.add_argument('--seg_root', type=str, default=os.path.join(codebase_dir, 'results'))
 
@@ -53,10 +57,10 @@ def set_parse():
     parser.add_argument('--adaptation_config_name', type=str, default=None)
     parser.add_argument('--enable_adaptation', action='store_true', default=False)
     parser.add_argument('--execute_on_adapted', action='store_true', default=False)
-    parser.add_argument('--adaptation_episode', type=int, default=None)#0) #Episode number to pull checkpoint for inference
+    parser.add_argument('--adaptation_episode', type=int, default=None) #Episode number to pull checkpoint for inference
     #ONLY INTENDED when execute_on_adapted is enabled.
-    parser.add_argument('--algo_cache_name', type=str, default=None) #'r3qsE9ieGDtlAWB_')
-    parser.add_argument('--reference_experiment_checkpoint', type=str, default=None)#'adadesign2-dataset005-pointsonly-run1.pkl') #This is a 
+    parser.add_argument('--algo_cache_name', type=str, default=None)
+    parser.add_argument('--reference_experiment_checkpoint', type=str, default=None) #This is a 
     #string which denotes the reference name/run which we will be pulling episodes from.
 
     #This is a bool which controls whether we execute on a pre-adapted method.
@@ -80,9 +84,9 @@ def set_parse():
     parser.add_argument('--prompt_conf_filename', type=str, default='prompts_configs.txt')
     parser.add_argument('--task_conf_filename', type=str, default='task_configs.txt')
     parser.add_argument('--metric_conf_name', type=str, default='prototype')
-    parser.add_argument('--task_conf_name', type=str, default='task_id_2')
-    parser.add_argument('--init_prompt_conf_name', type=str, default='prototype')
-    parser.add_argument('--edit_prompt_conf_name', type=str, default='prototype')
+    parser.add_argument('--task_conf_name', type=str, default='task_id_12')
+    parser.add_argument('--init_prompt_conf_name', type=str, default='points_prototype_simplified')
+    parser.add_argument('--edit_prompt_conf_name', type=str, default='points_prototype_simplified')
     parser.add_argument('--metric_prompt_procedure_type', type=str, default='heuristic')
     parser.add_argument('--inf_prompt_procedure_type', type=str, default='heuristic')
     parser.add_argument('--sim_empty_fg_automatic', action='store_true', default=False)
@@ -143,24 +147,35 @@ def gen_experiment_args(args):
     output_dict['seg_dataset_subdir'] = os.path.join(output_dict['seg_root'], args.dataset_name) #Subdir for the dataset which is being used in the task, this will
     #typically be the same as the results dataset subdir, but in case of separate mounts we want to be able to store these large files externally.
 
+    if args.skip_metric_and_prompting:
+        assert args.enable_adaptation, 'If skipping metric and prompting generation, then adaptation must be enabled, as we need the adaptation to be able to run without the metrics and prompting generation steps, please check your input arguments.'
+        output_dict['enable_adaptation'] = args.enable_adaptation
+        output_dict['skip_metric_and_prompting'] = args.skip_metric_and_prompting
+        assert args.continue_execution, 'If skipping metric and prompting generation, then continue execution must be enabled, as we need to be able to continue into the adaptation step without the metrics and prompting generation steps, please check your input arguments.'
+        output_dict['continue_execution'] = args.continue_execution
+        assert args.provide_gold_standard_after_inference, 'If skipping metric and prompting generation, then providing gold standard after inference must be enabled, as we need to be able to provide the gold standard for the adaptation step without the metrics and prompting generation steps, please check your input arguments.'
+    else:
+        pass 
     #Experiment logging related arguments (i.e. for a specific run of the evaluation script!)
     if args.continue_execution:
-        if args.experiment_name == None:
-            raise ValueError('If configured for continuing an experiment execution, must provide the experiment name to \n ' \
+        if args.experiment_basename == None:
+            raise ValueError('If configured for continuing an experiment execution, must provide the experiment basename to \n ' \
             'continue from otherwise we cannot proceed.')
         else:
-            output_dict['experiment_name'] = args.experiment_name
-        
+            output_dict['experiment_name'] = f'{args.experiment_basename}_{args.run_num}_{args.split_name}'
+            named_experiment = True 
+
         if args.continue_exec_root == None:
             raise ValueError('If continuing an experiment execution, must provide the root directory of the \n'
             'files to write/read where to continue from.')
         else:
-            output_dict['continue_exec_path'] = os.path.join(args.continue_exec_root, args.experiment_name + '.pkl')
+            output_dict['continue_exec_path'] = os.path.join(args.continue_exec_root, output_dict['experiment_name'] + '.pkl')
     else:
-        if args.experiment_name == None:
+        if args.experiment_basename == None:
             output_dict['experiment_name'] = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            named_experiment = False
         else:
-            raise Exception('If not continuing an experiment execution, cannot provide an experiment name, \n'
+            raise Exception('If not continuing an experiment execution, cannot provide an experiment basename, \n'
             'this is redundant.')
     if args.enable_adaptation:
         assert not args.execute_on_adapted, 'If adaptation is enabled, then executing on pre-trained adapted should not be enabled, please check your input arguments.'
@@ -229,6 +244,28 @@ def gen_experiment_args(args):
     output_dict['task_configs'] = extract_config(os.path.join(exp_conf_dir, args.task_conf_filename), args.task_conf_name)
     output_dict['seg_problem'] = output_dict['task_configs']['seg_problem']
     
+    if named_experiment:
+        assert output_dict['task_configs']['data_sampling']['sample_group_category'][0] in output_dict['experiment_name'], 'The experiment name must contain the sample group category specified in the task configs for the experiment at hand, please check your input arguments and the task configs to ensure this is the case for consistency and clarity.'
+        subcategory_type = type(output_dict['task_configs']['data_sampling']['sample_group_category'][1])
+        if 'kfold' in output_dict['task_configs']['data_sampling']['sample_group_category'][0]:
+            if subcategory_type == str:
+                assert output_dict['task_configs']['data_sampling']['sample_group_category'][1] in output_dict['experiment_name'], 'If using kfold sample group category, the experiment name must also contain the specific fold numbers used in the sample group category specified in the task configs for the experiment at hand, please check your input arguments and the task configs to ensure this is the case for consistency and clarity.'
+            elif subcategory_type == list:
+                fold_merged_str = []
+                for fold in output_dict['task_configs']['data_sampling']['sample_group_category'][1]:
+                    assert 'fold' in fold
+                    fold_merged_str.append(fold.replace('fold_', ''))
+                fold_merged_str = 'fold_' + '_'.join(fold_merged_str)
+                assert fold_merged_str in output_dict['experiment_name'], 'If using kfold sample group category, the experiment name must also contain the specific fold numbers used in the sample group category specified in the task configs for the experiment at hand, please check your input arguments and the task configs to ensure this is the case for consistency and clarity.'
+            else: 
+                raise TypeError('Unknown datatype for the sample group subcategory, please check your task configs to ensure it is either a string or a list of strings for consistency and clarity.')
+        elif 'all_' in output_dict['task_configs']['data_sampling']['sample_group_category'][0]:
+            assert subcategory_type == str, 'If using all_ sample group category, the subcategory type must be a string, please check your task configs to ensure this is the case.'
+            assert 'all' in output_dict['task_configs']['data_sampling']['sample_group_category'][1] and output_dict['task_configs']['data_sampling']['sample_group_category'][1] in output_dict['experiment_name'], 'If using all_ sample group category, the experiment name must also contain the specific subcategory specified in the sample group category specified in the task configs for the experiment at hand, please check your input arguments and the task configs to ensure this is the case for consistency and clarity.'
+        else:
+            raise NotImplementedError('The current implementation only supports sample group categories which contain kfold or all_ as substrings, please check your task configs to ensure this is the case if you want to use named experiments for consistency and clarity.')
+    
+    
     #Loading in the relevant information from the dataset
 
     output_dict['dataset_info'] = {
@@ -260,12 +297,12 @@ def gen_experiment_args(args):
     output_dict['random_seed'] = args.random_seed
     if args.random_seed != None:
         #Lets extract the run num. 
-        run_num = re.search(r'run(\d+)', output_dict['experiment_name'])
-        assert output_dict and len(re.findall(r'run(\d+)', output_dict['experiment_name'])) == 1, "Expected exactly one match"
-        run_num = run_num.group()
+        run_num = args.run_num #re.search(r'run(\d+)', output_dict['experiment_name'])
+        # assert output_dict and len(re.findall(r'run(\d+)', output_dict['experiment_name'])) == 1, "Expected exactly one match"
+        # run_num = run_num.group()
 
         if run_num is None:
-            raise ValueError('Nothing was found at all!')
+            raise ValueError('No run num was found at all with a pre-determined random seed!')
         if run_num not in run_vs_seed:
             raise ValueError(f'If a random seed is provided, the experiment name must contain run-num substring \n'
             f'where {run_num} is in {run_vs_seed.keys()} to match the available seeds in the run_vs_seed dictionary.')
@@ -639,7 +676,8 @@ def run_instances(
     if resume_bool:
         logger.info(f'Resuming after {loaded_experiment_checkpoint["eval_state"]["last_completed_case"]} from {dataloader.data[0]["case_name"]}')
         resumed_idx = loaded_experiment_checkpoint["eval_state"]['last_completed_idx'] + 1
-
+    else:
+        log_config_writer('Case list for this experiment', {'Case list':[data_instance['case_name'] for data_instance in dataloader]}, logger)
     if experiment_checkpoint_path != None:
         write_to_checkpoint(
             checkpoint_path=experiment_checkpoint_path,
@@ -986,7 +1024,7 @@ def main():
             }
 
     if len(dataloader) == 0:
-        exp_setup_logger.info('No samples to iterate through in the dataloader, finishing execution.')
+        exp_setup_logger.info('No samples to iterate through in the dataloader, finishing execution. Check if intended.')
     else:
         run_instances(
             dataloader=dataloader, 

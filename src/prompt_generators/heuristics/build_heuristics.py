@@ -297,7 +297,7 @@ class BuildHeuristic:
 
         Returns: 
 
-        Both outputs are in the list[torch] format denoted in: `<https://github.com/IS_Validate/blob/main/src/data/interaction_state_construct.py>` 
+        Both outputs are in the list[torch] format denoted in: src/data/interaction_state_construct.py 
 
         prompts_torch_format: dict - A dictionary, separated by the prompt-type, which contains the prompt spatial information
         for the selected prompt types in the prompt generation config.  
