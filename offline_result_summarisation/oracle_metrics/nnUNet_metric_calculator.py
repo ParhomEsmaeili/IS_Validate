@@ -154,11 +154,11 @@ if __name__ == "__main__":
             task_configs = json.load(f)
             current_tasks = [task_configs[conf_id] for conf_id in args.task_conf_id]
             #We assert uniqueness of the semantic class mapping.
-            for idx, task in current_tasks:
+            for fold_idx, task in enumerate(current_tasks):
                 if 'semantic_class_mapping' not in task['data_transforms']:
                     raise KeyError(f"Task configuration with ID {args.task_conf_id} does not contain 'semantic_class_mapping' in its 'data_transforms' section.")
-                if f'fold_{idx}' not in task['data_sampling']['sample_group_category']:
-                    raise KeyError(f"Task configuration with ID {args.task_conf_id} does not contain fold-specific semantic class mapping for fold_{idx}")
+                if f'fold_{fold_idx}' not in task['data_sampling']['sample_group_category']:
+                    raise KeyError(f"Task configuration with ID {args.task_conf_id} does not contain fold-specific semantic class mapping for fold_{fold_idx}")
                 
             semantic_class_mappings = [task['data_transforms']['semantic_class_mapping'] for task in current_tasks]
             if len(set(tuple(mapping.items()) for mapping in semantic_class_mappings)) != 1:
