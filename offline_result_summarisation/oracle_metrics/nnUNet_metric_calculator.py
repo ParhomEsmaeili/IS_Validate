@@ -131,6 +131,8 @@ if __name__ == "__main__":
     
     with open(data_split_path, 'r') as f:
         data_split = json.load(f)
+        print(f'Data split json dict: {data_split}')
+        print(f"Dictionary split paths: \n{dictionary_split_paths}")
         datalist = []
         for path in dictionary_split_paths:
             datalist.extend(extractor(data_split, path))
