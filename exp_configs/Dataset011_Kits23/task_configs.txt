@@ -1,0 +1,1642 @@
+{
+	"task_id_3":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_0"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_1"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_4":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_1"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_1"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_5":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_2"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_1"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_6":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_3"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_1"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_7":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_4"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_1"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_8":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_1", "fold_2", "fold_3", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_1"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_9":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_2", "fold_3", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_1"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_10":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_3", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_1"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_11":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_2", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_1"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_12":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_2", "fold_3"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_1"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_13":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_0"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_2"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_14":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_1"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_2"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_15":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_2"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_2"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_16":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_3"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_2"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_17":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_4"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_2"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_18":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_1", "fold_2", "fold_3", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_2"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_19":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_2", "fold_3", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_2"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_20":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_3", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_2"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_21":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_2", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_2"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_22":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_2", "fold_3"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_2"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_23":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_0"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_3"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_24":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_1"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_3"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_25":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_2"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_3"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_26":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_3"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_3"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_27":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_4"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_3"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_28":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_1", "fold_2", "fold_3", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_3"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_29":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_2", "fold_3", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_3"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_30":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_3", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_3"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_31":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_2", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_3"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_32":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_2", "fold_3"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_3"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_33":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_0"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_4"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_34":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_1"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_4"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_35":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_2"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_4"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_36":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_3"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_4"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_37":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_4"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_4"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_38":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_1", "fold_2", "fold_3", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_4"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_39":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_2", "fold_3", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_4"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_40":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_3", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_4"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_41":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_2", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_4"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_42":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_2", "fold_3"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_4"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				}
+			}
+	},
+	"task_id_43":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_0"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_1"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_44":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_1"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_1"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_45":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_2"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_1"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_46":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_3"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_1"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_47":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_4"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_1"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_48":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_1", "fold_2", "fold_3", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_1"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_49":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_2", "fold_3", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_1"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_50":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_3", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_1"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_51":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_2", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_1"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_52":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_2", "fold_3"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_1"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_53":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_0"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_2"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_54":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_1"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_2"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_55":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_2"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_2"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_56":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_3"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_2"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_57":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_4"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_2"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_58":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_1", "fold_2", "fold_3", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_2"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_59":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_2", "fold_3", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_2"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_60":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_3", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_2"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_61":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_2", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_2"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_62":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_2", "fold_3"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_2"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_63":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_0"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_3"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_64":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_1"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_3"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_65":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_2"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_3"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_66":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_3"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_3"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_67":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_4"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_3"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_68":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_1", "fold_2", "fold_3", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_3"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_69":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_2", "fold_3", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_3"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_70":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_3", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_3"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_71":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_2", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_3"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_72":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_2", "fold_3"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_3"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_73":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_0"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_4"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_74":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_1"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_4"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_75":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_2"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_4"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_76":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_3"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_4"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_77":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", "fold_4"],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_4"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_78":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_1", "fold_2", "fold_3", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_4"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_79":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_2", "fold_3", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_4"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_80":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_3", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_4"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_81":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_2", "fold_4"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_4"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	},
+	"task_id_82":{
+		"data_sampling":
+			{
+				"sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_2", "fold_3"]],
+				"image_conf": {
+					"image_channel": ["CT"]
+					},	
+				 "annotation_conf": { 
+				 	"annotator": ["annotator_4"],
+				 	"instance_id": ["instance_1"]
+				 	}
+			},
+		"seg_problem": "whole_kidney",
+		"data_transforms":
+			{"semantic_class_mapping":{
+				"background":["background"],
+				"whole_kidney":["whole_kidney"]
+				},
+			"image_augmentations": ["foreground_crop"]
+			}
+	}
+}

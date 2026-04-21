@@ -1,0 +1,60 @@
+{
+	"heuristic":{
+		"prototype":{
+		
+			"methods":{
+				
+				"points":["uniform_random"],
+				"scribbles":null,
+				"bboxes":null,
+				"lassos":null
+				
+				},
+			"build_params":{
+			
+				"points":{
+					
+					"uniform_random": {
+						"n_max": 1
+						}
+					
+					},
+				"scribbles":null,
+				"bboxes":null,
+				"lassos":null
+				
+				},
+				
+			"mixture_params":null,
+			"prompter_class_type":"prototype_pseudo_mixture"
+		},
+		"points_prototype_simplified":{
+		
+			"methods":{
+				
+				"points":["uniform_random"],
+				"scribbles":null,
+				"bboxes":null,
+				"lassos":null
+				
+				},
+			"build_params":{
+			
+				"points":{
+					
+					"uniform_random": {
+						"n_max": 1
+						}
+					
+					},
+				"scribbles":null,
+				"bboxes":null,
+				"lassos":null
+				
+				},
+				
+			"mixture_params":null,
+			"prompter_class_type":"simplified_prototype_pseudo_mixture"
+		}
+	}
+}
