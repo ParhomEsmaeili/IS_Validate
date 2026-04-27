@@ -1,5 +1,6 @@
 import os
 import sys
+import copy
 parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(parent_dir)
 import argparse
@@ -7,7 +8,6 @@ import pandas as pd
 from src.results_utils.base_metrics.scoring_base_utils import BaseScoringWrapper
 from src.results_utils.metric_save_util import init_all_csvs, write_to_csvs
 from src.general_utils.dict_utils import extractor
- 
 import json 
 import torch 
 from monai.transforms import (
@@ -17,7 +17,6 @@ from monai.transforms import (
     EnsureTyped,
     Orientationd,
 )
-
 monai_transforms = Compose([
     LoadImaged(keys=['seg', 'gt'], image_only=True),
     EnsureChannelFirstd(keys=['seg', 'gt']),
@@ -25,6 +24,46 @@ monai_transforms = Compose([
     EnsureTyped(keys=['seg', 'gt'], dtype=[torch.uint8, torch.uint8]),
 ])
 
+def process_metric_config(metric_config, spacing_config):
+    #Function which processes the metric configs for cases where we do not have a trivial config.
+    #E.g., for NSD where we may want to calculate across multiple tolerance values.
+    for metric_name, conf in metric_config.items():
+        if metric_name == 'NSD':
+            if 'tolerance_mm' not in conf:
+                assert 'tolerance_sf' in conf, 'If no tolerance_mm provided for NSD metric config, then must provide a tolerance_sf value to calculate the tolerance based on the dataset voxel spacing, please check your metric configs.'
+                #If we have a tolerance sf, then we must calculate tolerance mms from the tolerance sf. 
+                if spacing_config:
+                    tolerance_mms = [float(i) * float(spacing_config) for i in conf['tolerance_sf']]
+                    assert isinstance(tolerance_mms, list), 'The calculated tolerance mms values must be a list, even if there is only one value, to be consistent with the case where the tolerance mms values are provided directly in the metric configs, please check your metric configs and dataset spacing config to ensure this is the case.'
+                    conf['tolerance_mms'] = {index:tolerance_mm for index,tolerance_mm in enumerate(tolerance_mms)}
+
+                    #We add the tolerance mms values to the config dict for the metric, we will use these for the metric calculations. We deepcopy just to be safe and avoid any weird pointer issues.
+                    del conf['tolerance_sf'] #We remove the tolerance sf value as it is no longer needed and to avoid confusion.
+                else:
+                    raise ValueError('If using a tolerance sf value for NSD metric config, then the dataset spacing config must be provided to calculate the tolerance_mm values, please check your metric configs and dataset configs to ensure this is the case.')
+            else:
+                tolerance_mms = copy.deepcopy(conf['tolerance_mm'])
+                del conf['tolerance_mm'] #We remove the tolerance mm value as it is no longer needed and to avoid confusion, we will just use the tolerance mms values for the metric calculations. We deepcopy just to be safe and avoid any weird pointer issues.
+                conf['tolerance_mms'] = {0: tolerance_mms} #We just rename the key to be consistent with the case where we calculate the tolerance mms from the tolerance sf, this is just
+            if len(conf['tolerance_mms']) > 1:
+                #We add a new key which says that we have multiple nsds so downstream it knows to treat
+                #this differently!. It points to the key where that corresponding list of parameterisations
+                #are.
+                conf['multiple_parameter_values'] = 'tolerance_mms'
+    return metric_config
+
+def extract_config(path, name):
+    #Function which extracts configs dicts from json or txt files. Takes the path to the file, and the name of the specific config desired.
+
+    if not os.path.exists(path):
+        raise Exception(f'The path {path} was not a valid one. Please check.')    
+
+    #Loading the file:
+    with open(path) as f:
+        configs_registry = json.load(f)
+        config = configs_registry[name]
+
+    return config 
 def write_metrics(metrics_dict, metrics_configs, config_labels_dict, output_base_folder):
     metric_paths_dict = init_all_csvs(output_base_folder, metrics_configs, config_labels_dict)
 
@@ -32,9 +71,10 @@ def write_metrics(metrics_dict, metrics_configs, config_labels_dict, output_base
         write_to_csvs(
             case_name=case,
             csv_paths=metric_paths_dict,
-            tracked_metrics=metrics
+            tracked_metrics=metrics,
+            metrics_configs=metrics_configs,
         )
-    print('done')
+    print('done writing metrics.')
 
 def calculate_nnUNet_metrics(scoring_wrapper, seg_folder, gt_folder, config_labels_dict, datalist):
     #check all of the files are in the seg and gt folder.
@@ -101,7 +141,8 @@ if __name__ == "__main__":
     path_to_metric_configs = os.path.join(args.exp_configs_base_folder, args.dataset_name, 'metrics_configs.txt')
     path_to_task_configs = os.path.join(args.exp_configs_base_folder, args.dataset_name, 'task_configs.txt')
     output_folder = os.path.join(args.output_results_base_folder, args.dataset_name, 'nnUNet_metrics')
-    
+    spacing_config_path = os.path.join(args.exp_configs_base_folder, args.dataset_name, 'spacing_config.json')
+
     seg_folder = os.path.join(
         args.segmentation_base_folder, 
         args.dataset_name, 
@@ -143,34 +184,48 @@ if __name__ == "__main__":
     if not os.path.exists(path_to_metric_configs):
         raise FileNotFoundError(f"Metric configuration file not found at {path_to_metric_configs}")
     else:
-        with open(path_to_metric_configs, 'r') as f:
-            configs_registry = json.load(f)
-            metric_config = configs_registry[args.metric_config_id]
+        metric_config = extract_config(path_to_metric_configs, args.metric_config_id) #We also do this as a check to ensure the metric config id provided is valid, this will raise an error if it is not. If it is valid, then we will read in the metric configs again in the next step when we initialise the scoring wrapper, so we don't need to keep the metric config dict returned from this function call.
+        # with open(path_to_metric_configs, 'r') as f:
+        #     configs_registry = json.load(f)
+        #     metric_config = configs_registry[args.metric_config_id]
 
     if not os.path.exists(path_to_task_configs):
         raise FileNotFoundError(f"Task configuration file not found at {path_to_task_configs}")
     else:
-        with open(path_to_task_configs, 'r') as f:
-            task_configs = json.load(f)
-            current_tasks = [task_configs[conf_id] for conf_id in args.task_conf_id]
-            #We assert uniqueness of the semantic class mapping.
-            for fold_idx, task in enumerate(current_tasks):
-                if 'semantic_class_mapping' not in task['data_transforms']:
-                    raise KeyError(f"Task configuration with ID {args.task_conf_id} does not contain 'semantic_class_mapping' in its 'data_transforms' section.")
-                if f'fold_{fold_idx}' not in task['data_sampling']['sample_group_category']:
-                    raise KeyError(f"Task configuration with ID {args.task_conf_id} does not contain fold-specific semantic class mapping for fold_{fold_idx}")
-                
-            semantic_class_mappings = [task['data_transforms']['semantic_class_mapping'] for task in current_tasks]
-            canonical_mappings = [json.dumps(m, sort_keys=True) for m in semantic_class_mappings]
-            if len(set(canonical_mappings)) != 1:
-                raise ValueError(f"Semantic class mappings are not the same across the tasks specified by task_conf_id {args.task_conf_id}. Please ensure they are the same, or specify a single task_conf_id corresponding to a single task configuration.")
-            else:
-                config_labels_dict = semantic_class_mappings[0]
-            print(f"Config labels dict: {config_labels_dict}")
-            # config_labels_dict = current_tasks[0]['data_transforms']['semantic_class_mapping']
-            config_labels_dict = {k:idx for idx, k in enumerate(config_labels_dict.keys())}  # Convert to a dictionary with labels as keys and indices as values
+        current_tasks = [extract_config(path_to_task_configs, conf_id) for conf_id in args.task_conf_id]
+        # with open(path_to_task_configs, 'r') as f:
+        #     task_configs = json.load(f)
+        #     current_tasks = [task_configs[conf_id] for conf_id in args.task_conf_id]
+        #We assert uniqueness of the semantic class mapping.
+        
+        for fold_idx, task in enumerate(current_tasks):
+            if 'semantic_class_mapping' not in task['data_transforms']:
+                raise KeyError(f"Task configuration with ID {args.task_conf_id} does not contain 'semantic_class_mapping' in its 'data_transforms' section.")
+            if f'fold_{fold_idx}' not in task['data_sampling']['sample_group_category']:
+                raise KeyError(f"Task configuration with ID {args.task_conf_id} does not contain fold-specific semantic class mapping for fold_{fold_idx}")
+            
+        semantic_class_mappings = [task['data_transforms']['semantic_class_mapping'] for task in current_tasks]
+        canonical_mappings = [json.dumps(m, sort_keys=True) for m in semantic_class_mappings]
+        if len(set(canonical_mappings)) != 1:
+            raise ValueError(f"Semantic class mappings are not the same across the tasks specified by task_conf_id {args.task_conf_id}. Please ensure they are the same, or specify a single task_conf_id corresponding to a single task configuration.")
+        else:
+            config_labels_dict = semantic_class_mappings[0]
+        print(f"Config labels dict: {config_labels_dict}")
+        # config_labels_dict = current_tasks[0]['data_transforms']['semantic_class_mapping']
+        config_labels_dict = {k:idx for idx, k in enumerate(config_labels_dict.keys())}  # Convert to a dictionary with labels as keys and indices as values
 
-    #Reading the config labels dictionary from the task definition.
+    #Lets extract the spacing config if it exists. We will use a try-except here for convenience.
+    try:
+        spacing_config = extract_config(spacing_config_path, 'reference_spacing')
+    except:
+        spacing_config = None 
+    
+    #Here we will process the metric configs, as there may be instances where we have multiple parameter
+    #values for a given metric... (For example with NSD if we do not have a single tolerance provided).
+    metric_config = process_metric_config(
+        metric_config=metric_config,
+        spacing_config=spacing_config
+    )
 
     # Initialise the scoring wrapper
     scoring_wrapper = BaseScoringWrapper(
