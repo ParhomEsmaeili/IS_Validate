@@ -415,11 +415,13 @@ class NSD:
             cross_class = torch.mean(torch.stack(list(per_class_scores.values())), dim=0) 
             #This will be a tensor of size (num_tolerances)
             # cross_class = torch.tensor([float(cross_class)]) #just in case it isn't a floating point value (it should be)
-        
+            assert cross_class.size() == torch.Size([len(self.tolerance_mms)]), 'Generation of NSD has failed because the cross-class score was not a torch tensor of size equal to the number of tolerances being evaluated'
+
         if not self.include_per_class_scores:
             per_class_scores = None 
             warnings.warn('Strongly recommended to include per-class scores for NSD as it is not a simple counting metric, each target has its own -shape- it is recommended to examine per-class scores. \n')
-
+        
+        #probably a redundant artefact since we will be doing this check on the cross-class score generation.
         if len(self.tolerance_mms) == 1:
             assert type(cross_class) == torch.Tensor and cross_class.size() == torch.Size([1]), 'Generation of NSD has failed because the cross-class score was not a torch tensor of size 1'
         else:
