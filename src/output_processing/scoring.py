@@ -287,7 +287,8 @@ class MetricsHandler:
 
                         if 'multiple_parameter_values' in self.metrics_configs[metric_type]:
                             metric_subdict['Interactive Edit Iter ' + str(iter_num)]['cross_class_scores'] = dict()
-                            for parameter_idx in self.metrics_configs[metric_type]['multiple_parameter_values']:
+                            parameter_name = self.metrics_configs[metric_type]['multiple_parameter_values']
+                            for parameter_idx in self.metrics_configs[metric_type][parameter_name]:
                                 metric_subdict['Interactive Edit Iter ' + str(iter_num)]['cross_class_scores'][parameter_idx] = 'empty_foreground'
                         else:
                             metric_subdict['Interactive Edit Iter ' + str(iter_num)]['cross_class_scores'] = 'empty_foreground'
@@ -297,11 +298,12 @@ class MetricsHandler:
                         if self.metrics_configs[metric_type]['include_per_class_scores']:
                             if 'multiple_parameter_values' in self.metrics_configs[metric_type]:
                                 metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'] = dict()
+                                parameter_name = self.metrics_configs[metric_type]['multiple_parameter_values']
                                 for class_lb in self.config_labels_dict.keys():
                                     if class_lb.title() == 'Background' and not self.metrics_configs[metric_type]['include_background_metric']:
                                         continue 
                                     metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'][class_lb] = dict()
-                                    for parameter_idx in self.metrics_configs[metric_type]['multiple_parameter_values']:
+                                    for parameter_idx in self.metrics_configs[metric_type][parameter_name]:
                                         metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'][class_lb][parameter_idx] = 'empty_foreground'
                             else:
                                 metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'] = dict()
@@ -333,7 +335,8 @@ class MetricsHandler:
 
                         if 'multiple_parameter_values' in self.metrics_configs[metric_type]:
                             metric_subdict['Interactive Edit Iter ' + str(iter_num)]['cross_class_scores'] = dict()
-                            for parameter_idx in self.metrics_configs[metric_type]['multiple_parameter_values']:
+                            parameter_name = self.metrics_configs[metric_type]['multiple_parameter_values']
+                            for parameter_idx in self.metrics_configs[metric_type][parameter_name]:
                                 metric_subdict['Interactive Edit Iter ' + str(iter_num)]['cross_class_scores'][parameter_idx] = 'terminated_early'
                         else:
                             metric_subdict['Interactive Edit Iter ' + str(iter_num)]['cross_class_scores'] = 'terminated_early'
@@ -342,11 +345,12 @@ class MetricsHandler:
                         if self.metrics_configs[metric_type]['include_per_class_scores']:
                                 if 'multiple_parameter_values' in self.metrics_configs[metric_type]:
                                     metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'] = dict()
+                                    parameter_name = self.metrics_configs[metric_type]['multiple_parameter_values']
                                     for class_lb in self.config_labels_dict.keys():
                                         if class_lb.title() == 'Background' and not self.metrics_configs[metric_type]['include_background_metric']:
                                             continue 
                                         metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'][class_lb] = dict()
-                                        for parameter_idx in self.metrics_configs[metric_type]['multiple_parameter_values']:
+                                        for parameter_idx in self.metrics_configs[metric_type][parameter_name]:
                                             metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'][class_lb][parameter_idx] = 'terminated_early'  
                                 else:
                                     metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'] = dict()
