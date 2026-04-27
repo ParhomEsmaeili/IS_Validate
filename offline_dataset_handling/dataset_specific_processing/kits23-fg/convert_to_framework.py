@@ -9,6 +9,14 @@ import multiprocessing
 import random
 import sys 
 import warnings 
+from monai.transforms import (
+    Compose,
+    LoadImaged,
+    EnsureChannelFirstd,
+    CropForegroundd,
+)
+import torch
+import itk
 
 #NOTE: We have a-priori enforced a mapping into binary sem seg formulation, rather than do this in the evaluation
 #task config. This is because for the MSD datasets we could always guarantee the existence of the target, whereas 
@@ -27,6 +35,88 @@ sys.path.insert(0, offline_dhandling_dir)
 
 # Now import from utils in the offline_dataset_handling directory
 from utils import check_dataset_existence
+
+
+def _log_case_event(level, stage, case_name, reason):
+    print(f"[{level}][{stage}] case={case_name} reason={reason}")
+
+
+def _assert_not_under_source_case(source_case_dir, candidate_path, case_name, tag):
+    source_case_dir = Path(source_case_dir).resolve(strict=False)
+    candidate_path = Path(candidate_path).resolve(strict=False)
+    source_prefix = str(source_case_dir) + os.sep
+    if str(candidate_path) == str(source_case_dir) or str(candidate_path).startswith(source_prefix):
+        raise RuntimeError(
+            f"Unsafe output path for case {case_name}: tag={tag}, path={candidate_path}. "
+            f"Refusing to write inside source case directory {source_case_dir}."
+        )
+
+def save_nifti_images(output_dict, file_path_dict, case_name):
+    output_files = {
+        key: output_dict[key][0] for key in file_path_dict.keys() #This creates  adict with
+        #name of the file as key, and image as value. 
+    }
+    standard_shape = None
+    for image in output_files.values():
+        if standard_shape is None:
+            standard_shape = image.shape
+        else:
+            assert image.shape == standard_shape, f"Image shapes are not the same for case {case_name}, got {image.shape} and {standard_shape}. Please check the original image shapes for this case."
+
+
+    affines = {
+        key: output_dict[key].meta['affine'] for key in file_path_dict.keys()
+    } 
+    standard_affine = None
+    for affine in affines.values():
+        if standard_affine is None:
+            standard_affine = affine
+        else:
+            assert torch.allclose(standard_affine, affine), f"Affines are not close for key {affine[0]}, got {affine[1]} and {standard_affine[1]}. Please check the original affines for this case: {case_name}."
+    
+    if isinstance(output_files['image'], torch.Tensor):
+        for key, array in output_files.items(): 
+            output_files[key] = array.numpy()
+
+    if isinstance(standard_affine, torch.Tensor):
+        standard_affine = standard_affine.numpy()
+
+    if len(standard_shape) >= 2:
+        for key, image in output_files.items():
+            output_files[key] = image.transpose().copy() #Transposition operation is necessary to convert between the axis ordering in MONAI IO and ITK
+    output_files['image'] = output_files['image'].astype(np.float32)
+
+    for key, array in output_files.items():
+        if key != 'image':
+            output_files[key] = array.astype(np.uint8)
+
+    if standard_affine is not None:
+        
+        convert_aff_mat = np.diag([-1, -1, 1, 1])
+        if standard_affine.shape[0] == 3:
+            raise NotImplementedError('We do not yet provide handling for 2D images')
+            # if affine.shape[0] == 3:  # Handle RGB (2D Image)
+                # convert_aff_mat = np.diag([-1, -1, 1])
+
+        standard_affine = convert_aff_mat @ standard_affine
+
+        dim = standard_affine.shape[0] - 1
+        _origin_key = (slice(-1), -1)
+        _m_key = (slice(-1), slice(-1))
+        origin = standard_affine[_origin_key]
+        spacing = np.linalg.norm(standard_affine[_m_key] @ np.eye(dim), axis=0)
+        direction = standard_affine[_m_key] @ np.diag(1 / spacing)
+
+        for key, array in output_files.items():
+            itk_array = itk.image_from_array(array)
+            itk_array.SetDirection(itk.matrix_from_array(direction))
+            itk_array.SetSpacing(spacing)
+            itk_array.SetOrigin(origin)
+
+            itk.imwrite(itk_array, file_path_dict[key], compression=True)
+    else:
+        raise ValueError(f"Affine is None for case {case_name}, cannot save NIfTI files without affine information. Please check the original images for this case.")
+
 
 def validate_case(case_dir, num_annotators):
     """
@@ -47,6 +137,7 @@ def validate_case(case_dir, num_annotators):
     
     # Check required files and directories exist
     if not (imaging_file.exists() and segmentation_file.exists() and instances_dir.exists()):
+        _log_case_event("SKIP", "validate_case", case_dir.name, "missing_required_files_or_instances_dir")
         return False
     
     # Count annotators
@@ -66,8 +157,15 @@ def validate_case(case_dir, num_annotators):
     
     # Skip if doesn't match expected number of annotators
     if num_annotators is not None and len(annotators) != num_annotators:
+        _log_case_event(
+            "SKIP",
+            "validate_case",
+            case_dir.name,
+            f"annotator_count_mismatch expected={num_annotators} got={len(annotators)}",
+        )
         return False
     elif len(annotators) < 2:
+        _log_case_event("SKIP", "validate_case", case_dir.name, "annotator_count_below_two")
         return False
     
     return True
@@ -102,6 +200,7 @@ def process_single_case(case_dir, output_images_path, output_labels_path, semant
     
     # Check required files and directories exist
     if not (imaging_file.exists() and segmentation_file.exists() and instances_dir.exists()):
+        _log_case_event("SKIP", "process_single_case", case_dir.name, "missing_required_files_or_instances_dir")
         return False
     
     # Group instance segmentations by semantic class and annotator
@@ -167,6 +266,7 @@ def process_single_case(case_dir, output_images_path, output_labels_path, semant
         if has_foreground_instances:
             break
     if not has_foreground_instances:
+        _log_case_event("SKIP", "process_single_case", case_dir.name, "no_foreground_instances_for_output_mapping")
         return False
     
     output_images_path.mkdir(parents=True, exist_ok=True)
@@ -178,9 +278,9 @@ def process_single_case(case_dir, output_images_path, output_labels_path, semant
     output_case_images_dir = output_images_path / case_name
     output_case_images_dir.mkdir(parents=True, exist_ok=True)
     
-    # Copy imaging file to case-specific images directory (with channel index 0000)
+    # Create path for output imaging file in case-specific images directory (with channel index 0000)
     output_image_file = output_case_images_dir / f"{case_name}_0000.nii.gz"
-    shutil.copy(imaging_file, output_image_file)
+    _assert_not_under_source_case(case_dir, output_image_file, case_name, "output_image_file")
     
     # Create case subdirectory in labels for all semantic classes and annotators
     output_case_labels_dir = output_labels_path / case_name
@@ -216,12 +316,34 @@ def process_single_case(case_dir, output_images_path, output_labels_path, semant
     if consensus_foreground is None or np.all(consensus_foreground == 0):
         warnings.warn(f'Consensus foreground is all zeros for case {case_name}, despite the fact that there are instance segmentations in the foreground classes. \n'
                       'This could arise from the fusion strategy, but please check the instance segmentations and consensus segmentation for this case to ensure they are correct and consistent with each other. Skipping this case as it has no foreground in the consensus segmentation after fusion.')
+        _log_case_event("SKIP", "process_single_case", case_name, "empty_consensus_foreground_after_mapping")
         return False
     
     consensus_annotator_id = len(annotators) + 1
     
-    # Save consensus segmentation with output mapping applied (merged by output class name)
+    #Now we crop the images, instance segmentations and consensus
+    #according to the foreground region of the consensus segmentation. 
+
+    #NOTE: we assumed a binary semseg task so the foreground region for cropping is only intended for that 
+    # given set of labels. this means that we do not run into issues where we would have determiend
+    # the fg according to one set of classes, but then cropped a fg determined by another set of 
+    # classes. This would have created an inconsistency in how the image and segmentations would
+    # have been cropped otherwise. 
+
+    #First we need to process the consensus segmentation into the segmentation file for the specific
+    #task at hand (i.e. binary sem seg for whole kidney, whole mass, whole tumour etc0)
+    
+    # Save consensus segmentation with output semantic applied (merged by output class name)
+        #We save this in a temporary directory for now.
+    
+    temp_seg_dir = output_case_labels_dir
+    temp_seg_dir.mkdir(parents=True, exist_ok=True)
+
+    assert len(input_to_output_class_mapping) == 2, f"Expected exactly 2 output classes (foreground and background) in input_to_output_class_mapping, but got {len(input_to_output_class_mapping)}. Please check your mapping."
     for output_class_name, input_class_names in input_to_output_class_mapping.items():
+        if output_class_name == 'background':
+            continue  # Skip background class for consensus segmentation, as it will be implicitly defined as everything not in foreground classes
+
         # Merge all input classes that map to this output class
         class_seg = None
         for input_class_name in input_class_names:
@@ -230,19 +352,32 @@ def process_single_case(case_dir, output_images_path, output_labels_path, semant
             class_seg = input_mask if class_seg is None else (class_seg | input_mask)
         
         # Create annotator and semantic class folders using output class name
-        class_annotator_dir = output_case_labels_dir / f"annotator_{consensus_annotator_id}" / f"semantic_class_{output_class_name}"
+        class_annotator_dir = temp_seg_dir / f"annotator_{consensus_annotator_id}" / f"semantic_class_{output_class_name}"
         class_annotator_dir.mkdir(parents=True, exist_ok=True)
         # Save with instance ID = 1 (semantic seg has single instance per class) in .nii.gz format
-        output_file = class_annotator_dir / f"{case_name}_0001.nii.gz"
+        fg_file = class_annotator_dir / f"{case_name}_0001.nii.gz"
+        _assert_not_under_source_case(case_dir, fg_file, case_name, "consensus_foreground_file")
         class_seg_itk = sitk.GetImageFromArray(class_seg)
         # Apply spacing and orientation from original segmentation file
         class_seg_itk.SetSpacing(seg_spacing)
         class_seg_itk.SetOrigin(seg_origin)
         class_seg_itk.SetDirection(seg_direction)
-        sitk.WriteImage(class_seg_itk, str(output_file))
+        sitk.WriteImage(class_seg_itk, str(fg_file))
     
-    # Fuse instances per output class and annotator (using output mapping)
+    foreground_file = fg_file
+    
+    #We need to map each of the annotator's instance level segmentations to a single annotator level
+    #semantic segmentation file, so that we can apply the cropping using the consensus.
+
+    #We will also save these intermediate files in a temporary directory which must be removed after processing.
+
+    # Fuse instances per output class and annotator (using output mapping) for the foreground class
+    fused_instances = dict() 
+
     for output_class_name, input_class_names in input_to_output_class_mapping.items():
+        if output_class_name == 'background':
+            continue  # Skip background class for instance fusion, as it will be implicitly defined as everything not in foreground classes
+
         for annotator_id in annotators:
             # Collect instances from all input classes that map to this output class
             all_instance_files = []
@@ -256,6 +391,12 @@ def process_single_case(case_dir, output_images_path, output_labels_path, semant
                     if str(inst_file).endswith('.nii.gz') or str(inst_file).endswith('.nii'):
                         inst_itk = sitk.ReadImage(str(inst_file))
                         inst_data = sitk.GetArrayFromImage(inst_itk).astype(np.uint8)
+                        if inst_data.shape != image_shape:
+                            raise Exception(
+                                f"Instance segmentation {inst_file.name} has inconsistent voxel shape compared to consensus segmentation. "
+                                f"Instance shape={inst_data.shape}, consensus shape={image_shape}. "
+                                f"Please check the instance segmentations and ensure they are aligned with the consensus segmentation."
+                            )
                         # Enforce consistent header information with consensus segmentation
                         inst_spacing = inst_itk.GetSpacing()
                         inst_origin = inst_itk.GetOrigin()
@@ -278,18 +419,97 @@ def process_single_case(case_dir, output_images_path, output_labels_path, semant
                 fused = np.zeros(image_shape, dtype=np.uint8)
             
             # Create annotator and semantic class folders using output class name
-            class_annotator_dir = output_case_labels_dir / f"annotator_{annotator_id}" / f"semantic_class_{output_class_name}"
+            class_annotator_dir = temp_seg_dir / f"annotator_{annotator_id}" / f"semantic_class_{output_class_name}"
             class_annotator_dir.mkdir(parents=True, exist_ok=True)
             # Save with instance ID = 1 (semantic seg has single instance per class) in .nii.gz format
             output_file = class_annotator_dir / f"{case_name}_0001.nii.gz"
+            _assert_not_under_source_case(case_dir, output_file, case_name, f"fused_instance_file_annotator_{annotator_id}")
             fused_itk = sitk.GetImageFromArray(fused)
             # Apply spacing and orientation from original segmentation file
             fused_itk.SetSpacing(seg_spacing)
             fused_itk.SetOrigin(seg_origin)
             fused_itk.SetDirection(seg_direction)
             sitk.WriteImage(fused_itk, str(output_file))
+            
+            #Here we store the path to the fused instance segmentation.
+            fused_instances[annotator_id] = output_file 
+
+    #NOTE: This process it not ideal, its just easier to reuse code
+
+
+    #Now lets create the input dict for performing the foreground cropping:
+
+    fg_crop_input_dict = {
+        'image': imaging_file,
+        'consensus_segmentation': foreground_file,
+    }
+    for annotator_id in fused_instances:
+        fg_crop_input_dict[f'annotator_{annotator_id}_segmentation'] = fused_instances[annotator_id]
     
+    #Now we will use the MONAI implementation for loading and cropping, then saving the final
+    #cropped images in place. We can then move the temporary files to the permanent location outside
+    #of this function (essentially we perform an in-place crop and overwrite the temporary files with the cropped versions, then move them to the final location after processing).)
+
+    #We for now will assume our transforms are fixed configuration so that we don't need dynamic initialisation
+    #according to non fixed parameters. 
+    transforms = [
+        LoadImaged(keys=list(fg_crop_input_dict.keys()), image_only=True, reader='ITKReader'),
+        EnsureChannelFirstd(keys=list(fg_crop_input_dict.keys())),
+        CropForegroundd(keys=list(fg_crop_input_dict.keys()), source_key='consensus_segmentation', margin=30, allow_smaller=True)
+    ]
+
+    #We now execute the transform.
+    cropped_output = Compose(transforms)(fg_crop_input_dict)
+    #Save the output images 
+
+    output_paths = {
+        'image': output_image_file,
+        'consensus_segmentation': foreground_file
+    }
+    for annotator_id in fused_instances:
+        output_paths[f'annotator_{annotator_id}_segmentation'] = fused_instances[annotator_id]
+    for key, path in output_paths.items():
+        _assert_not_under_source_case(case_dir, path, case_name, f"save_target_{key}")
+    save_nifti_images(cropped_output, output_paths, case_name)
+    
+    #We now need to save the background segmentations for each segmentation
+    for key, output_file in output_paths.items():
+        if key == 'image':
+            continue  # Skip image, only want to create background for segmentations
+        # Load the cropped segmentation
+        seg_itk = sitk.ReadImage(str(output_file))
+        seg_data = sitk.GetArrayFromImage(seg_itk).astype(np.uint8)
+        # Create background by inverting the foreground (assuming binary segmentation after cropping)
+        background_data = (seg_data == 0).astype(np.uint8)
+        # Save background segmentation as a sibling semantic class directory under the same annotator
+        bg_output_file = output_file.parent.parent / "semantic_class_background" / output_file.name
+        _assert_not_under_source_case(case_dir, bg_output_file, case_name, f"background_file_from_{key}")
+        bg_output_file.parent.mkdir(parents=True, exist_ok=True)
+        bg_itk = sitk.GetImageFromArray(background_data)
+        # Apply spacing and orientation from original segmentation file
+        bg_itk.SetSpacing(seg_spacing)
+        bg_itk.SetOrigin(seg_origin)
+        bg_itk.SetDirection(seg_direction)
+        sitk.WriteImage(bg_itk, str(bg_output_file))
+
     return True
+
+
+def process_single_case_safe(case_dir, output_images_path, output_labels_path, semantic_class_mapping, input_to_output_class_mapping, final_semantic_class_mapping, num_annotators):
+    case_name = Path(case_dir).name
+    try:
+        return process_single_case(
+            case_dir,
+            output_images_path,
+            output_labels_path,
+            semantic_class_mapping,
+            input_to_output_class_mapping,
+            final_semantic_class_mapping,
+            num_annotators,
+        )
+    except Exception as e:
+        _log_case_event("ERROR", "process_single_case", case_name, f"exception={type(e).__name__}: {e}")
+        return False
 
 def process_multi_annotator_segmentations(input_dir, output_dir, dataset_id, semantic_class_mapping=None, input_to_output_class_mapping=None, final_semantic_class_mapping=None, num_annotators=None, num_processes=1, methodology_fraction=1.0):
     """
@@ -329,18 +549,29 @@ def process_multi_annotator_segmentations(input_dir, output_dir, dataset_id, sem
     if not final_semantic_class_mapping:
         raise ValueError("Final semantic mapping is empty. Please check your configuration.")
     
-    # Check if dataset ID is already in use
-    existing_datasets = check_dataset_existence(datasets_path, dataset_id)
-    assert len(existing_datasets) == 0, f"Target dataset id {dataset_id} is already taken, please consider changing " \
-                                        f"it. Conflicting dataset: {existing_datasets}"
-    
     # Create target dataset directory with naming convention: Dataset{id:03d}_{name}
     target_dataset_name = f"Dataset{dataset_id:03d}_Kits23"
     target_folder = os.path.join(datasets_path, target_dataset_name)
+    target_folder_path = Path(target_folder)
     
+    # Skip conflict check if folder already exists (likely a resume)
+    if not target_folder_path.exists():
+        existing_datasets = check_dataset_existence(datasets_path, dataset_id)
+        assert len(existing_datasets) == 0, f"Target dataset id {dataset_id} is already taken, please consider changing " \
+                                            f"it. Conflicting dataset: {existing_datasets}"
+    else:
+        print(f"Dataset folder already exists - resuming dataset {dataset_id}...")
+    
+    # Now safe to create the output directory
     input_path = Path(input_dir)
-    output_path = Path(target_folder)
+    output_path = target_folder_path
     output_path.mkdir(parents=True, exist_ok=True)
+    
+    # Create/load checkpoint file
+    checkpoint_file = output_path / "processing_checkpoint.json"
+    if not checkpoint_file.exists():
+        with open(checkpoint_file, 'w') as f:
+            json.dump({'processed_cases': []}, f)
     
     # Create temporary directory for all processed cases
     temp_output_path = output_path / "_temp_processing"
@@ -376,19 +607,55 @@ def process_multi_annotator_segmentations(input_dir, output_dir, dataset_id, sem
         print("No potential cases found!")
         return
     
-    # Process ALL potential cases to temporary folder
-    print(f"Processing all {len(potential_case_dirs)} cases to temporary folder...")
-    if num_processes == 1:
-        results = [process_single_case(case_dir, temp_images, temp_labels, semantic_class_mapping, input_to_output_class_mapping, final_semantic_class_mapping, num_annotators) for case_dir in potential_case_dirs]
-        processed_case_names = [potential_case_dirs[i].name for i, result in enumerate(results) if result]
+    # Load checkpoint if resuming
+    processed_case_names = []
+    if checkpoint_file.exists():
+        try:
+            with open(checkpoint_file, 'r') as f:
+                checkpoint_data = json.load(f)
+                processed_case_names = checkpoint_data.get('processed_cases', [])
+            print(f"Resuming from checkpoint: {len(processed_case_names)} cases already processed")
+        except Exception as e:
+            print(f"Warning: Could not load checkpoint: {e}. Starting fresh.")
+            processed_case_names = []
+    
+    # Identify cases that still need processing
+    processed_set = set(processed_case_names)
+    cases_to_process = [case_dir for case_dir in potential_case_dirs if case_dir.name not in processed_set]
+    
+    if cases_to_process:
+        print(f"Processing {len(cases_to_process)} remaining cases to temporary folder...")
+        if num_processes == 1:
+            for i, case_dir in enumerate(cases_to_process):
+                print(f"  [{i+1}/{len(cases_to_process)}] Processing {case_dir.name}...")
+                result = process_single_case_safe(
+                    case_dir,
+                    temp_images,
+                    temp_labels,
+                    semantic_class_mapping,
+                    input_to_output_class_mapping,
+                    final_semantic_class_mapping,
+                    num_annotators,
+                )
+                if result:
+                    processed_case_names.append(case_dir.name)
+                # Save checkpoint after each case
+                with open(checkpoint_file, 'w') as f:
+                    json.dump({'processed_cases': processed_case_names}, f)
+        else:
+            with multiprocessing.Pool(num_processes) as p:
+                results = p.starmap_async(
+                    process_single_case_safe,
+                    [(case_dir, temp_images, temp_labels, semantic_class_mapping, input_to_output_class_mapping, final_semantic_class_mapping, num_annotators) for case_dir in cases_to_process]
+                )
+                results_list = results.get(timeout=None)
+                newly_processed = [cases_to_process[i].name for i, result in enumerate(results_list) if result]
+                processed_case_names.extend(newly_processed)
+            # Save checkpoint after batch processing
+            with open(checkpoint_file, 'w') as f:
+                json.dump({'processed_cases': processed_case_names}, f)
     else:
-        with multiprocessing.Pool(num_processes) as p:
-            results = p.starmap_async(
-                process_single_case,
-                [(case_dir, temp_images, temp_labels, semantic_class_mapping, input_to_output_class_mapping, final_semantic_class_mapping, num_annotators) for case_dir in potential_case_dirs]
-            )
-            results_list = results.get()
-            processed_case_names = [potential_case_dirs[i].name for i, result in enumerate(results_list) if result]
+        print("All cases already processed!")
     
     print(f"Successfully processed {len(processed_case_names)} cases with non-empty foreground")
     
@@ -565,56 +832,56 @@ if __name__ == "__main__":
     # Fraction of cases to use for training
     methodology_fraction = 1.0
     
-    # Number of worker processes
-    num_processes = 8
+    # Number of worker processes (set to 1 for safer single-process mode, increase if you have many CPU cores and want parallelization)
+    num_processes = 1
     
-    # ===== Example 2: Binary kidney dataset (kidneys, tumors, cysts foreground, others background) =====
-    # Merges all foregrounds into one class. This is the most inclusive definition of foreground, and should have the most cases with non-empty foreground, as any instance of kidney, tumor or cyst will count towards the foreground.
-    dataset_id = 11
-    input_to_output_map = {
-        "whole_kidney": ["kidney", "cyst", "tumor"],
-        "background": ["background"],
-    }
-    final_map = {
-        "whole_kidney": 1,
-        "background": 0,
-    }
+    # # ===== Example 2: Binary kidney dataset (kidneys, tumors, cysts foreground, others background) =====
+    # # Merges all foregrounds into one class. This is the most inclusive definition of foreground, and should have the most cases with non-empty foreground, as any instance of kidney, tumor or cyst will count towards the foreground.
+    # dataset_id = 23
+    # input_to_output_map = {
+    #     "whole_kidney": ["kidney", "cyst", "tumor"],
+    #     "background": ["background"],
+    # }
+    # final_map = {
+    #     "whole_kidney": 1,
+    #     "background": 0,
+    # }
     
-    process_multi_annotator_segmentations(
-        input_directory, None, dataset_id, 
-        semantic_class_mapping,
-        input_to_output_class_mapping=input_to_output_map,
-        final_semantic_class_mapping=final_map,
-        num_annotators=num_annotators, 
-        num_processes=num_processes, 
-        methodology_fraction=methodology_fraction
-    )
+    # process_multi_annotator_segmentations(
+    #     input_directory, None, dataset_id, 
+    #     semantic_class_mapping,
+    #     input_to_output_class_mapping=input_to_output_map,
+    #     final_semantic_class_mapping=final_map,
+    #     num_annotators=num_annotators, 
+    #     num_processes=num_processes, 
+    #     methodology_fraction=methodology_fraction
+    # )
 
-    # # ===== Example 2: Binary tumor dataset (tumor foreground, others background) =====
-    # # Maps kidney and cyst into background, keeps tumor separate
-    dataset_id = 15
-    input_to_output_map = {
-        "tumor": ["tumor"],
-        "background": ["background", "kidney", "cyst"],
-    }
-    final_map = {
-        "tumor": 1,
-        "background": 0,
-    }
+    # # # ===== Example 2: Binary tumor dataset (tumor foreground, others background) =====
+    # # # Maps kidney and cyst into background, keeps tumor separate
+    # dataset_id = 27
+    # input_to_output_map = {
+    #     "tumor": ["tumor"],
+    #     "background": ["background", "kidney", "cyst"],
+    # }
+    # final_map = {
+    #     "tumor": 1,
+    #     "background": 0,
+    # }
     
-    process_multi_annotator_segmentations(
-        input_directory, None, dataset_id, 
-        semantic_class_mapping,
-        input_to_output_class_mapping=input_to_output_map,
-        final_semantic_class_mapping=final_map,
-        num_annotators=num_annotators, 
-        num_processes=num_processes, 
-        methodology_fraction=methodology_fraction
-    )
+    # process_multi_annotator_segmentations(
+    #     input_directory, None, dataset_id, 
+    #     semantic_class_mapping,
+    #     input_to_output_class_mapping=input_to_output_map,
+    #     final_semantic_class_mapping=final_map,
+    #     num_annotators=num_annotators, 
+    #     num_processes=num_processes, 
+    #     methodology_fraction=methodology_fraction
+    # )
 
     # ===== Example 3: Binary mass dataset (tumor and cyst foreground, others background) =====
     # Maps kidney to background, keeps mass separate
-    dataset_id = 19
+    dataset_id = 31
     input_to_output_map = {
         "mass": ["tumor", "cyst"],
         "background": ["background", "kidney"],

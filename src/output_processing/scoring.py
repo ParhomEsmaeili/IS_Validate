@@ -88,17 +88,29 @@ class MetricsHandler:
         per_class_scores: A class separated dict of torch tensors or metatensors OR a Nonetype.
 
         '''
-        
-        if not isinstance(metric_subdict['cross_class_scores'], torch.Tensor) and not isinstance(metric_subdict['cross_class_scores'], MetaTensor):
-            raise TypeError(f'The cross class score provided for {metric_type} was not a torch tensor or a metatensor')
+        if 'multiple_parameter_values' in self.metrics_configs[metric_type]:
+            if not isinstance(metric_subdict['cross_class_scores'], dict) and not isinstance(metric_subdict['cross_class_scores'], dict):
+                raise TypeError(f'The cross class score provided for {metric_type} was not a torch tensor or a metatensor')
 
-        if not isinstance(metric_subdict['per_class_scores'], dict) and not metric_subdict['per_class_scores'] is None:
-            raise TypeError('The per class scores provided for {metric_type} were not a dict or a NoneType')
-        
-        if isinstance(metric_subdict['per_class_scores'], dict):
-            for key, val in metric_subdict['per_class_scores'].items():
-                if not isinstance(val, torch.Tensor) and not isinstance(val, MetaTensor):
-                    raise TypeError(f'The key {key} in per class scores in {metric_type} was not a Torch Tensor or a MetaTensor')
+            if not isinstance(metric_subdict['per_class_scores'], dict) and not metric_subdict['per_class_scores'] is None:
+                raise TypeError(f'The per class scores provided for {metric_type} were not a dict or a NoneType')
+            
+            if isinstance(metric_subdict['per_class_scores'], dict):
+                for key, val in metric_subdict['per_class_scores'].items():
+                    if not isinstance(val, dict) and not isinstance(val, dict):
+                        raise TypeError(f'The key {key} in per class scores in {metric_type} was not a Torch Tensor or a MetaTensor')
+
+        else:
+            if not isinstance(metric_subdict['cross_class_scores'], torch.Tensor) and not isinstance(metric_subdict['cross_class_scores'], MetaTensor):
+                raise TypeError(f'The cross class score provided for {metric_type} was not a torch tensor or a metatensor')
+
+            if not isinstance(metric_subdict['per_class_scores'], dict) and not metric_subdict['per_class_scores'] is None:
+                raise TypeError(f'The per class scores provided for {metric_type} were not a dict or a NoneType')
+            
+            if isinstance(metric_subdict['per_class_scores'], dict):
+                for key, val in metric_subdict['per_class_scores'].items():
+                    if not isinstance(val, torch.Tensor) and not isinstance(val, MetaTensor):
+                        raise TypeError(f'The key {key} in per class scores in {metric_type} was not a Torch Tensor or a MetaTensor')
 
         return True 
     
@@ -272,15 +284,32 @@ class MetricsHandler:
                         
                         #First we pad the cross-class scores:
                         metric_subdict['Interactive Edit Iter ' + str(iter_num)] = dict()
-                        metric_subdict['Interactive Edit Iter ' + str(iter_num)]['cross_class_scores'] = 'empty_foreground'
+
+                        if 'multiple_parameter_values' in self.metrics_configs[metric_type]:
+                            metric_subdict['Interactive Edit Iter ' + str(iter_num)]['cross_class_scores'] = dict()
+                            for parameter_idx in self.metrics_configs[metric_type]['multiple_parameter_values']:
+                                metric_subdict['Interactive Edit Iter ' + str(iter_num)]['cross_class_scores'][parameter_idx] = 'empty_foreground'
+                        else:
+                            metric_subdict['Interactive Edit Iter ' + str(iter_num)]['cross_class_scores'] = 'empty_foreground'
+                        
+                        
                         #Then we pad the per-class scores, if include_per_class_scores config is True
                         if self.metrics_configs[metric_type]['include_per_class_scores']:
-                            metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'] = dict()
-                            for class_lb in self.config_labels_dict.keys():
-                                if class_lb.title() == 'Background' and not self.metrics_configs[metric_type]['include_background_metric']:
-                                    continue 
-                                #We will pad the per-class scores with a string denoting empty foreground.
-                                metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'][class_lb] = 'empty_foreground'
+                            if 'multiple_parameter_values' in self.metrics_configs[metric_type]:
+                                metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'] = dict()
+                                for class_lb in self.config_labels_dict.keys():
+                                    if class_lb.title() == 'Background' and not self.metrics_configs[metric_type]['include_background_metric']:
+                                        continue 
+                                    metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'][class_lb] = dict()
+                                    for parameter_idx in self.metrics_configs[metric_type]['multiple_parameter_values']:
+                                        metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'][class_lb][parameter_idx] = 'empty_foreground'
+                            else:
+                                metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'] = dict()
+                                for class_lb in self.config_labels_dict.keys():
+                                    if class_lb.title() == 'Background' and not self.metrics_configs[metric_type]['include_background_metric']:
+                                        continue 
+                                    #We will pad the per-class scores with a string denoting empty foreground.
+                                    metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'][class_lb] = 'empty_foreground'
             
             elif terminated_early: #Terminated early but not because of a fully empty foreground.
                 warnings.warn('The process terminated early, given that determining the early termination is a design choice that is not fully covered,'
@@ -301,19 +330,39 @@ class MetricsHandler:
                         
                         #First we pad the cross-class scores:
                         metric_subdict['Interactive Edit Iter ' + str(iter_num)] = dict()
-                        metric_subdict['Interactive Edit Iter ' + str(iter_num)]['cross_class_scores'] = 'terminated_early'
+
+                        if 'multiple_parameter_values' in self.metrics_configs[metric_type]:
+                            metric_subdict['Interactive Edit Iter ' + str(iter_num)]['cross_class_scores'] = dict()
+                            for parameter_idx in self.metrics_configs[metric_type]['multiple_parameter_values']:
+                                metric_subdict['Interactive Edit Iter ' + str(iter_num)]['cross_class_scores'][parameter_idx] = 'terminated_early'
+                        else:
+                            metric_subdict['Interactive Edit Iter ' + str(iter_num)]['cross_class_scores'] = 'terminated_early'
+
                         #Then we pad the per-class scores, if include_per_class_scores config is True
                         if self.metrics_configs[metric_type]['include_per_class_scores']:
-                            metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'] = dict()
-                            for class_lb in self.config_labels_dict.keys():
-                                if class_lb.title() == 'Background' and not self.metrics_configs[metric_type]['include_background_metric']:
-                                    continue 
-                                #We will pad the per-class scores with a string denoting early termination.
-                                metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'][class_lb] = 'terminated_early'
+                                if 'multiple_parameter_values' in self.metrics_configs[metric_type]:
+                                    metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'] = dict()
+                                    for class_lb in self.config_labels_dict.keys():
+                                        if class_lb.title() == 'Background' and not self.metrics_configs[metric_type]['include_background_metric']:
+                                            continue 
+                                        metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'][class_lb] = dict()
+                                        for parameter_idx in self.metrics_configs[metric_type]['multiple_parameter_values']:
+                                            metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'][class_lb][parameter_idx] = 'terminated_early'  
+                                else:
+                                    metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'] = dict()
+                                    for class_lb in self.config_labels_dict.keys():
+                                        if class_lb.title() == 'Background' and not self.metrics_configs[metric_type]['include_background_metric']:
+                                            continue 
+                                        #We will pad the per-class scores with a string denoting early termination.
+                                        metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'][class_lb] = 'terminated_early'
             else:
                 if temporary_iter_lims[0] != None:
                     raise Exception('If the process did not terminate early, the bottom iteration limit must be a NoneType. There is \n' \
                     'no need to pad the tracked metrics.')
                 # print('The process did not terminate early, so we will save the tracked metrics as they are without modification')
 
-        write_to_csvs(case_name=case_name, csv_paths=self.metrics_savepaths, tracked_metrics=tracked_metrics)  
+        write_to_csvs(
+            case_name=case_name, 
+            csv_paths=self.metrics_savepaths, 
+            tracked_metrics=tracked_metrics,
+            metrics_configs=self.metrics_configs)  

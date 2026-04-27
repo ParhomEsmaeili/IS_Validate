@@ -1,0 +1,13 @@
+{
+  "dataset_name": "Dataset042_TopCowCT",
+  "median_spacing": {
+    "dim0": 0.431640625,
+    "dim1": 0.431640625,
+    "dim2": 0.75
+  },
+  "spacing_type": "isotropic",
+  "anisotropy_ratio": 1.737556561085973,
+  "reference_spacing": 0.431640625,
+  "num_cases": 123,
+  "note": "Reference spacing: median of all dims (isotropic) or median of in-plane dims (anisotropic). SimpleITK GetSpacing() accounts for image orientation from NIfTI headers."
+}

@@ -1,0 +1,13 @@
+{
+  "dataset_name": "Dataset044_TopBrainCT",
+  "median_spacing": {
+    "dim0": 0.4833984375,
+    "dim1": 0.4833984375,
+    "dim2": 0.70001220703125
+  },
+  "spacing_type": "isotropic",
+  "anisotropy_ratio": 1.4481060606060605,
+  "reference_spacing": 0.4833984375,
+  "num_cases": 24,
+  "note": "Reference spacing: median of all dims (isotropic) or median of in-plane dims (anisotropic). SimpleITK GetSpacing() accounts for image orientation from NIfTI headers."
+}

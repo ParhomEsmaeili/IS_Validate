@@ -1,0 +1,13 @@
+{
+  "dataset_name": "Dataset007_Pancreas",
+  "median_spacing": {
+    "dim0": 0.8027340173721313,
+    "dim1": 0.8027340173721313,
+    "dim2": 2.5
+  },
+  "spacing_type": "anisotropic",
+  "anisotropy_ratio": 3.1143566186270766,
+  "reference_spacing": 0.8027340173721313,
+  "num_cases": 281,
+  "note": "Reference spacing: median of all dims (isotropic) or median of in-plane dims (anisotropic). SimpleITK GetSpacing() accounts for image orientation from NIfTI headers."
+}

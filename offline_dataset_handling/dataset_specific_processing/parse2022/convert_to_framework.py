@@ -346,6 +346,8 @@ def process_parse_dataset(
     for case_name in sorted(train_case_names):
         case_image_file = output_images_tr / case_name / f"{case_name}_0000.nii.gz"
         if case_image_file.exists():
+            # Build labels dictionary with hierarchy:
+            # labels -> annotator -> semantic class -> instance_1
             labels_dict = {}
             case_labels_dir = output_labels_tr / case_name
             if case_labels_dir.exists():
@@ -356,10 +358,12 @@ def process_parse_dataset(
                                 class_name = semantic_class_dir.name.replace("semantic_class_", "")
                                 seg_file = semantic_class_dir / f"{case_name}_0001.nii.gz"
                                 if seg_file.exists():
-                                    if class_name not in labels_dict:
-                                        labels_dict[class_name] = {}
                                     annotator_name = annotator_dir.name
-                                    labels_dict[class_name][annotator_name] = f"./labelsTr/{case_name}/{annotator_name}/{semantic_class_dir.name}/{seg_file.name}"
+                                    if annotator_name not in labels_dict:
+                                        labels_dict[annotator_name] = {}
+                                    labels_dict[annotator_name][class_name] = {
+                                        "instance_1": f"./labelsTr/{case_name}/{annotator_name}/{semantic_class_dir.name}/{seg_file.name}"
+                                    }
             
             # Build images dict with only available modalities
             images_dict = {}
@@ -377,6 +381,8 @@ def process_parse_dataset(
     for case_name in sorted(test_case_names):
         case_image_file = output_images_ts / case_name / f"{case_name}_0000.nii.gz"
         if case_image_file.exists():
+            # Build labels dictionary with hierarchy:
+            # labels -> annotator -> semantic class -> instance_1
             labels_dict = {}
             case_labels_dir = output_labels_ts / case_name
             if case_labels_dir.exists():
@@ -387,10 +393,12 @@ def process_parse_dataset(
                                 class_name = semantic_class_dir.name.replace("semantic_class_", "")
                                 seg_file = semantic_class_dir / f"{case_name}_0001.nii.gz"
                                 if seg_file.exists():
-                                    if class_name not in labels_dict:
-                                        labels_dict[class_name] = {}
                                     annotator_name = annotator_dir.name
-                                    labels_dict[class_name][annotator_name] = f"./labelsTs/{case_name}/{annotator_name}/{semantic_class_dir.name}/{seg_file.name}"
+                                    if annotator_name not in labels_dict:
+                                        labels_dict[annotator_name] = {}
+                                    labels_dict[annotator_name][class_name] = {
+                                        "instance_1": f"./labelsTs/{case_name}/{annotator_name}/{semantic_class_dir.name}/{seg_file.name}"
+                                    }
             
             # Build images dict with only available modalities
             images_dict = {}

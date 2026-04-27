@@ -11,5 +11,5 @@
 			"include_background_metric":false,
 			"tolerance_sf": ["1", "2", "3"]
 		}
-	},
+	}
 }

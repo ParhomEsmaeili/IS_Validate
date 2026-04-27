@@ -1,4 +1,5 @@
 import argparse
+import copy
 import json
 import logging 
 import sys 
@@ -43,7 +44,7 @@ def set_parse():
     parser.add_argument('--skip_metric_and_prompting', action='store_true', default=False) 
     #Whether to skip the metric and prompt generation steps and just execute adaptation with gold-standard annotations.
     parser.add_argument('--data_root', type=str, default=codebase_dir)
-    parser.add_argument('--dataset_name', type=str, default='Dataset005_Prostate')
+    parser.add_argument('--dataset_name', type=str, default='Dataset040_MSMultispine')
     parser.add_argument('--app_root', type=str, default= 
                         '/home/parhomesmaeili/IS_Codebase_Forks/nnInteractive_Fork') 
     #NOTE:Just set for debugging purposes.
@@ -274,9 +275,17 @@ def gen_experiment_args(args):
     'task_channels': extractor(output_dict['task_configs'], ('data_sampling', 'image_conf', 'image_channel'))
     }
 
+    #We pull the spacing config info here as it may be needed. If it does not exist we raise an error
+    #if the metrics configs require it (e.g. for NSD with tolerance sf instead of mms), but we don't want to pull it if it isn't needed to avoid unnecessary dependencies on the dataset configs.
+    try:
+        spacing_config = extract_config(os.path.join(codebase_dir, 'exp_configs', args.dataset_name, 'spacing_config.json'), 'reference_spacing')
+    except:
+        spacing_config = None 
+    output_dict['metrics_configs'] = process_metric_config(
+        extract_config(os.path.join(exp_conf_dir, args.metric_conf_filename), args.metric_conf_name),
+        spacing_config
+    )
 
-    output_dict['metrics_configs'] = extract_config(os.path.join(exp_conf_dir, args.metric_conf_filename), args.metric_conf_name)
-    
     #Extracting the config dict for handling the empty fg....? 
     output_dict['sim_empty_fg_automatic'] = args.sim_empty_fg_automatic  
 
@@ -371,6 +380,35 @@ def gen_experiment_args(args):
     }
 
     return output_dict 
+
+def process_metric_config(metric_config, spacing_config):
+    #Function which processes the metric configs for cases where we do not have a trivial config.
+
+    #E.g., for NSD where we may want to calculate across multiple tolerance values.
+    for metric_name, conf in metric_config.items():
+        if metric_name == 'NSD':
+            if 'tolerance_mm' not in conf:
+                assert 'tolerance_sf' in conf, 'If no tolerance_mm provided for NSD metric config, then must provide a tolerance_sf value to calculate the tolerance based on the dataset voxel spacing, please check your metric configs.'
+                #If we have a tolerance sf, then we must calculate tolerance mms from the tolerance sf. 
+                if spacing_config:
+                    tolerance_mms = [float(i) * float(spacing_config) for i in conf['tolerance_sf']]
+                    assert isinstance(tolerance_mms, list), 'The calculated tolerance mms values must be a list, even if there is only one value, to be consistent with the case where the tolerance mms values are provided directly in the metric configs, please check your metric configs and dataset spacing config to ensure this is the case.'
+                    conf['tolerance_mms'] = {index:tolerance_mm for index,tolerance_mm in enumerate(tolerance_mms)}
+
+                    #We add the tolerance mms values to the config dict for the metric, we will use these for the metric calculations. We deepcopy just to be safe and avoid any weird pointer issues.
+                    del conf['tolerance_sf'] #We remove the tolerance sf value as it is no longer needed and to avoid confusion.
+                else:
+                    raise ValueError('If using a tolerance sf value for NSD metric config, then the dataset spacing config must be provided to calculate the tolerance_mm values, please check your metric configs and dataset configs to ensure this is the case.')
+            else:
+                tolerance_mms = copy.deepcopy(conf['tolerance_mm'])
+                del conf['tolerance_mm'] #We remove the tolerance mm value as it is no longer needed and to avoid confusion, we will just use the tolerance mms values for the metric calculations. We deepcopy just to be safe and avoid any weird pointer issues.
+                conf['tolerance_mms'] = {0: tolerance_mms} #We just rename the key to be consistent with the case where we calculate the tolerance mms from the tolerance sf, this is just
+            if len(conf['tolerance_mms']) > 1:
+                #We add a new key which says that we have multiple nsds so downstream it knows to treat
+                #this differently!. It points to the key where that corresponding list of parameterisations
+                #are.
+                conf['multiple_parameter_values'] = 'tolerance_mms'
+    return metric_config
 
 
 def create_seg_dirs(exp_seg_dir, infer_run_conf, exist_ok=False):

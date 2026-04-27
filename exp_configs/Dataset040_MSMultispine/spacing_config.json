@@ -1,0 +1,13 @@
+{
+  "dataset_name": "Dataset040_MSMultispine",
+  "median_spacing": {
+    "dim0": 0.5,
+    "dim1": 0.5,
+    "dim2": 0.4999999701976776
+  },
+  "spacing_type": "isotropic",
+  "anisotropy_ratio": 1.0000000596046483,
+  "reference_spacing": 0.5,
+  "num_cases": 76,
+  "note": "Reference spacing: median of all dims (isotropic) or median of in-plane dims (anisotropic). SimpleITK GetSpacing() accounts for image orientation from NIfTI headers."
+}

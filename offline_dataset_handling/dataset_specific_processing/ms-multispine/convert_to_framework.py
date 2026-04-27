@@ -163,6 +163,17 @@ def process_single_case(case_dir, t2_file, lesion_mask_file, complementary_file,
     merged_itk.SetOrigin(t2_origin)
     merged_itk.SetDirection(t2_direction)
     sitk.WriteImage(merged_itk, str(output_file))
+
+    # Save the corresponding background mask as the inverse of the lesion mask.
+    background_mask = (merged_lesion_mask == 0).astype(np.uint8)
+    background_dir = output_case_labels_dir / f"annotator_{annotator_id}" / "semantic_class_background"
+    background_dir.mkdir(parents=True, exist_ok=True)
+    background_file = background_dir / f"{case_name}_0001.nii.gz"
+    background_itk = sitk.GetImageFromArray(background_mask)
+    background_itk.SetSpacing(t2_spacing)
+    background_itk.SetOrigin(t2_origin)
+    background_itk.SetDirection(t2_direction)
+    sitk.WriteImage(background_itk, str(background_file))
     
     # Record metadata
     metadata_file = output_case_images_dir / "metadata.json"
@@ -338,6 +349,8 @@ def process_ms_multispine_dataset(input_dir, output_dir, dataset_id, semantic_cl
     for case_name in sorted(train_case_names):
         case_image_file = output_images_tr / case_name / f"{case_name}_0000.nii.gz"
         if case_image_file.exists():
+            # Build labels dictionary with hierarchy:
+            # labels -> annotator -> semantic class -> instance_1
             labels_dict = {}
             case_labels_dir = output_labels_tr / case_name
             if case_labels_dir.exists():
@@ -348,10 +361,12 @@ def process_ms_multispine_dataset(input_dir, output_dir, dataset_id, semantic_cl
                                 class_name = semantic_class_dir.name.replace("semantic_class_", "")
                                 seg_file = semantic_class_dir / f"{case_name}_0001.nii.gz"
                                 if seg_file.exists():
-                                    if class_name not in labels_dict:
-                                        labels_dict[class_name] = {}
                                     annotator_name = annotator_dir.name
-                                    labels_dict[class_name][annotator_name] = f"./labelsTr/{case_name}/{annotator_name}/{semantic_class_dir.name}/{seg_file.name}"
+                                    if annotator_name not in labels_dict:
+                                        labels_dict[annotator_name] = {}
+                                    labels_dict[annotator_name][class_name] = {
+                                        "instance_1": f"./labelsTr/{case_name}/{annotator_name}/{semantic_class_dir.name}/{seg_file.name}"
+                                    }
             
             # Build images dict with only available modalities
             images_dict = {}
@@ -369,6 +384,8 @@ def process_ms_multispine_dataset(input_dir, output_dir, dataset_id, semantic_cl
     for case_name in sorted(test_case_names):
         case_image_file = output_images_ts / case_name / f"{case_name}_0000.nii.gz"
         if case_image_file.exists():
+            # Build labels dictionary with hierarchy:
+            # labels -> annotator -> semantic class -> instance_1
             labels_dict = {}
             case_labels_dir = output_labels_ts / case_name
             if case_labels_dir.exists():
@@ -379,10 +396,12 @@ def process_ms_multispine_dataset(input_dir, output_dir, dataset_id, semantic_cl
                                 class_name = semantic_class_dir.name.replace("semantic_class_", "")
                                 seg_file = semantic_class_dir / f"{case_name}_0001.nii.gz"
                                 if seg_file.exists():
-                                    if class_name not in labels_dict:
-                                        labels_dict[class_name] = {}
                                     annotator_name = annotator_dir.name
-                                    labels_dict[class_name][annotator_name] = f"./labelsTs/{case_name}/{annotator_name}/{semantic_class_dir.name}/{seg_file.name}"
+                                    if annotator_name not in labels_dict:
+                                        labels_dict[annotator_name] = {}
+                                    labels_dict[annotator_name][class_name] = {
+                                        "instance_1": f"./labelsTs/{case_name}/{annotator_name}/{semantic_class_dir.name}/{seg_file.name}"
+                                    }
             
             # Build images dict with only available modalities
             images_dict = {}
@@ -412,7 +431,7 @@ if __name__ == "__main__":
         "background": 0,
     }
     
-    dataset_id = 30  # Adjust as needed
+    dataset_id = 40  # Adjust as needed
     num_processes = 8
     methodology_fraction = 1.0  # 80% train, 20% test
     

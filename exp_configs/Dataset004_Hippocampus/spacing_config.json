@@ -1,0 +1,13 @@
+{
+  "dataset_name": "Dataset004_Hippocampus",
+  "median_spacing": {
+    "dim0": 1.0,
+    "dim1": 1.0,
+    "dim2": 1.0
+  },
+  "spacing_type": "isotropic",
+  "anisotropy_ratio": 1.0,
+  "reference_spacing": 1.0,
+  "num_cases": 260,
+  "note": "Reference spacing: median of all dims (isotropic) or median of in-plane dims (anisotropic). SimpleITK GetSpacing() accounts for image orientation from NIfTI headers."
+}

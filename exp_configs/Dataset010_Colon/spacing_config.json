@@ -1,0 +1,13 @@
+{
+  "dataset_name": "Dataset010_Colon",
+  "median_spacing": {
+    "dim0": 0.78125,
+    "dim1": 0.78125,
+    "dim2": 5.0
+  },
+  "spacing_type": "anisotropic",
+  "anisotropy_ratio": 6.4,
+  "reference_spacing": 0.78125,
+  "num_cases": 126,
+  "note": "Reference spacing: median of all dims (isotropic) or median of in-plane dims (anisotropic). SimpleITK GetSpacing() accounts for image orientation from NIfTI headers."
+}

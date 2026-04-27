@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 from os.path import dirname as up
@@ -10,7 +11,7 @@ import re
 # import pandas
 
 def init_metric_csvs(
-        dir_path, 
+        dir_path: str | dict[str, str], 
         metric_configs: dict, 
         config_labels_dict:dict):
     '''
@@ -121,17 +122,41 @@ def init_all_csvs(
 
     config_labels_dict: A dictionary containing the class-label - class-integer code mapping.
 
+    returns:
+    A nested dictionary containing the paths to the csvs for each metric type,
+    and if applicable, for each subgroup within the metric type (e.g., if there
+    is a parameterisation which is not fixed/single).)
     '''
     
     complete_paths_dicts = dict() 
 
     for metric_type, config in metric_configs.items():
         #creating the subdir for the metric type
+    
         metric_subdir_abspath = os.path.join(metrics_save_dir, metric_type)
         os.makedirs(metric_subdir_abspath, exist_ok=False) #False, folder should not exist! 
-        
-        metric_paths_dict = init_metric_csvs(dir_path=metric_subdir_abspath, metric_configs=config, config_labels_dict=config_labels_dict)
+        if 'multiple_parameter_values' in config:
+            #for each parameterisation we want to also create a subfolder.
+            parameter_name = config['multiple_parameter_values']
+            parameter_values = config[parameter_name]
+            #We will add the parameter value to the metric type in the paths dict for downstream use
+            metric_paths_dict = dict()
+            for parameter_idx, parameter_value in parameter_values.items():
+                metric_final_abspath = os.path.join(
+                    metric_subdir_abspath,
+                    f'{parameter_name}_idx_{parameter_idx}'
+                    )
+                os.makedirs(metric_final_abspath, exist_ok=False) #False, folder should not exist!
+                #Save a json which contains the parameter value in question.
+                with open(os.path.join(metric_final_abspath, 'parameter_values.json'), 'w') as f:
+                    json.dump({parameter_name: parameter_value}, f)
+                metric_paths_dict[parameter_idx] = init_metric_csvs(dir_path=metric_final_abspath, metric_configs=config, config_labels_dict=config_labels_dict)
 
+        else:
+            metric_final_abspath = metric_subdir_abspath
+            metric_paths_dict =init_metric_csvs(dir_path=metric_final_abspath, metric_configs=config, config_labels_dict=config_labels_dict)
+
+        
         complete_paths_dicts[metric_type] = metric_paths_dict
 
     if len(complete_paths_dicts) < 1:
@@ -223,7 +248,8 @@ def write_row(
 def write_to_csvs(
     case_name: str,
     csv_paths: dict[str, dict],
-    tracked_metrics: dict
+    tracked_metrics: dict,
+    metrics_configs: dict
 ):
     '''
     Function which saves the metric outcomes for each patient to the corresponding csv files.
@@ -244,12 +270,15 @@ def write_to_csvs(
 
     tracked_metrics: A thrice nested dictionary containing the metrics across the iterative refinement process 
     separated by metric type, then by the infer mode/name, and then a dictionary with fields:
-
-    "cross_class_scores" (a torch tensor or Metatensor size 1) and 
+    
+    "cross_class_scores" (a torch tensor or Metatensor) and 
     "per_class_scores" an optional dict separated by the class label for each per class score being saved 
-    (each is a torch tensor or metatensor size 1). In instances where per_class_scores were not desired, this is a 
+    (each is a torch tensor or metatensor). In instances where per_class_scores were not desired, this is a 
     NoneType.
 
+    metrics_configs: A dictionary containing information regarding the metrics configurations. 
+    This can inform the process of saving the metrics, for example whether we have
+    multiple parameterisations for a given metric type.
     '''
 
     if not set(csv_paths) == set(tracked_metrics):
@@ -268,24 +297,45 @@ def write_to_csvs(
         
         #Writing the cross class scores, must always be provided.: 
         
-        #Generating the tuples for the paths:
-        path_tuples = tuple([(infer_mode, 'cross_class_scores') for infer_mode in sorted_infer_calls])
-        #Writing:
-        write_row(case_name=case_name, save_path=current_metric_csvs['cross_class_scores'], extraction_tuples=path_tuples,  metrics_dict=metrics_dict)
-       
-        # per_class_score handling, since this is not always provided at all, or across all classes:
-        if current_metric_csvs['per_class_scores'] is None:
-            pass #Explicit for debugging purposes
-        elif isinstance(current_metric_csvs['per_class_scores'], dict):
-            #In this case, we want to iterate through the non-NoneType classes.
-            for class_lb, path in current_metric_csvs['per_class_scores'].items():
-                if path is None:
+        if 'multiple_parameter_values' in metrics_configs[metric_type]:
+            #In this case we need to convert the metrics to a format compatible with the
+            #write_row function. Therefore we need to convert torch tensors of size (num_parameter values)
+            #into separate tensors.
+            parameter_name = metrics_configs[metric_type]['multiple_parameter_values']
+            for parameter_idx in metrics_configs[metric_type][parameter_name]:
+                path_tuples = tuple([(infer_mode, 'cross_class_scores', parameter_idx) for infer_mode in sorted_infer_calls])
+                write_row(case_name=case_name, save_path=current_metric_csvs[parameter_idx]['cross_class_scores'], extraction_tuples=path_tuples,  metrics_dict=metrics_dict)
+        
+                if current_metric_csvs[parameter_idx]['per_class_scores'] is None:
                     pass #Explicit for debugging purposes
+                elif isinstance(current_metric_csvs[parameter_idx]['per_class_scores'], dict):
+                #In this case, we want to iterate through the non-NoneType classes.
+                    for class_lb, path in current_metric_csvs[parameter_idx]['per_class_scores'].items():
+                        if path is None:
+                            pass #Explicit for debugging purposes
+                        else:
+                            path_tuples = tuple([(infer_mode, 'per_class_scores', class_lb, parameter_idx) for infer_mode in sorted_infer_calls])
+                            write_row(case_name=case_name, save_path=path, extraction_tuples=path_tuples, metrics_dict=metrics_dict)
                 else:
-                    path_tuples = tuple([(infer_mode, 'per_class_scores', class_lb) for infer_mode in sorted_infer_calls])
-                    write_row(case_name=case_name, save_path=path, extraction_tuples=path_tuples, metrics_dict=metrics_dict)
+                    Exception(f'Unexpected datatype for the per-class scores csv paths in {metric_type}')
         else:
-            Exception(f'Unexpected datatype for the per-class scores csv paths in {metric_type}')
+            #Generating the tuples for the paths:
+            path_tuples = tuple([(infer_mode, 'cross_class_scores') for infer_mode in sorted_infer_calls])
+            write_row(case_name=case_name, save_path=current_metric_csvs['cross_class_scores'], extraction_tuples=path_tuples,  metrics_dict=metrics_dict)
+    
+            # per_class_score handling, since this is not always provided at all, or across all classes:
+            if current_metric_csvs['per_class_scores'] is None:
+                pass #Explicit for debugging purposes
+            elif isinstance(current_metric_csvs['per_class_scores'], dict):
+                #In this case, we want to iterate through the non-NoneType classes.
+                for class_lb, path in current_metric_csvs['per_class_scores'].items():
+                    if path is None:
+                        pass #Explicit for debugging purposes
+                    else:
+                        path_tuples = tuple([(infer_mode, 'per_class_scores', class_lb) for infer_mode in sorted_infer_calls])
+                        write_row(case_name=case_name, save_path=path, extraction_tuples=path_tuples, metrics_dict=metrics_dict)
+            else:
+                Exception(f'Unexpected datatype for the per-class scores csv paths in {metric_type}')
 
 
 

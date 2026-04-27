@@ -1,0 +1,13 @@
+{
+  "dataset_name": "Dataset008_HepaticVessel",
+  "median_spacing": {
+    "dim0": 0.7988280057907104,
+    "dim1": 0.7988280057907104,
+    "dim2": 5.0
+  },
+  "spacing_type": "anisotropic",
+  "anisotropy_ratio": 6.2591696382136846,
+  "reference_spacing": 0.7988280057907104,
+  "num_cases": 303,
+  "note": "Reference spacing: median of all dims (isotropic) or median of in-plane dims (anisotropic). SimpleITK GetSpacing() accounts for image orientation from NIfTI headers."
+}
