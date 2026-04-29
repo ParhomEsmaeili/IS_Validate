@@ -106,9 +106,9 @@ Anchored to a location in the image. Coordinate information is always required.
 | Subtype | Description |
 |---|---|
 | `point` | A single 3D coordinate. |
-| `scribble` | A sequence of 2D coordinates forming an open path. Optional extra: brush size. |
-| `bbox` | Two 2D coordinates defining the corners of a bounding box. |
-| `lasso` | A closed loop of floating-point 2D coordinates. The algorithm handles inside/outside interpretation. |
+| `scribble` | A sequence of 3D coordinates forming an open path in a 2D slice/plane |
+| `bbox` | Two 3D coordinates defining the corners of a bounding box in a 2D slice/plane |
+| `lasso` | A closed loop of floating-point 3D coordinates in a 2D slice/plane. The algorithm handles inside/outside interpretation. |
 
 #### Semantic / Text Prompts
 Based on language or semantic meaning rather than image coordinates.
