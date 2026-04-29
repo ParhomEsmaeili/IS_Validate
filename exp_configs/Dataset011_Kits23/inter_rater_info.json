@@ -1,0 +1,5416 @@
+{
+  "n_samples": 300,
+  "n_samples_skipped_after_annotator_filter": 0,
+  "class_labels": [
+    "whole_kidney"
+  ],
+  "include_annotators": null,
+  "exclude_annotators": [
+    "annotator_4"
+  ],
+  "dataset_class_mean_dice": {
+    "whole_kidney": 0.9788988279011522
+  },
+  "per_sample": {
+    "case_00000": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9648802347753124
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9502571895518537,
+          "annotator_1__vs__annotator_3": 0.9744996947024592,
+          "annotator_2__vs__annotator_3": 0.9698838200716244
+        }
+      }
+    },
+    "case_00001": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9727479404372893
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.969540038952046,
+          "annotator_1__vs__annotator_3": 0.9762476098876285,
+          "annotator_2__vs__annotator_3": 0.972456172472193
+        }
+      }
+    },
+    "case_00002": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9741093350446896
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9761734532958627,
+          "annotator_1__vs__annotator_3": 0.9697763279208937,
+          "annotator_2__vs__annotator_3": 0.9763782239173124
+        }
+      }
+    },
+    "case_00003": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9795448394657903
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9796557390070271,
+          "annotator_1__vs__annotator_3": 0.9771867206255834,
+          "annotator_2__vs__annotator_3": 0.9817920587647602
+        }
+      }
+    },
+    "case_00004": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9909063923028886
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9931304119208556,
+          "annotator_1__vs__annotator_3": 0.9893934809751691,
+          "annotator_2__vs__annotator_3": 0.9901952840126408
+        }
+      }
+    },
+    "case_00005": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9696444288894709
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9718370057528438,
+          "annotator_1__vs__annotator_3": 0.9717776847167877,
+          "annotator_2__vs__annotator_3": 0.9653185961987814
+        }
+      }
+    },
+    "case_00006": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9767132883367396
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9752434937506934,
+          "annotator_1__vs__annotator_3": 0.9725769940776999,
+          "annotator_2__vs__annotator_3": 0.9823193771818258
+        }
+      }
+    },
+    "case_00007": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9890677568749687
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9883829984723377,
+          "annotator_1__vs__annotator_3": 0.9867914902670958,
+          "annotator_2__vs__annotator_3": 0.9920287818854728
+        }
+      }
+    },
+    "case_00008": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9782489175615298
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.977219480491787,
+          "annotator_1__vs__annotator_3": 0.9805903704974366,
+          "annotator_2__vs__annotator_3": 0.9769369016953656
+        }
+      }
+    },
+    "case_00009": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9724724699639937
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9732377585246772,
+          "annotator_1__vs__annotator_3": 0.9690439147443162,
+          "annotator_2__vs__annotator_3": 0.9751357366229879
+        }
+      }
+    },
+    "case_00010": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9711031419519208
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9706946393454855,
+          "annotator_1__vs__annotator_3": 0.9723129787522636,
+          "annotator_2__vs__annotator_3": 0.9703018077580133
+        }
+      }
+    },
+    "case_00011": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.975879740914921
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9791093843395099,
+          "annotator_1__vs__annotator_3": 0.976230768314047,
+          "annotator_2__vs__annotator_3": 0.972299070091206
+        }
+      }
+    },
+    "case_00012": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9809160174160741
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9826167215939743,
+          "annotator_1__vs__annotator_3": 0.9795891165878478,
+          "annotator_2__vs__annotator_3": 0.9805422140664004
+        }
+      }
+    },
+    "case_00013": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9750769333244018
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9752199919748421,
+          "annotator_1__vs__annotator_3": 0.9777325015738568,
+          "annotator_2__vs__annotator_3": 0.9722783064245065
+        }
+      }
+    },
+    "case_00014": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9734856068409607
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9699428613154676,
+          "annotator_1__vs__annotator_3": 0.9741441509595875,
+          "annotator_2__vs__annotator_3": 0.9763698082478273
+        }
+      }
+    },
+    "case_00015": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9772746037058315
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9772922894500934,
+          "annotator_1__vs__annotator_3": 0.9775621201944462,
+          "annotator_2__vs__annotator_3": 0.9769694014729549
+        }
+      }
+    },
+    "case_00016": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9742138062119924
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9752799993679769,
+          "annotator_1__vs__annotator_3": 0.9760878870024254,
+          "annotator_2__vs__annotator_3": 0.9712735322655748
+        }
+      }
+    },
+    "case_00017": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9759489060591106
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9760757651215197,
+          "annotator_1__vs__annotator_3": 0.9747278242810883,
+          "annotator_2__vs__annotator_3": 0.9770431287747234
+        }
+      }
+    },
+    "case_00018": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9752928723144069
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9735243666978795,
+          "annotator_1__vs__annotator_3": 0.9763219802618558,
+          "annotator_2__vs__annotator_3": 0.9760322699834854
+        }
+      }
+    },
+    "case_00019": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9800396885993768
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.979832301738911,
+          "annotator_1__vs__annotator_3": 0.9818345183217438,
+          "annotator_2__vs__annotator_3": 0.978452245737476
+        }
+      }
+    },
+    "case_00020": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9795118388196808
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.980904693925383,
+          "annotator_1__vs__annotator_3": 0.9788588219962417,
+          "annotator_2__vs__annotator_3": 0.9787720005374178
+        }
+      }
+    },
+    "case_00021": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9838243523265279
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9829506535426421,
+          "annotator_1__vs__annotator_3": 0.9887038029913661,
+          "annotator_2__vs__annotator_3": 0.9798186004455754
+        }
+      }
+    },
+    "case_00022": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9768843462664797
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.974711364556063,
+          "annotator_1__vs__annotator_3": 0.9785745751351429,
+          "annotator_2__vs__annotator_3": 0.9773670991082333
+        }
+      }
+    },
+    "case_00023": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9818600885296243
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9797125432333365,
+          "annotator_1__vs__annotator_3": 0.9810619829176964,
+          "annotator_2__vs__annotator_3": 0.9848057394378401
+        }
+      }
+    },
+    "case_00024": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.981633735476115
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.979581756140342,
+          "annotator_1__vs__annotator_3": 0.9838953950426607,
+          "annotator_2__vs__annotator_3": 0.9814240552453422
+        }
+      }
+    },
+    "case_00025": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9876339526177039
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9866067376623338,
+          "annotator_1__vs__annotator_3": 0.9896239674589514,
+          "annotator_2__vs__annotator_3": 0.9866711527318268
+        }
+      }
+    },
+    "case_00026": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.983153142417267
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.982250445797968,
+          "annotator_1__vs__annotator_3": 0.9823282877312794,
+          "annotator_2__vs__annotator_3": 0.9848806937225538
+        }
+      }
+    },
+    "case_00027": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9828472021551976
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9810061007643578,
+          "annotator_1__vs__annotator_3": 0.9816016846607531,
+          "annotator_2__vs__annotator_3": 0.9859338210404819
+        }
+      }
+    },
+    "case_00028": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9851600287912575
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9838024348429939,
+          "annotator_1__vs__annotator_3": 0.9874652228523906,
+          "annotator_2__vs__annotator_3": 0.984212428678388
+        }
+      }
+    },
+    "case_00029": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9744845946468083
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9754862292731407,
+          "annotator_1__vs__annotator_3": 0.9732776707737771,
+          "annotator_2__vs__annotator_3": 0.974689883893507
+        }
+      }
+    },
+    "case_00030": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9869680850114984
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9858670408961637,
+          "annotator_1__vs__annotator_3": 0.9880837654214092,
+          "annotator_2__vs__annotator_3": 0.9869534487169219
+        }
+      }
+    },
+    "case_00031": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9706000899033241
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9694894021448428,
+          "annotator_1__vs__annotator_3": 0.9716956399612996,
+          "annotator_2__vs__annotator_3": 0.9706152276038299
+        }
+      }
+    },
+    "case_00032": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9750885940576225
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9737122855159636,
+          "annotator_1__vs__annotator_3": 0.9767001609651492,
+          "annotator_2__vs__annotator_3": 0.9748533356917544
+        }
+      }
+    },
+    "case_00033": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9801142640834771
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9807329212921998,
+          "annotator_1__vs__annotator_3": 0.9801173455525448,
+          "annotator_2__vs__annotator_3": 0.9794925254056865
+        }
+      }
+    },
+    "case_00034": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9868874355344291
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9869978653211722,
+          "annotator_1__vs__annotator_3": 0.9861878531920423,
+          "annotator_2__vs__annotator_3": 0.9874765880900728
+        }
+      }
+    },
+    "case_00035": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9913641109902479
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9899162488445702,
+          "annotator_1__vs__annotator_3": 0.9951608866145674,
+          "annotator_2__vs__annotator_3": 0.9890151975116059
+        }
+      }
+    },
+    "case_00036": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9793569059271608
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9744950070608716,
+          "annotator_1__vs__annotator_3": 0.9828778898660187,
+          "annotator_2__vs__annotator_3": 0.9806978208545922
+        }
+      }
+    },
+    "case_00037": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9889924846727073
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9881889418309773,
+          "annotator_1__vs__annotator_3": 0.9897304348205443,
+          "annotator_2__vs__annotator_3": 0.9890580773666002
+        }
+      }
+    },
+    "case_00038": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9804685595026555
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9793691996631055,
+          "annotator_1__vs__annotator_3": 0.9797339955385328,
+          "annotator_2__vs__annotator_3": 0.9823024833063285
+        }
+      }
+    },
+    "case_00039": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9761547166472639
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9801358126546932,
+          "annotator_1__vs__annotator_3": 0.9738746614310896,
+          "annotator_2__vs__annotator_3": 0.9744536758560091
+        }
+      }
+    },
+    "case_00040": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9786042483739781
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9778938128493423,
+          "annotator_1__vs__annotator_3": 0.975479865993306,
+          "annotator_2__vs__annotator_3": 0.9824390662792861
+        }
+      }
+    },
+    "case_00041": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9731314237493827
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9766809677457481,
+          "annotator_1__vs__annotator_3": 0.9712494694830722,
+          "annotator_2__vs__annotator_3": 0.9714638340193277
+        }
+      }
+    },
+    "case_00042": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9892061009223824
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9919216444521927,
+          "annotator_1__vs__annotator_3": 0.9878097484139566,
+          "annotator_2__vs__annotator_3": 0.9878869099009977
+        }
+      }
+    },
+    "case_00043": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9778393427003224
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9824476310197906,
+          "annotator_1__vs__annotator_3": 0.9766848710072198,
+          "annotator_2__vs__annotator_3": 0.9743855260739566
+        }
+      }
+    },
+    "case_00044": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9799413923035062
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9847868786408582,
+          "annotator_1__vs__annotator_3": 0.9765655769988184,
+          "annotator_2__vs__annotator_3": 0.9784717212708419
+        }
+      }
+    },
+    "case_00045": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9713014297461577
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9753571002450523,
+          "annotator_1__vs__annotator_3": 0.9669916004157654,
+          "annotator_2__vs__annotator_3": 0.9715555885776556
+        }
+      }
+    },
+    "case_00046": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9822073520050628
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.988413686085121,
+          "annotator_1__vs__annotator_3": 0.9789789975263959,
+          "annotator_2__vs__annotator_3": 0.9792293724036716
+        }
+      }
+    },
+    "case_00047": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9820727314842262
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9800330592230391,
+          "annotator_1__vs__annotator_3": 0.9815757677345458,
+          "annotator_2__vs__annotator_3": 0.984609367495094
+        }
+      }
+    },
+    "case_00048": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9783286511912502
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9780453777810412,
+          "annotator_1__vs__annotator_3": 0.9763543755136654,
+          "annotator_2__vs__annotator_3": 0.9805862002790442
+        }
+      }
+    },
+    "case_00049": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9752903201363745
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9844252902020981,
+          "annotator_1__vs__annotator_3": 0.9707559528396393,
+          "annotator_2__vs__annotator_3": 0.9706897173673863
+        }
+      }
+    },
+    "case_00050": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9788607969062469
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9807880387081315,
+          "annotator_1__vs__annotator_3": 0.9771888241264807,
+          "annotator_2__vs__annotator_3": 0.9786055278841287
+        }
+      }
+    },
+    "case_00051": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9766125262227279
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9841362758297723,
+          "annotator_1__vs__annotator_3": 0.9724988146040777,
+          "annotator_2__vs__annotator_3": 0.9732024882343335
+        }
+      }
+    },
+    "case_00052": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9724525617516496
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9744309945955286,
+          "annotator_1__vs__annotator_3": 0.9748765097454902,
+          "annotator_2__vs__annotator_3": 0.9680501809139297
+        }
+      }
+    },
+    "case_00053": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9731034585069703
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9865034713238562,
+          "annotator_1__vs__annotator_3": 0.9679478709376966,
+          "annotator_2__vs__annotator_3": 0.9648590332593583
+        }
+      }
+    },
+    "case_00054": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9699927592840639
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.97734816484028,
+          "annotator_1__vs__annotator_3": 0.972648570344566,
+          "annotator_2__vs__annotator_3": 0.9599815426673458
+        }
+      }
+    },
+    "case_00055": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.975263980643248
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9698436980379116,
+          "annotator_1__vs__annotator_3": 0.9762636270268725,
+          "annotator_2__vs__annotator_3": 0.9796846168649603
+        }
+      }
+    },
+    "case_00056": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9754105763451709
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9709483942034778,
+          "annotator_1__vs__annotator_3": 0.9769667856940429,
+          "annotator_2__vs__annotator_3": 0.978316549137992
+        }
+      }
+    },
+    "case_00057": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9842994222801442
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9860114071623948,
+          "annotator_1__vs__annotator_3": 0.9824666272726651,
+          "annotator_2__vs__annotator_3": 0.9844202324053729
+        }
+      }
+    },
+    "case_00058": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9727547584476897
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.980861503197352,
+          "annotator_1__vs__annotator_3": 0.9654542257682364,
+          "annotator_2__vs__annotator_3": 0.9719485463774804
+        }
+      }
+    },
+    "case_00059": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9736667418819939
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9745802558314933,
+          "annotator_1__vs__annotator_3": 0.9717517774253255,
+          "annotator_2__vs__annotator_3": 0.9746681923891629
+        }
+      }
+    },
+    "case_00060": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9689485474458109
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.96152276444469,
+          "annotator_1__vs__annotator_3": 0.9706157016316446,
+          "annotator_2__vs__annotator_3": 0.9747071762610984
+        }
+      }
+    },
+    "case_00061": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9848879232391647
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9833104058676017,
+          "annotator_1__vs__annotator_3": 0.9841875811668944,
+          "annotator_2__vs__annotator_3": 0.9871657826829983
+        }
+      }
+    },
+    "case_00062": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9751413364206781
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9828566910300317,
+          "annotator_1__vs__annotator_3": 0.9679392086222034,
+          "annotator_2__vs__annotator_3": 0.9746281096097992
+        }
+      }
+    },
+    "case_00063": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9768648620880311
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9768502878371195,
+          "annotator_1__vs__annotator_3": 0.9732126752738048,
+          "annotator_2__vs__annotator_3": 0.980531623153169
+        }
+      }
+    },
+    "case_00064": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9738279320629215
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9679401654056262,
+          "annotator_1__vs__annotator_3": 0.9846238307396693,
+          "annotator_2__vs__annotator_3": 0.9689198000434688
+        }
+      }
+    },
+    "case_00065": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9807801106628423
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9769752503850448,
+          "annotator_1__vs__annotator_3": 0.9852590548649807,
+          "annotator_2__vs__annotator_3": 0.9801060267385018
+        }
+      }
+    },
+    "case_00066": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9671602300993762
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9645456415155677,
+          "annotator_1__vs__annotator_3": 0.9663883715289477,
+          "annotator_2__vs__annotator_3": 0.9705466772536134
+        }
+      }
+    },
+    "case_00067": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9854531592337983
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9862300861999597,
+          "annotator_1__vs__annotator_3": 0.9843666757881493,
+          "annotator_2__vs__annotator_3": 0.9857627157132857
+        }
+      }
+    },
+    "case_00068": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9787654583839677
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9784593666702479,
+          "annotator_1__vs__annotator_3": 0.9795984808065279,
+          "annotator_2__vs__annotator_3": 0.9782385276751273
+        }
+      }
+    },
+    "case_00069": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9674079013598952
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9642483004569263,
+          "annotator_1__vs__annotator_3": 0.9596498330504414,
+          "annotator_2__vs__annotator_3": 0.9783255705723175
+        }
+      }
+    },
+    "case_00070": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9776807015461836
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.972761289599035,
+          "annotator_1__vs__annotator_3": 0.9799783069491477,
+          "annotator_2__vs__annotator_3": 0.9803025080903681
+        }
+      }
+    },
+    "case_00071": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9725568242540001
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9741132951174243,
+          "annotator_1__vs__annotator_3": 0.9684739051525039,
+          "annotator_2__vs__annotator_3": 0.9750832724920723
+        }
+      }
+    },
+    "case_00072": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.982399268703667
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.97914870916379,
+          "annotator_1__vs__annotator_3": 0.986810324826764,
+          "annotator_2__vs__annotator_3": 0.9812387721204469
+        }
+      }
+    },
+    "case_00073": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9809395664862707
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9818426952559554,
+          "annotator_1__vs__annotator_3": 0.9796472028774776,
+          "annotator_2__vs__annotator_3": 0.981328801325379
+        }
+      }
+    },
+    "case_00074": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9752982836249092
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9726080541725692,
+          "annotator_1__vs__annotator_3": 0.9772334811092904,
+          "annotator_2__vs__annotator_3": 0.9760533155928681
+        }
+      }
+    },
+    "case_00075": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9725845246557556
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9832224450677541,
+          "annotator_1__vs__annotator_3": 0.9693732788116498,
+          "annotator_2__vs__annotator_3": 0.9651578500878628
+        }
+      }
+    },
+    "case_00076": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9740036678495351
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9683355443826341,
+          "annotator_1__vs__annotator_3": 0.9808426322588178,
+          "annotator_2__vs__annotator_3": 0.9728328269071536
+        }
+      }
+    },
+    "case_00077": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.979752530476309
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9792581106105945,
+          "annotator_1__vs__annotator_3": 0.9787030773620413,
+          "annotator_2__vs__annotator_3": 0.9812964034562912
+        }
+      }
+    },
+    "case_00078": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9817484546894724
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9864467834796098,
+          "annotator_1__vs__annotator_3": 0.9791023232836435,
+          "annotator_2__vs__annotator_3": 0.979696257305164
+        }
+      }
+    },
+    "case_00079": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9806758924884055
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9810569602240932,
+          "annotator_1__vs__annotator_3": 0.9795790145112422,
+          "annotator_2__vs__annotator_3": 0.9813917027298809
+        }
+      }
+    },
+    "case_00080": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9850791487106164
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9859832373158168,
+          "annotator_1__vs__annotator_3": 0.9868720965408588,
+          "annotator_2__vs__annotator_3": 0.9823821122751735
+        }
+      }
+    },
+    "case_00081": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9892399011009413
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9866904761284983,
+          "annotator_1__vs__annotator_3": 0.9904128279428772,
+          "annotator_2__vs__annotator_3": 0.9906163992314483
+        }
+      }
+    },
+    "case_00082": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9708215401490655
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9777304462454839,
+          "annotator_1__vs__annotator_3": 0.9712472501668438,
+          "annotator_2__vs__annotator_3": 0.9634869240348692
+        }
+      }
+    },
+    "case_00083": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9914060444077331
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9895697887092372,
+          "annotator_1__vs__annotator_3": 0.9943432367619142,
+          "annotator_2__vs__annotator_3": 0.9903051077520478
+        }
+      }
+    },
+    "case_00084": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.967366323365249
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9697836572545839,
+          "annotator_1__vs__annotator_3": 0.9620697242473747,
+          "annotator_2__vs__annotator_3": 0.9702455885937881
+        }
+      }
+    },
+    "case_00085": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9814756787895278
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9759672387211124,
+          "annotator_1__vs__annotator_3": 0.9908655488216558,
+          "annotator_2__vs__annotator_3": 0.9775942488258155
+        }
+      }
+    },
+    "case_00086": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9594189744399526
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9620570062951737,
+          "annotator_1__vs__annotator_3": 0.9638754085741267,
+          "annotator_2__vs__annotator_3": 0.9523245084505575
+        }
+      }
+    },
+    "case_00087": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9770628778987204
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9788261445454864,
+          "annotator_1__vs__annotator_3": 0.9780039306067259,
+          "annotator_2__vs__annotator_3": 0.9743585585439488
+        }
+      }
+    },
+    "case_00088": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9818339410525372
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9823184561548914,
+          "annotator_1__vs__annotator_3": 0.9836455652770629,
+          "annotator_2__vs__annotator_3": 0.9795378017256572
+        }
+      }
+    },
+    "case_00089": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9889252407484282
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9904092169569947,
+          "annotator_1__vs__annotator_3": 0.9892202134443838,
+          "annotator_2__vs__annotator_3": 0.987146291843906
+        }
+      }
+    },
+    "case_00090": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9830301484767169
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9809930334635364,
+          "annotator_1__vs__annotator_3": 0.9870402901343005,
+          "annotator_2__vs__annotator_3": 0.9810571218323139
+        }
+      }
+    },
+    "case_00091": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9795945562175764
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9759954173037798,
+          "annotator_1__vs__annotator_3": 0.9811788950984465,
+          "annotator_2__vs__annotator_3": 0.9816093562505029
+        }
+      }
+    },
+    "case_00092": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9826624676165926
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9800691897209954,
+          "annotator_1__vs__annotator_3": 0.9858798858120553,
+          "annotator_2__vs__annotator_3": 0.9820383273167272
+        }
+      }
+    },
+    "case_00093": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9721466550973417
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.968852823758608,
+          "annotator_1__vs__annotator_3": 0.9688452019736958,
+          "annotator_2__vs__annotator_3": 0.978741939559721
+        }
+      }
+    },
+    "case_00094": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9910632660379862
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9914018364739382,
+          "annotator_1__vs__annotator_3": 0.9889404751440375,
+          "annotator_2__vs__annotator_3": 0.9928474864959831
+        }
+      }
+    },
+    "case_00095": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9787932727486165
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.975871440536674,
+          "annotator_1__vs__annotator_3": 0.9836954320414516,
+          "annotator_2__vs__annotator_3": 0.9768129456677238
+        }
+      }
+    },
+    "case_00096": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9817264749038275
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9795482894851549,
+          "annotator_1__vs__annotator_3": 0.9838570332660307,
+          "annotator_2__vs__annotator_3": 0.9817741019602966
+        }
+      }
+    },
+    "case_00097": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9809137648888524
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9752719764948781,
+          "annotator_1__vs__annotator_3": 0.9858710356230272,
+          "annotator_2__vs__annotator_3": 0.9815982825486521
+        }
+      }
+    },
+    "case_00098": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9668282156608297
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9623007645299501,
+          "annotator_1__vs__annotator_3": 0.9730663226729612,
+          "annotator_2__vs__annotator_3": 0.9651175597795776
+        }
+      }
+    },
+    "case_00099": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9764457634438845
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9805771062049247,
+          "annotator_1__vs__annotator_3": 0.9739319646854255,
+          "annotator_2__vs__annotator_3": 0.9748282194413027
+        }
+      }
+    },
+    "case_00100": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9736836641985528
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9722657352847424,
+          "annotator_1__vs__annotator_3": 0.9782558448020459,
+          "annotator_2__vs__annotator_3": 0.9705294125088699
+        }
+      }
+    },
+    "case_00101": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.980168298895462
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9867991527141011,
+          "annotator_1__vs__annotator_3": 0.977818117576778,
+          "annotator_2__vs__annotator_3": 0.9758876263955067
+        }
+      }
+    },
+    "case_00102": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9764326791931665
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9729425224965613,
+          "annotator_1__vs__annotator_3": 0.9836701938921819,
+          "annotator_2__vs__annotator_3": 0.972685321190756
+        }
+      }
+    },
+    "case_00103": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9676067707985435
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9651714446056096,
+          "annotator_1__vs__annotator_3": 0.9629630933397165,
+          "annotator_2__vs__annotator_3": 0.9746857744503045
+        }
+      }
+    },
+    "case_00104": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9889412310694904
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9884162403639439,
+          "annotator_1__vs__annotator_3": 0.9877417678286372,
+          "annotator_2__vs__annotator_3": 0.9906656850158901
+        }
+      }
+    },
+    "case_00105": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9738893808347683
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9682358436705247,
+          "annotator_1__vs__annotator_3": 0.973489357995296,
+          "annotator_2__vs__annotator_3": 0.9799429408384841
+        }
+      }
+    },
+    "case_00106": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.972913052994692
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9656279174777127,
+          "annotator_1__vs__annotator_3": 0.9729435330142151,
+          "annotator_2__vs__annotator_3": 0.9801677084921482
+        }
+      }
+    },
+    "case_00107": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9760942577177391
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9719180742314879,
+          "annotator_1__vs__annotator_3": 0.9822782401353963,
+          "annotator_2__vs__annotator_3": 0.974086458786333
+        }
+      }
+    },
+    "case_00108": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9874847948648885
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9860462782968583,
+          "annotator_1__vs__annotator_3": 0.9893833431334526,
+          "annotator_2__vs__annotator_3": 0.9870247631643547
+        }
+      }
+    },
+    "case_00109": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.984158059750169
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9814465579195405,
+          "annotator_1__vs__annotator_3": 0.9839171594318117,
+          "annotator_2__vs__annotator_3": 0.9871104618991547
+        }
+      }
+    },
+    "case_00110": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9821293560383063
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9814594201714283,
+          "annotator_1__vs__annotator_3": 0.9851883703801467,
+          "annotator_2__vs__annotator_3": 0.9797402775633438
+        }
+      }
+    },
+    "case_00111": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9731555959274439
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9791571060501081,
+          "annotator_1__vs__annotator_3": 0.9667729697867388,
+          "annotator_2__vs__annotator_3": 0.9735367119454849
+        }
+      }
+    },
+    "case_00112": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9838505440872797
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9825264202841603,
+          "annotator_1__vs__annotator_3": 0.9869021773669461,
+          "annotator_2__vs__annotator_3": 0.9821230346107328
+        }
+      }
+    },
+    "case_00113": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9758652700004871
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9696926646777478,
+          "annotator_1__vs__annotator_3": 0.9754391890428992,
+          "annotator_2__vs__annotator_3": 0.9824639562808143
+        }
+      }
+    },
+    "case_00114": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9776835454279915
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9800446934082458,
+          "annotator_1__vs__annotator_3": 0.9734575702022397,
+          "annotator_2__vs__annotator_3": 0.9795483726734888
+        }
+      }
+    },
+    "case_00115": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9732848643062887
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9775772389162924,
+          "annotator_1__vs__annotator_3": 0.9706267508154544,
+          "annotator_2__vs__annotator_3": 0.9716506031871193
+        }
+      }
+    },
+    "case_00116": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9668054942191434
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9569724672814742,
+          "annotator_1__vs__annotator_3": 0.9794101356252497,
+          "annotator_2__vs__annotator_3": 0.9640338797507063
+        }
+      }
+    },
+    "case_00117": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9843573709296439
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9877558663402309,
+          "annotator_1__vs__annotator_3": 0.9851693914029728,
+          "annotator_2__vs__annotator_3": 0.9801468550457277
+        }
+      }
+    },
+    "case_00118": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9783999002395093
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9787651029740734,
+          "annotator_1__vs__annotator_3": 0.9824242241946958,
+          "annotator_2__vs__annotator_3": 0.974010373549759
+        }
+      }
+    },
+    "case_00119": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9717579052707032
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9766144291882976,
+          "annotator_1__vs__annotator_3": 0.9695270792854314,
+          "annotator_2__vs__annotator_3": 0.9691322073383809
+        }
+      }
+    },
+    "case_00120": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.976685951267893
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9741270175047099,
+          "annotator_1__vs__annotator_3": 0.9792822799962645,
+          "annotator_2__vs__annotator_3": 0.9766485563027046
+        }
+      }
+    },
+    "case_00121": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9728065152980147
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9707055515595371,
+          "annotator_1__vs__annotator_3": 0.9751583049196298,
+          "annotator_2__vs__annotator_3": 0.9725556894148772
+        }
+      }
+    },
+    "case_00122": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9807304034569929
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9797828143146199,
+          "annotator_1__vs__annotator_3": 0.9885406638189687,
+          "annotator_2__vs__annotator_3": 0.9738677322373901
+        }
+      }
+    },
+    "case_00123": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9718812391552833
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9614061892553918,
+          "annotator_1__vs__annotator_3": 0.9879967871655719,
+          "annotator_2__vs__annotator_3": 0.9662407410448864
+        }
+      }
+    },
+    "case_00124": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9775949279784868
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9801441581046647,
+          "annotator_1__vs__annotator_3": 0.9790273898205265,
+          "annotator_2__vs__annotator_3": 0.9736132360102694
+        }
+      }
+    },
+    "case_00125": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9853547209385333
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9817888912236464,
+          "annotator_1__vs__annotator_3": 0.9870029582277342,
+          "annotator_2__vs__annotator_3": 0.9872723133642188
+        }
+      }
+    },
+    "case_00126": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9885948723786043
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.986409886690679,
+          "annotator_1__vs__annotator_3": 0.9901579017410272,
+          "annotator_2__vs__annotator_3": 0.9892168287041063
+        }
+      }
+    },
+    "case_00127": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9819259248755728
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9857132529182446,
+          "annotator_1__vs__annotator_3": 0.979253112033195,
+          "annotator_2__vs__annotator_3": 0.9808114096752787
+        }
+      }
+    },
+    "case_00128": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9930573531950441
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9958080347913971,
+          "annotator_1__vs__annotator_3": 0.9920120462721282,
+          "annotator_2__vs__annotator_3": 0.9913519785216066
+        }
+      }
+    },
+    "case_00129": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9812049099704628
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9806979068160936,
+          "annotator_1__vs__annotator_3": 0.9840142686960515,
+          "annotator_2__vs__annotator_3": 0.9789025543992431
+        }
+      }
+    },
+    "case_00130": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9839630789796171
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9848227159231216,
+          "annotator_1__vs__annotator_3": 0.9838455387464268,
+          "annotator_2__vs__annotator_3": 0.9832209822693027
+        }
+      }
+    },
+    "case_00131": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9843575878224309
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9827209452262592,
+          "annotator_1__vs__annotator_3": 0.9880317151030865,
+          "annotator_2__vs__annotator_3": 0.982320103137947
+        }
+      }
+    },
+    "case_00132": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9864811659006465
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9837311169223595,
+          "annotator_1__vs__annotator_3": 0.9891320388110727,
+          "annotator_2__vs__annotator_3": 0.9865803419685075
+        }
+      }
+    },
+    "case_00133": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9761249757542982
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9728432473669711,
+          "annotator_1__vs__annotator_3": 0.9861954836817629,
+          "annotator_2__vs__annotator_3": 0.9693361962141606
+        }
+      }
+    },
+    "case_00134": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9771535492790551
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9761475149824168,
+          "annotator_1__vs__annotator_3": 0.9833218885557807,
+          "annotator_2__vs__annotator_3": 0.9719912442989679
+        }
+      }
+    },
+    "case_00135": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9841130125525069
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9840551907384589,
+          "annotator_1__vs__annotator_3": 0.9837794451504767,
+          "annotator_2__vs__annotator_3": 0.9845044017685854
+        }
+      }
+    },
+    "case_00136": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9801198420770375
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9778675036658534,
+          "annotator_1__vs__annotator_3": 0.9735549542274106,
+          "annotator_2__vs__annotator_3": 0.9889370683378483
+        }
+      }
+    },
+    "case_00137": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9739917128700629
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9729160435804315,
+          "annotator_1__vs__annotator_3": 0.9751856661917311,
+          "annotator_2__vs__annotator_3": 0.9738734288380262
+        }
+      }
+    },
+    "case_00138": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9803786238000365
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9826260477937977,
+          "annotator_1__vs__annotator_3": 0.9727764890296963,
+          "annotator_2__vs__annotator_3": 0.9857333345766157
+        }
+      }
+    },
+    "case_00139": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9880096938780634
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9862424743570686,
+          "annotator_1__vs__annotator_3": 0.9892159604717289,
+          "annotator_2__vs__annotator_3": 0.9885706468053926
+        }
+      }
+    },
+    "case_00140": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9781820826184583
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9828131265689974,
+          "annotator_1__vs__annotator_3": 0.9776047243674577,
+          "annotator_2__vs__annotator_3": 0.9741283969189197
+        }
+      }
+    },
+    "case_00141": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9845422093955168
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9840796619736835,
+          "annotator_1__vs__annotator_3": 0.9846511434724834,
+          "annotator_2__vs__annotator_3": 0.9848958227403837
+        }
+      }
+    },
+    "case_00142": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9802229575744149
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.982761307592175,
+          "annotator_1__vs__annotator_3": 0.9770074201924781,
+          "annotator_2__vs__annotator_3": 0.9809001449385918
+        }
+      }
+    },
+    "case_00143": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9795227014511352
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.976921493880031,
+          "annotator_1__vs__annotator_3": 0.9808748085292616,
+          "annotator_2__vs__annotator_3": 0.980771801944113
+        }
+      }
+    },
+    "case_00144": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9770229279348633
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9702075342328726,
+          "annotator_1__vs__annotator_3": 0.9863192809072027,
+          "annotator_2__vs__annotator_3": 0.9745419686645149
+        }
+      }
+    },
+    "case_00145": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9780184693351415
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9760166383887035,
+          "annotator_1__vs__annotator_3": 0.9808363981466935,
+          "annotator_2__vs__annotator_3": 0.9772023714700273
+        }
+      }
+    },
+    "case_00146": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9795715042289652
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9736929351682989,
+          "annotator_1__vs__annotator_3": 0.9821159810877724,
+          "annotator_2__vs__annotator_3": 0.9829055964308246
+        }
+      }
+    },
+    "case_00147": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.98753162602108
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9868592025129092,
+          "annotator_1__vs__annotator_3": 0.9906333179842541,
+          "annotator_2__vs__annotator_3": 0.9851023575660764
+        }
+      }
+    },
+    "case_00148": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9934733505526184
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9958884361346887,
+          "annotator_1__vs__annotator_3": 0.9926562899265629,
+          "annotator_2__vs__annotator_3": 0.9918753255966039
+        }
+      }
+    },
+    "case_00149": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9830675370958751
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.986065168388535,
+          "annotator_1__vs__annotator_3": 0.9801811222476521,
+          "annotator_2__vs__annotator_3": 0.9829563206514386
+        }
+      }
+    },
+    "case_00150": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9757204707667984
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9816578338331758,
+          "annotator_1__vs__annotator_3": 0.9714187032905627,
+          "annotator_2__vs__annotator_3": 0.9740848751766563
+        }
+      }
+    },
+    "case_00151": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9684496423216528
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9761773162605735,
+          "annotator_1__vs__annotator_3": 0.9636036797709137,
+          "annotator_2__vs__annotator_3": 0.9655679309334709
+        }
+      }
+    },
+    "case_00152": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9887253395751795
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9881251984425394,
+          "annotator_1__vs__annotator_3": 0.9883718220585836,
+          "annotator_2__vs__annotator_3": 0.9896789982244153
+        }
+      }
+    },
+    "case_00153": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9819262763673349
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9778439129984552,
+          "annotator_1__vs__annotator_3": 0.9797268495626524,
+          "annotator_2__vs__annotator_3": 0.9882080665408972
+        }
+      }
+    },
+    "case_00154": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9718326450651741
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9734788400652044,
+          "annotator_1__vs__annotator_3": 0.9664844357518203,
+          "annotator_2__vs__annotator_3": 0.9755346593784974
+        }
+      }
+    },
+    "case_00155": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9823532332196395
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9811938171103505,
+          "annotator_1__vs__annotator_3": 0.9823485947039319,
+          "annotator_2__vs__annotator_3": 0.9835172878446362
+        }
+      }
+    },
+    "case_00156": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9841790823361438
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9867654943323573,
+          "annotator_1__vs__annotator_3": 0.9830670697938169,
+          "annotator_2__vs__annotator_3": 0.9827046828822574
+        }
+      }
+    },
+    "case_00157": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9797153113393592
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9783793324895877,
+          "annotator_1__vs__annotator_3": 0.985010353545583,
+          "annotator_2__vs__annotator_3": 0.9757562479829068
+        }
+      }
+    },
+    "case_00158": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9755862335778774
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.973694626696769,
+          "annotator_1__vs__annotator_3": 0.9713678640672226,
+          "annotator_2__vs__annotator_3": 0.9816962099696406
+        }
+      }
+    },
+    "case_00159": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9767581962643783
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9763959294137875,
+          "annotator_1__vs__annotator_3": 0.9730895411425167,
+          "annotator_2__vs__annotator_3": 0.9807891182368307
+        }
+      }
+    },
+    "case_00160": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.974928936685703
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9691563389033844,
+          "annotator_1__vs__annotator_3": 0.9825182501232234,
+          "annotator_2__vs__annotator_3": 0.9731122210305013
+        }
+      }
+    },
+    "case_00161": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.982159621706218
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.980302277204028,
+          "annotator_1__vs__annotator_3": 0.9860926385059202,
+          "annotator_2__vs__annotator_3": 0.9800839494087061
+        }
+      }
+    },
+    "case_00162": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9682703496240942
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.974339593879612,
+          "annotator_1__vs__annotator_3": 0.9633546426906514,
+          "annotator_2__vs__annotator_3": 0.9671168123020193
+        }
+      }
+    },
+    "case_00163": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9836612158532771
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9821105781645761,
+          "annotator_1__vs__annotator_3": 0.9827252094730761,
+          "annotator_2__vs__annotator_3": 0.986147859922179
+        }
+      }
+    },
+    "case_00164": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9838571888904323
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.98377498694998,
+          "annotator_1__vs__annotator_3": 0.9860584262208476,
+          "annotator_2__vs__annotator_3": 0.9817381535004694
+        }
+      }
+    },
+    "case_00165": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9765555013761261
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9891806306900647,
+          "annotator_1__vs__annotator_3": 0.9726241506599876,
+          "annotator_2__vs__annotator_3": 0.9678617227783259
+        }
+      }
+    },
+    "case_00166": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9725818549620029
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9674301824104587,
+          "annotator_1__vs__annotator_3": 0.9688595423014821,
+          "annotator_2__vs__annotator_3": 0.9814558401740678
+        }
+      }
+    },
+    "case_00167": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9793393087144482
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9761668282763251,
+          "annotator_1__vs__annotator_3": 0.9753872911067653,
+          "annotator_2__vs__annotator_3": 0.9864638067602541
+        }
+      }
+    },
+    "case_00168": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9771373760772596
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9759031679047775,
+          "annotator_1__vs__annotator_3": 0.9795005433463807,
+          "annotator_2__vs__annotator_3": 0.9760084169806208
+        }
+      }
+    },
+    "case_00169": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.977638955911912
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9773730802428185,
+          "annotator_1__vs__annotator_3": 0.9795541935507296,
+          "annotator_2__vs__annotator_3": 0.9759895939421878
+        }
+      }
+    },
+    "case_00170": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9653999948712381
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9681497082181563,
+          "annotator_1__vs__annotator_3": 0.9546387072747746,
+          "annotator_2__vs__annotator_3": 0.9734115691207834
+        }
+      }
+    },
+    "case_00171": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9750349072436593
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9835811274138414,
+          "annotator_1__vs__annotator_3": 0.9709225014209615,
+          "annotator_2__vs__annotator_3": 0.9706010928961749
+        }
+      }
+    },
+    "case_00172": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9802025775111133
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9839344714519476,
+          "annotator_1__vs__annotator_3": 0.9775113396884327,
+          "annotator_2__vs__annotator_3": 0.9791619213929593
+        }
+      }
+    },
+    "case_00173": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.972957397157893
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9679901049159619,
+          "annotator_1__vs__annotator_3": 0.9710743983942475,
+          "annotator_2__vs__annotator_3": 0.9798076881634694
+        }
+      }
+    },
+    "case_00174": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9820816004762364
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9782762772242907,
+          "annotator_1__vs__annotator_3": 0.9769253783824632,
+          "annotator_2__vs__annotator_3": 0.9910431458219552
+        }
+      }
+    },
+    "case_00175": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9874223422935006
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9838456638671322,
+          "annotator_1__vs__annotator_3": 0.9848251516300227,
+          "annotator_2__vs__annotator_3": 0.9935962113833466
+        }
+      }
+    },
+    "case_00176": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9896859400705424
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9881065363568443,
+          "annotator_1__vs__annotator_3": 0.9903495242864296,
+          "annotator_2__vs__annotator_3": 0.9906017595683534
+        }
+      }
+    },
+    "case_00177": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9765223123015785
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9701497338818929,
+          "annotator_1__vs__annotator_3": 0.9738763310025482,
+          "annotator_2__vs__annotator_3": 0.9855408720202945
+        }
+      }
+    },
+    "case_00178": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9643811815972994
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9620634829100315,
+          "annotator_1__vs__annotator_3": 0.967928150009753,
+          "annotator_2__vs__annotator_3": 0.9631519118721136
+        }
+      }
+    },
+    "case_00179": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9820693132824565
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9879336679561056,
+          "annotator_1__vs__annotator_3": 0.9820283679548638,
+          "annotator_2__vs__annotator_3": 0.9762459039364001
+        }
+      }
+    },
+    "case_00180": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9652859572494285
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9640215579328985,
+          "annotator_1__vs__annotator_3": 0.962003611690657,
+          "annotator_2__vs__annotator_3": 0.96983270212473
+        }
+      }
+    },
+    "case_00181": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9724152406399772
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9685561393849903,
+          "annotator_1__vs__annotator_3": 0.9879413724183878,
+          "annotator_2__vs__annotator_3": 0.9607482101165538
+        }
+      }
+    },
+    "case_00182": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9880484464246327
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9852600299589587,
+          "annotator_1__vs__annotator_3": 0.9882230633030653,
+          "annotator_2__vs__annotator_3": 0.9906622460118741
+        }
+      }
+    },
+    "case_00183": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9901234229695182
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9896907881995998,
+          "annotator_1__vs__annotator_3": 0.9895634418157309,
+          "annotator_2__vs__annotator_3": 0.991116038893224
+        }
+      }
+    },
+    "case_00184": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9785284192768217
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9809685312897971,
+          "annotator_1__vs__annotator_3": 0.9777072651115765,
+          "annotator_2__vs__annotator_3": 0.9769094614290912
+        }
+      }
+    },
+    "case_00185": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9712498539474669
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9699699619375219,
+          "annotator_1__vs__annotator_3": 0.9740708831788916,
+          "annotator_2__vs__annotator_3": 0.9697087167259871
+        }
+      }
+    },
+    "case_00186": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9859222792010867
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9864018498667955,
+          "annotator_1__vs__annotator_3": 0.9833586147390904,
+          "annotator_2__vs__annotator_3": 0.988006372997374
+        }
+      }
+    },
+    "case_00187": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9659740458947077
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9694748048261178,
+          "annotator_1__vs__annotator_3": 0.9544696376907188,
+          "annotator_2__vs__annotator_3": 0.9739776951672863
+        }
+      }
+    },
+    "case_00188": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9731223613108823
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9745123340896258,
+          "annotator_1__vs__annotator_3": 0.9696090398074263,
+          "annotator_2__vs__annotator_3": 0.9752457100355948
+        }
+      }
+    },
+    "case_00189": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9688438844442752
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9668437943580883,
+          "annotator_1__vs__annotator_3": 0.9786439348646442,
+          "annotator_2__vs__annotator_3": 0.9610439241100929
+        }
+      }
+    },
+    "case_00190": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9837548293504311
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9833385610692653,
+          "annotator_1__vs__annotator_3": 0.985548456400513,
+          "annotator_2__vs__annotator_3": 0.9823774705815149
+        }
+      }
+    },
+    "case_00191": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9713347531099857
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9710040039924314,
+          "annotator_1__vs__annotator_3": 0.9776300234181456,
+          "annotator_2__vs__annotator_3": 0.9653702319193803
+        }
+      }
+    },
+    "case_00192": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9698695285824983
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9694112118249751,
+          "annotator_1__vs__annotator_3": 0.9783473296114866,
+          "annotator_2__vs__annotator_3": 0.9618500443110333
+        }
+      }
+    },
+    "case_00193": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9806224703204472
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9840212456255903,
+          "annotator_1__vs__annotator_3": 0.9790941459165239,
+          "annotator_2__vs__annotator_3": 0.9787520194192273
+        }
+      }
+    },
+    "case_00194": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9924936673457697
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9937243764457984,
+          "annotator_1__vs__annotator_3": 0.9909867008713752,
+          "annotator_2__vs__annotator_3": 0.9927699247201354
+        }
+      }
+    },
+    "case_00195": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9875243540891335
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9876852245043918,
+          "annotator_1__vs__annotator_3": 0.9879511476519419,
+          "annotator_2__vs__annotator_3": 0.9869366901110669
+        }
+      }
+    },
+    "case_00196": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9811339799216136
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9773681740076219,
+          "annotator_1__vs__annotator_3": 0.9889248256348188,
+          "annotator_2__vs__annotator_3": 0.9771089401224
+        }
+      }
+    },
+    "case_00197": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9876551280793396
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9893812701270498,
+          "annotator_1__vs__annotator_3": 0.9880094490247523,
+          "annotator_2__vs__annotator_3": 0.9855746650862165
+        }
+      }
+    },
+    "case_00198": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9810001386352597
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9829387008468289,
+          "annotator_1__vs__annotator_3": 0.9820314817907234,
+          "annotator_2__vs__annotator_3": 0.9780302332682269
+        }
+      }
+    },
+    "case_00199": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9686899837140176
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9774894759382867,
+          "annotator_1__vs__annotator_3": 0.9637880922722972,
+          "annotator_2__vs__annotator_3": 0.9647923829314689
+        }
+      }
+    },
+    "case_00200": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9805825287046837
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9829385112253857,
+          "annotator_1__vs__annotator_3": 0.9774735571080219,
+          "annotator_2__vs__annotator_3": 0.9813355177806433
+        }
+      }
+    },
+    "case_00201": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9885963894028057
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9907636077515641,
+          "annotator_1__vs__annotator_3": 0.9875852497865154,
+          "annotator_2__vs__annotator_3": 0.9874403106703371
+        }
+      }
+    },
+    "case_00202": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9627996154286929
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9655129418069858,
+          "annotator_1__vs__annotator_3": 0.9719302746896873,
+          "annotator_2__vs__annotator_3": 0.9509556297894055
+        }
+      }
+    },
+    "case_00203": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9612416971873312
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9559691101248807,
+          "annotator_1__vs__annotator_3": 0.9505028990260024,
+          "annotator_2__vs__annotator_3": 0.9772530824111105
+        }
+      }
+    },
+    "case_00204": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9935050089485459
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9949563072868672,
+          "annotator_1__vs__annotator_3": 0.9920311320987074,
+          "annotator_2__vs__annotator_3": 0.993527587460063
+        }
+      }
+    },
+    "case_00205": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9811222458731613
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9851615166541827,
+          "annotator_1__vs__annotator_3": 0.9810137927359226,
+          "annotator_2__vs__annotator_3": 0.9771914282293787
+        }
+      }
+    },
+    "case_00206": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9923796725440005
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.994035661449817,
+          "annotator_1__vs__annotator_3": 0.993293754353861,
+          "annotator_2__vs__annotator_3": 0.9898096018283233
+        }
+      }
+    },
+    "case_00207": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9885580776145755
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9849495957710506,
+          "annotator_1__vs__annotator_3": 0.9912890837961382,
+          "annotator_2__vs__annotator_3": 0.9894355532765378
+        }
+      }
+    },
+    "case_00208": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9900366411725295
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9899792154067053,
+          "annotator_1__vs__annotator_3": 0.9922185647127513,
+          "annotator_2__vs__annotator_3": 0.9879121433981318
+        }
+      }
+    },
+    "case_00209": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9822121026815408
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9808703086593671,
+          "annotator_1__vs__annotator_3": 0.9804713979443236,
+          "annotator_2__vs__annotator_3": 0.9852946014409316
+        }
+      }
+    },
+    "case_00210": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9867715373789334
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9866499412970627,
+          "annotator_1__vs__annotator_3": 0.9878932737523057,
+          "annotator_2__vs__annotator_3": 0.9857713970874319
+        }
+      }
+    },
+    "case_00211": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9882315775588535
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9887720252934202,
+          "annotator_1__vs__annotator_3": 0.9882202646835307,
+          "annotator_2__vs__annotator_3": 0.9877024426996096
+        }
+      }
+    },
+    "case_00212": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9872893983492755
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9879087699283023,
+          "annotator_1__vs__annotator_3": 0.989044311075406,
+          "annotator_2__vs__annotator_3": 0.9849151140441181
+        }
+      }
+    },
+    "case_00213": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9675494602403857
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9658806964761599,
+          "annotator_1__vs__annotator_3": 0.9623086247010396,
+          "annotator_2__vs__annotator_3": 0.9744590595439573
+        }
+      }
+    },
+    "case_00214": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9777823659950906
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9778380226121718,
+          "annotator_1__vs__annotator_3": 0.9822463316537184,
+          "annotator_2__vs__annotator_3": 0.9732627437193815
+        }
+      }
+    },
+    "case_00215": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9908727491549884
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9907807950285135,
+          "annotator_1__vs__annotator_3": 0.9898568213691661,
+          "annotator_2__vs__annotator_3": 0.9919806310672857
+        }
+      }
+    },
+    "case_00216": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.980594542500283
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9805358410906012,
+          "annotator_1__vs__annotator_3": 0.9813848584844078,
+          "annotator_2__vs__annotator_3": 0.9798629279258398
+        }
+      }
+    },
+    "case_00217": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9727277140650821
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.976948253061242,
+          "annotator_1__vs__annotator_3": 0.9690330689550557,
+          "annotator_2__vs__annotator_3": 0.9722018201789484
+        }
+      }
+    },
+    "case_00218": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9716466238079783
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9715314636758423,
+          "annotator_1__vs__annotator_3": 0.9675134394434489,
+          "annotator_2__vs__annotator_3": 0.9758949683046434
+        }
+      }
+    },
+    "case_00219": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9884176259796634
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9886933689846013,
+          "annotator_1__vs__annotator_3": 0.9885328280498852,
+          "annotator_2__vs__annotator_3": 0.9880266809045037
+        }
+      }
+    },
+    "case_00220": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9866510338876809
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9860844248006203,
+          "annotator_1__vs__annotator_3": 0.9860639212189852,
+          "annotator_2__vs__annotator_3": 0.9878047556434372
+        }
+      }
+    },
+    "case_00221": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9863401738066501
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9835959155124886,
+          "annotator_1__vs__annotator_3": 0.9870420673959327,
+          "annotator_2__vs__annotator_3": 0.9883825385115288
+        }
+      }
+    },
+    "case_00222": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9816521510114078
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9860173111488613,
+          "annotator_1__vs__annotator_3": 0.9784309030687577,
+          "annotator_2__vs__annotator_3": 0.9805082388166045
+        }
+      }
+    },
+    "case_00223": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9863185815700434
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9847060496969543,
+          "annotator_1__vs__annotator_3": 0.9893698627616275,
+          "annotator_2__vs__annotator_3": 0.9848798322515482
+        }
+      }
+    },
+    "case_00224": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9783582963467182
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9812547870127185,
+          "annotator_1__vs__annotator_3": 0.9814218770919801,
+          "annotator_2__vs__annotator_3": 0.9723982249354558
+        }
+      }
+    },
+    "case_00225": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9874846237645164
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9872795481005563,
+          "annotator_1__vs__annotator_3": 0.9924705693738262,
+          "annotator_2__vs__annotator_3": 0.982703753819167
+        }
+      }
+    },
+    "case_00226": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9734569407069191
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9696007594536153,
+          "annotator_1__vs__annotator_3": 0.9693235337599527,
+          "annotator_2__vs__annotator_3": 0.9814465289071891
+        }
+      }
+    },
+    "case_00227": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9828956105081033
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.984629805696533,
+          "annotator_1__vs__annotator_3": 0.9792983197434821,
+          "annotator_2__vs__annotator_3": 0.9847587060842947
+        }
+      }
+    },
+    "case_00228": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9792914779786136
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9801151995096707,
+          "annotator_1__vs__annotator_3": 0.9739422923289679,
+          "annotator_2__vs__annotator_3": 0.9838169420972025
+        }
+      }
+    },
+    "case_00229": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9770661761089977
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9823206598833009,
+          "annotator_1__vs__annotator_3": 0.9710493615483604,
+          "annotator_2__vs__annotator_3": 0.9778285068953315
+        }
+      }
+    },
+    "case_00230": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9775974258699165
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9801356631625707,
+          "annotator_1__vs__annotator_3": 0.9831427218563631,
+          "annotator_2__vs__annotator_3": 0.9695138925908157
+        }
+      }
+    },
+    "case_00231": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9906058150023404
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9908539616264043,
+          "annotator_1__vs__annotator_3": 0.9897221313304888,
+          "annotator_2__vs__annotator_3": 0.9912413520501284
+        }
+      }
+    },
+    "case_00232": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9761876019708634
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9724046444381512,
+          "annotator_1__vs__annotator_3": 0.978747689805574,
+          "annotator_2__vs__annotator_3": 0.9774104716688652
+        }
+      }
+    },
+    "case_00233": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9767441656368355
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9749151291392405,
+          "annotator_1__vs__annotator_3": 0.9803643349619184,
+          "annotator_2__vs__annotator_3": 0.9749530328093479
+        }
+      }
+    },
+    "case_00234": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.977059034540447
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9739554812999877,
+          "annotator_1__vs__annotator_3": 0.9803763393024851,
+          "annotator_2__vs__annotator_3": 0.976845283018868
+        }
+      }
+    },
+    "case_00235": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9857196609606306
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9828100220151321,
+          "annotator_1__vs__annotator_3": 0.9917864090307558,
+          "annotator_2__vs__annotator_3": 0.9825625518360037
+        }
+      }
+    },
+    "case_00236": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9736647143750602
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9719511294773536,
+          "annotator_1__vs__annotator_3": 0.9699046888606604,
+          "annotator_2__vs__annotator_3": 0.9791383247871666
+        }
+      }
+    },
+    "case_00237": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9758835760873431
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.974359699157034,
+          "annotator_1__vs__annotator_3": 0.9734048392539856,
+          "annotator_2__vs__annotator_3": 0.9798861898510096
+        }
+      }
+    },
+    "case_00238": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9820767980701604
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9802227135461605,
+          "annotator_1__vs__annotator_3": 0.9841494004747783,
+          "annotator_2__vs__annotator_3": 0.9818582801895424
+        }
+      }
+    },
+    "case_00239": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9764571744843904
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9766504083484574,
+          "annotator_1__vs__annotator_3": 0.9755782579618569,
+          "annotator_2__vs__annotator_3": 0.9771428571428571
+        }
+      }
+    },
+    "case_00240": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9723709901157717
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9664898338758084,
+          "annotator_1__vs__annotator_3": 0.9741462696050505,
+          "annotator_2__vs__annotator_3": 0.976476866866456
+        }
+      }
+    },
+    "case_00241": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9803099256471883
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9736851108754198,
+          "annotator_1__vs__annotator_3": 0.9894520479029866,
+          "annotator_2__vs__annotator_3": 0.9777926181631585
+        }
+      }
+    },
+    "case_00242": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9765789815644198
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9761407515962736,
+          "annotator_1__vs__annotator_3": 0.9738151568648644,
+          "annotator_2__vs__annotator_3": 0.9797810362321212
+        }
+      }
+    },
+    "case_00243": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9792914691868261
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9871749039234963,
+          "annotator_1__vs__annotator_3": 0.9774390953125996,
+          "annotator_2__vs__annotator_3": 0.9732604083243822
+        }
+      }
+    },
+    "case_00244": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9806070377358487
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9802245809687936,
+          "annotator_1__vs__annotator_3": 0.9841001032880013,
+          "annotator_2__vs__annotator_3": 0.977496428950751
+        }
+      }
+    },
+    "case_00245": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9802376739319826
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9813207112423309,
+          "annotator_1__vs__annotator_3": 0.9785709983002417,
+          "annotator_2__vs__annotator_3": 0.9808213122533755
+        }
+      }
+    },
+    "case_00246": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9798655347798692
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9820203143160342,
+          "annotator_1__vs__annotator_3": 0.9788572041793898,
+          "annotator_2__vs__annotator_3": 0.9787190858441835
+        }
+      }
+    },
+    "case_00247": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.982581783378521
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9820140408958948,
+          "annotator_1__vs__annotator_3": 0.9821494809054043,
+          "annotator_2__vs__annotator_3": 0.983581828334264
+        }
+      }
+    },
+    "case_00248": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9783402624278562
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9797307239552678,
+          "annotator_1__vs__annotator_3": 0.9770169715186393,
+          "annotator_2__vs__annotator_3": 0.9782730918096618
+        }
+      }
+    },
+    "case_00249": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9830691244649735
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9808025079026755,
+          "annotator_1__vs__annotator_3": 0.9840229637936745,
+          "annotator_2__vs__annotator_3": 0.9843819016985708
+        }
+      }
+    },
+    "case_00250": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9713197667875214
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9728733010796631,
+          "annotator_1__vs__annotator_3": 0.968945954517158,
+          "annotator_2__vs__annotator_3": 0.9721400447657431
+        }
+      }
+    },
+    "case_00251": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9733491174651059
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.977909377550857,
+          "annotator_1__vs__annotator_3": 0.970633080067139,
+          "annotator_2__vs__annotator_3": 0.9715048947773216
+        }
+      }
+    },
+    "case_00252": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9857990344148595
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9841348661911126,
+          "annotator_1__vs__annotator_3": 0.9865640319609379,
+          "annotator_2__vs__annotator_3": 0.9866982050925281
+        }
+      }
+    },
+    "case_00253": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.967334715697314
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9708256466170873,
+          "annotator_1__vs__annotator_3": 0.966123477594053,
+          "annotator_2__vs__annotator_3": 0.9650550228808019
+        }
+      }
+    },
+    "case_00254": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9773535515932008
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9770336187896855,
+          "annotator_1__vs__annotator_3": 0.9749797833193288,
+          "annotator_2__vs__annotator_3": 0.9800472526705881
+        }
+      }
+    },
+    "case_00255": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9779765675335019
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9766495732590176,
+          "annotator_1__vs__annotator_3": 0.9801736009763341,
+          "annotator_2__vs__annotator_3": 0.977106528365154
+        }
+      }
+    },
+    "case_00256": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9741531088437348
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9724137931034482,
+          "annotator_1__vs__annotator_3": 0.9770280270243431,
+          "annotator_2__vs__annotator_3": 0.9730175064034134
+        }
+      }
+    },
+    "case_00257": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9728156005411615
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.970489365828431,
+          "annotator_1__vs__annotator_3": 0.9700313414665734,
+          "annotator_2__vs__annotator_3": 0.9779260943284795
+        }
+      }
+    },
+    "case_00258": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9766802639648257
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9777028543970002,
+          "annotator_1__vs__annotator_3": 0.97604403940828,
+          "annotator_2__vs__annotator_3": 0.9762938980891971
+        }
+      }
+    },
+    "case_00259": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9691335041478325
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9699512007500181,
+          "annotator_1__vs__annotator_3": 0.9659885619613529,
+          "annotator_2__vs__annotator_3": 0.9714607497321268
+        }
+      }
+    },
+    "case_00260": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.971712583439975
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9725696469160191,
+          "annotator_1__vs__annotator_3": 0.9687149365713806,
+          "annotator_2__vs__annotator_3": 0.9738531668325254
+        }
+      }
+    },
+    "case_00261": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9773179287127851
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9775582118058798,
+          "annotator_1__vs__annotator_3": 0.9775501571857383,
+          "annotator_2__vs__annotator_3": 0.9768454171467369
+        }
+      }
+    },
+    "case_00262": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9758908810760857
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9757518912929276,
+          "annotator_1__vs__annotator_3": 0.9726037300944325,
+          "annotator_2__vs__annotator_3": 0.9793170218408972
+        }
+      }
+    },
+    "case_00263": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9814686300726798
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9793145816216766,
+          "annotator_1__vs__annotator_3": 0.9833629365489268,
+          "annotator_2__vs__annotator_3": 0.9817283720474361
+        }
+      }
+    },
+    "case_00264": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.957450599311393
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9646334601046667,
+          "annotator_1__vs__annotator_3": 0.9516126045721015,
+          "annotator_2__vs__annotator_3": 0.9561057332574107
+        }
+      }
+    },
+    "case_00265": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9870618537140924
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9869676838951906,
+          "annotator_1__vs__annotator_3": 0.9875883035127614,
+          "annotator_2__vs__annotator_3": 0.9866295737343249
+        }
+      }
+    },
+    "case_00266": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9767463500268517
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9768526228143214,
+          "annotator_1__vs__annotator_3": 0.9714525038485918,
+          "annotator_2__vs__annotator_3": 0.9819339234176417
+        }
+      }
+    },
+    "case_00267": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.983535486875399
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9824934156651838,
+          "annotator_1__vs__annotator_3": 0.9803016545601292,
+          "annotator_2__vs__annotator_3": 0.9878113904008844
+        }
+      }
+    },
+    "case_00268": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9750293669945486
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9744668207807642,
+          "annotator_1__vs__annotator_3": 0.9710181882114883,
+          "annotator_2__vs__annotator_3": 0.9796030919913931
+        }
+      }
+    },
+    "case_00269": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9878906322035758
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.98721152576523,
+          "annotator_1__vs__annotator_3": 0.9873886156692798,
+          "annotator_2__vs__annotator_3": 0.9890717551762174
+        }
+      }
+    },
+    "case_00270": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9865214630338451
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9876362164057138,
+          "annotator_1__vs__annotator_3": 0.9857222398006362,
+          "annotator_2__vs__annotator_3": 0.9862059328951852
+        }
+      }
+    },
+    "case_00271": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9713797459608124
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9681457044136881,
+          "annotator_1__vs__annotator_3": 0.9756061014714256,
+          "annotator_2__vs__annotator_3": 0.9703874319973237
+        }
+      }
+    },
+    "case_00272": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9890442461141687
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9887755669908027,
+          "annotator_1__vs__annotator_3": 0.9879403404126859,
+          "annotator_2__vs__annotator_3": 0.9904168309390177
+        }
+      }
+    },
+    "case_00273": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9671444383475375
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9641434615275774,
+          "annotator_1__vs__annotator_3": 0.9682095057140462,
+          "annotator_2__vs__annotator_3": 0.9690803478009886
+        }
+      }
+    },
+    "case_00274": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9783820384286012
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9817731490826564,
+          "annotator_1__vs__annotator_3": 0.976366303215804,
+          "annotator_2__vs__annotator_3": 0.9770066629873428
+        }
+      }
+    },
+    "case_00275": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9858548129217599
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9876037484135459,
+          "annotator_1__vs__annotator_3": 0.9836477659761522,
+          "annotator_2__vs__annotator_3": 0.9863129243755819
+        }
+      }
+    },
+    "case_00276": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9868584956325656
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9874205313209613,
+          "annotator_1__vs__annotator_3": 0.9884120880633587,
+          "annotator_2__vs__annotator_3": 0.9847428675133769
+        }
+      }
+    },
+    "case_00277": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9816272552947843
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9844391378314682,
+          "annotator_1__vs__annotator_3": 0.9808185944592268,
+          "annotator_2__vs__annotator_3": 0.979624033593658
+        }
+      }
+    },
+    "case_00278": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9756195521394001
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9777563007912817,
+          "annotator_1__vs__annotator_3": 0.9756554618393437,
+          "annotator_2__vs__annotator_3": 0.9734468937875751
+        }
+      }
+    },
+    "case_00279": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9752083297884114
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9748869484646141,
+          "annotator_1__vs__annotator_3": 0.9761235272645274,
+          "annotator_2__vs__annotator_3": 0.9746145136360927
+        }
+      }
+    },
+    "case_00280": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9727696634629538
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9760801284175575,
+          "annotator_1__vs__annotator_3": 0.9715382042842308,
+          "annotator_2__vs__annotator_3": 0.9706906576870731
+        }
+      }
+    },
+    "case_00281": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9756087829361136
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9718830866151547,
+          "annotator_1__vs__annotator_3": 0.9770892813999464,
+          "annotator_2__vs__annotator_3": 0.9778539807932399
+        }
+      }
+    },
+    "case_00282": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9772712147130962
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9737042477753594,
+          "annotator_1__vs__annotator_3": 0.9813980261912155,
+          "annotator_2__vs__annotator_3": 0.9767113701727135
+        }
+      }
+    },
+    "case_00283": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.983600068187477
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9827306334208739,
+          "annotator_1__vs__annotator_3": 0.9856435793752952,
+          "annotator_2__vs__annotator_3": 0.9824259917662619
+        }
+      }
+    },
+    "case_00284": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9790185124881607
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9784080964028454,
+          "annotator_1__vs__annotator_3": 0.979293087269315,
+          "annotator_2__vs__annotator_3": 0.9793543537923218
+        }
+      }
+    },
+    "case_00285": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9774390649429479
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9795221055061757,
+          "annotator_1__vs__annotator_3": 0.9777562917352242,
+          "annotator_2__vs__annotator_3": 0.9750387975874438
+        }
+      }
+    },
+    "case_00286": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9834491562037919
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9824214907446848,
+          "annotator_1__vs__annotator_3": 0.985062779621879,
+          "annotator_2__vs__annotator_3": 0.982863198244812
+        }
+      }
+    },
+    "case_00287": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9848078251277478
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9850881035264464,
+          "annotator_1__vs__annotator_3": 0.9853334662240384,
+          "annotator_2__vs__annotator_3": 0.9840019056327585
+        }
+      }
+    },
+    "case_00288": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9823407739351916
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9840472837614163,
+          "annotator_1__vs__annotator_3": 0.9802623854509724,
+          "annotator_2__vs__annotator_3": 0.9827126525931857
+        }
+      }
+    },
+    "case_00289": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9900996106100077
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9918222159611185,
+          "annotator_1__vs__annotator_3": 0.9898245242382516,
+          "annotator_2__vs__annotator_3": 0.9886520916306528
+        }
+      }
+    },
+    "case_00290": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9807240378280312
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9829476851587347,
+          "annotator_1__vs__annotator_3": 0.97957970791904,
+          "annotator_2__vs__annotator_3": 0.9796447204063189
+        }
+      }
+    },
+    "case_00291": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9757541224259764
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9805059784151822,
+          "annotator_1__vs__annotator_3": 0.9707777386118703,
+          "annotator_2__vs__annotator_3": 0.9759786502508768
+        }
+      }
+    },
+    "case_00292": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9861064133917333
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9864541501503997,
+          "annotator_1__vs__annotator_3": 0.9850886154249885,
+          "annotator_2__vs__annotator_3": 0.9867764745998117
+        }
+      }
+    },
+    "case_00293": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9819863131701743
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9832909081453235,
+          "annotator_1__vs__annotator_3": 0.9804303405922263,
+          "annotator_2__vs__annotator_3": 0.9822376907729732
+        }
+      }
+    },
+    "case_00294": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9862238530183886
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9868642362580099,
+          "annotator_1__vs__annotator_3": 0.9864139905604759,
+          "annotator_2__vs__annotator_3": 0.9853933322366796
+        }
+      }
+    },
+    "case_00295": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9748957841809921
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9712423405311851,
+          "annotator_1__vs__annotator_3": 0.9810964537860521,
+          "annotator_2__vs__annotator_3": 0.9723485582257391
+        }
+      }
+    },
+    "case_00296": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9720687561318102
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9741626729938095,
+          "annotator_1__vs__annotator_3": 0.9706251837596558,
+          "annotator_2__vs__annotator_3": 0.9714184116419653
+        }
+      }
+    },
+    "case_00297": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.971342337117897
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9648393585541193,
+          "annotator_1__vs__annotator_3": 0.978276014409026,
+          "annotator_2__vs__annotator_3": 0.9709116383905455
+        }
+      }
+    },
+    "case_00298": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9769785460845245
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.9761842613571108,
+          "annotator_1__vs__annotator_3": 0.9852441163043573,
+          "annotator_2__vs__annotator_3": 0.9695072605921055
+        }
+      }
+    },
+    "case_00299": {
+      "dataset_id": "Dataset011_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "whole_kidney": 0.9831402506749355
+      },
+      "pairwise_dice_by_class": {
+        "whole_kidney": {
+          "annotator_1__vs__annotator_2": 0.981627125246543,
+          "annotator_1__vs__annotator_3": 0.9852758638630603,
+          "annotator_2__vs__annotator_3": 0.9825177629152031
+        }
+      }
+    }
+  }
+}

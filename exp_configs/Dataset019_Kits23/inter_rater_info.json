@@ -1,0 +1,5416 @@
+{
+  "n_samples": 300,
+  "n_samples_skipped_after_annotator_filter": 0,
+  "class_labels": [
+    "mass"
+  ],
+  "include_annotators": null,
+  "exclude_annotators": [
+    "annotator_4"
+  ],
+  "dataset_class_mean_dice": {
+    "mass": 0.9591622284652113
+  },
+  "per_sample": {
+    "case_00000": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9724040409438567
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9701978585878521,
+          "annotator_1__vs__annotator_3": 0.9749529604378956,
+          "annotator_2__vs__annotator_3": 0.9720613038058223
+        }
+      }
+    },
+    "case_00001": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9310777740793471
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9467222100416576,
+          "annotator_1__vs__annotator_3": 0.9169654173456455,
+          "annotator_2__vs__annotator_3": 0.9295456948507383
+        }
+      }
+    },
+    "case_00002": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9513413650805645
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9630942769876981,
+          "annotator_1__vs__annotator_3": 0.9447734068124524,
+          "annotator_2__vs__annotator_3": 0.9461564114415432
+        }
+      }
+    },
+    "case_00003": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9586340654001022
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9561166313731878,
+          "annotator_1__vs__annotator_3": 0.9535691318327975,
+          "annotator_2__vs__annotator_3": 0.9662164329943213
+        }
+      }
+    },
+    "case_00004": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.940703280748672
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9304895782840523,
+          "annotator_1__vs__annotator_3": 0.9461212976022567,
+          "annotator_2__vs__annotator_3": 0.9454989663597069
+        }
+      }
+    },
+    "case_00005": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9615099700962366
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9606516395466789,
+          "annotator_1__vs__annotator_3": 0.9703143380545348,
+          "annotator_2__vs__annotator_3": 0.9535639326874958
+        }
+      }
+    },
+    "case_00006": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9503122916633554
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9351877607788596,
+          "annotator_1__vs__annotator_3": 0.9666559451056074,
+          "annotator_2__vs__annotator_3": 0.9490931691055992
+        }
+      }
+    },
+    "case_00007": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9561807532329766
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9453185634657447,
+          "annotator_1__vs__annotator_3": 0.9500780031201248,
+          "annotator_2__vs__annotator_3": 0.97314569311306
+        }
+      }
+    },
+    "case_00008": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9752449642951113
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9771086921921818,
+          "annotator_1__vs__annotator_3": 0.9747807512633937,
+          "annotator_2__vs__annotator_3": 0.9738454494297588
+        }
+      }
+    },
+    "case_00009": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9276115066192037
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9194975423265975,
+          "annotator_1__vs__annotator_3": 0.9491907396025404,
+          "annotator_2__vs__annotator_3": 0.9141462379284729
+        }
+      }
+    },
+    "case_00010": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9351393163343412
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9530351259284079,
+          "annotator_1__vs__annotator_3": 0.9239862867951294,
+          "annotator_2__vs__annotator_3": 0.9283965362794864
+        }
+      }
+    },
+    "case_00011": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9673641689341204
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9719720157411456,
+          "annotator_1__vs__annotator_3": 0.9654393694511479,
+          "annotator_2__vs__annotator_3": 0.9646811216100674
+        }
+      }
+    },
+    "case_00012": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9802249957027506
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9793589729617803,
+          "annotator_1__vs__annotator_3": 0.9764634686665874,
+          "annotator_2__vs__annotator_3": 0.9848525454798838
+        }
+      }
+    },
+    "case_00013": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9535036383798046
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9524709302325581,
+          "annotator_1__vs__annotator_3": 0.9519451609483763,
+          "annotator_2__vs__annotator_3": 0.9560948239584794
+        }
+      }
+    },
+    "case_00014": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9159053884515753
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9181774315847522,
+          "annotator_1__vs__annotator_3": 0.910671715046978,
+          "annotator_2__vs__annotator_3": 0.9188670187229957
+        }
+      }
+    },
+    "case_00015": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.941445434687873
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.934016136757175,
+          "annotator_1__vs__annotator_3": 0.9384684482371435,
+          "annotator_2__vs__annotator_3": 0.9518517190693006
+        }
+      }
+    },
+    "case_00016": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9436590955986471
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9356066613798573,
+          "annotator_1__vs__annotator_3": 0.9609208396495466,
+          "annotator_2__vs__annotator_3": 0.9344497857665378
+        }
+      }
+    },
+    "case_00017": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9247689589942306
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9142649990937104,
+          "annotator_1__vs__annotator_3": 0.9289198606271777,
+          "annotator_2__vs__annotator_3": 0.931122017261804
+        }
+      }
+    },
+    "case_00018": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9393822973072843
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9362691890215538,
+          "annotator_1__vs__annotator_3": 0.9535218969031167,
+          "annotator_2__vs__annotator_3": 0.9283558059971825
+        }
+      }
+    },
+    "case_00019": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9028957275694319
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.901593252108716,
+          "annotator_1__vs__annotator_3": 0.9069124423963134,
+          "annotator_2__vs__annotator_3": 0.9001814882032668
+        }
+      }
+    },
+    "case_00020": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9290128769118438
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9440672486259295,
+          "annotator_1__vs__annotator_3": 0.9178743961352657,
+          "annotator_2__vs__annotator_3": 0.925096985974336
+        }
+      }
+    },
+    "case_00021": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9518596750415934
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9597994448921121,
+          "annotator_1__vs__annotator_3": 0.9472800388881524,
+          "annotator_2__vs__annotator_3": 0.9484995413445158
+        }
+      }
+    },
+    "case_00022": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.970063345146193
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9701737905119775,
+          "annotator_1__vs__annotator_3": 0.9724518558874387,
+          "annotator_2__vs__annotator_3": 0.9675643890391626
+        }
+      }
+    },
+    "case_00023": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.8902511218029868
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9032086979581013,
+          "annotator_1__vs__annotator_3": 0.8620873269435569,
+          "annotator_2__vs__annotator_3": 0.9054573405073021
+        }
+      }
+    },
+    "case_00024": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.981100814576258
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9792333594723004,
+          "annotator_1__vs__annotator_3": 0.9848310607305186,
+          "annotator_2__vs__annotator_3": 0.9792380235259548
+        }
+      }
+    },
+    "case_00025": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9828274444411774
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9855481461171152,
+          "annotator_1__vs__annotator_3": 0.9829999060768292,
+          "annotator_2__vs__annotator_3": 0.9799342811295878
+        }
+      }
+    },
+    "case_00026": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9715212181769184
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9702435779347047,
+          "annotator_1__vs__annotator_3": 0.9724270416605908,
+          "annotator_2__vs__annotator_3": 0.9718930349354598
+        }
+      }
+    },
+    "case_00027": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9590212346464346
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9567472179205532,
+          "annotator_1__vs__annotator_3": 0.9672905494193274,
+          "annotator_2__vs__annotator_3": 0.9530259365994236
+        }
+      }
+    },
+    "case_00028": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9837164057840505
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9824999692334199,
+          "annotator_1__vs__annotator_3": 0.9840077463442313,
+          "annotator_2__vs__annotator_3": 0.9846415017745
+        }
+      }
+    },
+    "case_00029": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9580392848972458
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9658866479142977,
+          "annotator_1__vs__annotator_3": 0.9534208918753818,
+          "annotator_2__vs__annotator_3": 0.954810314902058
+        }
+      }
+    },
+    "case_00030": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9812865919036207
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9837366981123443,
+          "annotator_1__vs__annotator_3": 0.9774996887636771,
+          "annotator_2__vs__annotator_3": 0.9826233888348407
+        }
+      }
+    },
+    "case_00031": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9430138227067243
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9502563128915892,
+          "annotator_1__vs__annotator_3": 0.9362155874369911,
+          "annotator_2__vs__annotator_3": 0.9425695677915926
+        }
+      }
+    },
+    "case_00032": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.968075661815428
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9637551990493167,
+          "annotator_1__vs__annotator_3": 0.9748209407073765,
+          "annotator_2__vs__annotator_3": 0.9656508456895909
+        }
+      }
+    },
+    "case_00033": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9645217168469222
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9622033786892789,
+          "annotator_1__vs__annotator_3": 0.9651109511029652,
+          "annotator_2__vs__annotator_3": 0.9662508207485226
+        }
+      }
+    },
+    "case_00034": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.975061206390866
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9718557279013269,
+          "annotator_1__vs__annotator_3": 0.9769857281625943,
+          "annotator_2__vs__annotator_3": 0.976342163108677
+        }
+      }
+    },
+    "case_00035": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9658947998506603
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9606252473288485,
+          "annotator_1__vs__annotator_3": 0.9770829287240241,
+          "annotator_2__vs__annotator_3": 0.9599762234991084
+        }
+      }
+    },
+    "case_00036": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9344590792060868
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9607422732117109,
+          "annotator_1__vs__annotator_3": 0.9326698983872471,
+          "annotator_2__vs__annotator_3": 0.9099650660193025
+        }
+      }
+    },
+    "case_00037": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9835965072007952
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9823133756185962,
+          "annotator_1__vs__annotator_3": 0.9870744646577461,
+          "annotator_2__vs__annotator_3": 0.9814016813260432
+        }
+      }
+    },
+    "case_00038": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9624500734929615
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.962247970803502,
+          "annotator_1__vs__annotator_3": 0.9566662051779039,
+          "annotator_2__vs__annotator_3": 0.9684360444974788
+        }
+      }
+    },
+    "case_00039": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9409963730720389
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9337952270977675,
+          "annotator_1__vs__annotator_3": 0.9334383615596692,
+          "annotator_2__vs__annotator_3": 0.9557555305586801
+        }
+      }
+    },
+    "case_00040": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9670810443791596
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9656198605998904,
+          "annotator_1__vs__annotator_3": 0.9628869235628553,
+          "annotator_2__vs__annotator_3": 0.9727363489747332
+        }
+      }
+    },
+    "case_00041": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9482749210855527
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9469083722874625,
+          "annotator_1__vs__annotator_3": 0.9502060439560439,
+          "annotator_2__vs__annotator_3": 0.9477103470131516
+        }
+      }
+    },
+    "case_00042": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9819918191346876
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9889151063046648,
+          "annotator_1__vs__annotator_3": 0.9791898617260996,
+          "annotator_2__vs__annotator_3": 0.9778704893732988
+        }
+      }
+    },
+    "case_00043": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9694425468536304
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9683619782532444,
+          "annotator_1__vs__annotator_3": 0.9659477866061293,
+          "annotator_2__vs__annotator_3": 0.9740178757015173
+        }
+      }
+    },
+    "case_00044": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9778682612675992
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9807355516637478,
+          "annotator_1__vs__annotator_3": 0.975709115394327,
+          "annotator_2__vs__annotator_3": 0.9771601167447227
+        }
+      }
+    },
+    "case_00045": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.971030711480954
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9726874118715111,
+          "annotator_1__vs__annotator_3": 0.9670830372007438,
+          "annotator_2__vs__annotator_3": 0.9733216853706068
+        }
+      }
+    },
+    "case_00046": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9746240311057449
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9794509288180174,
+          "annotator_1__vs__annotator_3": 0.975304132835108,
+          "annotator_2__vs__annotator_3": 0.9691170316641093
+        }
+      }
+    },
+    "case_00047": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9747205433361178
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9781612455404457,
+          "annotator_1__vs__annotator_3": 0.9740525377669988,
+          "annotator_2__vs__annotator_3": 0.9719478467009087
+        }
+      }
+    },
+    "case_00048": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9708653993657904
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9620575143079206,
+          "annotator_1__vs__annotator_3": 0.9902793827747943,
+          "annotator_2__vs__annotator_3": 0.9602593010146562
+        }
+      }
+    },
+    "case_00049": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9554364951304127
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9551064437323519,
+          "annotator_1__vs__annotator_3": 0.9540722982777112,
+          "annotator_2__vs__annotator_3": 0.9571307433811752
+        }
+      }
+    },
+    "case_00050": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9364812304263547
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9441813261163735,
+          "annotator_1__vs__annotator_3": 0.9348993288590604,
+          "annotator_2__vs__annotator_3": 0.9303630363036304
+        }
+      }
+    },
+    "case_00051": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9399169994093696
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.918753782747788,
+          "annotator_1__vs__annotator_3": 0.9473872477419739,
+          "annotator_2__vs__annotator_3": 0.9536099677383468
+        }
+      }
+    },
+    "case_00052": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9567056063234768
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9547693425354159,
+          "annotator_1__vs__annotator_3": 0.9597455521319949,
+          "annotator_2__vs__annotator_3": 0.9556019243030197
+        }
+      }
+    },
+    "case_00053": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.978241034381683
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9831913202595051,
+          "annotator_1__vs__annotator_3": 0.9772379531158503,
+          "annotator_2__vs__annotator_3": 0.9742938297696937
+        }
+      }
+    },
+    "case_00054": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.871228548807057
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.8899377005852369,
+          "annotator_1__vs__annotator_3": 0.8824814329401486,
+          "annotator_2__vs__annotator_3": 0.8412665128957852
+        }
+      }
+    },
+    "case_00055": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9720645348946112
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9666849391218413,
+          "annotator_1__vs__annotator_3": 0.9714991996744959,
+          "annotator_2__vs__annotator_3": 0.9780094658874964
+        }
+      }
+    },
+    "case_00056": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9708646528034842
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9768260328117386,
+          "annotator_1__vs__annotator_3": 0.964716355273895,
+          "annotator_2__vs__annotator_3": 0.971051570324819
+        }
+      }
+    },
+    "case_00057": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9753743689401118
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9716617868867004,
+          "annotator_1__vs__annotator_3": 0.9794050742132007,
+          "annotator_2__vs__annotator_3": 0.9750562457204344
+        }
+      }
+    },
+    "case_00058": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9730916207479235
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9716744457409568,
+          "annotator_1__vs__annotator_3": 0.9741877413547806,
+          "annotator_2__vs__annotator_3": 0.9734126751480331
+        }
+      }
+    },
+    "case_00059": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9624770153803689
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9608551234019543,
+          "annotator_1__vs__annotator_3": 0.9645525779508424,
+          "annotator_2__vs__annotator_3": 0.9620233447883101
+        }
+      }
+    },
+    "case_00060": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9562254817006851
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9705672418860478,
+          "annotator_1__vs__annotator_3": 0.9488890840432072,
+          "annotator_2__vs__annotator_3": 0.9492201191728006
+        }
+      }
+    },
+    "case_00061": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9787035074807232
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9764778772405837,
+          "annotator_1__vs__annotator_3": 0.9788089780737793,
+          "annotator_2__vs__annotator_3": 0.9808236671278068
+        }
+      }
+    },
+    "case_00062": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9683934937470324
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.967670011148272,
+          "annotator_1__vs__annotator_3": 0.9723589549413101,
+          "annotator_2__vs__annotator_3": 0.9651515151515152
+        }
+      }
+    },
+    "case_00063": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9488209998601304
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9412877552351752,
+          "annotator_1__vs__annotator_3": 0.9515690574157571,
+          "annotator_2__vs__annotator_3": 0.9536061869294589
+        }
+      }
+    },
+    "case_00064": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9372518606292553
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.932306798373039,
+          "annotator_1__vs__annotator_3": 0.9274770173646578,
+          "annotator_2__vs__annotator_3": 0.9519717661500691
+        }
+      }
+    },
+    "case_00065": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9382241530135688
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9309367541766109,
+          "annotator_1__vs__annotator_3": 0.9281784610746854,
+          "annotator_2__vs__annotator_3": 0.9555572437894098
+        }
+      }
+    },
+    "case_00066": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9435821394068366
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9642428227043611,
+          "annotator_1__vs__annotator_3": 0.9234086469352402,
+          "annotator_2__vs__annotator_3": 0.9430949485809085
+        }
+      }
+    },
+    "case_00067": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.981547994428746
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9780367610476315,
+          "annotator_1__vs__annotator_3": 0.9874586712418483,
+          "annotator_2__vs__annotator_3": 0.9791485509967582
+        }
+      }
+    },
+    "case_00068": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9387901716260588
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9374587900184244,
+          "annotator_1__vs__annotator_3": 0.9439129118228444,
+          "annotator_2__vs__annotator_3": 0.9349988130369078
+        }
+      }
+    },
+    "case_00069": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9720852122903002
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9733181875552189,
+          "annotator_1__vs__annotator_3": 0.9701686286986955,
+          "annotator_2__vs__annotator_3": 0.9727688206169861
+        }
+      }
+    },
+    "case_00070": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9721161271431588
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9722563206181181,
+          "annotator_1__vs__annotator_3": 0.9714865161487783,
+          "annotator_2__vs__annotator_3": 0.9726055446625798
+        }
+      }
+    },
+    "case_00071": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9559538951624424
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9573334707124826,
+          "annotator_1__vs__annotator_3": 0.9613289293067948,
+          "annotator_2__vs__annotator_3": 0.9491992854680498
+        }
+      }
+    },
+    "case_00072": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9402168535356288
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9409118789613576,
+          "annotator_1__vs__annotator_3": 0.9261688174317749,
+          "annotator_2__vs__annotator_3": 0.9535698642137538
+        }
+      }
+    },
+    "case_00073": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9806116132163331
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9822313801588413,
+          "annotator_1__vs__annotator_3": 0.9792355647554438,
+          "annotator_2__vs__annotator_3": 0.9803678947347139
+        }
+      }
+    },
+    "case_00074": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9572789042101763
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9558883438981863,
+          "annotator_1__vs__annotator_3": 0.9601508849985492,
+          "annotator_2__vs__annotator_3": 0.9557974837337937
+        }
+      }
+    },
+    "case_00075": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.941438166797258
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9461893257193059,
+          "annotator_1__vs__annotator_3": 0.9483080755657048,
+          "annotator_2__vs__annotator_3": 0.9298170991067631
+        }
+      }
+    },
+    "case_00076": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9498809470032716
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9331915647705121,
+          "annotator_1__vs__annotator_3": 0.977770349323082,
+          "annotator_2__vs__annotator_3": 0.9386809269162211
+        }
+      }
+    },
+    "case_00077": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9684069849693454
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9671361502347418,
+          "annotator_1__vs__annotator_3": 0.9754481096550686,
+          "annotator_2__vs__annotator_3": 0.962636695018226
+        }
+      }
+    },
+    "case_00078": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9771573352127011
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9745671789889301,
+          "annotator_1__vs__annotator_3": 0.9794624417663447,
+          "annotator_2__vs__annotator_3": 0.9774423848828285
+        }
+      }
+    },
+    "case_00079": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9793372704746605
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.980067558705834,
+          "annotator_1__vs__annotator_3": 0.9801509138411723,
+          "annotator_2__vs__annotator_3": 0.977793338876975
+        }
+      }
+    },
+    "case_00080": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9483540026140203
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9445956983392322,
+          "annotator_1__vs__annotator_3": 0.9616907992987468,
+          "annotator_2__vs__annotator_3": 0.9387755102040817
+        }
+      }
+    },
+    "case_00081": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9648383876368176
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9673934015049199,
+          "annotator_1__vs__annotator_3": 0.9675952245594087,
+          "annotator_2__vs__annotator_3": 0.9595265368461244
+        }
+      }
+    },
+    "case_00082": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9091812474125841
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9063843863711545,
+          "annotator_1__vs__annotator_3": 0.9261585469360041,
+          "annotator_2__vs__annotator_3": 0.8950008089305937
+        }
+      }
+    },
+    "case_00083": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9604980153658289
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9545004054419317,
+          "annotator_1__vs__annotator_3": 0.968690787692863,
+          "annotator_2__vs__annotator_3": 0.958302852962692
+        }
+      }
+    },
+    "case_00084": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9658432070453742
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9808790974482469,
+          "annotator_1__vs__annotator_3": 0.959823291831742,
+          "annotator_2__vs__annotator_3": 0.9568272318561336
+        }
+      }
+    },
+    "case_00085": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.965140472137378
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9634620367970977,
+          "annotator_1__vs__annotator_3": 0.9675408984679305,
+          "annotator_2__vs__annotator_3": 0.9644184811471057
+        }
+      }
+    },
+    "case_00086": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9441205722493006
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.940182852045936,
+          "annotator_1__vs__annotator_3": 0.9241293194712126,
+          "annotator_2__vs__annotator_3": 0.9680495452307533
+        }
+      }
+    },
+    "case_00087": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9517878518810075
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9311361200428725,
+          "annotator_1__vs__annotator_3": 0.9478459596820957,
+          "annotator_2__vs__annotator_3": 0.9763814759180542
+        }
+      }
+    },
+    "case_00088": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9606791589010584
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9705922997244748,
+          "annotator_1__vs__annotator_3": 0.9689751876631325,
+          "annotator_2__vs__annotator_3": 0.9424699893155678
+        }
+      }
+    },
+    "case_00089": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9428936914927243
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9814173387606503,
+          "annotator_1__vs__annotator_3": 0.9152670315153802,
+          "annotator_2__vs__annotator_3": 0.9319967042021423
+        }
+      }
+    },
+    "case_00090": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9697857303856559
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9692922374429224,
+          "annotator_1__vs__annotator_3": 0.9682038604164686,
+          "annotator_2__vs__annotator_3": 0.9718610932975768
+        }
+      }
+    },
+    "case_00091": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9579606551105377
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9439902744987491,
+          "annotator_1__vs__annotator_3": 0.96611333321889,
+          "annotator_2__vs__annotator_3": 0.963778357613974
+        }
+      }
+    },
+    "case_00092": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9823423454524852
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9822967060017381,
+          "annotator_1__vs__annotator_3": 0.9844775318034581,
+          "annotator_2__vs__annotator_3": 0.9802527985522594
+        }
+      }
+    },
+    "case_00093": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9475898945990365
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9437838551988373,
+          "annotator_1__vs__annotator_3": 0.973460371124515,
+          "annotator_2__vs__annotator_3": 0.9255254574737575
+        }
+      }
+    },
+    "case_00094": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9565680270856856
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9569331491995294,
+          "annotator_1__vs__annotator_3": 0.9563127891817276,
+          "annotator_2__vs__annotator_3": 0.9564581428757999
+        }
+      }
+    },
+    "case_00095": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9770627366478285
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9817312454756734,
+          "annotator_1__vs__annotator_3": 0.9728338410519416,
+          "annotator_2__vs__annotator_3": 0.9766231234158705
+        }
+      }
+    },
+    "case_00096": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.961295143292296
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9631525281404323,
+          "annotator_1__vs__annotator_3": 0.9632998940743972,
+          "annotator_2__vs__annotator_3": 0.9574330076620586
+        }
+      }
+    },
+    "case_00097": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9522660550021067
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9453062529985606,
+          "annotator_1__vs__annotator_3": 0.9383365200764818,
+          "annotator_2__vs__annotator_3": 0.9731553919312778
+        }
+      }
+    },
+    "case_00098": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9643253713824619
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9557093099877624,
+          "annotator_1__vs__annotator_3": 0.9699394638224272,
+          "annotator_2__vs__annotator_3": 0.9673273403371963
+        }
+      }
+    },
+    "case_00099": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9744581089848086
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.971142243113098,
+          "annotator_1__vs__annotator_3": 0.9768566256501914,
+          "annotator_2__vs__annotator_3": 0.9753754581911361
+        }
+      }
+    },
+    "case_00100": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.892406777870114
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.8704961910644431,
+          "annotator_1__vs__annotator_3": 0.8881524440762221,
+          "annotator_2__vs__annotator_3": 0.9185716984696769
+        }
+      }
+    },
+    "case_00101": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9273943859711605
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9395315315315316,
+          "annotator_1__vs__annotator_3": 0.9289812746950695,
+          "annotator_2__vs__annotator_3": 0.9136703516868806
+        }
+      }
+    },
+    "case_00102": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.977616160670383
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.974750458739475,
+          "annotator_1__vs__annotator_3": 0.9818843324433062,
+          "annotator_2__vs__annotator_3": 0.9762136908283678
+        }
+      }
+    },
+    "case_00103": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9278626981228345
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.942117318218875,
+          "annotator_1__vs__annotator_3": 0.9262970226421822,
+          "annotator_2__vs__annotator_3": 0.9151737535074466
+        }
+      }
+    },
+    "case_00104": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9752000818914698
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9781203223032581,
+          "annotator_1__vs__annotator_3": 0.9711029457557452,
+          "annotator_2__vs__annotator_3": 0.9763769776154061
+        }
+      }
+    },
+    "case_00105": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9758206521710271
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9779516648327017,
+          "annotator_1__vs__annotator_3": 0.9751891824835628,
+          "annotator_2__vs__annotator_3": 0.9743211091968168
+        }
+      }
+    },
+    "case_00106": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9307541037560307
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9429012345679012,
+          "annotator_1__vs__annotator_3": 0.9393814432989691,
+          "annotator_2__vs__annotator_3": 0.909979633401222
+        }
+      }
+    },
+    "case_00107": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9686496580129501
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.969663782141569,
+          "annotator_1__vs__annotator_3": 0.9736053950531763,
+          "annotator_2__vs__annotator_3": 0.962679796844105
+        }
+      }
+    },
+    "case_00108": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9645821088056441
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9538083441726092,
+          "annotator_1__vs__annotator_3": 0.9867918035351165,
+          "annotator_2__vs__annotator_3": 0.9531461787092066
+        }
+      }
+    },
+    "case_00109": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9764221450656797
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9764920294368699,
+          "annotator_1__vs__annotator_3": 0.9777674994708414,
+          "annotator_2__vs__annotator_3": 0.9750069062893275
+        }
+      }
+    },
+    "case_00110": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.955634004537245
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9520707305723592,
+          "annotator_1__vs__annotator_3": 0.9444444444444444,
+          "annotator_2__vs__annotator_3": 0.9703868385949311
+        }
+      }
+    },
+    "case_00111": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9519382527267445
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9461506203902414,
+          "annotator_1__vs__annotator_3": 0.9666043407256633,
+          "annotator_2__vs__annotator_3": 0.9430597970643286
+        }
+      }
+    },
+    "case_00112": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9619827332324108
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9488327828472262,
+          "annotator_1__vs__annotator_3": 0.9783041033249604,
+          "annotator_2__vs__annotator_3": 0.9588113135250458
+        }
+      }
+    },
+    "case_00113": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9679418348010915
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9645942023300513,
+          "annotator_1__vs__annotator_3": 0.9712746858168761,
+          "annotator_2__vs__annotator_3": 0.9679566162563471
+        }
+      }
+    },
+    "case_00114": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9714577459999755
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9757314539150133,
+          "annotator_1__vs__annotator_3": 0.9662619936987966,
+          "annotator_2__vs__annotator_3": 0.9723797903861164
+        }
+      }
+    },
+    "case_00115": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9473298308939683
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9489249158480456,
+          "annotator_1__vs__annotator_3": 0.9530183812726502,
+          "annotator_2__vs__annotator_3": 0.9400461955612092
+        }
+      }
+    },
+    "case_00116": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9452077543378659
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9314535787087853,
+          "annotator_1__vs__annotator_3": 0.9726961817504974,
+          "annotator_2__vs__annotator_3": 0.9314735025543149
+        }
+      }
+    },
+    "case_00117": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9724404778202697
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9686577751311399,
+          "annotator_1__vs__annotator_3": 0.9785286569717707,
+          "annotator_2__vs__annotator_3": 0.9701350013578981
+        }
+      }
+    },
+    "case_00118": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9750502829941959
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9714842509771292,
+          "annotator_1__vs__annotator_3": 0.9788911870761111,
+          "annotator_2__vs__annotator_3": 0.9747754109293476
+        }
+      }
+    },
+    "case_00119": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9759456098851468
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9734571890145396,
+          "annotator_1__vs__annotator_3": 0.9770994837268769,
+          "annotator_2__vs__annotator_3": 0.9772801569140241
+        }
+      }
+    },
+    "case_00120": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.914061352232161
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.935508764193584,
+          "annotator_1__vs__annotator_3": 0.9001615508885299,
+          "annotator_2__vs__annotator_3": 0.9065137416143692
+        }
+      }
+    },
+    "case_00121": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9659117824365057
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9679032930387661,
+          "annotator_1__vs__annotator_3": 0.9675954592363261,
+          "annotator_2__vs__annotator_3": 0.9622365950344252
+        }
+      }
+    },
+    "case_00122": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9842616443959781
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9874416631310988,
+          "annotator_1__vs__annotator_3": 0.9808169906654106,
+          "annotator_2__vs__annotator_3": 0.9845262793914247
+        }
+      }
+    },
+    "case_00123": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.8825152306761187
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.85,
+          "annotator_1__vs__annotator_3": 0.9032500469659966,
+          "annotator_2__vs__annotator_3": 0.8942956450623595
+        }
+      }
+    },
+    "case_00124": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9362005414491265
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9394987035436474,
+          "annotator_1__vs__annotator_3": 0.9299724860211236,
+          "annotator_2__vs__annotator_3": 0.9391304347826087
+        }
+      }
+    },
+    "case_00125": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9388328179949122
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9403907163132409,
+          "annotator_1__vs__annotator_3": 0.9209049158020072,
+          "annotator_2__vs__annotator_3": 0.9552028218694886
+        }
+      }
+    },
+    "case_00126": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.926169141066429
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9196086209176253,
+          "annotator_1__vs__annotator_3": 0.9102320146886997,
+          "annotator_2__vs__annotator_3": 0.9486667875929621
+        }
+      }
+    },
+    "case_00127": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9402976442720828
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9581821653618484,
+          "annotator_1__vs__annotator_3": 0.9266932270916335,
+          "annotator_2__vs__annotator_3": 0.9360175403627666
+        }
+      }
+    },
+    "case_00128": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9533978931211992
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9511435918256869,
+          "annotator_1__vs__annotator_3": 0.9572166724078539,
+          "annotator_2__vs__annotator_3": 0.9518334151300568
+        }
+      }
+    },
+    "case_00129": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.8869181576148497
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.8722208648912778,
+          "annotator_1__vs__annotator_3": 0.8675730110775428,
+          "annotator_2__vs__annotator_3": 0.9209605968757286
+        }
+      }
+    },
+    "case_00130": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9628266186088618
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9633956702229794,
+          "annotator_1__vs__annotator_3": 0.9608797739543399,
+          "annotator_2__vs__annotator_3": 0.9642044116492661
+        }
+      }
+    },
+    "case_00131": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9718174063914123
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9765548640924444,
+          "annotator_1__vs__annotator_3": 0.9729063449893492,
+          "annotator_2__vs__annotator_3": 0.9659910100924434
+        }
+      }
+    },
+    "case_00132": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9711352786740001
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9652942556908555,
+          "annotator_1__vs__annotator_3": 0.9723836833811258,
+          "annotator_2__vs__annotator_3": 0.9757278969500186
+        }
+      }
+    },
+    "case_00133": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9867651948718302
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9890038255022043,
+          "annotator_1__vs__annotator_3": 0.9846724860815176,
+          "annotator_2__vs__annotator_3": 0.9866192730317686
+        }
+      }
+    },
+    "case_00134": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9708151642379721
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.967068013219015,
+          "annotator_1__vs__annotator_3": 0.9665073989887275,
+          "annotator_2__vs__annotator_3": 0.9788700805061737
+        }
+      }
+    },
+    "case_00135": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9823362387953759
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9824760238827934,
+          "annotator_1__vs__annotator_3": 0.984412981349536,
+          "annotator_2__vs__annotator_3": 0.9801197111537981
+        }
+      }
+    },
+    "case_00136": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9608434692914329
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9639253628196268,
+          "annotator_1__vs__annotator_3": 0.9593651662334108,
+          "annotator_2__vs__annotator_3": 0.9592398788212614
+        }
+      }
+    },
+    "case_00137": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9485054008690362
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9446470003314551,
+          "annotator_1__vs__annotator_3": 0.9515855998194335,
+          "annotator_2__vs__annotator_3": 0.9492836024562201
+        }
+      }
+    },
+    "case_00138": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9769063822704044
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9777981392726247,
+          "annotator_1__vs__annotator_3": 0.9748758085843966,
+          "annotator_2__vs__annotator_3": 0.9780451989541922
+        }
+      }
+    },
+    "case_00139": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9802219332495516
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.979206571417501,
+          "annotator_1__vs__annotator_3": 0.9820074494998506,
+          "annotator_2__vs__annotator_3": 0.9794517788313032
+        }
+      }
+    },
+    "case_00140": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9475880404775108
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9576413783012656,
+          "annotator_1__vs__annotator_3": 0.9419345800938572,
+          "annotator_2__vs__annotator_3": 0.9431881630374093
+        }
+      }
+    },
+    "case_00141": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9724132570125597
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9719060276291167,
+          "annotator_1__vs__annotator_3": 0.9738643289109746,
+          "annotator_2__vs__annotator_3": 0.9714694144975877
+        }
+      }
+    },
+    "case_00142": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.947338405362612
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9436672508281249,
+          "annotator_1__vs__annotator_3": 0.958113806569734,
+          "annotator_2__vs__annotator_3": 0.9402341586899771
+        }
+      }
+    },
+    "case_00143": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9743641882805525
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9718404290982232,
+          "annotator_1__vs__annotator_3": 0.9735230125523012,
+          "annotator_2__vs__annotator_3": 0.9777291231911327
+        }
+      }
+    },
+    "case_00144": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9450897714739243
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9457708273847438,
+          "annotator_1__vs__annotator_3": 0.9480375387175812,
+          "annotator_2__vs__annotator_3": 0.9414609483194478
+        }
+      }
+    },
+    "case_00145": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9819608444117089
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9790908010330333,
+          "annotator_1__vs__annotator_3": 0.9855173974418379,
+          "annotator_2__vs__annotator_3": 0.9812743347602556
+        }
+      }
+    },
+    "case_00146": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9723054559653548
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9628427255725326,
+          "annotator_1__vs__annotator_3": 0.9730271159762467,
+          "annotator_2__vs__annotator_3": 0.9810465263472847
+        }
+      }
+    },
+    "case_00147": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9341120855630552
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.920065970313359,
+          "annotator_1__vs__annotator_3": 0.9465684555126856,
+          "annotator_2__vs__annotator_3": 0.9357018308631212
+        }
+      }
+    },
+    "case_00148": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9776820488111663
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9762422485302408,
+          "annotator_1__vs__annotator_3": 0.9838917525773195,
+          "annotator_2__vs__annotator_3": 0.9729121453259384
+        }
+      }
+    },
+    "case_00149": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9734387833430738
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9835851779721435,
+          "annotator_1__vs__annotator_3": 0.9659857305125656,
+          "annotator_2__vs__annotator_3": 0.9707454415445119
+        }
+      }
+    },
+    "case_00150": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9309821824770252
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.935907688792414,
+          "annotator_1__vs__annotator_3": 0.920907920907921,
+          "annotator_2__vs__annotator_3": 0.9361309377307409
+        }
+      }
+    },
+    "case_00151": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9740697911412175
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9730267339586219,
+          "annotator_1__vs__annotator_3": 0.9713175927228557,
+          "annotator_2__vs__annotator_3": 0.977865046742175
+        }
+      }
+    },
+    "case_00152": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9493563993797626
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9481000926784059,
+          "annotator_1__vs__annotator_3": 0.949594239341639,
+          "annotator_2__vs__annotator_3": 0.9503748661192432
+        }
+      }
+    },
+    "case_00153": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9648042465495802
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9638680626898949,
+          "annotator_1__vs__annotator_3": 0.9654226364151025,
+          "annotator_2__vs__annotator_3": 0.9651220405437428
+        }
+      }
+    },
+    "case_00154": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9466532921297092
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9542907949566689,
+          "annotator_1__vs__annotator_3": 0.9483490858295126,
+          "annotator_2__vs__annotator_3": 0.937319995602946
+        }
+      }
+    },
+    "case_00155": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9716589602127358
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.974298403707518,
+          "annotator_1__vs__annotator_3": 0.9690700943964652,
+          "annotator_2__vs__annotator_3": 0.9716083825342243
+        }
+      }
+    },
+    "case_00156": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9283463478609445
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9208645735707591,
+          "annotator_1__vs__annotator_3": 0.9443809306047788,
+          "annotator_2__vs__annotator_3": 0.9197935394072957
+        }
+      }
+    },
+    "case_00157": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9731350973972596
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9666666666666667,
+          "annotator_1__vs__annotator_3": 0.9730142432140695,
+          "annotator_2__vs__annotator_3": 0.9797243823110425
+        }
+      }
+    },
+    "case_00158": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9107242406582755
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9172236503856042,
+          "annotator_1__vs__annotator_3": 0.9053265816293827,
+          "annotator_2__vs__annotator_3": 0.9096224899598394
+        }
+      }
+    },
+    "case_00159": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9760432389698673
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9742926693331585,
+          "annotator_1__vs__annotator_3": 0.9759094866550303,
+          "annotator_2__vs__annotator_3": 0.9779275609214132
+        }
+      }
+    },
+    "case_00160": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9424393219738224
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.918493554926397,
+          "annotator_1__vs__annotator_3": 0.9368231402570507,
+          "annotator_2__vs__annotator_3": 0.9720012707380196
+        }
+      }
+    },
+    "case_00161": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9690874446506857
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9793003745646507,
+          "annotator_1__vs__annotator_3": 0.9645760612543632,
+          "annotator_2__vs__annotator_3": 0.9633858981330433
+        }
+      }
+    },
+    "case_00162": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.975201718270518
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9796698523023458,
+          "annotator_1__vs__annotator_3": 0.9769020698808096,
+          "annotator_2__vs__annotator_3": 0.9690332326283988
+        }
+      }
+    },
+    "case_00163": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9396216161315786
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9437596302003082,
+          "annotator_1__vs__annotator_3": 0.9295609183024133,
+          "annotator_2__vs__annotator_3": 0.9455442998920142
+        }
+      }
+    },
+    "case_00164": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9630405324711505
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9554492826579412,
+          "annotator_1__vs__annotator_3": 0.9640793770409445,
+          "annotator_2__vs__annotator_3": 0.969592937714566
+        }
+      }
+    },
+    "case_00165": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9424153943363272
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9412908533393164,
+          "annotator_1__vs__annotator_3": 0.9413533834586466,
+          "annotator_2__vs__annotator_3": 0.9446019462110183
+        }
+      }
+    },
+    "case_00166": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9535991593676578
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9388954023423219,
+          "annotator_1__vs__annotator_3": 0.966240210147395,
+          "annotator_2__vs__annotator_3": 0.9556618656132565
+        }
+      }
+    },
+    "case_00167": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.896919087074218
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.880057803468208,
+          "annotator_1__vs__annotator_3": 0.9077519379844962,
+          "annotator_2__vs__annotator_3": 0.9029475197699497
+        }
+      }
+    },
+    "case_00168": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9413202386938587
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9360967184801382,
+          "annotator_1__vs__annotator_3": 0.9503516968732351,
+          "annotator_2__vs__annotator_3": 0.9375123007282031
+        }
+      }
+    },
+    "case_00169": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9623134492925863
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.968144690781797,
+          "annotator_1__vs__annotator_3": 0.9604108198483311,
+          "annotator_2__vs__annotator_3": 0.9583848372476308
+        }
+      }
+    },
+    "case_00170": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9497704829883881
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9497006862315667,
+          "annotator_1__vs__annotator_3": 0.9449840560055712,
+          "annotator_2__vs__annotator_3": 0.9546267067280265
+        }
+      }
+    },
+    "case_00171": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9695974649952418
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.985545932692688,
+          "annotator_1__vs__annotator_3": 0.9667664361647229,
+          "annotator_2__vs__annotator_3": 0.9564800261283145
+        }
+      }
+    },
+    "case_00172": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9578003149254809
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9470924243843056,
+          "annotator_1__vs__annotator_3": 0.9510567326052488,
+          "annotator_2__vs__annotator_3": 0.9752517877868884
+        }
+      }
+    },
+    "case_00173": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9764001057622504
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9782005548949663,
+          "annotator_1__vs__annotator_3": 0.9727564102564102,
+          "annotator_2__vs__annotator_3": 0.9782433521353747
+        }
+      }
+    },
+    "case_00174": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9353639567115432
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.955683408490126,
+          "annotator_1__vs__annotator_3": 0.9194608809993425,
+          "annotator_2__vs__annotator_3": 0.9309475806451613
+        }
+      }
+    },
+    "case_00175": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9624660098853665
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9613780846264269,
+          "annotator_1__vs__annotator_3": 0.9667505629884753,
+          "annotator_2__vs__annotator_3": 0.9592693820411973
+        }
+      }
+    },
+    "case_00176": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9859678732738368
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9834544277390116,
+          "annotator_1__vs__annotator_3": 0.9843345789019833,
+          "annotator_2__vs__annotator_3": 0.9901146131805157
+        }
+      }
+    },
+    "case_00177": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9627079698319337
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.966038961038961,
+          "annotator_1__vs__annotator_3": 0.9746831539671282,
+          "annotator_2__vs__annotator_3": 0.9474017944897118
+        }
+      }
+    },
+    "case_00178": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9659126525448833
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9738430341358333,
+          "annotator_1__vs__annotator_3": 0.9605576439175346,
+          "annotator_2__vs__annotator_3": 0.9633372795812823
+        }
+      }
+    },
+    "case_00179": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9644948543106944
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9593166419405655,
+          "annotator_1__vs__annotator_3": 0.9568061064132306,
+          "annotator_2__vs__annotator_3": 0.9773618145782867
+        }
+      }
+    },
+    "case_00180": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9730555447596766
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9707035957665929,
+          "annotator_1__vs__annotator_3": 0.9671013418233096,
+          "annotator_2__vs__annotator_3": 0.9813616966891273
+        }
+      }
+    },
+    "case_00181": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9636142804012588
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9665494809272698,
+          "annotator_1__vs__annotator_3": 0.969399235655948,
+          "annotator_2__vs__annotator_3": 0.9548941246205588
+        }
+      }
+    },
+    "case_00182": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9610860106028194
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9630750605326877,
+          "annotator_1__vs__annotator_3": 0.9594882729211087,
+          "annotator_2__vs__annotator_3": 0.9606946983546618
+        }
+      }
+    },
+    "case_00183": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9646834691383791
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9711368115134263,
+          "annotator_1__vs__annotator_3": 0.9608434955232347,
+          "annotator_2__vs__annotator_3": 0.9620701003784762
+        }
+      }
+    },
+    "case_00184": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9687309817920705
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9713157315844132,
+          "annotator_1__vs__annotator_3": 0.9674983001202991,
+          "annotator_2__vs__annotator_3": 0.9673789136714989
+        }
+      }
+    },
+    "case_00185": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.922980114913221
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.908412820396908,
+          "annotator_1__vs__annotator_3": 0.9462443982245856,
+          "annotator_2__vs__annotator_3": 0.9142831261181693
+        }
+      }
+    },
+    "case_00186": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9740345456670102
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9708441724542344,
+          "annotator_1__vs__annotator_3": 0.9778855581184963,
+          "annotator_2__vs__annotator_3": 0.9733739064282997
+        }
+      }
+    },
+    "case_00187": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9718218395877513
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9749000923075223,
+          "annotator_1__vs__annotator_3": 0.9704585488449327,
+          "annotator_2__vs__annotator_3": 0.9701068776107991
+        }
+      }
+    },
+    "case_00188": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9243510259168913
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9164191196327303,
+          "annotator_1__vs__annotator_3": 0.9112398609501738,
+          "annotator_2__vs__annotator_3": 0.9453940971677697
+        }
+      }
+    },
+    "case_00189": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9677551891088519
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9610501912081523,
+          "annotator_1__vs__annotator_3": 0.981309425102093,
+          "annotator_2__vs__annotator_3": 0.9609059510163104
+        }
+      }
+    },
+    "case_00190": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.970959471227637
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9652473082333932,
+          "annotator_1__vs__annotator_3": 0.9712847312475205,
+          "annotator_2__vs__annotator_3": 0.9763463742019971
+        }
+      }
+    },
+    "case_00191": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9134991152026792
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9044910179640718,
+          "annotator_1__vs__annotator_3": 0.921289123024481,
+          "annotator_2__vs__annotator_3": 0.9147172046194848
+        }
+      }
+    },
+    "case_00192": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9731580429708294
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9753389283408651,
+          "annotator_1__vs__annotator_3": 0.9766201348257441,
+          "annotator_2__vs__annotator_3": 0.967515065745879
+        }
+      }
+    },
+    "case_00193": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9589721397351312
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.962746170678337,
+          "annotator_1__vs__annotator_3": 0.9572475114640421,
+          "annotator_2__vs__annotator_3": 0.9569227370630143
+        }
+      }
+    },
+    "case_00194": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.968061015435718
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.970386387139231,
+          "annotator_1__vs__annotator_3": 0.9678826204791128,
+          "annotator_2__vs__annotator_3": 0.9659140386888101
+        }
+      }
+    },
+    "case_00195": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9638810190902808
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9566584363546268,
+          "annotator_1__vs__annotator_3": 0.9663995972985444,
+          "annotator_2__vs__annotator_3": 0.9685850236176716
+        }
+      }
+    },
+    "case_00196": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9534822336855756
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9496716546452794,
+          "annotator_1__vs__annotator_3": 0.9679993860793492,
+          "annotator_2__vs__annotator_3": 0.9427756603320984
+        }
+      }
+    },
+    "case_00197": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9745933613218843
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9758119743012028,
+          "annotator_1__vs__annotator_3": 0.9822093588082902,
+          "annotator_2__vs__annotator_3": 0.9657587508561599
+        }
+      }
+    },
+    "case_00198": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9672437409076995
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9638586234387457,
+          "annotator_1__vs__annotator_3": 0.9707819116073716,
+          "annotator_2__vs__annotator_3": 0.9670906876769811
+        }
+      }
+    },
+    "case_00199": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.970518876118971
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9674274713168115,
+          "annotator_1__vs__annotator_3": 0.9677856713752679,
+          "annotator_2__vs__annotator_3": 0.9763434856648335
+        }
+      }
+    },
+    "case_00200": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9616642573336917
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9621305212359526,
+          "annotator_1__vs__annotator_3": 0.9580948174822917,
+          "annotator_2__vs__annotator_3": 0.9647674332828309
+        }
+      }
+    },
+    "case_00201": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9166942670426389
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9038098830629951,
+          "annotator_1__vs__annotator_3": 0.9343326195574589,
+          "annotator_2__vs__annotator_3": 0.9119402985074627
+        }
+      }
+    },
+    "case_00202": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9773068623691556
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9779517933545341,
+          "annotator_1__vs__annotator_3": 0.9758077337525836,
+          "annotator_2__vs__annotator_3": 0.9781610600003492
+        }
+      }
+    },
+    "case_00203": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9479303674302675
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9514177576472048,
+          "annotator_1__vs__annotator_3": 0.9417516750165993,
+          "annotator_2__vs__annotator_3": 0.9506216696269982
+        }
+      }
+    },
+    "case_00204": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9704358637452124
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9831577840480906,
+          "annotator_1__vs__annotator_3": 0.9571382301076042,
+          "annotator_2__vs__annotator_3": 0.9710115770799422
+        }
+      }
+    },
+    "case_00205": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9571508635476418
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9603960396039604,
+          "annotator_1__vs__annotator_3": 0.9498199279711885,
+          "annotator_2__vs__annotator_3": 0.9612366230677765
+        }
+      }
+    },
+    "case_00206": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.977803274593772
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9846225535880708,
+          "annotator_1__vs__annotator_3": 0.9759880280253044,
+          "annotator_2__vs__annotator_3": 0.972799242167941
+        }
+      }
+    },
+    "case_00207": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9674611592609512
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.97396306388132,
+          "annotator_1__vs__annotator_3": 0.9663167789440702,
+          "annotator_2__vs__annotator_3": 0.9621036349574633
+        }
+      }
+    },
+    "case_00208": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9893626364742832
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9898116702686014,
+          "annotator_1__vs__annotator_3": 0.9856821435876457,
+          "annotator_2__vs__annotator_3": 0.9925940955666024
+        }
+      }
+    },
+    "case_00209": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9018570667136722
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.8769716088328076,
+          "annotator_1__vs__annotator_3": 0.8749435665914221,
+          "annotator_2__vs__annotator_3": 0.9536560247167868
+        }
+      }
+    },
+    "case_00210": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9772204969211415
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9768835616438356,
+          "annotator_1__vs__annotator_3": 0.976608659455631,
+          "annotator_2__vs__annotator_3": 0.9781692696639581
+        }
+      }
+    },
+    "case_00211": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9668942388840533
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9665346059568224,
+          "annotator_1__vs__annotator_3": 0.9690317711794099,
+          "annotator_2__vs__annotator_3": 0.9651163395159278
+        }
+      }
+    },
+    "case_00212": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9422103598898803
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9279295154185022,
+          "annotator_1__vs__annotator_3": 0.9597729928225672,
+          "annotator_2__vs__annotator_3": 0.9389285714285714
+        }
+      }
+    },
+    "case_00213": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.8972754916053937
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9032061688311688,
+          "annotator_1__vs__annotator_3": 0.8896068928379106,
+          "annotator_2__vs__annotator_3": 0.8990134131471013
+        }
+      }
+    },
+    "case_00214": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9459045748247584
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9472577799466947,
+          "annotator_1__vs__annotator_3": 0.9414458373995946,
+          "annotator_2__vs__annotator_3": 0.9490101071279857
+        }
+      }
+    },
+    "case_00215": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9737395646973582
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9666574134048919,
+          "annotator_1__vs__annotator_3": 0.9809602396014792,
+          "annotator_2__vs__annotator_3": 0.9736010410857037
+        }
+      }
+    },
+    "case_00216": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9661724439124434
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9625871338130432,
+          "annotator_1__vs__annotator_3": 0.9645469273085562,
+          "annotator_2__vs__annotator_3": 0.9713832706157307
+        }
+      }
+    },
+    "case_00217": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9667773761409135
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9577234750926565,
+          "annotator_1__vs__annotator_3": 0.9631929970821176,
+          "annotator_2__vs__annotator_3": 0.9794156562479666
+        }
+      }
+    },
+    "case_00218": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.963986960128398
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9687898089171975,
+          "annotator_1__vs__annotator_3": 0.9628058727569331,
+          "annotator_2__vs__annotator_3": 0.9603651987110634
+        }
+      }
+    },
+    "case_00219": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9849536725120993
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9843718411644732,
+          "annotator_1__vs__annotator_3": 0.9891830673981981,
+          "annotator_2__vs__annotator_3": 0.9813061089736264
+        }
+      }
+    },
+    "case_00220": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.969884379027273
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9725969645868465,
+          "annotator_1__vs__annotator_3": 0.9689844063138205,
+          "annotator_2__vs__annotator_3": 0.9680717661811518
+        }
+      }
+    },
+    "case_00221": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9764912598031305
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.977691488506671,
+          "annotator_1__vs__annotator_3": 0.9706481869044995,
+          "annotator_2__vs__annotator_3": 0.9811341039982212
+        }
+      }
+    },
+    "case_00222": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.984946433061915
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9849084284322803,
+          "annotator_1__vs__annotator_3": 0.9863841212004986,
+          "annotator_2__vs__annotator_3": 0.9835467495529661
+        }
+      }
+    },
+    "case_00223": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9791138712813087
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9857951952665575,
+          "annotator_1__vs__annotator_3": 0.9715433720972928,
+          "annotator_2__vs__annotator_3": 0.9800030464800756
+        }
+      }
+    },
+    "case_00224": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9735932422001531
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9734347327846651,
+          "annotator_1__vs__annotator_3": 0.9752356339312861,
+          "annotator_2__vs__annotator_3": 0.9721093598845083
+        }
+      }
+    },
+    "case_00225": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9714081470554886
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9744582526697059,
+          "annotator_1__vs__annotator_3": 0.9710278649197269,
+          "annotator_2__vs__annotator_3": 0.9687383235770333
+        }
+      }
+    },
+    "case_00226": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9374356177270515
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9152371342078708,
+          "annotator_1__vs__annotator_3": 0.9472404570872842,
+          "annotator_2__vs__annotator_3": 0.9498292618859995
+        }
+      }
+    },
+    "case_00227": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9665694882569776
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9649979922366484,
+          "annotator_1__vs__annotator_3": 0.9605937921727395,
+          "annotator_2__vs__annotator_3": 0.9741166803615448
+        }
+      }
+    },
+    "case_00228": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.969359490761737
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9717279689457028,
+          "annotator_1__vs__annotator_3": 0.9585840124495207,
+          "annotator_2__vs__annotator_3": 0.9777664908899877
+        }
+      }
+    },
+    "case_00229": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9606505138587912
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9535949014140609,
+          "annotator_1__vs__annotator_3": 0.9635335413416537,
+          "annotator_2__vs__annotator_3": 0.9648230988206588
+        }
+      }
+    },
+    "case_00230": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9659638134002301
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9666677822027375,
+          "annotator_1__vs__annotator_3": 0.9719689869643009,
+          "annotator_2__vs__annotator_3": 0.9592546710336518
+        }
+      }
+    },
+    "case_00231": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9560563758773971
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.961969362091304,
+          "annotator_1__vs__annotator_3": 0.9517689866067972,
+          "annotator_2__vs__annotator_3": 0.9544307789340902
+        }
+      }
+    },
+    "case_00232": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9652554661759521
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.954106755958243,
+          "annotator_1__vs__annotator_3": 0.9664407873507583,
+          "annotator_2__vs__annotator_3": 0.9752188552188552
+        }
+      }
+    },
+    "case_00233": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9686448276644398
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9599104610905885,
+          "annotator_1__vs__annotator_3": 0.9781524699397041,
+          "annotator_2__vs__annotator_3": 0.9678715519630268
+        }
+      }
+    },
+    "case_00234": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9143275000661114
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9073610415623435,
+          "annotator_1__vs__annotator_3": 0.8966942148760331,
+          "annotator_2__vs__annotator_3": 0.9389272437599575
+        }
+      }
+    },
+    "case_00235": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9749301952878673
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9748409008474297,
+          "annotator_1__vs__annotator_3": 0.9776696440474604,
+          "annotator_2__vs__annotator_3": 0.9722800409687118
+        }
+      }
+    },
+    "case_00236": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9862432241474002
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.983870010563422,
+          "annotator_1__vs__annotator_3": 0.9893729531238328,
+          "annotator_2__vs__annotator_3": 0.9854867087549459
+        }
+      }
+    },
+    "case_00237": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9743140727267372
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.977267375901706,
+          "annotator_1__vs__annotator_3": 0.9709121657330092,
+          "annotator_2__vs__annotator_3": 0.9747626765454966
+        }
+      }
+    },
+    "case_00238": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9673859021805806
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9605611557578855,
+          "annotator_1__vs__annotator_3": 0.9781759913335891,
+          "annotator_2__vs__annotator_3": 0.9634205594502673
+        }
+      }
+    },
+    "case_00239": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9445228127557629
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9308764381255261,
+          "annotator_1__vs__annotator_3": 0.9370173969671597,
+          "annotator_2__vs__annotator_3": 0.9656746031746032
+        }
+      }
+    },
+    "case_00240": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9285829138581466
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.941796348486705,
+          "annotator_1__vs__annotator_3": 0.9105536332179931,
+          "annotator_2__vs__annotator_3": 0.9333987598697417
+        }
+      }
+    },
+    "case_00241": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9651197903471264
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9602979972503994,
+          "annotator_1__vs__annotator_3": 0.9755276704694525,
+          "annotator_2__vs__annotator_3": 0.9595337033215272
+        }
+      }
+    },
+    "case_00242": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9852007874332513
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9858173778834523,
+          "annotator_1__vs__annotator_3": 0.9842387659289068,
+          "annotator_2__vs__annotator_3": 0.985546218487395
+        }
+      }
+    },
+    "case_00243": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9729662933513711
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9792365935524159,
+          "annotator_1__vs__annotator_3": 0.9704892057833234,
+          "annotator_2__vs__annotator_3": 0.9691730807183738
+        }
+      }
+    },
+    "case_00244": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9751870852698806
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9758662190409831,
+          "annotator_1__vs__annotator_3": 0.9750482274437874,
+          "annotator_2__vs__annotator_3": 0.9746468093248717
+        }
+      }
+    },
+    "case_00245": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9603026071344981
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9796715685990366,
+          "annotator_1__vs__annotator_3": 0.9446107543495404,
+          "annotator_2__vs__annotator_3": 0.9566254984549173
+        }
+      }
+    },
+    "case_00246": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9695132277528803
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9758248112933398,
+          "annotator_1__vs__annotator_3": 0.9646823801208559,
+          "annotator_2__vs__annotator_3": 0.9680324918444451
+        }
+      }
+    },
+    "case_00247": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9524255452412728
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9379967065225173,
+          "annotator_1__vs__annotator_3": 0.9775784753363229,
+          "annotator_2__vs__annotator_3": 0.9417014538649777
+        }
+      }
+    },
+    "case_00248": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9833591360009656
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9813418288349504,
+          "annotator_1__vs__annotator_3": 0.9859699941403443,
+          "annotator_2__vs__annotator_3": 0.982765585027602
+        }
+      }
+    },
+    "case_00249": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9909332189986562
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9914127144298688,
+          "annotator_1__vs__annotator_3": 0.9904853129791665,
+          "annotator_2__vs__annotator_3": 0.9909016295869333
+        }
+      }
+    },
+    "case_00250": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9679482496884914
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9674590059743231,
+          "annotator_1__vs__annotator_3": 0.9715947769045115,
+          "annotator_2__vs__annotator_3": 0.9647909661866396
+        }
+      }
+    },
+    "case_00251": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9731967967490723
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9720045383783213,
+          "annotator_1__vs__annotator_3": 0.9713724240492883,
+          "annotator_2__vs__annotator_3": 0.9762134278196076
+        }
+      }
+    },
+    "case_00252": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9816961302634105
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9835905684268164,
+          "annotator_1__vs__annotator_3": 0.978838960905877,
+          "annotator_2__vs__annotator_3": 0.982658861457538
+        }
+      }
+    },
+    "case_00253": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9706974213240548
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.974706828090757,
+          "annotator_1__vs__annotator_3": 0.9677712042514975,
+          "annotator_2__vs__annotator_3": 0.9696142316299101
+        }
+      }
+    },
+    "case_00254": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9397481168044184
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9398368087035358,
+          "annotator_1__vs__annotator_3": 0.9385200414839614,
+          "annotator_2__vs__annotator_3": 0.9408875002257581
+        }
+      }
+    },
+    "case_00255": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9700181527249642
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9701554404145077,
+          "annotator_1__vs__annotator_3": 0.9677071290944124,
+          "annotator_2__vs__annotator_3": 0.9721918886659725
+        }
+      }
+    },
+    "case_00256": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9663633738073818
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9663228075701499,
+          "annotator_1__vs__annotator_3": 0.9649704330301504,
+          "annotator_2__vs__annotator_3": 0.9677968808218449
+        }
+      }
+    },
+    "case_00257": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9475919003745829
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9429041263528242,
+          "annotator_1__vs__annotator_3": 0.9443979615121321,
+          "annotator_2__vs__annotator_3": 0.9554736132587923
+        }
+      }
+    },
+    "case_00258": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.973893634670144
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9751107743497669,
+          "annotator_1__vs__annotator_3": 0.97376026272578,
+          "annotator_2__vs__annotator_3": 0.9728098669348855
+        }
+      }
+    },
+    "case_00259": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9649287086916942
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9586390653822504,
+          "annotator_1__vs__annotator_3": 0.9610218918141865,
+          "annotator_2__vs__annotator_3": 0.9751251688786458
+        }
+      }
+    },
+    "case_00260": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9797798935830871
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9799350910856846,
+          "annotator_1__vs__annotator_3": 0.9798509910500913,
+          "annotator_2__vs__annotator_3": 0.9795535986134857
+        }
+      }
+    },
+    "case_00261": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9788550352714328
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9783100351088806,
+          "annotator_1__vs__annotator_3": 0.9756567581417757,
+          "annotator_2__vs__annotator_3": 0.9825983125636425
+        }
+      }
+    },
+    "case_00262": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9668307034402389
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9721389468697269,
+          "annotator_1__vs__annotator_3": 0.9633897233395693,
+          "annotator_2__vs__annotator_3": 0.9649634401114207
+        }
+      }
+    },
+    "case_00263": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9728445957240051
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9679279514936886,
+          "annotator_1__vs__annotator_3": 0.9710330858676055,
+          "annotator_2__vs__annotator_3": 0.9795727498107213
+        }
+      }
+    },
+    "case_00264": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.954432230498309
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.952868505669318,
+          "annotator_1__vs__annotator_3": 0.9421636200179803,
+          "annotator_2__vs__annotator_3": 0.968264565807629
+        }
+      }
+    },
+    "case_00265": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9485708642627126
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9564880931443245,
+          "annotator_1__vs__annotator_3": 0.951074151074151,
+          "annotator_2__vs__annotator_3": 0.9381503485696624
+        }
+      }
+    },
+    "case_00266": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9705374120624182
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9710041713297385,
+          "annotator_1__vs__annotator_3": 0.9662405989679943,
+          "annotator_2__vs__annotator_3": 0.9743674658895218
+        }
+      }
+    },
+    "case_00267": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9331994598531964
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9388446552600372,
+          "annotator_1__vs__annotator_3": 0.9221871713985279,
+          "annotator_2__vs__annotator_3": 0.9385665529010239
+        }
+      }
+    },
+    "case_00268": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.943618885647202
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9632680001147875,
+          "annotator_1__vs__annotator_3": 0.9312097146754075,
+          "annotator_2__vs__annotator_3": 0.9363789421514107
+        }
+      }
+    },
+    "case_00269": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.987641622122362
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9922339962258673,
+          "annotator_1__vs__annotator_3": 0.9860754855258337,
+          "annotator_2__vs__annotator_3": 0.9846153846153847
+        }
+      }
+    },
+    "case_00270": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9804060379557932
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9818038494383499,
+          "annotator_1__vs__annotator_3": 0.9789549786395005,
+          "annotator_2__vs__annotator_3": 0.9804592857895291
+        }
+      }
+    },
+    "case_00271": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9804434934009896
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9814880114833968,
+          "annotator_1__vs__annotator_3": 0.9818104571786171,
+          "annotator_2__vs__annotator_3": 0.9780320115409549
+        }
+      }
+    },
+    "case_00272": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9382019134901723
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9668508287292817,
+          "annotator_1__vs__annotator_3": 0.9211529933481153,
+          "annotator_2__vs__annotator_3": 0.9266019183931202
+        }
+      }
+    },
+    "case_00273": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.966295098905729
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9669205743118193,
+          "annotator_1__vs__annotator_3": 0.9641372396780312,
+          "annotator_2__vs__annotator_3": 0.9678274827273362
+        }
+      }
+    },
+    "case_00274": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9769502287520071
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9795483512897675,
+          "annotator_1__vs__annotator_3": 0.9758378626336202,
+          "annotator_2__vs__annotator_3": 0.9754644723326337
+        }
+      }
+    },
+    "case_00275": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.96944653837639
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9726656730636265,
+          "annotator_1__vs__annotator_3": 0.9647267392101724,
+          "annotator_2__vs__annotator_3": 0.9709472028553712
+        }
+      }
+    },
+    "case_00276": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9621387377038703
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9679526034843479,
+          "annotator_1__vs__annotator_3": 0.9595055662786843,
+          "annotator_2__vs__annotator_3": 0.9589580433485783
+        }
+      }
+    },
+    "case_00277": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9628688833477161
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9626905917536893,
+          "annotator_1__vs__annotator_3": 0.961813494186895,
+          "annotator_2__vs__annotator_3": 0.9641025641025641
+        }
+      }
+    },
+    "case_00278": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.972852410376777
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9758105539342989,
+          "annotator_1__vs__annotator_3": 0.9731137176235114,
+          "annotator_2__vs__annotator_3": 0.9696329595725208
+        }
+      }
+    },
+    "case_00279": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9726942621369069
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9747228657808068,
+          "annotator_1__vs__annotator_3": 0.9729153688936023,
+          "annotator_2__vs__annotator_3": 0.9704445517363112
+        }
+      }
+    },
+    "case_00280": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9666360850998886
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9658602625228089,
+          "annotator_1__vs__annotator_3": 0.9603781397437468,
+          "annotator_2__vs__annotator_3": 0.9736698530331102
+        }
+      }
+    },
+    "case_00281": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9584553782963572
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9602055628785477,
+          "annotator_1__vs__annotator_3": 0.9599267152351075,
+          "annotator_2__vs__annotator_3": 0.9552338567754163
+        }
+      }
+    },
+    "case_00282": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9681636300381307
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9678132899963886,
+          "annotator_1__vs__annotator_3": 0.9642298000506956,
+          "annotator_2__vs__annotator_3": 0.9724478000673076
+        }
+      }
+    },
+    "case_00283": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9618773943619834
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9679900078450803,
+          "annotator_1__vs__annotator_3": 0.9686627884124052,
+          "annotator_2__vs__annotator_3": 0.9489793868284646
+        }
+      }
+    },
+    "case_00284": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9685440332544369
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9672285762531765,
+          "annotator_1__vs__annotator_3": 0.9690848022751232,
+          "annotator_2__vs__annotator_3": 0.9693187212350113
+        }
+      }
+    },
+    "case_00285": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9407158212270997
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9407524866657057,
+          "annotator_1__vs__annotator_3": 0.9337979094076655,
+          "annotator_2__vs__annotator_3": 0.9475970676079283
+        }
+      }
+    },
+    "case_00286": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.970426664667424
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9741655738803328,
+          "annotator_1__vs__annotator_3": 0.9675058760813201,
+          "annotator_2__vs__annotator_3": 0.9696085440406192
+        }
+      }
+    },
+    "case_00287": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9735981702200879
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9781861575178997,
+          "annotator_1__vs__annotator_3": 0.9694261190324183,
+          "annotator_2__vs__annotator_3": 0.9731822341099458
+        }
+      }
+    },
+    "case_00288": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9768388705599452
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9803738039032157,
+          "annotator_1__vs__annotator_3": 0.9754634244929751,
+          "annotator_2__vs__annotator_3": 0.9746793832836448
+        }
+      }
+    },
+    "case_00289": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9821327204572857
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9831316042267051,
+          "annotator_1__vs__annotator_3": 0.982029720078332,
+          "annotator_2__vs__annotator_3": 0.9812368370668199
+        }
+      }
+    },
+    "case_00290": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9708646405927935
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9774001138986302,
+          "annotator_1__vs__annotator_3": 0.9676896795475967,
+          "annotator_2__vs__annotator_3": 0.9675041283321538
+        }
+      }
+    },
+    "case_00291": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9644113398385445
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9647055797082809,
+          "annotator_1__vs__annotator_3": 0.9670313051368654,
+          "annotator_2__vs__annotator_3": 0.9614971346704871
+        }
+      }
+    },
+    "case_00292": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9691615028211388
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9715646576120089,
+          "annotator_1__vs__annotator_3": 0.965287187514309,
+          "annotator_2__vs__annotator_3": 0.9706326633370984
+        }
+      }
+    },
+    "case_00293": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9794449381365125
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9783563062280363,
+          "annotator_1__vs__annotator_3": 0.9788021151090444,
+          "annotator_2__vs__annotator_3": 0.9811763930724567
+        }
+      }
+    },
+    "case_00294": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9569899658930078
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9608001694295231,
+          "annotator_1__vs__annotator_3": 0.9566500574932925,
+          "annotator_2__vs__annotator_3": 0.9535196707562075
+        }
+      }
+    },
+    "case_00295": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9500246441572123
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9451494296219478,
+          "annotator_1__vs__annotator_3": 0.9406100119904077,
+          "annotator_2__vs__annotator_3": 0.9643144908592812
+        }
+      }
+    },
+    "case_00296": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.922049956720346
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.929265091863517,
+          "annotator_1__vs__annotator_3": 0.9117728531855955,
+          "annotator_2__vs__annotator_3": 0.9251119251119251
+        }
+      }
+    },
+    "case_00297": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9575682307646703
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9533195632930068,
+          "annotator_1__vs__annotator_3": 0.9529483473918088,
+          "annotator_2__vs__annotator_3": 0.9664367816091954
+        }
+      }
+    },
+    "case_00298": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9712825745499752
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9742374565325385,
+          "annotator_1__vs__annotator_3": 0.9649441449886728,
+          "annotator_2__vs__annotator_3": 0.9746661221287146
+        }
+      }
+    },
+    "case_00299": {
+      "dataset_id": "Dataset019_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "mass": 0.9670637546535638
+      },
+      "pairwise_dice_by_class": {
+        "mass": {
+          "annotator_1__vs__annotator_2": 0.9639993711680553,
+          "annotator_1__vs__annotator_3": 0.9646924236909157,
+          "annotator_2__vs__annotator_3": 0.9724994691017201
+        }
+      }
+    }
+  }
+}

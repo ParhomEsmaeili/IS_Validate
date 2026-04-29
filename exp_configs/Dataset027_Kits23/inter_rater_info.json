@@ -1,0 +1,5416 @@
+{
+  "n_samples": 300,
+  "n_samples_skipped_after_annotator_filter": 0,
+  "class_labels": [
+    "tumor"
+  ],
+  "include_annotators": null,
+  "exclude_annotators": [
+    "annotator_4"
+  ],
+  "dataset_class_mean_dice": {
+    "tumor": 0.9596773688554653
+  },
+  "per_sample": {
+    "case_00000": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9724040409438567
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9701978585878521,
+          "annotator_1__vs__annotator_3": 0.9749529604378956,
+          "annotator_2__vs__annotator_3": 0.9720613038058223
+        }
+      }
+    },
+    "case_00001": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9310777740793471
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9467222100416576,
+          "annotator_1__vs__annotator_3": 0.9169654173456455,
+          "annotator_2__vs__annotator_3": 0.9295456948507383
+        }
+      }
+    },
+    "case_00002": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9666605327684366
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9704406683390921,
+          "annotator_1__vs__annotator_3": 0.9642258581815113,
+          "annotator_2__vs__annotator_3": 0.965315071784706
+        }
+      }
+    },
+    "case_00003": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9586340654001022
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9561166313731878,
+          "annotator_1__vs__annotator_3": 0.9535691318327975,
+          "annotator_2__vs__annotator_3": 0.9662164329943213
+        }
+      }
+    },
+    "case_00004": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.940703280748672
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9304895782840523,
+          "annotator_1__vs__annotator_3": 0.9461212976022567,
+          "annotator_2__vs__annotator_3": 0.9454989663597069
+        }
+      }
+    },
+    "case_00005": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9615099700962366
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9606516395466789,
+          "annotator_1__vs__annotator_3": 0.9703143380545348,
+          "annotator_2__vs__annotator_3": 0.9535639326874958
+        }
+      }
+    },
+    "case_00006": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9434849406706246
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9229965676764662,
+          "annotator_1__vs__annotator_3": 0.9667305100375967,
+          "annotator_2__vs__annotator_3": 0.9407277442978107
+        }
+      }
+    },
+    "case_00007": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9561807532329766
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9453185634657447,
+          "annotator_1__vs__annotator_3": 0.9500780031201248,
+          "annotator_2__vs__annotator_3": 0.97314569311306
+        }
+      }
+    },
+    "case_00008": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.976422198685727
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9787072042300066,
+          "annotator_1__vs__annotator_3": 0.9756753362308535,
+          "annotator_2__vs__annotator_3": 0.9748840555963211
+        }
+      }
+    },
+    "case_00009": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9276115066192037
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9194975423265975,
+          "annotator_1__vs__annotator_3": 0.9491907396025404,
+          "annotator_2__vs__annotator_3": 0.9141462379284729
+        }
+      }
+    },
+    "case_00010": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9351393163343412
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9530351259284079,
+          "annotator_1__vs__annotator_3": 0.9239862867951294,
+          "annotator_2__vs__annotator_3": 0.9283965362794864
+        }
+      }
+    },
+    "case_00011": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9673641689341204
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9719720157411456,
+          "annotator_1__vs__annotator_3": 0.9654393694511479,
+          "annotator_2__vs__annotator_3": 0.9646811216100674
+        }
+      }
+    },
+    "case_00012": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9802249957027506
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9793589729617803,
+          "annotator_1__vs__annotator_3": 0.9764634686665874,
+          "annotator_2__vs__annotator_3": 0.9848525454798838
+        }
+      }
+    },
+    "case_00013": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9535036383798046
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9524709302325581,
+          "annotator_1__vs__annotator_3": 0.9519451609483763,
+          "annotator_2__vs__annotator_3": 0.9560948239584794
+        }
+      }
+    },
+    "case_00014": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9159053884515753
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9181774315847522,
+          "annotator_1__vs__annotator_3": 0.910671715046978,
+          "annotator_2__vs__annotator_3": 0.9188670187229957
+        }
+      }
+    },
+    "case_00015": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9499198686278237
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9423528909020982,
+          "annotator_1__vs__annotator_3": 0.949706475072286,
+          "annotator_2__vs__annotator_3": 0.957700239909087
+        }
+      }
+    },
+    "case_00016": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9436590955986471
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9356066613798573,
+          "annotator_1__vs__annotator_3": 0.9609208396495466,
+          "annotator_2__vs__annotator_3": 0.9344497857665378
+        }
+      }
+    },
+    "case_00017": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9247689589942306
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9142649990937104,
+          "annotator_1__vs__annotator_3": 0.9289198606271777,
+          "annotator_2__vs__annotator_3": 0.931122017261804
+        }
+      }
+    },
+    "case_00018": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9393822973072843
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9362691890215538,
+          "annotator_1__vs__annotator_3": 0.9535218969031167,
+          "annotator_2__vs__annotator_3": 0.9283558059971825
+        }
+      }
+    },
+    "case_00019": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9028957275694319
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.901593252108716,
+          "annotator_1__vs__annotator_3": 0.9069124423963134,
+          "annotator_2__vs__annotator_3": 0.9001814882032668
+        }
+      }
+    },
+    "case_00020": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9283262708864765
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9443147715905301,
+          "annotator_1__vs__annotator_3": 0.9156026160074743,
+          "annotator_2__vs__annotator_3": 0.9250614250614251
+        }
+      }
+    },
+    "case_00021": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9469922431883636
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.959694142042509,
+          "annotator_1__vs__annotator_3": 0.9433331189296971,
+          "annotator_2__vs__annotator_3": 0.9379494685928849
+        }
+      }
+    },
+    "case_00022": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.970063345146193
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9701737905119775,
+          "annotator_1__vs__annotator_3": 0.9724518558874387,
+          "annotator_2__vs__annotator_3": 0.9675643890391626
+        }
+      }
+    },
+    "case_00023": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.8902511218029868
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9032086979581013,
+          "annotator_1__vs__annotator_3": 0.8620873269435569,
+          "annotator_2__vs__annotator_3": 0.9054573405073021
+        }
+      }
+    },
+    "case_00024": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.981100814576258
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9792333594723004,
+          "annotator_1__vs__annotator_3": 0.9848310607305186,
+          "annotator_2__vs__annotator_3": 0.9792380235259548
+        }
+      }
+    },
+    "case_00025": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9828274444411774
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9855481461171152,
+          "annotator_1__vs__annotator_3": 0.9829999060768292,
+          "annotator_2__vs__annotator_3": 0.9799342811295878
+        }
+      }
+    },
+    "case_00026": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9717974481798523
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9704413574071157,
+          "annotator_1__vs__annotator_3": 0.9731239415972298,
+          "annotator_2__vs__annotator_3": 0.9718270455352109
+        }
+      }
+    },
+    "case_00027": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9557439095155771
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9530545402762615,
+          "annotator_1__vs__annotator_3": 0.9649794546133732,
+          "annotator_2__vs__annotator_3": 0.9491977336570966
+        }
+      }
+    },
+    "case_00028": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9838910247257697
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9826488978871283,
+          "annotator_1__vs__annotator_3": 0.9841853213052678,
+          "annotator_2__vs__annotator_3": 0.9848388549849129
+        }
+      }
+    },
+    "case_00029": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9580392848972458
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9658866479142977,
+          "annotator_1__vs__annotator_3": 0.9534208918753818,
+          "annotator_2__vs__annotator_3": 0.954810314902058
+        }
+      }
+    },
+    "case_00030": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9813038488398448
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9837595672635497,
+          "annotator_1__vs__annotator_3": 0.9775058332049367,
+          "annotator_2__vs__annotator_3": 0.9826461460510482
+        }
+      }
+    },
+    "case_00031": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9430138227067243
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9502563128915892,
+          "annotator_1__vs__annotator_3": 0.9362155874369911,
+          "annotator_2__vs__annotator_3": 0.9425695677915926
+        }
+      }
+    },
+    "case_00032": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9696233626060948
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9654147750722245,
+          "annotator_1__vs__annotator_3": 0.9766754270696452,
+          "annotator_2__vs__annotator_3": 0.9667798856764146
+        }
+      }
+    },
+    "case_00033": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9645217168469222
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9622033786892789,
+          "annotator_1__vs__annotator_3": 0.9651109511029652,
+          "annotator_2__vs__annotator_3": 0.9662508207485226
+        }
+      }
+    },
+    "case_00034": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9760683163238126
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9733539891556933,
+          "annotator_1__vs__annotator_3": 0.9773527931555108,
+          "annotator_2__vs__annotator_3": 0.9774981666602339
+        }
+      }
+    },
+    "case_00035": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9658947998506603
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9606252473288485,
+          "annotator_1__vs__annotator_3": 0.9770829287240241,
+          "annotator_2__vs__annotator_3": 0.9599762234991084
+        }
+      }
+    },
+    "case_00036": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9344590792060868
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9607422732117109,
+          "annotator_1__vs__annotator_3": 0.9326698983872471,
+          "annotator_2__vs__annotator_3": 0.9099650660193025
+        }
+      }
+    },
+    "case_00037": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9862178692864365
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.985312225610865,
+          "annotator_1__vs__annotator_3": 0.9894388729337203,
+          "annotator_2__vs__annotator_3": 0.9839025093147244
+        }
+      }
+    },
+    "case_00038": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9624500734929615
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.962247970803502,
+          "annotator_1__vs__annotator_3": 0.9566662051779039,
+          "annotator_2__vs__annotator_3": 0.9684360444974788
+        }
+      }
+    },
+    "case_00039": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9409963730720389
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9337952270977675,
+          "annotator_1__vs__annotator_3": 0.9334383615596692,
+          "annotator_2__vs__annotator_3": 0.9557555305586801
+        }
+      }
+    },
+    "case_00040": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9670810443791596
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9656198605998904,
+          "annotator_1__vs__annotator_3": 0.9628869235628553,
+          "annotator_2__vs__annotator_3": 0.9727363489747332
+        }
+      }
+    },
+    "case_00041": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9482749210855527
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9469083722874625,
+          "annotator_1__vs__annotator_3": 0.9502060439560439,
+          "annotator_2__vs__annotator_3": 0.9477103470131516
+        }
+      }
+    },
+    "case_00042": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9819918191346876
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9889151063046648,
+          "annotator_1__vs__annotator_3": 0.9791898617260996,
+          "annotator_2__vs__annotator_3": 0.9778704893732988
+        }
+      }
+    },
+    "case_00043": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9694425468536304
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9683619782532444,
+          "annotator_1__vs__annotator_3": 0.9659477866061293,
+          "annotator_2__vs__annotator_3": 0.9740178757015173
+        }
+      }
+    },
+    "case_00044": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9778682612675992
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9807355516637478,
+          "annotator_1__vs__annotator_3": 0.975709115394327,
+          "annotator_2__vs__annotator_3": 0.9771601167447227
+        }
+      }
+    },
+    "case_00045": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9804833932616349
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9854784722487369,
+          "annotator_1__vs__annotator_3": 0.9779089159717768,
+          "annotator_2__vs__annotator_3": 0.9780627915643916
+        }
+      }
+    },
+    "case_00046": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9746240311057449
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9794509288180174,
+          "annotator_1__vs__annotator_3": 0.975304132835108,
+          "annotator_2__vs__annotator_3": 0.9691170316641093
+        }
+      }
+    },
+    "case_00047": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9747205433361178
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9781612455404457,
+          "annotator_1__vs__annotator_3": 0.9740525377669988,
+          "annotator_2__vs__annotator_3": 0.9719478467009087
+        }
+      }
+    },
+    "case_00048": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9708653993657904
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9620575143079206,
+          "annotator_1__vs__annotator_3": 0.9902793827747943,
+          "annotator_2__vs__annotator_3": 0.9602593010146562
+        }
+      }
+    },
+    "case_00049": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9554364951304127
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9551064437323519,
+          "annotator_1__vs__annotator_3": 0.9540722982777112,
+          "annotator_2__vs__annotator_3": 0.9571307433811752
+        }
+      }
+    },
+    "case_00050": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9578702899988123
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9669749009247027,
+          "annotator_1__vs__annotator_3": 0.9514313284014152,
+          "annotator_2__vs__annotator_3": 0.9552046406703191
+        }
+      }
+    },
+    "case_00051": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9331875980338636
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9088372093023256,
+          "annotator_1__vs__annotator_3": 0.9432853583249656,
+          "annotator_2__vs__annotator_3": 0.9474402264742999
+        }
+      }
+    },
+    "case_00052": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9567056063234768
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9547693425354159,
+          "annotator_1__vs__annotator_3": 0.9597455521319949,
+          "annotator_2__vs__annotator_3": 0.9556019243030197
+        }
+      }
+    },
+    "case_00053": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.978241034381683
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9831913202595051,
+          "annotator_1__vs__annotator_3": 0.9772379531158503,
+          "annotator_2__vs__annotator_3": 0.9742938297696937
+        }
+      }
+    },
+    "case_00054": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.8640878828056394
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.887123745819398,
+          "annotator_1__vs__annotator_3": 0.8758943992104614,
+          "annotator_2__vs__annotator_3": 0.829245503387059
+        }
+      }
+    },
+    "case_00055": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9720645348946112
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9666849391218413,
+          "annotator_1__vs__annotator_3": 0.9714991996744959,
+          "annotator_2__vs__annotator_3": 0.9780094658874964
+        }
+      }
+    },
+    "case_00056": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9708646528034842
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9768260328117386,
+          "annotator_1__vs__annotator_3": 0.964716355273895,
+          "annotator_2__vs__annotator_3": 0.971051570324819
+        }
+      }
+    },
+    "case_00057": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9753743689401118
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9716617868867004,
+          "annotator_1__vs__annotator_3": 0.9794050742132007,
+          "annotator_2__vs__annotator_3": 0.9750562457204344
+        }
+      }
+    },
+    "case_00058": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.970631648222465
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9684399551066217,
+          "annotator_1__vs__annotator_3": 0.9730480564579366,
+          "annotator_2__vs__annotator_3": 0.9704069331028364
+        }
+      }
+    },
+    "case_00059": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9624770153803689
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9608551234019543,
+          "annotator_1__vs__annotator_3": 0.9645525779508424,
+          "annotator_2__vs__annotator_3": 0.9620233447883101
+        }
+      }
+    },
+    "case_00060": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9596482059385774
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9741564550786922,
+          "annotator_1__vs__annotator_3": 0.9527041357370095,
+          "annotator_2__vs__annotator_3": 0.9520840270000303
+        }
+      }
+    },
+    "case_00061": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9787035074807232
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9764778772405837,
+          "annotator_1__vs__annotator_3": 0.9788089780737793,
+          "annotator_2__vs__annotator_3": 0.9808236671278068
+        }
+      }
+    },
+    "case_00062": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9683934937470324
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.967670011148272,
+          "annotator_1__vs__annotator_3": 0.9723589549413101,
+          "annotator_2__vs__annotator_3": 0.9651515151515152
+        }
+      }
+    },
+    "case_00063": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9507156573515796
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9443112519911825,
+          "annotator_1__vs__annotator_3": 0.953205353435334,
+          "annotator_2__vs__annotator_3": 0.9546303666282224
+        }
+      }
+    },
+    "case_00064": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9460160457359384
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9389442043960173,
+          "annotator_1__vs__annotator_3": 0.9344169344169344,
+          "annotator_2__vs__annotator_3": 0.9646869983948636
+        }
+      }
+    },
+    "case_00065": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9382241530135688
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9309367541766109,
+          "annotator_1__vs__annotator_3": 0.9281784610746854,
+          "annotator_2__vs__annotator_3": 0.9555572437894098
+        }
+      }
+    },
+    "case_00066": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9442008265757371
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.964827795316318,
+          "annotator_1__vs__annotator_3": 0.9241242030740918,
+          "annotator_2__vs__annotator_3": 0.9436504813368014
+        }
+      }
+    },
+    "case_00067": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.981547994428746
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9780367610476315,
+          "annotator_1__vs__annotator_3": 0.9874586712418483,
+          "annotator_2__vs__annotator_3": 0.9791485509967582
+        }
+      }
+    },
+    "case_00068": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9399085755651563
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9508027155385915,
+          "annotator_1__vs__annotator_3": 0.9349388819800418,
+          "annotator_2__vs__annotator_3": 0.9339841291768354
+        }
+      }
+    },
+    "case_00069": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9669482397337136
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9618554210399163,
+          "annotator_1__vs__annotator_3": 0.9623069445944487,
+          "annotator_2__vs__annotator_3": 0.9766823535667757
+        }
+      }
+    },
+    "case_00070": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9721161271431588
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9722563206181181,
+          "annotator_1__vs__annotator_3": 0.9714865161487783,
+          "annotator_2__vs__annotator_3": 0.9726055446625798
+        }
+      }
+    },
+    "case_00071": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9559538951624424
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9573334707124826,
+          "annotator_1__vs__annotator_3": 0.9613289293067948,
+          "annotator_2__vs__annotator_3": 0.9491992854680498
+        }
+      }
+    },
+    "case_00072": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9402168535356288
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9409118789613576,
+          "annotator_1__vs__annotator_3": 0.9261688174317749,
+          "annotator_2__vs__annotator_3": 0.9535698642137538
+        }
+      }
+    },
+    "case_00073": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9817223752809036
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9836941744272993,
+          "annotator_1__vs__annotator_3": 0.9797644553405437,
+          "annotator_2__vs__annotator_3": 0.9817084960748675
+        }
+      }
+    },
+    "case_00074": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.95177566877364
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9587246123607774,
+          "annotator_1__vs__annotator_3": 0.957586717080388,
+          "annotator_2__vs__annotator_3": 0.9390156768797545
+        }
+      }
+    },
+    "case_00075": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9453658914073463
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9541751527494908,
+          "annotator_1__vs__annotator_3": 0.9517241379310345,
+          "annotator_2__vs__annotator_3": 0.9301983835415136
+        }
+      }
+    },
+    "case_00076": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9532845243008242
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9369771332961517,
+          "annotator_1__vs__annotator_3": 0.9804680626429703,
+          "annotator_2__vs__annotator_3": 0.9424083769633508
+        }
+      }
+    },
+    "case_00077": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9684069849693454
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9671361502347418,
+          "annotator_1__vs__annotator_3": 0.9754481096550686,
+          "annotator_2__vs__annotator_3": 0.962636695018226
+        }
+      }
+    },
+    "case_00078": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9771573352127011
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9745671789889301,
+          "annotator_1__vs__annotator_3": 0.9794624417663447,
+          "annotator_2__vs__annotator_3": 0.9774423848828285
+        }
+      }
+    },
+    "case_00079": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9793372704746605
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.980067558705834,
+          "annotator_1__vs__annotator_3": 0.9801509138411723,
+          "annotator_2__vs__annotator_3": 0.977793338876975
+        }
+      }
+    },
+    "case_00080": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9483540026140203
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9445956983392322,
+          "annotator_1__vs__annotator_3": 0.9616907992987468,
+          "annotator_2__vs__annotator_3": 0.9387755102040817
+        }
+      }
+    },
+    "case_00081": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9709135756303295
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9753961634695579,
+          "annotator_1__vs__annotator_3": 0.9721827411167513,
+          "annotator_2__vs__annotator_3": 0.9651618223046794
+        }
+      }
+    },
+    "case_00082": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.914711188469502
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9134923460306159,
+          "annotator_1__vs__annotator_3": 0.9346715328467153,
+          "annotator_2__vs__annotator_3": 0.8959696865311746
+        }
+      }
+    },
+    "case_00083": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9663252931205651
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9604556906561508,
+          "annotator_1__vs__annotator_3": 0.9740145342435587,
+          "annotator_2__vs__annotator_3": 0.9645056544619863
+        }
+      }
+    },
+    "case_00084": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9796244947227434
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9807301938525181,
+          "annotator_1__vs__annotator_3": 0.9795937891645221,
+          "annotator_2__vs__annotator_3": 0.9785495011511895
+        }
+      }
+    },
+    "case_00085": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.965140472137378
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9634620367970977,
+          "annotator_1__vs__annotator_3": 0.9675408984679305,
+          "annotator_2__vs__annotator_3": 0.9644184811471057
+        }
+      }
+    },
+    "case_00086": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9441205722493006
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.940182852045936,
+          "annotator_1__vs__annotator_3": 0.9241293194712126,
+          "annotator_2__vs__annotator_3": 0.9680495452307533
+        }
+      }
+    },
+    "case_00087": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9517878518810075
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9311361200428725,
+          "annotator_1__vs__annotator_3": 0.9478459596820957,
+          "annotator_2__vs__annotator_3": 0.9763814759180542
+        }
+      }
+    },
+    "case_00088": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9606791589010584
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9705922997244748,
+          "annotator_1__vs__annotator_3": 0.9689751876631325,
+          "annotator_2__vs__annotator_3": 0.9424699893155678
+        }
+      }
+    },
+    "case_00089": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9428936914927243
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9814173387606503,
+          "annotator_1__vs__annotator_3": 0.9152670315153802,
+          "annotator_2__vs__annotator_3": 0.9319967042021423
+        }
+      }
+    },
+    "case_00090": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9697857303856559
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9692922374429224,
+          "annotator_1__vs__annotator_3": 0.9682038604164686,
+          "annotator_2__vs__annotator_3": 0.9718610932975768
+        }
+      }
+    },
+    "case_00091": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9579606551105377
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9439902744987491,
+          "annotator_1__vs__annotator_3": 0.96611333321889,
+          "annotator_2__vs__annotator_3": 0.963778357613974
+        }
+      }
+    },
+    "case_00092": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9825539346990723
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9825399983378622,
+          "annotator_1__vs__annotator_3": 0.9847104741251248,
+          "annotator_2__vs__annotator_3": 0.98041133163423
+        }
+      }
+    },
+    "case_00093": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9599073336360116
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9550013863291634,
+          "annotator_1__vs__annotator_3": 0.9769859867471562,
+          "annotator_2__vs__annotator_3": 0.9477346278317152
+        }
+      }
+    },
+    "case_00094": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.972389966999961
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9672218284904324,
+          "annotator_1__vs__annotator_3": 0.9808740804846386,
+          "annotator_2__vs__annotator_3": 0.9690739920248117
+        }
+      }
+    },
+    "case_00095": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9798771646988342
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9839478487614081,
+          "annotator_1__vs__annotator_3": 0.9757586602528341,
+          "annotator_2__vs__annotator_3": 0.9799249850822607
+        }
+      }
+    },
+    "case_00096": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.961295143292296
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9631525281404323,
+          "annotator_1__vs__annotator_3": 0.9632998940743972,
+          "annotator_2__vs__annotator_3": 0.9574330076620586
+        }
+      }
+    },
+    "case_00097": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9589441951253619
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9490500047263446,
+          "annotator_1__vs__annotator_3": 0.9429828667727741,
+          "annotator_2__vs__annotator_3": 0.9847997138769671
+        }
+      }
+    },
+    "case_00098": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9643253713824619
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9557093099877624,
+          "annotator_1__vs__annotator_3": 0.9699394638224272,
+          "annotator_2__vs__annotator_3": 0.9673273403371963
+        }
+      }
+    },
+    "case_00099": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9746201345094087
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9712574160474627,
+          "annotator_1__vs__annotator_3": 0.9770224493311133,
+          "annotator_2__vs__annotator_3": 0.9755805381496498
+        }
+      }
+    },
+    "case_00100": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.8933806176113918
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.871654373024236,
+          "annotator_1__vs__annotator_3": 0.8893598982619754,
+          "annotator_2__vs__annotator_3": 0.9191275815479637
+        }
+      }
+    },
+    "case_00101": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9273943859711605
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9395315315315316,
+          "annotator_1__vs__annotator_3": 0.9289812746950695,
+          "annotator_2__vs__annotator_3": 0.9136703516868806
+        }
+      }
+    },
+    "case_00102": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9776566912307167
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9747547169209861,
+          "annotator_1__vs__annotator_3": 0.9821540729788156,
+          "annotator_2__vs__annotator_3": 0.9760612837923484
+        }
+      }
+    },
+    "case_00103": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9278626981228345
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.942117318218875,
+          "annotator_1__vs__annotator_3": 0.9262970226421822,
+          "annotator_2__vs__annotator_3": 0.9151737535074466
+        }
+      }
+    },
+    "case_00104": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9752000818914698
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9781203223032581,
+          "annotator_1__vs__annotator_3": 0.9711029457557452,
+          "annotator_2__vs__annotator_3": 0.9763769776154061
+        }
+      }
+    },
+    "case_00105": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9774163342036241
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9790931073591406,
+          "annotator_1__vs__annotator_3": 0.9775219893582365,
+          "annotator_2__vs__annotator_3": 0.9756339058934952
+        }
+      }
+    },
+    "case_00106": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9307541037560307
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9429012345679012,
+          "annotator_1__vs__annotator_3": 0.9393814432989691,
+          "annotator_2__vs__annotator_3": 0.909979633401222
+        }
+      }
+    },
+    "case_00107": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9686496580129501
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.969663782141569,
+          "annotator_1__vs__annotator_3": 0.9736053950531763,
+          "annotator_2__vs__annotator_3": 0.962679796844105
+        }
+      }
+    },
+    "case_00108": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9645821088056441
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9538083441726092,
+          "annotator_1__vs__annotator_3": 0.9867918035351165,
+          "annotator_2__vs__annotator_3": 0.9531461787092066
+        }
+      }
+    },
+    "case_00109": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9764221450656797
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9764920294368699,
+          "annotator_1__vs__annotator_3": 0.9777674994708414,
+          "annotator_2__vs__annotator_3": 0.9750069062893275
+        }
+      }
+    },
+    "case_00110": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9588404207805535
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9540856985226507,
+          "annotator_1__vs__annotator_3": 0.9479565190988036,
+          "annotator_2__vs__annotator_3": 0.9744790447202061
+        }
+      }
+    },
+    "case_00111": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9520652026264749
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9462572925936913,
+          "annotator_1__vs__annotator_3": 0.9667702378975831,
+          "annotator_2__vs__annotator_3": 0.9431680773881499
+        }
+      }
+    },
+    "case_00112": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9597091064866365
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9444691347051242,
+          "annotator_1__vs__annotator_3": 0.9775318811626649,
+          "annotator_2__vs__annotator_3": 0.9571263035921205
+        }
+      }
+    },
+    "case_00113": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9679418348010915
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9645942023300513,
+          "annotator_1__vs__annotator_3": 0.9712746858168761,
+          "annotator_2__vs__annotator_3": 0.9679566162563471
+        }
+      }
+    },
+    "case_00114": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9715081066899898
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.975794550575687,
+          "annotator_1__vs__annotator_3": 0.9663017022170035,
+          "annotator_2__vs__annotator_3": 0.9724280672772786
+        }
+      }
+    },
+    "case_00115": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9494320761355329
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9521211245212112,
+          "annotator_1__vs__annotator_3": 0.9554622568760175,
+          "annotator_2__vs__annotator_3": 0.9407128470093703
+        }
+      }
+    },
+    "case_00116": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9455357682289943
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9314161556434798,
+          "annotator_1__vs__annotator_3": 0.9737149564749957,
+          "annotator_2__vs__annotator_3": 0.9314761925685077
+        }
+      }
+    },
+    "case_00117": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9695245427316946
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9655703703703704,
+          "annotator_1__vs__annotator_3": 0.9733009708737864,
+          "annotator_2__vs__annotator_3": 0.9697022869509271
+        }
+      }
+    },
+    "case_00118": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9750502829941959
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9714842509771292,
+          "annotator_1__vs__annotator_3": 0.9788911870761111,
+          "annotator_2__vs__annotator_3": 0.9747754109293476
+        }
+      }
+    },
+    "case_00119": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9792833892112435
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9808140689857072,
+          "annotator_1__vs__annotator_3": 0.9768819764058615,
+          "annotator_2__vs__annotator_3": 0.9801541222421619
+        }
+      }
+    },
+    "case_00120": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9184915328250373
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.942560553633218,
+          "annotator_1__vs__annotator_3": 0.9048207663782447,
+          "annotator_2__vs__annotator_3": 0.9080932784636488
+        }
+      }
+    },
+    "case_00121": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9670361785463935
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9613564668769716,
+          "annotator_1__vs__annotator_3": 0.9731649565903709,
+          "annotator_2__vs__annotator_3": 0.9665871121718377
+        }
+      }
+    },
+    "case_00122": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9842616443959781
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9874416631310988,
+          "annotator_1__vs__annotator_3": 0.9808169906654106,
+          "annotator_2__vs__annotator_3": 0.9845262793914247
+        }
+      }
+    },
+    "case_00123": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.8990924141179585
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.8548428979485848,
+          "annotator_1__vs__annotator_3": 0.9211678832116789,
+          "annotator_2__vs__annotator_3": 0.9212664611936117
+        }
+      }
+    },
+    "case_00124": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9451171047986712
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9486973487891656,
+          "annotator_1__vs__annotator_3": 0.9394443125148421,
+          "annotator_2__vs__annotator_3": 0.947209653092006
+        }
+      }
+    },
+    "case_00125": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.953455281597171
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9609147609147609,
+          "annotator_1__vs__annotator_3": 0.9374201787994891,
+          "annotator_2__vs__annotator_3": 0.9620309050772627
+        }
+      }
+    },
+    "case_00126": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.926169141066429
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9196086209176253,
+          "annotator_1__vs__annotator_3": 0.9102320146886997,
+          "annotator_2__vs__annotator_3": 0.9486667875929621
+        }
+      }
+    },
+    "case_00127": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9346922266572227
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9571428571428572,
+          "annotator_1__vs__annotator_3": 0.9202863961813843,
+          "annotator_2__vs__annotator_3": 0.9266474266474266
+        }
+      }
+    },
+    "case_00128": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9522053674063033
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9498391342497806,
+          "annotator_1__vs__annotator_3": 0.9559448378680582,
+          "annotator_2__vs__annotator_3": 0.9508321301010715
+        }
+      }
+    },
+    "case_00129": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.8860254349537661
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.8689304982545224,
+          "annotator_1__vs__annotator_3": 0.8719292499181134,
+          "annotator_2__vs__annotator_3": 0.9172165566886623
+        }
+      }
+    },
+    "case_00130": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9637758118180116
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9646318094716672,
+          "annotator_1__vs__annotator_3": 0.9616489861689271,
+          "annotator_2__vs__annotator_3": 0.9650466398134407
+        }
+      }
+    },
+    "case_00131": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9718174063914123
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9765548640924444,
+          "annotator_1__vs__annotator_3": 0.9729063449893492,
+          "annotator_2__vs__annotator_3": 0.9659910100924434
+        }
+      }
+    },
+    "case_00132": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9711352786740001
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9652942556908555,
+          "annotator_1__vs__annotator_3": 0.9723836833811258,
+          "annotator_2__vs__annotator_3": 0.9757278969500186
+        }
+      }
+    },
+    "case_00133": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9867651948718302
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9890038255022043,
+          "annotator_1__vs__annotator_3": 0.9846724860815176,
+          "annotator_2__vs__annotator_3": 0.9866192730317686
+        }
+      }
+    },
+    "case_00134": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9720337686707935
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9694079589503333,
+          "annotator_1__vs__annotator_3": 0.9669733493665931,
+          "annotator_2__vs__annotator_3": 0.9797199976954543
+        }
+      }
+    },
+    "case_00135": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9823362387953759
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9824760238827934,
+          "annotator_1__vs__annotator_3": 0.984412981349536,
+          "annotator_2__vs__annotator_3": 0.9801197111537981
+        }
+      }
+    },
+    "case_00136": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9608434692914329
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9639253628196268,
+          "annotator_1__vs__annotator_3": 0.9593651662334108,
+          "annotator_2__vs__annotator_3": 0.9592398788212614
+        }
+      }
+    },
+    "case_00137": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9424613606211545
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9259656652360515,
+          "annotator_1__vs__annotator_3": 0.9580326116011761,
+          "annotator_2__vs__annotator_3": 0.9433858050262358
+        }
+      }
+    },
+    "case_00138": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9786947330082766
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9805755122210819,
+          "annotator_1__vs__annotator_3": 0.9753557792433183,
+          "annotator_2__vs__annotator_3": 0.9801529075604294
+        }
+      }
+    },
+    "case_00139": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9802219332495516
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.979206571417501,
+          "annotator_1__vs__annotator_3": 0.9820074494998506,
+          "annotator_2__vs__annotator_3": 0.9794517788313032
+        }
+      }
+    },
+    "case_00140": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9513728493113028
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9629454430778934,
+          "annotator_1__vs__annotator_3": 0.9439308986210032,
+          "annotator_2__vs__annotator_3": 0.947242206235012
+        }
+      }
+    },
+    "case_00141": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.934308731211353
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9436841935795472,
+          "annotator_1__vs__annotator_3": 0.9322039138096269,
+          "annotator_2__vs__annotator_3": 0.9270380862448852
+        }
+      }
+    },
+    "case_00142": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.947338405362612
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9436672508281249,
+          "annotator_1__vs__annotator_3": 0.958113806569734,
+          "annotator_2__vs__annotator_3": 0.9402341586899771
+        }
+      }
+    },
+    "case_00143": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9764196609823813
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9737811165120047,
+          "annotator_1__vs__annotator_3": 0.9756741882223445,
+          "annotator_2__vs__annotator_3": 0.9798036782127948
+        }
+      }
+    },
+    "case_00144": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9460185668491273
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9462029677952865,
+          "annotator_1__vs__annotator_3": 0.948989691717162,
+          "annotator_2__vs__annotator_3": 0.9428630410349336
+        }
+      }
+    },
+    "case_00145": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9850494561187375
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9834349229114377,
+          "annotator_1__vs__annotator_3": 0.987846215468127,
+          "annotator_2__vs__annotator_3": 0.9838672299766476
+        }
+      }
+    },
+    "case_00146": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9723054559653548
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9628427255725326,
+          "annotator_1__vs__annotator_3": 0.9730271159762467,
+          "annotator_2__vs__annotator_3": 0.9810465263472847
+        }
+      }
+    },
+    "case_00147": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9376966625511414
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9251867270723644,
+          "annotator_1__vs__annotator_3": 0.9492715920915713,
+          "annotator_2__vs__annotator_3": 0.9386316684894884
+        }
+      }
+    },
+    "case_00148": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9776820488111663
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9762422485302408,
+          "annotator_1__vs__annotator_3": 0.9838917525773195,
+          "annotator_2__vs__annotator_3": 0.9729121453259384
+        }
+      }
+    },
+    "case_00149": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9734387833430738
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9835851779721435,
+          "annotator_1__vs__annotator_3": 0.9659857305125656,
+          "annotator_2__vs__annotator_3": 0.9707454415445119
+        }
+      }
+    },
+    "case_00150": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9309821824770252
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.935907688792414,
+          "annotator_1__vs__annotator_3": 0.920907920907921,
+          "annotator_2__vs__annotator_3": 0.9361309377307409
+        }
+      }
+    },
+    "case_00151": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9742816709132845
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9732770883474869,
+          "annotator_1__vs__annotator_3": 0.9714375160879638,
+          "annotator_2__vs__annotator_3": 0.978130408304403
+        }
+      }
+    },
+    "case_00152": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9555564960752685
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9443088013021742,
+          "annotator_1__vs__annotator_3": 0.9546187514397604,
+          "annotator_2__vs__annotator_3": 0.967741935483871
+        }
+      }
+    },
+    "case_00153": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9654500633853494
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9646518204312478,
+          "annotator_1__vs__annotator_3": 0.9658508696703828,
+          "annotator_2__vs__annotator_3": 0.9658475000544177
+        }
+      }
+    },
+    "case_00154": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9642036984289725
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9703780660855463,
+          "annotator_1__vs__annotator_3": 0.9641053960239824,
+          "annotator_2__vs__annotator_3": 0.9581276331773889
+        }
+      }
+    },
+    "case_00155": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9697311134059666
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9892407322421091,
+          "annotator_1__vs__annotator_3": 0.9621658961687656,
+          "annotator_2__vs__annotator_3": 0.957786711807025
+        }
+      }
+    },
+    "case_00156": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9197676065740871
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9266203483392025,
+          "annotator_1__vs__annotator_3": 0.9109038869910442,
+          "annotator_2__vs__annotator_3": 0.9217785843920145
+        }
+      }
+    },
+    "case_00157": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9731350973972596
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9666666666666667,
+          "annotator_1__vs__annotator_3": 0.9730142432140695,
+          "annotator_2__vs__annotator_3": 0.9797243823110425
+        }
+      }
+    },
+    "case_00158": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9115007131653506
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9181161195492406,
+          "annotator_1__vs__annotator_3": 0.905780403102788,
+          "annotator_2__vs__annotator_3": 0.9106056168440235
+        }
+      }
+    },
+    "case_00159": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9760432389698673
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9742926693331585,
+          "annotator_1__vs__annotator_3": 0.9759094866550303,
+          "annotator_2__vs__annotator_3": 0.9779275609214132
+        }
+      }
+    },
+    "case_00160": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9424393219738224
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.918493554926397,
+          "annotator_1__vs__annotator_3": 0.9368231402570507,
+          "annotator_2__vs__annotator_3": 0.9720012707380196
+        }
+      }
+    },
+    "case_00161": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9605030586360782
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9674950077656979,
+          "annotator_1__vs__annotator_3": 0.952278880866426,
+          "annotator_2__vs__annotator_3": 0.9617352872761107
+        }
+      }
+    },
+    "case_00162": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.975201718270518
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9796698523023458,
+          "annotator_1__vs__annotator_3": 0.9769020698808096,
+          "annotator_2__vs__annotator_3": 0.9690332326283988
+        }
+      }
+    },
+    "case_00163": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9394907578510944
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9438770350894934,
+          "annotator_1__vs__annotator_3": 0.9288806431663574,
+          "annotator_2__vs__annotator_3": 0.945714595297432
+        }
+      }
+    },
+    "case_00164": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9630405324711505
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9554492826579412,
+          "annotator_1__vs__annotator_3": 0.9640793770409445,
+          "annotator_2__vs__annotator_3": 0.969592937714566
+        }
+      }
+    },
+    "case_00165": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9622616654995371
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9647058823529412,
+          "annotator_1__vs__annotator_3": 0.9604612850082372,
+          "annotator_2__vs__annotator_3": 0.961617829137433
+        }
+      }
+    },
+    "case_00166": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9535991593676578
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9388954023423219,
+          "annotator_1__vs__annotator_3": 0.966240210147395,
+          "annotator_2__vs__annotator_3": 0.9556618656132565
+        }
+      }
+    },
+    "case_00167": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.896919087074218
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.880057803468208,
+          "annotator_1__vs__annotator_3": 0.9077519379844962,
+          "annotator_2__vs__annotator_3": 0.9029475197699497
+        }
+      }
+    },
+    "case_00168": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9413202386938587
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9360967184801382,
+          "annotator_1__vs__annotator_3": 0.9503516968732351,
+          "annotator_2__vs__annotator_3": 0.9375123007282031
+        }
+      }
+    },
+    "case_00169": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9623134492925863
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.968144690781797,
+          "annotator_1__vs__annotator_3": 0.9604108198483311,
+          "annotator_2__vs__annotator_3": 0.9583848372476308
+        }
+      }
+    },
+    "case_00170": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9524749413212324
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9538309196682758,
+          "annotator_1__vs__annotator_3": 0.9453669877117237,
+          "annotator_2__vs__annotator_3": 0.9582269165836976
+        }
+      }
+    },
+    "case_00171": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9695974649952418
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.985545932692688,
+          "annotator_1__vs__annotator_3": 0.9667664361647229,
+          "annotator_2__vs__annotator_3": 0.9564800261283145
+        }
+      }
+    },
+    "case_00172": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9578003149254809
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9470924243843056,
+          "annotator_1__vs__annotator_3": 0.9510567326052488,
+          "annotator_2__vs__annotator_3": 0.9752517877868884
+        }
+      }
+    },
+    "case_00173": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9803731175159092
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9819974282040291,
+          "annotator_1__vs__annotator_3": 0.9774305555555556,
+          "annotator_2__vs__annotator_3": 0.981691368788143
+        }
+      }
+    },
+    "case_00174": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9353639567115432
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.955683408490126,
+          "annotator_1__vs__annotator_3": 0.9194608809993425,
+          "annotator_2__vs__annotator_3": 0.9309475806451613
+        }
+      }
+    },
+    "case_00175": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9624660098853665
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9613780846264269,
+          "annotator_1__vs__annotator_3": 0.9667505629884753,
+          "annotator_2__vs__annotator_3": 0.9592693820411973
+        }
+      }
+    },
+    "case_00176": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9866316478623386
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.983894908713077,
+          "annotator_1__vs__annotator_3": 0.9852428624397479,
+          "annotator_2__vs__annotator_3": 0.990757172434191
+        }
+      }
+    },
+    "case_00177": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9627640861337879
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9662722475335147,
+          "annotator_1__vs__annotator_3": 0.9748233902841316,
+          "annotator_2__vs__annotator_3": 0.9471966205837173
+        }
+      }
+    },
+    "case_00178": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9678148792692595
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9764819127464679,
+          "annotator_1__vs__annotator_3": 0.9617020194636375,
+          "annotator_2__vs__annotator_3": 0.9652607055976729
+        }
+      }
+    },
+    "case_00179": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9648583805394937
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.959402063474067,
+          "annotator_1__vs__annotator_3": 0.9540819384391455,
+          "annotator_2__vs__annotator_3": 0.9810911397052687
+        }
+      }
+    },
+    "case_00180": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9734081571458031
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9711551184227937,
+          "annotator_1__vs__annotator_3": 0.9672891046543933,
+          "annotator_2__vs__annotator_3": 0.9817802483602224
+        }
+      }
+    },
+    "case_00181": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9636142804012588
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9665494809272698,
+          "annotator_1__vs__annotator_3": 0.969399235655948,
+          "annotator_2__vs__annotator_3": 0.9548941246205588
+        }
+      }
+    },
+    "case_00182": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9517225775640553
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9539361442846698,
+          "annotator_1__vs__annotator_3": 0.9456979915695513,
+          "annotator_2__vs__annotator_3": 0.9555335968379447
+        }
+      }
+    },
+    "case_00183": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9678825855361124
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9812630914464434,
+          "annotator_1__vs__annotator_3": 0.9610681824910442,
+          "annotator_2__vs__annotator_3": 0.9613164826708497
+        }
+      }
+    },
+    "case_00184": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9614974341308743
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9672771218741285,
+          "annotator_1__vs__annotator_3": 0.9570771139301293,
+          "annotator_2__vs__annotator_3": 0.960138066588365
+        }
+      }
+    },
+    "case_00185": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9305667338519313
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9175497022908468,
+          "annotator_1__vs__annotator_3": 0.9535026435045317,
+          "annotator_2__vs__annotator_3": 0.9206478557604156
+        }
+      }
+    },
+    "case_00186": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9740345456670102
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9708441724542344,
+          "annotator_1__vs__annotator_3": 0.9778855581184963,
+          "annotator_2__vs__annotator_3": 0.9733739064282997
+        }
+      }
+    },
+    "case_00187": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9718218395877513
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9749000923075223,
+          "annotator_1__vs__annotator_3": 0.9704585488449327,
+          "annotator_2__vs__annotator_3": 0.9701068776107991
+        }
+      }
+    },
+    "case_00188": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9487821850838362
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9511037067888379,
+          "annotator_1__vs__annotator_3": 0.9341530496683385,
+          "annotator_2__vs__annotator_3": 0.9610897987943318
+        }
+      }
+    },
+    "case_00189": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9677551891088519
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9610501912081523,
+          "annotator_1__vs__annotator_3": 0.981309425102093,
+          "annotator_2__vs__annotator_3": 0.9609059510163104
+        }
+      }
+    },
+    "case_00190": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9667688215529252
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.957242511284366,
+          "annotator_1__vs__annotator_3": 0.9815065763252292,
+          "annotator_2__vs__annotator_3": 0.9615573770491803
+        }
+      }
+    },
+    "case_00191": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9134991152026792
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9044910179640718,
+          "annotator_1__vs__annotator_3": 0.921289123024481,
+          "annotator_2__vs__annotator_3": 0.9147172046194848
+        }
+      }
+    },
+    "case_00192": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9732777237975333
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9754586960397498,
+          "annotator_1__vs__annotator_3": 0.9768076834667546,
+          "annotator_2__vs__annotator_3": 0.9675667918860955
+        }
+      }
+    },
+    "case_00193": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9567198368937019
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9680402836296372,
+          "annotator_1__vs__annotator_3": 0.9501817404319008,
+          "annotator_2__vs__annotator_3": 0.9519374866195676
+        }
+      }
+    },
+    "case_00194": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9695690692789786
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9708809436048654,
+          "annotator_1__vs__annotator_3": 0.976843605272533,
+          "annotator_2__vs__annotator_3": 0.9609826589595376
+        }
+      }
+    },
+    "case_00195": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9691806250035704
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.964484558158717,
+          "annotator_1__vs__annotator_3": 0.971467050864445,
+          "annotator_2__vs__annotator_3": 0.9715902659875495
+        }
+      }
+    },
+    "case_00196": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9544346557138003
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9508634308438197,
+          "annotator_1__vs__annotator_3": 0.9688081936685289,
+          "annotator_2__vs__annotator_3": 0.9436323426290523
+        }
+      }
+    },
+    "case_00197": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9747835974729404
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9760411624823755,
+          "annotator_1__vs__annotator_3": 0.9824543538253174,
+          "annotator_2__vs__annotator_3": 0.9658552761111284
+        }
+      }
+    },
+    "case_00198": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9397260218267546
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9543191166919247,
+          "annotator_1__vs__annotator_3": 0.9445609131143722,
+          "annotator_2__vs__annotator_3": 0.9202980356739671
+        }
+      }
+    },
+    "case_00199": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.970518876118971
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9674274713168115,
+          "annotator_1__vs__annotator_3": 0.9677856713752679,
+          "annotator_2__vs__annotator_3": 0.9763434856648335
+        }
+      }
+    },
+    "case_00200": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9675631557177217
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9690987294602684,
+          "annotator_1__vs__annotator_3": 0.958433982499574,
+          "annotator_2__vs__annotator_3": 0.9751567551933228
+        }
+      }
+    },
+    "case_00201": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9166942670426389
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9038098830629951,
+          "annotator_1__vs__annotator_3": 0.9343326195574589,
+          "annotator_2__vs__annotator_3": 0.9119402985074627
+        }
+      }
+    },
+    "case_00202": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9773068623691556
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9779517933545341,
+          "annotator_1__vs__annotator_3": 0.9758077337525836,
+          "annotator_2__vs__annotator_3": 0.9781610600003492
+        }
+      }
+    },
+    "case_00203": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9481338302171728
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9506493506493506,
+          "annotator_1__vs__annotator_3": 0.942603550295858,
+          "annotator_2__vs__annotator_3": 0.95114858970631
+        }
+      }
+    },
+    "case_00204": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9704358637452124
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9831577840480906,
+          "annotator_1__vs__annotator_3": 0.9571382301076042,
+          "annotator_2__vs__annotator_3": 0.9710115770799422
+        }
+      }
+    },
+    "case_00205": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9571508635476418
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9603960396039604,
+          "annotator_1__vs__annotator_3": 0.9498199279711885,
+          "annotator_2__vs__annotator_3": 0.9612366230677765
+        }
+      }
+    },
+    "case_00206": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9715472060785805
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9814747169023639,
+          "annotator_1__vs__annotator_3": 0.9673517448083923,
+          "annotator_2__vs__annotator_3": 0.9658151565249853
+        }
+      }
+    },
+    "case_00207": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9674611592609512
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.97396306388132,
+          "annotator_1__vs__annotator_3": 0.9663167789440702,
+          "annotator_2__vs__annotator_3": 0.9621036349574633
+        }
+      }
+    },
+    "case_00208": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9893626364742832
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9898116702686014,
+          "annotator_1__vs__annotator_3": 0.9856821435876457,
+          "annotator_2__vs__annotator_3": 0.9925940955666024
+        }
+      }
+    },
+    "case_00209": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9018570667136722
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.8769716088328076,
+          "annotator_1__vs__annotator_3": 0.8749435665914221,
+          "annotator_2__vs__annotator_3": 0.9536560247167868
+        }
+      }
+    },
+    "case_00210": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9772204969211415
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9768835616438356,
+          "annotator_1__vs__annotator_3": 0.976608659455631,
+          "annotator_2__vs__annotator_3": 0.9781692696639581
+        }
+      }
+    },
+    "case_00211": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9669024407520374
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9665429302675144,
+          "annotator_1__vs__annotator_3": 0.9690455739821201,
+          "annotator_2__vs__annotator_3": 0.9651188180064777
+        }
+      }
+    },
+    "case_00212": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9422103598898803
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9279295154185022,
+          "annotator_1__vs__annotator_3": 0.9597729928225672,
+          "annotator_2__vs__annotator_3": 0.9389285714285714
+        }
+      }
+    },
+    "case_00213": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.8935052039892595
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9003314917127072,
+          "annotator_1__vs__annotator_3": 0.8845563039111426,
+          "annotator_2__vs__annotator_3": 0.8956278163439289
+        }
+      }
+    },
+    "case_00214": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9521403822547644
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9549511262218444,
+          "annotator_1__vs__annotator_3": 0.9465364946536494,
+          "annotator_2__vs__annotator_3": 0.9549335258887992
+        }
+      }
+    },
+    "case_00215": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9744554946506737
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9667540937123414,
+          "annotator_1__vs__annotator_3": 0.9822990274959771,
+          "annotator_2__vs__annotator_3": 0.9743133627437028
+        }
+      }
+    },
+    "case_00216": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9556161078444697
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9505086826508733,
+          "annotator_1__vs__annotator_3": 0.9506726457399103,
+          "annotator_2__vs__annotator_3": 0.9656669951426254
+        }
+      }
+    },
+    "case_00217": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9666062971044878
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9567094596146338,
+          "annotator_1__vs__annotator_3": 0.9630441734045955,
+          "annotator_2__vs__annotator_3": 0.980065258294234
+        }
+      }
+    },
+    "case_00218": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9673646579552143
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9726923944933423,
+          "annotator_1__vs__annotator_3": 0.9671534953529989,
+          "annotator_2__vs__annotator_3": 0.9622480840193017
+        }
+      }
+    },
+    "case_00219": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9849536725120993
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9843718411644732,
+          "annotator_1__vs__annotator_3": 0.9891830673981981,
+          "annotator_2__vs__annotator_3": 0.9813061089736264
+        }
+      }
+    },
+    "case_00220": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9630947178133358
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9692268129607406,
+          "annotator_1__vs__annotator_3": 0.9614103987022966,
+          "annotator_2__vs__annotator_3": 0.9586469417769703
+        }
+      }
+    },
+    "case_00221": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9764912598031305
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.977691488506671,
+          "annotator_1__vs__annotator_3": 0.9706481869044995,
+          "annotator_2__vs__annotator_3": 0.9811341039982212
+        }
+      }
+    },
+    "case_00222": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.984946433061915
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9849084284322803,
+          "annotator_1__vs__annotator_3": 0.9863841212004986,
+          "annotator_2__vs__annotator_3": 0.9835467495529661
+        }
+      }
+    },
+    "case_00223": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9791138712813087
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9857951952665575,
+          "annotator_1__vs__annotator_3": 0.9715433720972928,
+          "annotator_2__vs__annotator_3": 0.9800030464800756
+        }
+      }
+    },
+    "case_00224": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9739201746536462
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9737590942194926,
+          "annotator_1__vs__annotator_3": 0.9756797397655435,
+          "annotator_2__vs__annotator_3": 0.9723216899759025
+        }
+      }
+    },
+    "case_00225": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9714081470554886
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9744582526697059,
+          "annotator_1__vs__annotator_3": 0.9710278649197269,
+          "annotator_2__vs__annotator_3": 0.9687383235770333
+        }
+      }
+    },
+    "case_00226": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9388046843975486
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9138998311761396,
+          "annotator_1__vs__annotator_3": 0.9490879390144297,
+          "annotator_2__vs__annotator_3": 0.9534262830020765
+        }
+      }
+    },
+    "case_00227": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9362397435709665
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9323828920570265,
+          "annotator_1__vs__annotator_3": 0.9188355107499229,
+          "annotator_2__vs__annotator_3": 0.9575008279059499
+        }
+      }
+    },
+    "case_00228": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.969359490761737
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9717279689457028,
+          "annotator_1__vs__annotator_3": 0.9585840124495207,
+          "annotator_2__vs__annotator_3": 0.9777664908899877
+        }
+      }
+    },
+    "case_00229": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9606505138587912
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9535949014140609,
+          "annotator_1__vs__annotator_3": 0.9635335413416537,
+          "annotator_2__vs__annotator_3": 0.9648230988206588
+        }
+      }
+    },
+    "case_00230": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9659638134002301
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9666677822027375,
+          "annotator_1__vs__annotator_3": 0.9719689869643009,
+          "annotator_2__vs__annotator_3": 0.9592546710336518
+        }
+      }
+    },
+    "case_00231": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9786153754792754
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9835472789730609,
+          "annotator_1__vs__annotator_3": 0.9767782044249406,
+          "annotator_2__vs__annotator_3": 0.9755206430398247
+        }
+      }
+    },
+    "case_00232": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9652554661759521
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.954106755958243,
+          "annotator_1__vs__annotator_3": 0.9664407873507583,
+          "annotator_2__vs__annotator_3": 0.9752188552188552
+        }
+      }
+    },
+    "case_00233": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9686448276644398
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9599104610905885,
+          "annotator_1__vs__annotator_3": 0.9781524699397041,
+          "annotator_2__vs__annotator_3": 0.9678715519630268
+        }
+      }
+    },
+    "case_00234": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9171491619293635
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9125799573560768,
+          "annotator_1__vs__annotator_3": 0.8935860058309038,
+          "annotator_2__vs__annotator_3": 0.9452815226011102
+        }
+      }
+    },
+    "case_00235": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9781968084322705
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9792123681186671,
+          "annotator_1__vs__annotator_3": 0.9794026047565119,
+          "annotator_2__vs__annotator_3": 0.9759754524216325
+        }
+      }
+    },
+    "case_00236": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9862432241474002
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.983870010563422,
+          "annotator_1__vs__annotator_3": 0.9893729531238328,
+          "annotator_2__vs__annotator_3": 0.9854867087549459
+        }
+      }
+    },
+    "case_00237": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9745548900386999
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9775077032090441,
+          "annotator_1__vs__annotator_3": 0.9711862609986218,
+          "annotator_2__vs__annotator_3": 0.9749707059084335
+        }
+      }
+    },
+    "case_00238": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9485843953639561
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9535603715170279,
+          "annotator_1__vs__annotator_3": 0.9591245574509173,
+          "annotator_2__vs__annotator_3": 0.9330682571239232
+        }
+      }
+    },
+    "case_00239": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9445228127557629
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9308764381255261,
+          "annotator_1__vs__annotator_3": 0.9370173969671597,
+          "annotator_2__vs__annotator_3": 0.9656746031746032
+        }
+      }
+    },
+    "case_00240": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9285829138581466
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.941796348486705,
+          "annotator_1__vs__annotator_3": 0.9105536332179931,
+          "annotator_2__vs__annotator_3": 0.9333987598697417
+        }
+      }
+    },
+    "case_00241": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9788583441861102
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9776764843384759,
+          "annotator_1__vs__annotator_3": 0.9810107079577844,
+          "annotator_2__vs__annotator_3": 0.9778878402620701
+        }
+      }
+    },
+    "case_00242": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9869015669844022
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9875463242264931,
+          "annotator_1__vs__annotator_3": 0.9861105101466834,
+          "annotator_2__vs__annotator_3": 0.9870478665800303
+        }
+      }
+    },
+    "case_00243": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9739678712805686
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9818729853058149,
+          "annotator_1__vs__annotator_3": 0.9697486879720101,
+          "annotator_2__vs__annotator_3": 0.9702819405638812
+        }
+      }
+    },
+    "case_00244": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9759569864535732
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.976703325307477,
+          "annotator_1__vs__annotator_3": 0.9761610912633972,
+          "annotator_2__vs__annotator_3": 0.9750065427898456
+        }
+      }
+    },
+    "case_00245": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9603026071344981
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9796715685990366,
+          "annotator_1__vs__annotator_3": 0.9446107543495404,
+          "annotator_2__vs__annotator_3": 0.9566254984549173
+        }
+      }
+    },
+    "case_00246": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9698559919586471
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9761235521235522,
+          "annotator_1__vs__annotator_3": 0.9651138171372329,
+          "annotator_2__vs__annotator_3": 0.9683306066151561
+        }
+      }
+    },
+    "case_00247": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9537875251523057
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9387799963363254,
+          "annotator_1__vs__annotator_3": 0.9797391063003053,
+          "annotator_2__vs__annotator_3": 0.9428434728202864
+        }
+      }
+    },
+    "case_00248": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9833591360009656
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9813418288349504,
+          "annotator_1__vs__annotator_3": 0.9859699941403443,
+          "annotator_2__vs__annotator_3": 0.982765585027602
+        }
+      }
+    },
+    "case_00249": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9913748480799014
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9916955947348802,
+          "annotator_1__vs__annotator_3": 0.9909682039927523,
+          "annotator_2__vs__annotator_3": 0.9914607455120718
+        }
+      }
+    },
+    "case_00250": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9679482496884914
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9674590059743231,
+          "annotator_1__vs__annotator_3": 0.9715947769045115,
+          "annotator_2__vs__annotator_3": 0.9647909661866396
+        }
+      }
+    },
+    "case_00251": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9731967967490723
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9720045383783213,
+          "annotator_1__vs__annotator_3": 0.9713724240492883,
+          "annotator_2__vs__annotator_3": 0.9762134278196076
+        }
+      }
+    },
+    "case_00252": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9831500963008072
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9850136359251822,
+          "annotator_1__vs__annotator_3": 0.9805632963527701,
+          "annotator_2__vs__annotator_3": 0.9838733566244696
+        }
+      }
+    },
+    "case_00253": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9706974213240548
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.974706828090757,
+          "annotator_1__vs__annotator_3": 0.9677712042514975,
+          "annotator_2__vs__annotator_3": 0.9696142316299101
+        }
+      }
+    },
+    "case_00254": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9507980817361465
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9567315980003448,
+          "annotator_1__vs__annotator_3": 0.9417962870045158,
+          "annotator_2__vs__annotator_3": 0.9538663602035791
+        }
+      }
+    },
+    "case_00255": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9700181527249642
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9701554404145077,
+          "annotator_1__vs__annotator_3": 0.9677071290944124,
+          "annotator_2__vs__annotator_3": 0.9721918886659725
+        }
+      }
+    },
+    "case_00256": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9633115526468662
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9571840263482915,
+          "annotator_1__vs__annotator_3": 0.9717700391510405,
+          "annotator_2__vs__annotator_3": 0.9609805924412665
+        }
+      }
+    },
+    "case_00257": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.922170790165232
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9294871794871795,
+          "annotator_1__vs__annotator_3": 0.904610492845787,
+          "annotator_2__vs__annotator_3": 0.9324146981627297
+        }
+      }
+    },
+    "case_00258": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.973893634670144
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9751107743497669,
+          "annotator_1__vs__annotator_3": 0.97376026272578,
+          "annotator_2__vs__annotator_3": 0.9728098669348855
+        }
+      }
+    },
+    "case_00259": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9649287086916942
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9586390653822504,
+          "annotator_1__vs__annotator_3": 0.9610218918141865,
+          "annotator_2__vs__annotator_3": 0.9751251688786458
+        }
+      }
+    },
+    "case_00260": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.980980577022136
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9805989453785693,
+          "annotator_1__vs__annotator_3": 0.9815938859263263,
+          "annotator_2__vs__annotator_3": 0.9807488997615126
+        }
+      }
+    },
+    "case_00261": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9788550352714328
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9783100351088806,
+          "annotator_1__vs__annotator_3": 0.9756567581417757,
+          "annotator_2__vs__annotator_3": 0.9825983125636425
+        }
+      }
+    },
+    "case_00262": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9668307034402389
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9721389468697269,
+          "annotator_1__vs__annotator_3": 0.9633897233395693,
+          "annotator_2__vs__annotator_3": 0.9649634401114207
+        }
+      }
+    },
+    "case_00263": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9728445957240051
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9679279514936886,
+          "annotator_1__vs__annotator_3": 0.9710330858676055,
+          "annotator_2__vs__annotator_3": 0.9795727498107213
+        }
+      }
+    },
+    "case_00264": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.954432230498309
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.952868505669318,
+          "annotator_1__vs__annotator_3": 0.9421636200179803,
+          "annotator_2__vs__annotator_3": 0.968264565807629
+        }
+      }
+    },
+    "case_00265": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9623666933483733
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9636750836629145,
+          "annotator_1__vs__annotator_3": 0.970551220739995,
+          "annotator_2__vs__annotator_3": 0.9528737756422103
+        }
+      }
+    },
+    "case_00266": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.971587815246187
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9719593894605981,
+          "annotator_1__vs__annotator_3": 0.9675868699354484,
+          "annotator_2__vs__annotator_3": 0.9752171863425146
+        }
+      }
+    },
+    "case_00267": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9331994598531964
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9388446552600372,
+          "annotator_1__vs__annotator_3": 0.9221871713985279,
+          "annotator_2__vs__annotator_3": 0.9385665529010239
+        }
+      }
+    },
+    "case_00268": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9483486757376772
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.971994149370519,
+          "annotator_1__vs__annotator_3": 0.9364828713680612,
+          "annotator_2__vs__annotator_3": 0.9365690064744515
+        }
+      }
+    },
+    "case_00269": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.989137110254433
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9940237536878735,
+          "annotator_1__vs__annotator_3": 0.987072592365945,
+          "annotator_2__vs__annotator_3": 0.9863149847094801
+        }
+      }
+    },
+    "case_00270": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9844958628734979
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9874930472785062,
+          "annotator_1__vs__annotator_3": 0.9817711245666448,
+          "annotator_2__vs__annotator_3": 0.9842234167753428
+        }
+      }
+    },
+    "case_00271": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9802751236112662
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9814207598262004,
+          "annotator_1__vs__annotator_3": 0.9817158320490279,
+          "annotator_2__vs__annotator_3": 0.97768877895857
+        }
+      }
+    },
+    "case_00272": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9382019134901723
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9668508287292817,
+          "annotator_1__vs__annotator_3": 0.9211529933481153,
+          "annotator_2__vs__annotator_3": 0.9266019183931202
+        }
+      }
+    },
+    "case_00273": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.966557840677068
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9672951059880824,
+          "annotator_1__vs__annotator_3": 0.9643145837030027,
+          "annotator_2__vs__annotator_3": 0.9680638323401192
+        }
+      }
+    },
+    "case_00274": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9776529292306261
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9802415175956383,
+          "annotator_1__vs__annotator_3": 0.9768331526349199,
+          "annotator_2__vs__annotator_3": 0.9758841174613199
+        }
+      }
+    },
+    "case_00275": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9714040815231274
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9747460087082729,
+          "annotator_1__vs__annotator_3": 0.9666431632044259,
+          "annotator_2__vs__annotator_3": 0.9728230726566833
+        }
+      }
+    },
+    "case_00276": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9621387377038703
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9679526034843479,
+          "annotator_1__vs__annotator_3": 0.9595055662786843,
+          "annotator_2__vs__annotator_3": 0.9589580433485783
+        }
+      }
+    },
+    "case_00277": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.967227015448702
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.968890241119647,
+          "annotator_1__vs__annotator_3": 0.9658170914542729,
+          "annotator_2__vs__annotator_3": 0.966973713772186
+        }
+      }
+    },
+    "case_00278": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.973115067312461
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9759999642191043,
+          "annotator_1__vs__annotator_3": 0.973440680895381,
+          "annotator_2__vs__annotator_3": 0.9699045568228974
+        }
+      }
+    },
+    "case_00279": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9727487594259406
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9747789911596464,
+          "annotator_1__vs__annotator_3": 0.9729548663718912,
+          "annotator_2__vs__annotator_3": 0.9705124207462842
+        }
+      }
+    },
+    "case_00280": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9666360850998886
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9658602625228089,
+          "annotator_1__vs__annotator_3": 0.9603781397437468,
+          "annotator_2__vs__annotator_3": 0.9736698530331102
+        }
+      }
+    },
+    "case_00281": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9584553782963572
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9602055628785477,
+          "annotator_1__vs__annotator_3": 0.9599267152351075,
+          "annotator_2__vs__annotator_3": 0.9552338567754163
+        }
+      }
+    },
+    "case_00282": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9681636300381307
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9678132899963886,
+          "annotator_1__vs__annotator_3": 0.9642298000506956,
+          "annotator_2__vs__annotator_3": 0.9724478000673076
+        }
+      }
+    },
+    "case_00283": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9618773943619834
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9679900078450803,
+          "annotator_1__vs__annotator_3": 0.9686627884124052,
+          "annotator_2__vs__annotator_3": 0.9489793868284646
+        }
+      }
+    },
+    "case_00284": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9693436350950337
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.967575608166267,
+          "annotator_1__vs__annotator_3": 0.9701900163700036,
+          "annotator_2__vs__annotator_3": 0.970265280748831
+        }
+      }
+    },
+    "case_00285": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9433213894856903
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9426169051482519,
+          "annotator_1__vs__annotator_3": 0.9376608521589934,
+          "annotator_2__vs__annotator_3": 0.9496864111498258
+        }
+      }
+    },
+    "case_00286": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.970426664667424
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9741655738803328,
+          "annotator_1__vs__annotator_3": 0.9675058760813201,
+          "annotator_2__vs__annotator_3": 0.9696085440406192
+        }
+      }
+    },
+    "case_00287": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9790151212820958
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9805755024022318,
+          "annotator_1__vs__annotator_3": 0.9761855881749127,
+          "annotator_2__vs__annotator_3": 0.9802842732691426
+        }
+      }
+    },
+    "case_00288": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9768388705599452
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9803738039032157,
+          "annotator_1__vs__annotator_3": 0.9754634244929751,
+          "annotator_2__vs__annotator_3": 0.9746793832836448
+        }
+      }
+    },
+    "case_00289": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9538551795709869
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.971003717472119,
+          "annotator_1__vs__annotator_3": 0.9452407203234106,
+          "annotator_2__vs__annotator_3": 0.9453211009174312
+        }
+      }
+    },
+    "case_00290": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9726667343434557
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9786276370985028,
+          "annotator_1__vs__annotator_3": 0.9700192840785826,
+          "annotator_2__vs__annotator_3": 0.9693532818532818
+        }
+      }
+    },
+    "case_00291": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9644113398385445
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9647055797082809,
+          "annotator_1__vs__annotator_3": 0.9670313051368654,
+          "annotator_2__vs__annotator_3": 0.9614971346704871
+        }
+      }
+    },
+    "case_00292": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9691615028211388
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9715646576120089,
+          "annotator_1__vs__annotator_3": 0.965287187514309,
+          "annotator_2__vs__annotator_3": 0.9706326633370984
+        }
+      }
+    },
+    "case_00293": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9794449381365125
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9783563062280363,
+          "annotator_1__vs__annotator_3": 0.9788021151090444,
+          "annotator_2__vs__annotator_3": 0.9811763930724567
+        }
+      }
+    },
+    "case_00294": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9569899658930078
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9608001694295231,
+          "annotator_1__vs__annotator_3": 0.9566500574932925,
+          "annotator_2__vs__annotator_3": 0.9535196707562075
+        }
+      }
+    },
+    "case_00295": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9500246441572123
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9451494296219478,
+          "annotator_1__vs__annotator_3": 0.9406100119904077,
+          "annotator_2__vs__annotator_3": 0.9643144908592812
+        }
+      }
+    },
+    "case_00296": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9203449248017389
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9284061324848134,
+          "annotator_1__vs__annotator_3": 0.9084907108859205,
+          "annotator_2__vs__annotator_3": 0.9241379310344827
+        }
+      }
+    },
+    "case_00297": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9632385859453106
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9615097624673548,
+          "annotator_1__vs__annotator_3": 0.9579816169574189,
+          "annotator_2__vs__annotator_3": 0.9702243784111583
+        }
+      }
+    },
+    "case_00298": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9712825745499752
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9742374565325385,
+          "annotator_1__vs__annotator_3": 0.9649441449886728,
+          "annotator_2__vs__annotator_3": 0.9746661221287146
+        }
+      }
+    },
+    "case_00299": {
+      "dataset_id": "Dataset027_Kits23",
+      "annotators": [
+        "annotator_1",
+        "annotator_2",
+        "annotator_3"
+      ],
+      "class_mean_dice": {
+        "tumor": 0.9689001875555247
+      },
+      "pairwise_dice_by_class": {
+        "tumor": {
+          "annotator_1__vs__annotator_2": 0.9661968729354767,
+          "annotator_1__vs__annotator_3": 0.9664422182076969,
+          "annotator_2__vs__annotator_3": 0.9740614715234005
+        }
+      }
+    }
+  }
+}
