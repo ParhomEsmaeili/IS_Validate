@@ -1,0 +1,62 @@
+{
+  "task_id_1": {
+    "exp_config_relpath": "exp_configs/Dataset040_MSMultispine",
+    "dataset_name_val_convention": "Dataset040_MSMultispine",
+    "task_id": "task_id_13"
+  },
+  "task_id_2": {
+    "exp_config_relpath": "exp_configs/Dataset040_MSMultispine",
+    "dataset_name_val_convention": "Dataset040_MSMultispine",
+    "task_id": "task_id_14"
+  },
+  "task_id_3": {
+    "exp_config_relpath": "exp_configs/Dataset040_MSMultispine",
+    "dataset_name_val_convention": "Dataset040_MSMultispine",
+    "task_id": "task_id_15"
+  },
+  "task_id_4": {
+    "exp_config_relpath": "exp_configs/Dataset040_MSMultispine",
+    "dataset_name_val_convention": "Dataset040_MSMultispine",
+    "task_id": "task_id_16"
+  },
+  "task_id_5": {
+    "exp_config_relpath": "exp_configs/Dataset040_MSMultispine",
+    "dataset_name_val_convention": "Dataset040_MSMultispine",
+    "task_id": "task_id_17"
+  },
+  "task_id_6": {
+    "exp_config_relpath": "exp_configs/Dataset040_MSMultispine",
+    "dataset_name_val_convention": "Dataset040_MSMultispine",
+    "task_id": "task_id_18"
+  },
+  "task_id_7": {
+    "exp_config_relpath": "exp_configs/Dataset040_MSMultispine",
+    "dataset_name_val_convention": "Dataset040_MSMultispine",
+    "task_id": "task_id_19"
+  },
+  "task_id_8": {
+    "exp_config_relpath": "exp_configs/Dataset040_MSMultispine",
+    "dataset_name_val_convention": "Dataset040_MSMultispine",
+    "task_id": "task_id_20"
+  },
+  "task_id_9": {
+    "exp_config_relpath": "exp_configs/Dataset040_MSMultispine",
+    "dataset_name_val_convention": "Dataset040_MSMultispine",
+    "task_id": "task_id_21"
+  },
+  "task_id_10": {
+    "exp_config_relpath": "exp_configs/Dataset040_MSMultispine",
+    "dataset_name_val_convention": "Dataset040_MSMultispine",
+    "task_id": "task_id_22"
+  },
+  "task_id_11": {
+    "exp_config_relpath": "exp_configs/Dataset040_MSMultispine",
+    "dataset_name_val_convention": "Dataset040_MSMultispine",
+    "task_id": "task_id_23"
+  },
+  "task_id_12": {
+    "exp_config_relpath": "exp_configs/Dataset040_MSMultispine",
+    "dataset_name_val_convention": "Dataset040_MSMultispine",
+    "task_id": "task_id_24"
+  }
+}

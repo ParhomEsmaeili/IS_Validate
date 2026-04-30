@@ -8,6 +8,7 @@ import pandas as pd
 from src.results_utils.base_metrics.scoring_base_utils import BaseScoringWrapper
 from src.results_utils.metric_save_util import init_all_csvs, write_to_csvs
 from src.general_utils.dict_utils import extractor
+from offline_result_summarisation.utils import extract_config, convert_nnunet_task_to_internal_convention
 import json 
 import torch 
 from monai.transforms import (
@@ -52,18 +53,6 @@ def process_metric_config(metric_config, spacing_config):
                 conf['multiple_parameter_values'] = 'tolerance_mms'
     return metric_config
 
-def extract_config(path, name):
-    #Function which extracts configs dicts from json or txt files. Takes the path to the file, and the name of the specific config desired.
-
-    if not os.path.exists(path):
-        raise Exception(f'The path {path} was not a valid one. Please check.')    
-
-    #Loading the file:
-    with open(path) as f:
-        configs_registry = json.load(f)
-        config = configs_registry[name]
-
-    return config 
 def write_metrics(metrics_dict, metrics_configs, config_labels_dict, output_base_folder):
     metric_paths_dict = init_all_csvs(output_base_folder, metrics_configs, config_labels_dict)
 
@@ -118,44 +107,113 @@ def calculate_nnUNet_metrics(scoring_wrapper, seg_folder, gt_folder, config_labe
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Calculate nnUNet metrics.")
-    # required=True, help='Path to the input folder containing results.')
-    parser.add_argument('--segmentation_base_folder', type=str, required=True, help='Path to the base folder containing the dataset folders with segmentation and gold-standard annotations for metric calculation.')
-    parser.add_argument('--gt_base_folder', type=str, required=True, help='Path to the base folder containing the dataset-separated folders which contain the gold standard annotations')
-    parser.add_argument('--dataset_name', type=str, required=True, help='Name of the task for reading segmentations, metric configs AND saving metrics.')
-    parser.add_argument('--seg_subfolder_path', type=str, default='preds_final')
-    parser.add_argument('--output_results_base_folder', type=str, default=os.path.join(parent_dir, 'results_summary'), help='Path to the base folder for saving the results summaries.')
+    parser.add_argument('--segmentation_base_folder', 
+        type=str, 
+        required=True,
+        default='/home/parhomesmaeili/Helmholtz Group/nnUNet_inspect',
+        help='Path to the base folder containing the dataset folders with segmentation and gold-standard annotations for metric calculation.')
+    parser.add_argument('--gt_base_folder', 
+        type=str, 
+        required=True,
+        default='/home/parhomesmaeili/Helmholtz Group/nnUNet/nnUNet_raw',
+        help='Path to the base folder containing the dataset-separated folders which contain the gold standard annotations')
+    parser.add_argument('--dataset_name', 
+        type=str, 
+        required=True,
+        default='Dataset046_MSMultispineAll',
+        help='Name of the task in nnu-net convention, which is also the name of its dataset folder.')
+    parser.add_argument('--seg_subfolder_path', 
+        type=str, 
+        default="nnUNetTrainer__nnUNetPlans__3d_fullres/crossval_results_folds_0_1_2_3_4/postprocessed")#'preds_final')
+    parser.add_argument('--output_results_base_folder', 
+        type=str, 
+        default=os.path.join(parent_dir, 'results_summary'), 
+        help='Path to the base folder for saving the results summaries.')
     #For processing any specific experiment configs, or metric configs.
-    parser.add_argument('--exp_configs_base_folder', type=str, default=os.path.join(parent_dir, 'exp_configs'), help='Path to the base folder containing experiment configs required for extracting metric and task configuration information')
-    parser.add_argument('--reference_splits_base_folder', type=str, default=os.path.join(parent_dir, 'datasets'), help='Path to the base folder containing dataset folders with dataset_split.json files for reading the data splits.')
-    parser.add_argument('--task_conf_id', nargs='+', type=str, default='task_id_2', help='Task configuration ID to use for reading the task configs which are to be used in loading reference labels, etc.')
-    parser.add_argument('--metric_config_id', type=str, default='prototype', help='ID or string for the metric configuration for the given task')
+    parser.add_argument('--nnUNet_exp_configs_base_folder', 
+        type=str, 
+        default=os.path.join(parent_dir, 'exp_configs_nnUNet'), 
+        help='Path to the base folder containing experiment configs required for extracting metric and task configuration information')
+    parser.add_argument('--reference_splits_base_folder', 
+        type=str, 
+        default=os.path.join(parent_dir, 'datasets'), 
+        help='Path to the base folder containing dataset folders with dataset_split.json files for reading the data splits.')
+    parser.add_argument('--task_conf_id', 
+        nargs='+', 
+        type=str, 
+        default=['task_id_3', 'task_id_4', 'task_id_5', 'task_id_6', 'task_id_7'], #'task_id_2', 
+        help='Task configuration ID to use for reading the task configs which are to be used in loading reference labels, etc.')
+    parser.add_argument('--metric_config_id', 
+        type=str, 
+        default='prototype', 
+        help='ID or string for the metric configuration for the given task')
     #Data extraction parameters required to identify the datalist!
-    parser.add_argument('--data_split', type=str, default='test', choices=['train', 'test'], help='Name of the data split to be used for calculating metric')
-    parser.add_argument('--strategy_type', type=str, required=False, choices=['all', 'kfold'], help='Sampling strategy type', default='all')
-    parser.add_argument('--total_folds', type=int, default=None, help='If using kfold strategy, specify the total number of folds.')
+    parser.add_argument('--data_split', 
+        type=str, 
+        default='train', #'test', 
+        choices=['train', 'test'], 
+        help='Name of the data split to be used for calculating metric')
+    parser.add_argument('--strategy_type', 
+        type=str, 
+        required=True,
+        choices=['all', 'kfold'], 
+        default='kfold',
+        help='Sampling strategy type')
+    parser.add_argument('--total_folds', 
+        type=int, 
+        default=None, 
+        help='If using kfold strategy, specify the total number of folds.')
     # parser.add_argument('--fold_num', type=int, default=None, help='If using kfold strategy, specify the fold number (0-indexed) to use.')
-    parser.add_argument('--gt_subfolder_path', type=str, default='labelsTs')
+    parser.add_argument('--gt_subfolder_path', 
+        type=str, 
+        default='labelsTr'
+    )
     # parser.add_argument('--metrics', nargs='+', type=str, default=['Dice', 'NSD'], help='List of metrics to calculate (default: Dice, NSD).')
     args = parser.parse_args()
 
-    path_to_metric_configs = os.path.join(args.exp_configs_base_folder, args.dataset_name, 'metrics_configs.txt')
-    path_to_task_configs = os.path.join(args.exp_configs_base_folder, args.dataset_name, 'task_configs.txt')
-    output_folder = os.path.join(args.output_results_base_folder, args.dataset_name, 'nnUNet_metrics')
-    spacing_config_path = os.path.join(args.exp_configs_base_folder, args.dataset_name, 'spacing_config.json')
+    mapping_configs = [convert_nnunet_task_to_internal_convention(
+        nnunet_task_id=conf_id,
+        mapping_file_path=os.path.join(args.nnUNet_exp_configs_base_folder, args.dataset_name, 'task_configs.json')
+    )
+    for conf_id in args.task_conf_id
+    ]
+    
+    assert len(set([mapping['dataset_name_val_convention'] for mapping in mapping_configs])) == 1, 'All provided task_conf_id values must correspond to the same dataset_name_val_convention in the mapping configs, please check your task configs and mapping configs to ensure this is the case.'
+    assert len(set([mapping['exp_config_relpath'] for mapping in mapping_configs])) == 1, 'All provided task_conf_id values must correspond to the same exp_config_relpath in the mapping configs, please check your task configs and mapping configs to ensure this is the case.'
+    #We must be accessing the same dataset and task_relpath across all provided task_conf_id values, as these correspond to the dataset and task_relpath which we will use for accessing the datalist and loading the reference labels for metric calculation, so we need to ensure consistency here. If there are multiple task_conf_id values provided, then they should only differ in terms of the specific data sampling (e.g., different folds in a kfold strategy) or data transformations (e.g., different permutations of the segmentations), but they should all point to the same dataset and task_relpath for accessing the datalist and loading reference labels, as these are not
+    #things that we want to differ across different task IDs within a dataset in nnUNet (here the IDs
+    #are typically just different folds).
+    val_framework_dataset_name = mapping_configs[0]['dataset_name_val_convention']
+    exp_config_relpath = mapping_configs[0]['exp_config_relpath']
+    
+    nnunet_dataset_name = args.dataset_name 
+    del args.dataset_name #We will remove this to prevent it leaking. 
+    
+    print(f"Dataset name in original convention from mapping configs: {val_framework_dataset_name}")
+    print(f"Experiment config relative path from mapping configs: {exp_config_relpath}")
+
+    # path_to_metric_configs = os.path.join(args.exp_configs_base_folder, args.dataset_name, 'metrics_configs.txt')
+    # path_to_task_configs = os.path.join(args.exp_configs_base_folder, args.dataset_name, 'task_configs.txt')
+    # output_folder = os.path.join(args.output_results_base_folder, args.dataset_name, 'nnUNet_metrics')
+    # spacing_config_path = os.path.join(args.exp_configs_base_folder, args.dataset_name, 'spacing_config.json')
+    path_to_metric_configs = os.path.join(parent_dir, exp_config_relpath, "metrics_configs.txt")
+    path_to_task_configs = os.path.join(parent_dir, exp_config_relpath, "task_configs.txt")
+    output_folder = os.path.join(args.output_results_base_folder, nnunet_dataset_name, 'nnUNet_metrics')
+    spacing_config_path = os.path.join(parent_dir, exp_config_relpath, 'spacing_config.json')
 
     seg_folder = os.path.join(
         args.segmentation_base_folder, 
-        args.dataset_name, 
+        nnunet_dataset_name, 
         args.seg_subfolder_path        
         )
     
     gt_folder = os.path.join(
         args.gt_base_folder, 
-        args.dataset_name, 
+        nnunet_dataset_name, 
         args.gt_subfolder_path)
 
     #Now we need to read in the datalist. 
-    data_split_path = os.path.join(args.reference_splits_base_folder, args.dataset_name, 'dataset_split.json')
+    data_split_path = os.path.join(args.reference_splits_base_folder, val_framework_dataset_name, 'dataset_split.json')
 
     if not os.path.exists(data_split_path):
         raise FileNotFoundError(f"Dataset split file not found at {data_split_path}")

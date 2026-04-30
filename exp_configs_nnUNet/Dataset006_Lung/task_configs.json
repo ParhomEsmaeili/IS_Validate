@@ -1,0 +1,62 @@
+{
+  "task_id_1": {
+    "exp_config_relpath": "exp_configs/Dataset006_Lung",
+    "dataset_name_val_convention": "Dataset006_Lung",
+    "task_id": "task_id_1"
+  },
+  "task_id_2": {
+    "exp_config_relpath": "exp_configs/Dataset006_Lung",
+    "dataset_name_val_convention": "Dataset006_Lung",
+    "task_id": "task_id_2"
+  },
+  "task_id_3": {
+    "exp_config_relpath": "exp_configs/Dataset006_Lung",
+    "dataset_name_val_convention": "Dataset006_Lung",
+    "task_id": "task_id_3"
+  },
+  "task_id_4": {
+    "exp_config_relpath": "exp_configs/Dataset006_Lung",
+    "dataset_name_val_convention": "Dataset006_Lung",
+    "task_id": "task_id_4"
+  },
+  "task_id_5": {
+    "exp_config_relpath": "exp_configs/Dataset006_Lung",
+    "dataset_name_val_convention": "Dataset006_Lung",
+    "task_id": "task_id_5"
+  },
+  "task_id_6": {
+    "exp_config_relpath": "exp_configs/Dataset006_Lung",
+    "dataset_name_val_convention": "Dataset006_Lung",
+    "task_id": "task_id_6"
+  },
+  "task_id_7": {
+    "exp_config_relpath": "exp_configs/Dataset006_Lung",
+    "dataset_name_val_convention": "Dataset006_Lung",
+    "task_id": "task_id_7"
+  },
+  "task_id_8": {
+    "exp_config_relpath": "exp_configs/Dataset006_Lung",
+    "dataset_name_val_convention": "Dataset006_Lung",
+    "task_id": "task_id_8"
+  },
+  "task_id_9": {
+    "exp_config_relpath": "exp_configs/Dataset006_Lung",
+    "dataset_name_val_convention": "Dataset006_Lung",
+    "task_id": "task_id_9"
+  },
+  "task_id_10": {
+    "exp_config_relpath": "exp_configs/Dataset006_Lung",
+    "dataset_name_val_convention": "Dataset006_Lung",
+    "task_id": "task_id_10"
+  },
+  "task_id_11": {
+    "exp_config_relpath": "exp_configs/Dataset006_Lung",
+    "dataset_name_val_convention": "Dataset006_Lung",
+    "task_id": "task_id_11"
+  },
+  "task_id_12": {
+    "exp_config_relpath": "exp_configs/Dataset006_Lung",
+    "dataset_name_val_convention": "Dataset006_Lung",
+    "task_id": "task_id_12"
+  }
+}

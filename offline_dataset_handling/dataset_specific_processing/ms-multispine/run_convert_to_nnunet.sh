@@ -3,7 +3,7 @@
 # Array of jobs: each job runs offline_sampling_split.py on a dataset folder with desired strategy and split
 
 jobs=(
-  "python3 convert_to_nnunet.py --reference_dataset_path='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset030_MSMultispine/' --target_dataset_basedir_path='/home/parhomesmaeili/Helmholtz Group/NeurIPS2026_nnunet/nnUNet_raw' --output_name='Dataset030_MSMultispine' --task_config_basepath='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/exp_configs' --split_name='train' --reference_task_ids 3 4 5 6 7"   
+  "python3 convert_to_nnunet.py --reference_dataset_path='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset040_MSMultispine/' --target_dataset_basedir_path='/home/parhomesmaeili/Helmholtz Group/NeurIPS2026_nnunet/nnUNet_raw' --output_name='Dataset046_MSMultispineAll' --task_config_basepath='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/exp_configs' --split_name='train' --reference_task_ids 15 16 17 18 19"   
 )
 
 # Run jobs sequentially
