@@ -220,7 +220,7 @@ def calculate_surface_distances(
                     gt_to_pred_percentile = np.percentile(surface_dists["distances_gt_to_pred"], percentile)
                     pred_to_gt_percentile = np.percentile(surface_dists["distances_pred_to_gt"], percentile)
                     serializable_result[f'symmetric_surface_distance_{percentile}'] = np.mean([gt_to_pred_percentile, pred_to_gt_percentile])
-                    logger.info(f'Symmetric surface distance {percentile}th percentile: {surface_dists[f"symmetric_surface_distance_{percentile}"]:.4f}')
+                    logger.info(f'Symmetric surface distance {percentile}th percentile: {serializable_result[f"symmetric_surface_distance_{percentile}"]:.4f}')
                 else:
                     serializable_result[f'symmetric_surface_distance_{percentile}'] = float('nan')
                     logger.info(f'    Symmetric surface distance {percentile}th percentile: NaN (due to empty GT or segmentation for this class in this case)')
