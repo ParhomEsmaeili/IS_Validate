@@ -161,7 +161,11 @@ def calculate_surface_distances(seg_folder, gt_folder, config_labels_dict, datal
             logger.info(f'    Seg->GT mean distance: {surface_dists["distances_pred_to_gt"].mean():.4f}')
             
             # Store result
-            serializable_result = {k: v for k, v in surface_dists.items() if not k.startswith('_')}
+            serializable_result = {
+                'mean_distance_gt_to_pred': surface_dists["distances_gt_to_pred"].mean(),
+                'mean_distance_pred_to_gt': surface_dists["distances_pred_to_gt"].mean(),
+                f'hausdorff_distance_{percentile_for_hausdorff}': surface_dists[f'hausdorff_distance_{percentile_for_hausdorff}']
+            }
             case_results[class_name] = serializable_result
         
         surface_distances_dict[file] = case_results
