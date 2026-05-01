@@ -36,11 +36,13 @@ def load_surface_distance_jsons(directory: str) -> Dict[str, Dict[str, Dict[str,
         }
     """
     json_file = os.path.join(directory, 'surface_distances.json')
+    results = {}
     try:
         with open(json_file, 'r') as f:
             results = json.load(f)
     except (json.JSONDecodeError, IOError) as e:
         print(f"Warning: Failed to load {json_file}: {e}")
+        return {}
     
     return results
 
@@ -71,6 +73,7 @@ def compute_field_statistics(
         class_label: str) -> Dict[str, float]:
     """
     Compute statistics for a specific field across all metrics.
+    Filters out NaN values and returns NaN-filled stats if no valid data remains.
     
     Args:
         metrics_collection: Dictionary of metric dictionaries
@@ -79,16 +82,36 @@ def compute_field_statistics(
         
     Returns:
         Dictionary containing min, max, mean, median, and stdev
+        Returns NaN-filled dict if no valid values found after filtering
     """
+    import math
+    
     values = []
     dict_paths = [(case_id, class_label, field_name) for case_id in metrics_collection.keys()]
     for path in dict_paths:
-        value = extractor(metrics_collection, path)
-        numeric_value = extract_numeric_value(value)
-        if numeric_value is not None:
-            values.append(numeric_value)
+        try:
+            value = extractor(metrics_collection, path)
+            numeric_value = extract_numeric_value(value)
+            # Only add if not None and not NaN
+            if numeric_value is not None and not math.isnan(numeric_value):
+                values.append(numeric_value)
+        except (KeyError, TypeError):
+            # Skip if path doesn't exist or value can't be extracted
+            continue
+    
+    # If no valid values after filtering NaNs, return NaN-filled stats
     if not values:
-        raise ValueError(f"No valid numeric values found for field '{field_name}' and class '{class_label}'")
+        return {
+            "count": 0,
+            "min": float('nan'),
+            "max": float('nan'),
+            "mean": float('nan'),
+            "median": float('nan'),
+            "stdev": float('nan'),
+            "lq": float('nan'),
+            "uq": float('nan'),
+            "iqr": float('nan'),
+        }
     
     stats = {
         "count": len(values),
@@ -103,6 +126,12 @@ def compute_field_statistics(
         stats["lq"] = statistics.quantiles(values, n=4)[0]  # 25th percentile
         stats["uq"] = statistics.quantiles(values, n=4)[2]  # 75th percentile
         stats["iqr"] = stats["uq"] - stats["lq"]
+    else:
+        # Single value or edge case - set these to NaN
+        stats["stdev"] = float('nan')
+        stats["lq"] = float('nan')
+        stats["uq"] = float('nan')
+        stats["iqr"] = float('nan')
     
     return stats
 
@@ -147,10 +176,23 @@ def summarize_surface_distance_metrics(metrics_collection: Dict[str, Dict[str,  
 def print_summary_report(summary: Dict[str, Dict[str, float]]) -> None:
     """
     Print a formatted summary report of the statistics.
+    Handles NaN values gracefully.
     
     Args:
         summary: Dictionary of computed statistics
     """
+    import math
+    
+    def format_value(value):
+        """Format numeric value, handling NaN gracefully."""
+        if value is None:
+            return "N/A"
+        if isinstance(value, (int, str)):
+            return str(value)
+        if isinstance(value, float) and math.isnan(value):
+            return "NaN"
+        return f"{value:.6f}"
+    
     print("\n" + "="*80)
     print("Surface Distance Metrics Summary Report")
     print("="*80 + "\n")
@@ -158,18 +200,18 @@ def print_summary_report(summary: Dict[str, Dict[str, float]]) -> None:
     for field_name, stats in summary.items():
         print(f"\n{field_name}:")
         print(f"  Count:     {stats.get('count', 'N/A')}")
-        print(f"  Min:       {stats.get('min', 'N/A'):.6f}")
-        print(f"  Max:       {stats.get('max', 'N/A'):.6f}")
-        print(f"  Mean:      {stats.get('mean', 'N/A'):.6f}")
-        print(f"  Median:    {stats.get('median', 'N/A'):.6f}")
+        print(f"  Min:       {format_value(stats.get('min'))}")
+        print(f"  Max:       {format_value(stats.get('max'))}")
+        print(f"  Mean:      {format_value(stats.get('mean'))}")
+        print(f"  Median:    {format_value(stats.get('median'))}")
         if 'stdev' in stats:
-            print(f"  StDev:     {stats['stdev']:.6f}")
+            print(f"  StDev:     {format_value(stats['stdev'])}")
         if 'lq' in stats:
-            print(f"  25th Percentile: {stats['lq']:.6f}")
+            print(f"  25th Percentile: {format_value(stats['lq'])}")
         if 'uq' in stats:
-            print(f"  75th Percentile: {stats['uq']:.6f}")
+            print(f"  75th Percentile: {format_value(stats['uq'])}")
         if 'iqr' in stats:
-            print(f"  IQR: {stats['iqr']:.6f}")
+            print(f"  IQR: {format_value(stats['iqr'])}")
 
 
 def save_summary_to_json(summary: Dict[str, Dict[str, float]], output_path: str) -> None:
@@ -186,26 +228,41 @@ def save_summary_to_json(summary: Dict[str, Dict[str, float]], output_path: str)
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Summarize nnUNet surface distance metrics across a dataset"
-    )
-    parser.add_argument(
-        "--input_dir",
-        help="Directory containing surface distance JSON files"
-    )
-    
-    args = parser.parse_args()
-    
-    if not os.path.isdir(args.input_dir):
-        print(f"Error: Directory not found: {args.input_dir}")
-        return
-    
-    print(f"Loading JSON files from: {args.input_dir}")
-    metrics_collection = load_surface_distance_jsons(args.input_dir)
-    print(f"Loaded {len(metrics_collection)} metric files")
-    
-    summary = summarize_surface_distance_metrics(metrics_collection)
-    print_summary_report(summary)
+    try:
+        parser = argparse.ArgumentParser(
+            description="Summarize nnUNet surface distance metrics across a dataset"
+        )
+        parser.add_argument(
+            "--input_dir",
+            help="Directory containing surface distance JSON files"
+        )
+        
+        args = parser.parse_args()
+        
+        if not os.path.isdir(args.input_dir):
+            print(f"Error: Directory not found: {args.input_dir}")
+            return
+        
+        print(f"Loading JSON files from: {args.input_dir}")
+        metrics_collection = load_surface_distance_jsons(args.input_dir)
+        
+        if not metrics_collection:
+            print("Error: No metrics found in the specified directory.")
+            return
+        
+        print(f"Loaded {len(metrics_collection)} metric files")
+        
+        summary = summarize_surface_distance_metrics(metrics_collection)
+        print_summary_report(summary)
+        
+        output_dir = os.path.dirname(args.input_dir)
+        output_path = os.path.join(output_dir, "surface_distance_summary.json")    
+        save_summary_to_json(summary, output_path)
+        
+    except Exception as e:
+        print(f"Error during processing: {e}")
+        import traceback
+        traceback.print_exc()
     
     output_dir = os.path.dirname(args.input_dir)
     output_path = os.path.join(output_dir, "surface_distance_summary.json")    
