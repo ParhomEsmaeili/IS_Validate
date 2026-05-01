@@ -19,7 +19,7 @@ from monai.transforms import (
     Orientationd,
 )
 monai_transforms = Compose([
-    LoadImaged(keys=['seg', 'gt'], image_only=True),
+    LoadImaged(keys=['seg', 'gt'], image_only=True, reader='ITKReader'),  # Keep metadata for spacing extraction
     EnsureChannelFirstd(keys=['seg', 'gt']),
     Orientationd(keys=['seg', 'gt'], axcodes='RAS'),
     EnsureTyped(keys=['seg', 'gt'], dtype=[torch.uint8, torch.uint8]),
