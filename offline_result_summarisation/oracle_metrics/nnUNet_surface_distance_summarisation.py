@@ -149,6 +149,15 @@ def calculate_surface_distances(
         
         # Compute surface distances per class (excluding background/class 0)
         case_results = {}
+        #Lets first assert that there is a foreground label in the GT for at least one of the classes.
+        has_foreground = False
+        for class_name, class_idx in config_labels_dict.items():
+            if class_idx != 0 and np.any(gt_array == class_idx):
+                has_foreground = True
+                break
+        if not has_foreground:
+            raise Exception(f"No foreground labels found in GT. This should not have happened! Revisit data preprocessing pipeline")
+
         for class_name, class_idx in config_labels_dict.items():
             # Skip background class (typically class_idx == 0)
             if class_idx == 0:
@@ -161,31 +170,61 @@ def calculate_surface_distances(
             seg_input = (seg_array == class_idx).astype(bool)
             gt_input = (gt_array == class_idx).astype(bool)
             surface_dists = compute_surface_distances(seg_input, gt_input, spacing_mm=im_spacing)
+            if surface_dists['distances_gt_to_pred'].size == 0 or surface_dists['distances_pred_to_gt'].size == 0:
+                #This class has either an empty gt or pred... so just log NaNs.
+                serializable_result = {
+                    'mean_distance_gt_to_pred': float('nan'),
+                    'mean_distance_pred_to_gt': float('nan')
+                }
+                # Log surface distance summary
+                logger.info(f'    GT->Seg mean distance: {surface_dists["distances_gt_to_pred"].mean():.4f}')
+                logger.info(f'    Seg->GT mean distance: {surface_dists["distances_pred_to_gt"].mean():.4f}')
+                #Lets log whether the fg or the gt was empty for this class, for debugging purposes.
+                if gt_input.sum() == 0 and not seg_input.sum() == 0:
+                    logger.info(f'    Note: GT is empty for this class in this case.')
+                elif seg_input.sum() == 0 and not gt_input.sum() == 0:
+                    logger.info(f'    Note: Segmentation is empty for this class in this case.')
+                elif gt_input.sum() == 0 and seg_input.sum() == 0:
+                    raise Exception(f'Both GT and segmentation are empty for class {class_name} in case {file}, which is unexpected. Please check the data preprocessing pipeline for this case.')
+                else:
+                    raise Exception(f'Unexpected condition for class {class_name} in case {file}.')
+                print_summary = False
+            else: 
+                serializable_result = {
+                    'mean_distance_gt_to_pred': surface_dists["distances_gt_to_pred"].mean(),
+                    'mean_distance_pred_to_gt': surface_dists["distances_pred_to_gt"].mean()
+                }
+                # Log surface distance summary
+                logger.info(f'    GT->Seg mean distance: {surface_dists["distances_gt_to_pred"].mean():.4f}')
+                logger.info(f'    Seg->GT mean distance: {surface_dists["distances_pred_to_gt"].mean():.4f}')
+                
+                print_summary = True
 
-            serializable_result = {
-                'mean_distance_gt_to_pred': surface_dists["distances_gt_to_pred"].mean(),
-                'mean_distance_pred_to_gt': surface_dists["distances_pred_to_gt"].mean()
-            }
-            # Log surface distance summary
-            logger.info(f'    GT->Seg mean distance: {surface_dists["distances_gt_to_pred"].mean():.4f}')
-            logger.info(f'    Seg->GT mean distance: {surface_dists["distances_pred_to_gt"].mean():.4f}')
-            
+              
             if measure=='hausdorff_distance':
                 percentile_for_hausdorff = parameterisation
-                hd_dist = compute_robust_hausdorff(surface_dists, percent=percentile_for_hausdorff)
-                surface_dists[f'hausdorff_distance_{percentile_for_hausdorff}'] = hd_dist
-                logger.info(f'    Hausdorff distance: {surface_dists[f"hausdorff_distance_{percentile_for_hausdorff}"]:.4f}')
-            
-                # Store result
-                serializable_result[f'hausdorff_distance_{percentile_for_hausdorff}'] = surface_dists[f'hausdorff_distance_{percentile_for_hausdorff}']
+                if print_summary:
+                    hd_dist = compute_robust_hausdorff(surface_dists, percent=percentile_for_hausdorff)
+                    surface_dists[f'hausdorff_distance_{percentile_for_hausdorff}'] = hd_dist
+                    logger.info(f'    Hausdorff distance: {surface_dists[f"hausdorff_distance_{percentile_for_hausdorff}"]:.4f}')
+                
+                    # Store result
+                    serializable_result[f'hausdorff_distance_{percentile_for_hausdorff}'] = surface_dists[f'hausdorff_distance_{percentile_for_hausdorff}']
+                else:
+                    serializable_result[f'hausdorff_distance_{percentile_for_hausdorff}'] = float('nan')
+                    logger.info(f'    Hausdorff distance: NaN (due to empty GT or segmentation for this class in this case)')
             elif measure=='symmetric_surface_distance_percentile':
                 #Kits21 approach. potentially less sensitive to multi-lesion outliers than hausdorff distance.
                 percentile = parameterisation
-                gt_to_pred_percentile = np.percentile(surface_dists["distances_gt_to_pred"], percentile)
-                pred_to_gt_percentile = np.percentile(surface_dists["distances_pred_to_gt"], percentile)
-                surface_dists[f'symmetric_surface_distance_{percentile}'] = np.mean([gt_to_pred_percentile, pred_to_gt_percentile])
-                logger.info(f'Symmetric surface distance {percentile}th percentile: {surface_dists[f"symmetric_surface_distance_{percentile}"]:.4f}')
-            
+                if print_summary:
+                    gt_to_pred_percentile = np.percentile(surface_dists["distances_gt_to_pred"], percentile)
+                    pred_to_gt_percentile = np.percentile(surface_dists["distances_pred_to_gt"], percentile)
+                    serializable_result[f'symmetric_surface_distance_{percentile}'] = np.mean([gt_to_pred_percentile, pred_to_gt_percentile])
+                    logger.info(f'Symmetric surface distance {percentile}th percentile: {surface_dists[f"symmetric_surface_distance_{percentile}"]:.4f}')
+                else:
+                    serializable_result[f'symmetric_surface_distance_{percentile}'] = float('nan')
+                    logger.info(f'    Symmetric surface distance {percentile}th percentile: NaN (due to empty GT or segmentation for this class in this case)')
+
             case_results[class_name] = serializable_result
         
         surface_distances_dict[file] = case_results
