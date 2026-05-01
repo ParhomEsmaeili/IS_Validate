@@ -293,7 +293,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         '--statistic_parameterisation',
-        float,
+        type=float,
         default=95.0,
         help='Parameterisation for the statistic.'
     )
