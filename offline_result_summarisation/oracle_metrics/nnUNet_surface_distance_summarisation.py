@@ -105,7 +105,15 @@ def convert_tensor_to_numpy(tensor_data):
     
     return array, spacing
 
-def calculate_surface_distances(seg_folder, gt_folder, config_labels_dict, datalist, logger, percentile_for_hausdorff=95):
+def calculate_surface_distances(
+        seg_folder, 
+        gt_folder, 
+        config_labels_dict, 
+        datalist, 
+        logger, 
+        measure='hausdorff_distance',
+        parameterisation=95.0,
+        ):
     """Calculate surface distances for all cases and all classes (excluding background)."""
     # Check all files exist
     for file in datalist:
@@ -153,19 +161,31 @@ def calculate_surface_distances(seg_folder, gt_folder, config_labels_dict, datal
             seg_input = (seg_array == class_idx).astype(bool)
             gt_input = (gt_array == class_idx).astype(bool)
             surface_dists = compute_surface_distances(seg_input, gt_input, spacing_mm=im_spacing)
-            hd_dist = compute_robust_hausdorff(surface_dists, percent=percentile_for_hausdorff)
-            surface_dists[f'hausdorff_distance_{percentile_for_hausdorff}'] = hd_dist
+
+            serializable_result = {
+                'mean_distance_gt_to_pred': surface_dists["distances_gt_to_pred"].mean(),
+                'mean_distance_pred_to_gt': surface_dists["distances_pred_to_gt"].mean()
+            }
             # Log surface distance summary
-            logger.info(f'    Hausdorff distance: {surface_dists[f"hausdorff_distance_{percentile_for_hausdorff}"]:.4f}')
             logger.info(f'    GT->Seg mean distance: {surface_dists["distances_gt_to_pred"].mean():.4f}')
             logger.info(f'    Seg->GT mean distance: {surface_dists["distances_pred_to_gt"].mean():.4f}')
             
-            # Store result
-            serializable_result = {
-                'mean_distance_gt_to_pred': surface_dists["distances_gt_to_pred"].mean(),
-                'mean_distance_pred_to_gt': surface_dists["distances_pred_to_gt"].mean(),
-                f'hausdorff_distance_{percentile_for_hausdorff}': surface_dists[f'hausdorff_distance_{percentile_for_hausdorff}']
-            }
+            if measure=='hausdorff_distance':
+                percentile_for_hausdorff = parameterisation
+                hd_dist = compute_robust_hausdorff(surface_dists, percent=percentile_for_hausdorff)
+                surface_dists[f'hausdorff_distance_{percentile_for_hausdorff}'] = hd_dist
+                logger.info(f'    Hausdorff distance: {surface_dists[f"hausdorff_distance_{percentile_for_hausdorff}"]:.4f}')
+            
+                # Store result
+                serializable_result[f'hausdorff_distance_{percentile_for_hausdorff}'] = surface_dists[f'hausdorff_distance_{percentile_for_hausdorff}']
+            elif measure=='symmetric_surface_distance_percentile':
+                #Kits21 approach. potentially less sensitive to multi-lesion outliers than hausdorff distance.
+                percentile = parameterisation
+                gt_to_pred_percentile = np.percentile(surface_dists["distances_gt_to_pred"], percentile)
+                pred_to_gt_percentile = np.percentile(surface_dists["distances_pred_to_gt"], percentile)
+                surface_dists[f'symmetric_surface_distance_{percentile}'] = np.mean([gt_to_pred_percentile, pred_to_gt_percentile])
+                logger.info(f'Symmetric surface distance {percentile}th percentile: {surface_dists[f"symmetric_surface_distance_{percentile}"]:.4f}')
+            
             case_results[class_name] = serializable_result
         
         surface_distances_dict[file] = case_results
@@ -266,10 +286,16 @@ if __name__ == "__main__":
         help='Subfolder name for ground truth annotations.'
         )
     parser.add_argument(
-        '--HD_percentile',
-        type=float,
+        '--measure',
+        type=str,
+        default='hausdorff_distance',
+        help='What the measure of choice is for summarising the surface distance on per-sample basis.'
+    )
+    parser.add_argument(
+        '--statistic_parameterisation',
+        float,
         default=95.0,
-        help='Percentile to use for Hausdorff distance calculation (default: 95).'
+        help='Parameterisation for the statistic.'
     )
     args = parser.parse_args()
 
@@ -351,7 +377,8 @@ if __name__ == "__main__":
         config_labels_dict,
         datalist,
         logger,
-        percentile_for_hausdorff=args.HD_percentile
+        measure=args.measure,
+        parameterisation=args.statistic_parameterisation,
     )
     
     # Save results as JSON (convert numpy types to native Python types for JSON serialization)
