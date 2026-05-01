@@ -190,7 +190,7 @@ def main():
         description="Summarize nnUNet surface distance metrics across a dataset"
     )
     parser.add_argument(
-        "input_dir",
+        "--input_dir",
         help="Directory containing surface distance JSON files"
     )
     
