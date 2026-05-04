@@ -1,6 +1,7 @@
 {
-	"heuristic":{
-		"prototype":{
+	"prototype":{
+		"procedure_type":"heuristic",
+		"config":{
 		
 			"methods":{
 				
@@ -27,8 +28,11 @@
 				
 			"mixture_params":null,
 			"prompter_class_type":"prototype_pseudo_mixture"
-		},
-		"points_prototype_simplified":{
+		}
+	},
+	"points_prototype_simplified":{
+		"procedure_type":"heuristic",
+		"config":{
 		
 			"methods":{
 				

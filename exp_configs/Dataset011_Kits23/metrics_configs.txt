@@ -1,28 +1,32 @@
 {
 	"prototype":{
-		"Dice":{
-			"ignore_empty":true,
-			"include_per_class_scores":true,
-			"include_background_metric": false
-		},
-		"NSD":{
-			"ignore_empty":true,
-			"include_per_class_scores":true,
-			"include_background_metric":false,
-			"tolerance_mm": 1.0330772532390826
+		"metrics": {
+			"Dice":{
+				"ignore_empty":true,
+				"include_per_class_scores":true,
+				"include_background_metric": false
+			},
+			"NSD":{
+				"ignore_empty":true,
+				"include_per_class_scores":true,
+				"include_background_metric":false,
+				"tolerance_mm": 1.0330772532390826			}
 		}
 	},
 	"cross_annotator_fold_0":{
-		"Dice":{
+		"metrics": {
+			"Dice":{
 			"ignore_empty":true,
 			"include_per_class_scores":true,
 			"include_background_metric": false
-		},
-		"NSD":{
-			"ignore_empty":true,
-			"include_per_class_scores":true,
-			"include_background_metric":false,
-			"tolerance_mm": 1.0330772532390826
+			},
+			"NSD":{
+				"ignore_empty":true,
+				"include_per_class_scores":true,
+				"include_background_metric":false,
+				"tolerance_mm": 1.0330772532390826
+
+			}
 		},
 		"data_sampling":{
 				"sample_group_category": ["kfold_5_train", "fold_0"],
@@ -33,16 +37,18 @@
 			}
 	},
 	"cross_annotator_fold_1":{
-		"Dice":{
-			"ignore_empty":true,
-			"include_per_class_scores":true,
-			"include_background_metric": false
-		},
-		"NSD":{
-			"ignore_empty":true,
-			"include_per_class_scores":true,
-			"include_background_metric":false,
-			"tolerance_mm": 1.0330772532390826
+		"metrics": {
+			"Dice":{
+				"ignore_empty":true,
+				"include_per_class_scores":true,
+				"include_background_metric": false
+			},
+			"NSD":{
+				"ignore_empty":true,
+				"include_per_class_scores":true,
+				"include_background_metric":false,
+				"tolerance_mm": 1.0330772532390826
+			}
 		},
 		"data_sampling":{
 				"sample_group_category": ["kfold_5_train", "fold_1"],
@@ -53,16 +59,18 @@
 			}
 	},
 	"cross_annotator_fold_2":{
-		"Dice":{
-			"ignore_empty":true,
-			"include_per_class_scores":true,
-			"include_background_metric": false
-		},
-		"NSD":{
-			"ignore_empty":true,
-			"include_per_class_scores":true,
-			"include_background_metric":false,
-			"tolerance_mm": 1.0330772532390826
+		"metrics": {
+			"Dice":{
+				"ignore_empty":true,
+				"include_per_class_scores":true,
+				"include_background_metric": false
+			},
+			"NSD":{
+				"ignore_empty":true,
+				"include_per_class_scores":true,
+				"include_background_metric":false,
+				"tolerance_mm": 1.0330772532390826
+			}
 		},
 		"data_sampling":{
 				"sample_group_category": ["kfold_5_train", "fold_2"],
@@ -73,16 +81,18 @@
 			}
 	},
 	"cross_annotator_fold_3":{
-		"Dice":{
-			"ignore_empty":true,
-			"include_per_class_scores":true,
-			"include_background_metric": false
-		},
-		"NSD":{
-			"ignore_empty":true,
-			"include_per_class_scores":true,
-			"include_background_metric":false,
-			"tolerance_mm": 1.0330772532390826
+		"metrics": {
+			"Dice":{
+				"ignore_empty":true,
+				"include_per_class_scores":true,
+				"include_background_metric": false
+			},
+			"NSD":{
+				"ignore_empty":true,
+				"include_per_class_scores":true,
+				"include_background_metric":false,
+				"tolerance_mm": 1.0330772532390826
+			}
 		},
 		"data_sampling":{
 				"sample_group_category": ["kfold_5_train", "fold_3"],
@@ -93,16 +103,18 @@
 			}
 	},
 	"cross_annotator_fold_4":{
-		"Dice":{
-			"ignore_empty":true,
-			"include_per_class_scores":true,
-			"include_background_metric": false
-		},
-		"NSD":{
-			"ignore_empty":true,
-			"include_per_class_scores":true,
-			"include_background_metric":false,
-			"tolerance_mm": 1.0330772532390826
+		"metrics": {
+			"Dice":{
+				"ignore_empty":true,
+				"include_per_class_scores":true,
+				"include_background_metric": false
+			},
+			"NSD":{
+				"ignore_empty":true,
+				"include_per_class_scores":true,
+				"include_background_metric":false,
+				"tolerance_mm": 1.0330772532390826
+			}
 		},
 		"data_sampling":{
 				"sample_group_category": ["kfold_5_train", "fold_4"],
@@ -111,5 +123,5 @@
 				 	"instance_id": ["instance_1"]
 				 	}
 			}
-	}
+		}
 }
