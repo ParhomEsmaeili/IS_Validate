@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# Array of jobs: each job runs offline_sampling_split.py on a dataset folder with desired strategy and split
+# jobs=(
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset001_BrainTumour' --strategy=all --split=train"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset002_Heart' --strategy=all --split=train"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset003_Liver' --strategy=all --split=train"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset004_Hippocampus' --strategy=all --split=train"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset005_Prostate' --strategy=all --split=train"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset006_Lung' --strategy=all --split=train"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset007_Pancreas' --strategy=all --split=train"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset008_HepaticVessel' --strategy=all --split=train"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset009_Spleen' --strategy=all --split=train"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset010_Colon' --strategy=all --split=train"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset001_BrainTumour' --strategy=all --split=test"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset002_Heart' --strategy=all --split=test"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset003_Liver' --strategy=all --split=test"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset003_Liver' --strategy=all --split=test"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset004_Hippocampus' --strategy=all --split=test"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset005_Prostate' --strategy=all --split=test"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset006_Lung' --strategy=all --split=test"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset007_Pancreas' --strategy=all --split=test"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset008_HepaticVessel' --strategy=all --split=test"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset009_Spleen' --strategy=all --split=test"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset010_Colon' --strategy=all --split=test"
+#   # "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset010_Colon' --strategy=kfold --split=test"
+  
+# )
+
+# jobs=(
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset001_BrainTumour' --strategy=kfold --split=train --k_folds=5"
+#   # "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset002_Heart' --strategy=kfold --split=train --k_folds=5"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset003_Liver' --strategy=kfold --split=train --k_folds=5"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset004_Hippocampus' --strategy=kfold --split=train --k_folds=5"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset005_Prostate' --strategy=kfold --split=train --k_folds=5"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset006_Lung' --strategy=kfold --split=train --k_folds=5"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset007_Pancreas' --strategy=kfold --split=train --k_folds=5"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset008_HepaticVessel' --strategy=kfold --split=train --k_folds=5"
+#   # "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset009_Spleen' --strategy=kfold --split=train --k_folds=5"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset010_Colon' --strategy=kfold --split=train --k_folds=5"
+# )
+
+# jobs=(
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset011_Kits23' --strategy=kfold --split=train --k_folds=5"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset012_Kits23' --strategy=kfold --split=train --k_folds=5"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset013_Kits23' --strategy=kfold --split=train --k_folds=5"
+# )
+# jobs=(
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset011_Kits23' --strategy=kfold --split=train --k_folds=5"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset015_Kits23' --strategy=kfold --split=train --k_folds=5"
+#   "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset019_Kits23' --strategy=kfold --split=train --k_folds=5"
+# )
+jobs=(
+  "python3 offline_sampling_split.py --dataset_dir='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/Dataset044_TopBrainCT' --strategy=kfold --split=train --k_folds=5"
+)
+# Run jobs sequentially
+for job in "${jobs[@]}"; do
+  echo "Running: $job"
+  eval "$job"
+done
