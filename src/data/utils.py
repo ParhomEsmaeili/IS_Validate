@@ -6,6 +6,7 @@ import numpy as np
 from typing import Union, Optional, Sequence
 import os
 import sys
+import re
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) #Adding the parent directory to the path so that we can import utils from there.
 from general_utils.dict_utils import extractor #This is a custom utility function for extracting dicts.
 import copy 
@@ -21,6 +22,7 @@ import random
 def init_task_cases(
     dataset_dir:str, 
     exp_task_configs:dict, 
+    metric_configs: dict,
     shuffle_bool:bool=False, 
     random_seed:Optional[int]=None,
     last_completed_case:Optional[str]=None,
@@ -33,6 +35,8 @@ def init_task_cases(
     inputs: 
     dataset_dir (path to the dataset directory)
     exp_task_configs (a dictionary which contains information about the description of the task for loading the cases/building them.)
+    metric_configs (a dictionary containing information about the metrics being used and any relevant data also -> e.g., the evaluation annotation configuration which
+    may be relevant for building the case list.)
     shuffle_bool: bool, whether the shuffle the case list before returning it. Default = False.
     random_seed: Optional[int], the random seed for the experiment to use for shuffling the case list. Default = None.
     last_completed_case: Optional[str], the case id of the last completed case. If provided, only cases after this case will be included in the returned case list.
@@ -261,11 +265,12 @@ def init_task_cases(
 
     #Now we create the case list dictionary which will be used for passing through to the dataloader.
 
-    case_list, image_keys, label_keys = create_case_list(
+    case_list, image_keys, eval_annotation_keys, reference_annotation_keys = create_case_list(
         dataset_dir=dataset_dir, 
         ds_configs=ds_configs,
         sampling_metadata=sampling_metadata,
         exp_task_configs=exp_task_configs,
+        metric_configs=metric_configs,
         case_list=case_list)
 
     #Create a temporary transforms configs dictionary. It defines the set of parameters required for any downstream function
@@ -289,7 +294,7 @@ def init_task_cases(
     # common conventions). This is just a temporary hacky fix until we build a proper infrastructure for the dataloading pipeline.
     transforms_configs.update({'non_standard_transfs':{k:v for k,v in exp_task_configs['data_transforms'].items() if k != 'semantic_class_mapping'}})
 
-    return config_labels_dict, dataloader_generator(case_list=case_list, image_keys=image_keys, label_keys=label_keys, transforms_configs=transforms_configs)
+    return config_labels_dict, dataloader_generator(case_list=case_list, image_keys=image_keys, eval_annotation_keys=eval_annotation_keys, reference_annotation_keys=reference_annotation_keys, transforms_configs=transforms_configs)
 
 def create_filepath(dataset_dir, relpath):
     #Determining the actual abspath filepaths for the task at hand. 
@@ -318,6 +323,7 @@ def create_case_list(
         ds_configs,
         sampling_metadata,
         exp_task_configs, 
+        metric_configs,
         case_list):
     '''
     Function which creates the dictionary of cases which will be required for passing through to the dataloader.
@@ -334,11 +340,19 @@ def create_case_list(
     exp_task_configs: A dictionary containing all of the relevant information which could be required for describing the task being performed
     in the experiment. 
 
+    metric_configs: A dictionary containing all of the relevant information which could be required for describing the metric being used in the experiment, which may also be relevant for describing the task.
+    This will also contain the description of the annotation strata which are being used for evaluation, which is relevant for the construction of the case list.
+
     case_list: The list of cases which will need to be constructed according to the configurations of the task.
     
     Outputs:
 
-    A dictionary, separated by cases. Currently we assume that there are no repeats in the case_list. Will also perform necessary checks on the
+    A list of case dictionaries, containing filepaths for the subsequent keys:
+    image_key - image.
+    eval_annotation_key - for calculating the evaluation metrics, and for prompting if the evaluation annotation is also the prompter annotation.
+    reference_annotation_key - for either prompting/passing through for adaptation.
+   
+    Currently we assume that there are no repeats in the case_list. Will also perform necessary checks on the
     validity of the task configuration for the given data.
     
     '''
@@ -353,13 +367,17 @@ def create_case_list(
     #Here we are extracting the dictionary which contains descriptors about the image data which can be required for this given task.
     #I.e., the description of which image channels to keep under consideration.
     image_conf_dict = extractor(exp_task_configs, ('data_sampling', 'image_conf'))
-    annotation_conf_dict = extractor(exp_task_configs, ('data_sampling', 'annotation_conf'))
-
+    reference_annotation_conf_dict = extractor(exp_task_configs, ('data_sampling', 'annotation_conf'))
+    eval_annotation_conf_dict = extractor(metric_configs, ('data_sampling', 'annotation_conf'))
     # Temporary hack: Checking that all values in image_conf_dict and annotator_conf_dict are lists of length 1
     # Currently we will assume that all of the parameters (values) should be lists of length 1, as we do not yet support cases like 
     # multi-channel, multi-annotator, multi-instance (out-of-the-loop identified) setups. 
 
-    for conf_name, conf_dict in [('image_conf_dict', image_conf_dict), ('annotation_conf_dict', annotation_conf_dict)]:
+    for conf_name, conf_dict in [
+        ('image_conf_dict', image_conf_dict), 
+        ('eval_annotation_conf_dict', eval_annotation_conf_dict),
+        ('reference_annotation_conf_dict', reference_annotation_conf_dict)
+        ]:
         for k, v in conf_dict.items():
             if not isinstance(v, list) or len(v) != 1:
                 raise ValueError(f"All values in {conf_name} must be lists of length 1, but key '{k}' has value: {v}")
@@ -367,16 +385,22 @@ def create_case_list(
     #explicitly describe an upper limit on the quantity of instances, like we could potentially for the image channels or #of annotators. 
     
     #Nevertheless, we will also explicitly enforce that we cannot handle an "all" descriptor, for now. 
-            if conf_name == 'annotation_conf_dict':
+            if conf_name == 'eval_annotation_conf_dict':
                 if "all" in v:
                     raise ValueError('We currently do not support any mechanisms for "all" to be used in the description of the annotation \n' \
                     'strata being used in the task.')
+            elif conf_name == 'reference_annotation_conf_dict':
+                if "all" in v:
+                    raise ValueError('We currently do not support any mechanisms for "all" to be used in the description of the annotation \n' \
+                    'strata being used in the task.')
+               
     #Now we load in the full set of dictionaries from the dataset.json for the given "high-level split", and then pick out the
     #the cases in the case list to construct the case_dict.
     default_case_dict = {case:ds_configs[sampling_metadata['split']][case] for case in case_list}
     
 
-    #Now we extract the relevant fields which we want according to the image and annotator configurations.
+    #Now we extract the relevant fields which we want according to the image,
+    # eval annotation and prompter annotation configurations.
 
     #We also put temporary checks to raise any flags for cases of missingness of data with respect to the conf dictionaries
     # for each of the cases. I.e., we do not yet currently support cases where #of channels, instance ids (dummy: 1 for semantic seg), 
@@ -386,7 +410,9 @@ def create_case_list(
     #PLEASE FORGIVE ME FOR THIS MESSY ENTANGLED RECURSIVE CODE. 
     case_list = []
     im_keys = None #We put this here in case case_list = [] and we never enter the for loop, but we still want to return something to avoid breaking.
-    annotation_keys = None #We put this here in case case_list = [] and we never enter the for loop, but we still want to return something to avoid breaking.
+    eval_annotation_keys = None #We put this here in case case_list = [] and we never enter the for loop, but we still want to return something to avoid breaking.
+    reference_annotation_keys = None #We put this here in case case_list = [] and we never enter the for loop, but we still want to return something to avoid breaking.
+
     for case_name, full_case_dict in default_case_dict.items():
         subdict = {'case_name':case_name}
         #Monai dataset constructor requires the use of lists, so we must put the case name as a field in the structure.
@@ -415,18 +441,18 @@ def create_case_list(
                 #yet have an appropriate mechanism for preventing this in the dataloader, YET.
         
 
-        #We now do the same for the annotations, a bit more involved, we will retain the hierarchical structure:
+        #We now do the same for the evaluation annotations, a bit more involved, we will retain the hierarchical structure:
         # -annotator
         # |---- semantic_class
         #           |------------instance id. 
         #We will recursively iterate through each of the items in a hardcoded manner... for now we will presume the structure outlined above.
         
-        annotation_keys = [] #NOTE: This implementation for tracking keys is extremely hacky and dependent on uniformity across
+        eval_annotation_keys = [] #NOTE: This implementation for tracking keys is extremely hacky and dependent on uniformity across
         #the dataset for the specified task!!!
         
-        if not isinstance(annotation_conf_dict['annotator'], list):
+        if not isinstance(eval_annotation_conf_dict['annotator'], list):
             raise TypeError('Current implementation requires all fields of task conf dicts to be lists.')
-        for annotator_id in annotation_conf_dict['annotator']:
+        for annotator_id in eval_annotation_conf_dict['annotator']:
             
             if annotator_id not in full_case_dict['labels'].keys():
                 raise KeyError('Attempted to extract a filepath for annotator which does not exist in the reference manifest \n' \
@@ -442,9 +468,9 @@ def create_case_list(
                     else:
                         #now we iterate through the given semantic class.... almost there!!
                         sem_class_subdict = annotator_subdict[semantic_class] 
-                        if not annotation_conf_dict['instance_id'] == ['instance_1']:
+                        if not eval_annotation_conf_dict['instance_id'] == ['instance_1']:
                             raise NotImplementedError('Careful, you have not yet disentangled this complete mess! Still have not provided handling for reading multi-instance')
-                        for instance_id in annotation_conf_dict['instance_id']:
+                        for instance_id in eval_annotation_conf_dict['instance_id']:
                             if instance_id not in sem_class_subdict.keys():
                                 raise KeyError('Attempted to extract a filepath which does not exist in the reference manifest \n' \
                                 f'for case {case_name}, for semantic class {semantic_class}, for instance id {instance_id} \n' \
@@ -455,52 +481,102 @@ def create_case_list(
                                 annotation_key = f'{annotator_id}_semclass{semantic_class}_{instance_id}' 
                                 subdict[annotation_key] = create_filepath(dataset_dir=dataset_dir, relpath=extractor(full_case_dict, dict_subpath))
                                 #NOTE: THIS WONT WORK FOR MULTI-INSTANCE IT IS A TEMPORARY HACK UNTIL I HAVE MY OWN CUSTOM DATALOADERS IMPLEMENTED FOR THIS HIERARCHICAL STRUCTURE.
-                                if annotation_key not in annotation_keys:
-                                    annotation_keys.append(annotation_key)
+                                if annotation_key not in eval_annotation_keys:
+                                    eval_annotation_keys.append(annotation_key)
+                                    #We don't use sets because they have a randomisation component and we want to ensure that 
+                                    #order is preserved for now until we have our own custom dataloader.
+        case_list.append(subdict) 
+
+        #Now we will do the same for the prompter annotations. Same process as before, but derived from
+        #a different configuration dictionary.
+        reference_annotation_keys = [] #NOTE: This implementation for tracking keys is extremely hacky and dependent on uniformity across
+        #the dataset for the specified task!!!
+        
+        if not isinstance(reference_annotation_conf_dict['annotator'], list):
+            raise TypeError('Current implementation requires all fields of task conf dicts to be lists.')
+        for annotator_id in reference_annotation_conf_dict['annotator']:
+            
+            if annotator_id not in full_case_dict['labels'].keys():
+                raise KeyError('Attempted to extract a filepath for annotator which does not exist in the reference manifest \n' \
+                f'for case {case_name}, we currently do not support any missingness in annotator ids provided, \n' \
+                'we currently assume uniformity across all samples in an experiment')
+            else:
+                #extract the subdict for the given annotator.
+                annotator_subdict = full_case_dict['labels'][annotator_id]
+                #now iterate through the semantic classes to check for their presence, requires that all of the semantic classes be present.
+                for semantic_class in ds_configs['semantic_classes'].keys():
+                    if semantic_class not in annotator_subdict:
+                        raise KeyError(f'Missing default semantic class for annotator {annotator_id} in case {case_name}')
+                    else:
+                        #now we iterate through the given semantic class.... almost there!!
+                        sem_class_subdict = annotator_subdict[semantic_class] 
+                        if not reference_annotation_conf_dict['instance_id'] == ['instance_1']:
+                            raise NotImplementedError('Careful, you have not yet disentangled this complete mess! Still have not provided handling for reading multi-instance')
+                        for instance_id in reference_annotation_conf_dict['instance_id']:
+                            if instance_id not in sem_class_subdict.keys():
+                                raise KeyError('Attempted to extract a filepath which does not exist in the reference manifest \n' \
+                                f'for case {case_name}, for semantic class {semantic_class}, for instance id {instance_id} \n' \
+                                'we currently assume uniformity across all samples in an experiment') 
+                            else:
+                                #We will use a very hacky implementation for now, we will designate a very very long string:
+                                dict_subpath = ('labels', annotator_id, semantic_class, instance_id)
+                                annotation_key = f'{annotator_id}_semclass{semantic_class}_{instance_id}' 
+                                subdict[annotation_key] = create_filepath(dataset_dir=dataset_dir, relpath=extractor(full_case_dict, dict_subpath))
+                                #NOTE: THIS WONT WORK FOR MULTI-INSTANCE IT IS A TEMPORARY HACK UNTIL I HAVE MY OWN CUSTOM DATALOADERS IMPLEMENTED FOR THIS HIERARCHICAL STRUCTURE.
+                                if annotation_key not in reference_annotation_keys:
+                                    reference_annotation_keys.append(annotation_key)
                                     #We don't use sets because they have a randomisation component and we want to ensure that 
                                     #order is preserved for now until we have our own custom dataloader.
         case_list.append(subdict) 
 
     #NOTE: We need a better way of structuring this information hierarchically for the downstream dataloader in the future!
     #For now we can get away with it because we aren't working with multi-annotator or explicitly multi-instance data!!! 
-    #(i.e. )
-    return case_list, im_keys, annotation_keys 
 
 
+    return case_list, im_keys, eval_annotation_keys, reference_annotation_keys 
 
-# def debug_meta(data):
-#     print("Image meta:", data['image_T2w'].meta)
-#     print("Label meta:", data['annotator_1_semclassbackground_instance_1'].meta)
-#     return data
-
-def dataloader_generator(case_list:list, image_keys:list, label_keys:list, transforms_configs:dict):
+def dataloader_generator(
+    case_list:list, 
+    image_keys:list, 
+    #label_keys:list, 
+    eval_annotation_keys:list,
+    reference_annotation_keys:list,
+    transforms_configs:dict
+    ):
     '''
     This function handles the construction of a dataset object for iterating through.
     '''
     if case_list == []:
         assert image_keys == None, 'If case_list is empty, then image_keys must be None.'
-        assert label_keys == None, 'If case_list is empty, then label_keys must be None.'
+        # assert label_keys == None, 'If case_list is empty, then label_keys must be None.'
+        assert eval_annotation_keys == None, 'If case_list is empty, then eval_annotation_keys must be None.'
+        assert reference_annotation_keys == None, 'If case_list is empty, then reference_annotation_keys must be None.'
+
         #We set them to dummy variables/None for the sake of the dataloader construction, but they should not be used in any of the downstream transforms, and we will put checks in place to ensure that this is the case.
         image_keys = ['dummy_image_key']
-        label_keys = ['dummy_label_key']
+        # label_keys = ['dummy_label_key']
+        eval_annotation_keys = ['dummy_eval_annotation_key']
+        reference_annotation_keys = ['dummy_reference_annotation_key']
     else:
         assert image_keys != None, 'If case_list is not empty, then image_keys must not be None.'
-        assert label_keys != None, 'If case_list is not empty, then label_keys must not be None.'
+        # assert label_keys != None, 'If case_list is not empty, then label_keys must not be None.'
+        assert eval_annotation_keys != None, 'If case_list is not empty, then eval_annotation_keys must not be None.'
+        assert reference_annotation_keys != None, 'If case_list is not empty, then reference_annotation_keys must not be None.'
 
     #Just the basic load transforms in order to load the files in for our custom transforms.
     if monai_version == '1.4.0':
         load_transforms = [
-            LoadImaged(keys=image_keys+label_keys, reader="ITKReader", image_only=True),
-            EnsureChannelFirstd(keys=image_keys+label_keys),
-            Orientationd(keys=image_keys+label_keys, axcodes='RAS'),
-            EnsureTyped(keys=image_keys+label_keys, dtype=[torch.float32]*len(image_keys)+[torch.uint8]*len(label_keys)),
+            LoadImaged(keys=image_keys+eval_annotation_keys+reference_annotation_keys, reader="ITKReader", image_only=True),
+            EnsureChannelFirstd(keys=image_keys+eval_annotation_keys+reference_annotation_keys),
+            Orientationd(keys=image_keys+eval_annotation_keys+reference_annotation_keys, axcodes='RAS'),
+            EnsureTyped(keys=image_keys+eval_annotation_keys+reference_annotation_keys, dtype=[torch.float32]*len(image_keys)+[torch.uint8]*len(eval_annotation_keys)+[torch.uint8]*len(reference_annotation_keys)),
         ]
     elif monai_version == '0.9.0':
         load_transforms = [    
-            LoadImaged(keys=image_keys+label_keys, image_only=False),
-            EnsureChannelFirstd(keys=image_keys+label_keys),
-            Orientationd(keys=image_keys+label_keys, axcodes='RAS'),
-            MetaTensorConstructor(keys=image_keys+label_keys, dtypes=[torch.float32]*len(image_keys)+[torch.uint8]*len(label_keys)),
+            LoadImaged(keys=image_keys+eval_annotation_keys+reference_annotation_keys, image_only=False),
+            EnsureChannelFirstd(keys=image_keys+eval_annotation_keys+reference_annotation_keys),
+            Orientationd(keys=image_keys+eval_annotation_keys+reference_annotation_keys, axcodes='RAS'),
+            MetaTensorConstructor(keys=image_keys+eval_annotation_keys+reference_annotation_keys, dtypes=[torch.float32]*len(image_keys)+[torch.uint8]*len(eval_annotation_keys)+[torch.uint8]*len(reference_annotation_keys)),
         ]
     else:
         raise Exception('Unknown monai version.')
@@ -515,10 +591,15 @@ def dataloader_generator(case_list:list, image_keys:list, label_keys:list, trans
             #Hardcoding in some of these variables for now.
             MergeImChannels(keys=image_keys, channel_list=transforms_configs['image_struct_mapping']['image_channel'] , output_key='image'),
             MergeSegmentations(
-                keys=label_keys, 
+                keys=eval_annotation_keys, 
                 sem_mapping=transforms_configs['semantic_class_mapping'], 
                 output_sem_code=transforms_configs['config_labels_dict'], 
-                output_key='label'),
+                output_key='eval_label'),
+            MergeSegmentations(
+                keys=reference_annotation_keys, 
+                sem_mapping=transforms_configs['semantic_class_mapping'],
+                output_sem_code=transforms_configs['config_labels_dict'],
+                output_key='reference_label')
         ]
 
     if case_list == []:
@@ -527,7 +608,7 @@ def dataloader_generator(case_list:list, image_keys:list, label_keys:list, trans
             if transforms_configs['non_standard_transfs'] == {'component_extraction':'cc_largest'}:
                 additional_transforms = [
                     KeepTopCC(
-                        keys=['label'], 
+                        keys=['eval_label', 'reference_label'], #['label'], 
                         operated_classes=[k for k in transforms_configs['config_labels_dict'] if k.capitalize() != 'Background'],
                         class_code_map=transforms_configs['config_labels_dict'], 
                         component_descriptor='cc_largest',
@@ -541,9 +622,7 @@ def dataloader_generator(case_list:list, image_keys:list, label_keys:list, trans
     else:
         additional_transforms = []
     all_transforms = load_transforms + basic_transforms + additional_transforms 
-    dataset = Dataset(case_list, Compose(all_transforms))    #Compose(load_transforms))
-    # return DataLoader(dataset=dataset, batch_size=1, num_workers=4)
- 
+    dataset = Dataset(case_list, Compose(all_transforms))
     return dataset  #Until we can fix the dataloader just use the dataset.. will be slower.
 
 
@@ -626,7 +705,14 @@ class MergeSegmentations:
 
         new_sem_mapping = dict() 
         for output_sem, input_sems_list in self.semantic_map_dict.items():
-            new_sem_mapping[output_sem] = [f'annotator_1_semclass{sem}_instance_1' for sem in input_sems_list]
+            #We will use regex to extract the relevant keys according to the semantic class.
+            matching_keys = []
+            for sem in input_sems_list:
+                # Use regex to find input keys containing semclass{sem}_instance_1
+                pattern = rf'.*semclass{re.escape(sem)}_instance_1.*'
+                matched = [key for key in self.input_keys if re.match(pattern, key)]
+                matching_keys.extend(matched)
+            new_sem_mapping[output_sem] = matching_keys
 
         # Check for repeats across all lists. We need more modularity and unit-testing in order to scrap some of these
         # checks! This is just as a precaution!! Cannot have one semantic class be mapped to multiple in the output.
@@ -641,7 +727,7 @@ class MergeSegmentations:
         #TODO: This check does not make many assumptions about the source, number of instances etc... but was initially conceived
         #for the single-annotator, single-"instance" semantic seg formulation.
         if not all([input_sem_key in all_items for input_sem_key in self.input_keys]):
-            raise Exception('Unaccounted for initial semantic class in the description of the task domain seg task.')
+            raise Exception('Unaccounted for key which would be needed for the merging operation.')
         #Just checking that all of the output semantic keys are available.
         if not all([output_sem_key in self.output_sem_code_dict.keys() for output_sem_key in self.output_sem_code_dict.keys()]):
             raise Exception('Unaccounted for output semantic classes.')
@@ -948,10 +1034,13 @@ def iterate_dataloader_check(data_instance):
         raise TypeError('Data loader requires dictionary based transforms to be passed through the dataloader')
             
 
-    if isinstance(data_instance['image'], MetaTensor) and isinstance(data_instance['label'], MetaTensor):
+    if isinstance(data_instance['image'], MetaTensor) and \
+        isinstance(data_instance['eval_label'], MetaTensor) and \
+        isinstance(data_instance['reference_label'], MetaTensor):
         try:
             im_meta_dict = data_instance['image'].meta #['image_meta_dict']
-            label_meta_dict = data_instance['label'].meta #['label_meta_dict']
+            eval_label_meta_dict = data_instance['eval_label'].meta #['label_meta_dict']
+            reference_label_meta_dict = data_instance['reference_label'].meta #['label_meta_dict']
         except:
             raise Exception('The loaded data instance does not contain a meta dictionary')
 
@@ -964,7 +1053,9 @@ def iterate_dataloader_check(data_instance):
         if data_instance['image'].shape[0] != 1: 
             raise ValueError('This application only currently supports single channel implementations.')
         # if int(label_meta_dict['pixdim[4]']) != 1:
-        if data_instance['label'].shape[0] != 1:
+        if data_instance['eval_label'].shape[0] != 1:
+            raise ValueError('This application only currently supports semantic segmentation implementations')
+        if data_instance['reference_label'].shape[0] != 1:
             raise ValueError('This application only currently supports semantic segmentation implementations')
     else:
         raise TypeError("The loaded image and label data must be a MetaTensor")
@@ -981,50 +1072,44 @@ def data_instance_reformat(data_instance:dict):
     '''
     if not isinstance(data_instance, dict) or not data_instance:
         raise Exception('Data instance is assumed to be a non-empty dictionary format..')
-
-    #We extract the paths from the meta info: Deprecated.
-
-    # im_path = copy.deepcopy(data_instance['image'].meta['filename_or_obj'])
-    # label_path = copy.deepcopy(data_instance['label'].meta['filename_or_obj'])
-
-    # if not os.path.exists(im_path) or not os.path.exists(label_path):
-    #     raise Exception('One of the paths does not exist! Or the full absolute path was not provided to the dataset constructor')
     
     #We will deepcopy like a paranoid person for now. 
-
-    #Actually deepcopying is going to kill the memory.
+        #update: deepcopying is going to kill the memory.
     case_name = copy.deepcopy(data_instance['case_name'])
 
     im_tensor = copy.deepcopy(data_instance['image'])
-    label_tensor = copy.deepcopy(data_instance['label'])
-
+    eval_label_tensor = copy.deepcopy(data_instance['eval_label'])
+    reference_label_tensor = copy.deepcopy(data_instance['reference_label'])
     if not isinstance(im_tensor, MetaTensor): #or not isinstance(im_tensor, torch.Tensor):
         raise TypeError('Image tensor was not a MONAI meta-tensor.')
-    if not isinstance(label_tensor, MetaTensor): #or not isinstance(label_tensor, torch.Tensor): 
+    if not isinstance(eval_label_tensor, MetaTensor): #or not isinstance(label_tensor, torch.Tensor): 
+        raise TypeError('Label tensor was not a MONAI meta-tensor.')
+    if not isinstance(reference_label_tensor, MetaTensor): #or not isinstance(label_tensor, torch.Tensor): 
         raise TypeError('Label tensor was not a MONAI meta-tensor.')
     
     #Wiping all of the metadictionary outside of the affine and original affine keys. The user should not, and does not, require any of this other information! Bye bye!
     retained_keys = ('original_affine', 'affine')
 
     im_tensor.meta = {key:val for key, val in im_tensor.meta.items() if key in retained_keys}
-    label_tensor.meta = {key:val for key, val in label_tensor.meta.items() if key in retained_keys}    
-
-    
-    # im_meta_dict = copy.deepcopy(data_instance['image'].meta)
-    # label_meta_dict = copy.deepcopy(data_instance['label'].meta)
+    eval_label_tensor.meta = {key:val for key, val in eval_label_tensor.meta.items() if key in retained_keys}    
+    reference_label_tensor.meta = {key:val for key, val in reference_label_tensor.meta.items() if key in retained_keys}  
 
     if not isinstance(im_tensor.meta, dict) or not im_tensor.meta:
         raise Exception('The image meta_dict must be a non-empty dictionary')
     
-    if not isinstance(label_tensor.meta, dict) or not label_tensor.meta:
-        raise Exception('The label meta_dict must be a non-empty dictionary') 
+    if not isinstance(eval_label_tensor.meta, dict) or not eval_label_tensor.meta:
+        raise Exception('The eval label meta_dict must be a non-empty dictionary') 
+    
+    if not isinstance(reference_label_tensor.meta, dict) or not reference_label_tensor.meta:
+        raise Exception('The reference label meta_dict must be a non-empty dictionary') 
 
     #Checking that the meta dict contains the affine arrays required.
 
     #First copying the meta dict to keep it separate from the metatensor. 
     #NOTE: We will NOT be copying actually.
     im_meta_dict = im_tensor.meta #copy.deepcopy(im_tensor.meta)
-    label_meta_dict = label_tensor.meta #copy.deepcopy(label_tensor.meta)
+    eval_label_meta_dict = eval_label_tensor.meta #copy.deepcopy(eval_label_tensor.meta)
+    reference_label_meta_dict = reference_label_tensor.meta #copy.deepcopy(reference_label_tensor.meta)
 
     original_affine_key = 'original_affine'
     current_affine_key = 'affine'
@@ -1042,15 +1127,17 @@ def data_instance_reformat(data_instance:dict):
     im_meta_dict = affine_checker(im_meta_dict, original_affine_key)
     im_meta_dict = affine_checker(im_meta_dict, current_affine_key)
 
-    label_meta_dict = affine_checker(label_meta_dict, original_affine_key)
-    label_meta_dict = affine_checker(label_meta_dict, current_affine_key)
-    
+    eval_label_meta_dict = affine_checker(eval_label_meta_dict, original_affine_key)
+    eval_label_meta_dict = affine_checker(eval_label_meta_dict, current_affine_key)
+
+    reference_label_meta_dict = affine_checker(reference_label_meta_dict, original_affine_key)
+    reference_label_meta_dict = affine_checker(reference_label_meta_dict, current_affine_key)
 
     #Also applying this to the .meta attribute of the metatensors through reassignment. 
     #Probably should have already been altered because the reference is the same, but just to be sure.
     im_tensor.meta = im_meta_dict #copy.deepcopy(im_meta_dict)
-    label_tensor.meta = label_meta_dict #copy.deepcopy(label_meta_dict)
-    
+    eval_label_tensor.meta = eval_label_meta_dict #copy.deepcopy(eval_label_meta_dict)
+    reference_label_tensor.meta = reference_label_meta_dict #copy.deepcopy(reference_label_meta_dict)
 
 
     #Now populating the reformatted data instance:
@@ -1061,20 +1148,17 @@ def data_instance_reformat(data_instance:dict):
             'metatensor': im_tensor,
             'meta_dict': im_meta_dict
         },
-        'label': {
+        'eval_label': {
             # 'path': label_path,
-            'metatensor': label_tensor,
-            'meta_dict': label_meta_dict
+            'metatensor': eval_label_tensor,
+            'meta_dict': eval_label_meta_dict
+        },
+        'reference_label': {
+            # 'path': label_path,
+            'metatensor': reference_label_tensor,
+            'meta_dict': reference_label_meta_dict
         }
     } 
-    
-    # if os.path.split(im_path)[1].split('.')[0] != os.path.split(label_path)[1].split('.')[0]:
-    #     raise Exception('The name for the provided image and label needs to be the same!')
-    
-
-    # patient_name = os.path.split(im_path)[1].split('.')[0]
-
-    #HACK:
     del data_instance 
     gc.collect() #Garbage collection to free up memory, this is a hacky solution for now.
     torch.cuda.empty_cache() #Emptying the cuda cache... unlikely that this would actually be required. 

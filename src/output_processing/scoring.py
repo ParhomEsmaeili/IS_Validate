@@ -198,15 +198,10 @@ class MetricsHandler:
         #The output data must have been post-processed and checked to ensure that the output of the user is valid
         #prior to metric computation. 
         
-        # extracted_pred = self.extract_spatial_dims(output_data['pred']['metatensor'])[0] #We use 0 index as it should be len 1
-        # extracted_probs = self.extract_spatial_dims(output_data['probs']['metatensor']) #We do not index here, as the probs are channel-split.
-        # extracted_gt = self.extract_spatial_dims(data_instance['label']['metatensor'])[0] #We use 0 index as it should be len 1
-        # tracked_metrics, terminate_bool = self.exec_base_metrics(extracted_pred, extracted_gt, tracked_metrics, infer_call_info)        
-
         #Modified to be fully in-line, so that garbage collection is not necessary due to intermediate variables.
         tracked_metrics, terminate_bool = self.exec_base_metrics(
             self.extract_spatial_dims(output_data['pred']['metatensor'])[0], 
-            self.extract_spatial_dims(data_instance['label']['metatensor'])[0], 
+            self.extract_spatial_dims(data_instance['eval_label']['metatensor'])[0], 
             tracked_metrics, 
             infer_call_info
             )

@@ -158,18 +158,14 @@ class FrontEndSimulator:
         sim_empty_fg_automatic: Boolean denoting whether to simulate/attempt automatic segmentation in cases where the foreground are empty (non-background). 
         infer_run_configs: Dict containing inference run configs: (e.g., modes, number of refinement iterations)
     
-        metrics_configs: metrics being computed, prompt generation configs for parameter-dependent metrics (NOTE: latter not yet supported), etc.
+        metrics_configs: configs for metrics being computed, eval annotation samples, prompt generation configs for parameter-dependent metrics (NOTE: latter not yet supported), etc.
             
-        
-        inf_prompt_procedure_type: inf_prompt_procedure_type: String denoting the inference prompt generator type: Heuristic is the only 
-        one with support currently.
-
+    
         inf_init_prompt_config
         inf_edit_prompt_config
         {"use mode" specific prompt generation config dictionaries for inference prompt generation}
-
-        metric_init_prompt_config (and metric_edit_prompt_config): Same thing but for the metrics NOTE: currently not supported. 
-            
+            inf_prompt_procedure_type: String denoting the inference prompt generator type: Heuristic is the only 
+        one with support currently.
             
 
         #Variables related to reproducibility and device.
@@ -255,10 +251,6 @@ class FrontEndSimulator:
         #Initialising the output processors and writers.
         self.post_handlers_init()
 
-    def init_vars(self):
-        #initialising any remaining variables which are not class objects, i.e., variables which are derived from some input args.
-        pass 
-
     def set_seeds(
         self, 
         seed: Union[int, None], 
@@ -297,7 +289,7 @@ class FrontEndSimulator:
         self.metrics_handler = MetricsHandler(
             calc_device=self.args['device'], 
             dice_termination_threshold=self.args['dice_termination_thresh'],
-            metrics_configs=self.args['metrics_configs'],
+            metrics_configs=self.args['metrics_configs']['metrics'],
             metrics_savepaths=self.args['metrics_savepaths'],
             config_labels_dict=self.args['configs_labels_dict']
         )
@@ -313,21 +305,29 @@ class FrontEndSimulator:
         '''
         This function initialises the class objects which can generate the interaction states for use in inference.
         '''
-        if self.args['inf_prompt_procedure_type'].title() == 'Heuristic':
-            # self.autoseg_state_generator = None  
-            # The Autosegmentation state does not require any interaction state generators since they contain no 
-            # interaction. All information for the autosegmentation state will be provided manually.
+        # if self.args['inf_prompt_procedure_type'].title() == 'Heuristic':
+        # self.autoseg_state_generator = None  
+        # The Autosegmentation state does not require any interaction state generators since they contain no 
+        # interaction. All information for the autosegmentation state will be provided manually.
 
+        #First we initialise the init generator:
+        assert 'procedure_type' in self.args['inf_init_prompt_config'], 'The inference initialisation prompt config dictionary must contain the key "procedure_type"'
+        assert 'procedure_type' in self.args['inf_edit_prompt_config'], 'The inference editing prompt config dictionary must contain the key "procedure_type"'
+        if self.args['inf_init_prompt_config']['procedure_type'].title() == 'Heuristic':
             self.inf_init_generator = HeuristicInteractionState(
                 sim_device=self.args['device'],
                 use_mem=False,
-                prompt_configs=self.args['inf_init_prompt_config'],
+                prompt_configs=self.args['inf_init_prompt_config']['config'],
                 config_labels_dict=self.args['configs_labels_dict']
             )
+        else:
+            raise ValueError('The selected prompt generation algorithm-type is not supported')
+        #Then we initialise the edit generator:
+        if self.args['inf_edit_prompt_config']['procedure_type'].title() == 'Heuristic':
             self.inf_edit_generator = HeuristicInteractionState(
                 sim_device=self.args['device'],
                 use_mem=self.args['use_mem_inf_edit'],
-                prompt_configs=self.args['inf_edit_prompt_config'],
+                prompt_configs=self.args['inf_edit_prompt_config']['config'],
                 config_labels_dict=self.args['configs_labels_dict']
             )
         else:
@@ -406,7 +406,7 @@ class FrontEndSimulator:
             im = {'Interactive Init': self.inf_init_generator(
                 image=self.data_instance['image']['metatensor'], 
                 mode=infer_config['mode'], 
-                gt=self.data_instance['label']['metatensor'], 
+                gt=self.data_instance['reference_label']['metatensor'], 
                 prev_output_data=prev_output_data, 
                 im=None)} 
             
@@ -415,7 +415,7 @@ class FrontEndSimulator:
             im[f'Interactive Edit Iter {infer_config["edit_num"]}'] = self.inf_edit_generator(
                 image=self.data_instance['image']['metatensor'],
                 mode=infer_config['mode'],
-                gt=self.data_instance['label']['metatensor'],
+                gt=self.data_instance['reference_label']['metatensor'],
                 prev_output_data=prev_output_data,
                 im=im
             )
@@ -866,8 +866,9 @@ class FrontEndSimulator:
                 case_name: str, 
                 tmp_dir_path:str):
         '''
-        data_instance - A dictionary containing the set of information with respect to the image, and ground truth, 
-        required for the request generation + interaction state generation:
+        data_instance - A dictionary containing the set of information with respect to the image,
+        and annotations for the current data instance. This is required for the request generation 
+        + interaction state generation, and even for passing through image-label pairs for adaptation:
 
             Contains the following fields:
 
@@ -875,11 +876,14 @@ class FrontEndSimulator:
                     'metatensor': Loaded MetaTensor in nibabel RAS+ orientation (pseudo-UI native domain) channelfirst 1HWD.
                     'meta_dict': meta_dict, contains the original affine array, and the pseudo-ui domainaffine array
                 
-                'label': dict - A dictionary containing the same subfields as the image! Not one-hot encoded for the MetaTensors!
-        
-        case_name - The string denoting the filename for the image and ground truth. 
+                'eval_label': dict - A dictionary containing the same subfields as the image! 
+                Not one-hot encoded for the MetaTensors!
+                'reference_label': dict - A dictionary containing the same subfields as the image! 
+                Not one-hot encoded for the MetaTensors!
 
-        NOTE: KEY ASSUMPTION 1: The filename for both the image and ground truth will be the same. 
+        case_name - The string denoting the filename for the image and annotations. 
+
+        NOTE: KEY ASSUMPTION 1: The filename for both the image and annotations will be the same. 
 
         tmp_dir_path - The path name for the current temporary directory initialised for the current data instance.
         '''
@@ -894,15 +898,18 @@ class FrontEndSimulator:
             raise Exception('The tmp_dir path must be a string and non-empty.')
 
         #Checking if the foreground for this instance is even non-empty. We will currently not be supporting this at all for 
-        # interaction simulation. In most scenarios it would not make sense to simulate prompts for an empty foreground, 
-        # as ultimately there usually would be some salient target to have prompted the user to interact
-        # with the image in the first place.
+        # interaction simulation. 
+
+        #NOTE:We check the reference label for the empty fg case as it is the one that could be used for
+        #simulating prompts. Therefore, it would be the primary cause for any code-breaking if empty. The
+        #eval annotation being empty is not relevant here, as misalignment with the eval annotation is 
+        #what we are testing against. Empty annotations for the eval label are still a valid use case.
 
         #We initialise with a nonetype, and then update it if we have an empty foreground case which is also permitted to
         #continue depending on the configuration flag (i.e., sim automated empty fg).
         empty_foreground = None 
 
-        if check_empty(data_instance['label']['metatensor'], self.args['configs_labels_dict']['background']):
+        if check_empty(data_instance['reference_label']['metatensor'], self.args['configs_labels_dict']['background']):
             if self.args['infer_run_configs']['init'].title() == 'Automatic Init':
                 if not self.args['sim_empty_fg_automatic']:
                     warnings.warn(f'The gold standard segmentation for the task foreground is completely empty and sim_empty_fg_automatic flag is false, skipping... \n'
@@ -954,13 +961,7 @@ class FrontEndSimulator:
             assert empty_foreground == True, 'The empty_foreground flag should either be True or False at this point.'
 
         iter_num, terminated_early = self.iterative_loop(empty_foreground=empty_foreground)
-        # DEPRECATED: # try:       
-        #     iter_num, terminated_early = self.iterative_loop(empty_foreground=empty_foreground)
-        # # except:
-        #     iter_num, terminated_early = self.iterative_loop()
-        #     empty_foreground = False       
-        
-        
+    
         #Saving the final set of tracked metrics....
 
         self.metrics_handler.save_metrics(
@@ -981,8 +982,8 @@ class FrontEndSimulator:
                         'meta_dict':copy.deepcopy(self.data_instance['image']['meta_dict'])
                         },
                     'label': {
-                        'metatensor': torch.from_numpy(self.data_instance['label']['metatensor'].clone().detach().numpy()),
-                        'meta_dict': copy.deepcopy(self.data_instance['label']['meta_dict'])
+                        'metatensor': torch.from_numpy(self.data_instance['reference_label']['metatensor'].clone().detach().numpy()),
+                        'meta_dict': copy.deepcopy(self.data_instance['reference_label']['meta_dict'])
                         }
                     }
                 )
@@ -1018,6 +1019,3 @@ class FrontEndSimulator:
             #Final tmp_dir cleanup will occur in the script which calls this function.
 
 
-
-if __name__ == '__main__':
-    print('stop')

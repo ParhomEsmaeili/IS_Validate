@@ -130,7 +130,7 @@ def init_all_csvs(
     
     complete_paths_dicts = dict() 
 
-    for metric_type, config in metric_configs.items():
+    for metric_type, config in metric_configs['metrics'].items():
         #creating the subdir for the metric type
     
         metric_subdir_abspath = os.path.join(metrics_save_dir, metric_type)

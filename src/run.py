@@ -17,7 +17,7 @@ codebase_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(codebase_dir)
 from src.front_back_interactor.pseudo_ui import FrontEndSimulator 
 from src.general_utils.logging import experiment_args_logger
-from src.general_utils.dict_utils import extractor
+from src.general_utils.dict_utils import extractor, extract_config
 from src.data.utils import data_instance_reformat, iterate_dataloader_check, init_task_cases
 from src.results_utils.metric_save_util import init_all_csvs
 original_stdout = sys.stdout
@@ -35,7 +35,7 @@ def set_parse():
     parser = argparse.ArgumentParser()
     
     #Experimental name/job-continuation related args
-    parser.add_argument('--experiment_basename', type=str, required=False, default='debugging_exp_naming')
+    parser.add_argument('--experiment_basename', type=str, required=False, default='debugging_eval_annotation_split')
     parser.add_argument('--run_num', type=str, required=False, default='run1')
     parser.add_argument('--split_name', type=str, required=False, default='kfold_5_train_fold_0_1_2_3')
     parser.add_argument('--continue_execution', action='store_true', default=True)
@@ -44,7 +44,7 @@ def set_parse():
     parser.add_argument('--skip_metric_and_prompting', action='store_true', default=False) 
     #Whether to skip the metric and prompt generation steps and just execute adaptation with gold-standard annotations.
     parser.add_argument('--data_root', type=str, default=codebase_dir)
-    parser.add_argument('--dataset_name', type=str, default='Dataset040_MSMultispine')
+    parser.add_argument('--dataset_name', type=str, default='Dataset023_Kits23')
     parser.add_argument('--app_root', type=str, default= 
                         '/home/parhomesmaeili/IS_Codebase_Forks/nnInteractive_Fork') 
     #NOTE:Just set for debugging purposes.
@@ -84,12 +84,11 @@ def set_parse():
     parser.add_argument('--metric_conf_filename', type=str, default='metrics_configs.txt')
     parser.add_argument('--prompt_conf_filename', type=str, default='prompts_configs.txt')
     parser.add_argument('--task_conf_filename', type=str, default='task_configs.txt')
-    parser.add_argument('--metric_conf_name', type=str, default='prototype')
-    parser.add_argument('--task_conf_name', type=str, default='task_id_12')
+    parser.add_argument('--metric_conf_name', type=str, default='cross_annotator_fold_0')
+    parser.add_argument('--task_conf_name', type=str, default='task_id_3')
     parser.add_argument('--init_prompt_conf_name', type=str, default='points_prototype_simplified')
     parser.add_argument('--edit_prompt_conf_name', type=str, default='points_prototype_simplified')
-    parser.add_argument('--metric_prompt_procedure_type', type=str, default='heuristic')
-    parser.add_argument('--inf_prompt_procedure_type', type=str, default='heuristic')
+    # parser.add_argument('--inf_prompt_procedure_type', type=str, default='heuristic')
     parser.add_argument('--sim_empty_fg_automatic', action='store_true', default=False)
     #TODO: Put use_mem and other related args like that for the im etc in here. 
     parser.add_argument('--use_mem_inf_edit', action='store_true', default=False) #Whether im is used for conditioning prompt gen.
@@ -290,14 +289,16 @@ def gen_experiment_args(args):
     output_dict['sim_empty_fg_automatic'] = args.sim_empty_fg_automatic  
 
     # output_dict['metric_prompt_procedure_type']
-    output_dict['inf_prompt_procedure_type'] = args.inf_prompt_procedure_type 
+    # output_dict['inf_prompt_procedure_type'] = args.inf_prompt_procedure_type 
 
     #Extracting from inf prompt registry according to procedural type: 
-    inf_prompt_registry = extract_config(os.path.join(exp_conf_dir, args.prompt_conf_filename), args.inf_prompt_procedure_type)
+    # inf_prompt_registry = extract_config(os.path.join(exp_conf_dir, args.prompt_conf_filename), args.inf_prompt_procedure_type)
 
-    output_dict['inf_init_prompt_config'] =  inf_prompt_registry[args.init_prompt_conf_name]
+    output_dict['inf_init_prompt_config'] =  extract_config(os.path.join(exp_conf_dir, args.prompt_conf_filename), args.init_prompt_conf_name) 
+    #inf_prompt_registry[args.init_prompt_conf_name]
 
-    output_dict['inf_edit_prompt_config'] = inf_prompt_registry[args.edit_prompt_conf_name]
+    output_dict['inf_edit_prompt_config'] = extract_config(os.path.join(exp_conf_dir, args.prompt_conf_filename), args.edit_prompt_conf_name) 
+    #inf_prompt_registry[args.edit_prompt_conf_name]
     
     # output_dict['metrics_prompts_configs']
     
@@ -385,7 +386,7 @@ def process_metric_config(metric_config, spacing_config):
     #Function which processes the metric configs for cases where we do not have a trivial config.
 
     #E.g., for NSD where we may want to calculate across multiple tolerance values.
-    for metric_name, conf in metric_config.items():
+    for metric_name, conf in metric_config['metrics'].items():
         if metric_name == 'NSD':
             if 'tolerance_mm' not in conf:
                 assert 'tolerance_sf' in conf, 'If no tolerance_mm provided for NSD metric config, then must provide a tolerance_sf value to calculate the tolerance based on the dataset voxel spacing, please check your metric configs.'
@@ -445,21 +446,6 @@ def init_metrics_saves(exp_results_dir, metrics_configs, configs_labels_dict):
     os.makedirs(metrics_dir, exist_ok=False)
 
     return init_all_csvs(metrics_dir, metrics_configs, configs_labels_dict)
-
-
-def extract_config(path, name):
-    #Function which extracts configs dicts from json or txt files. Takes the path to the file, and the name of the specific config desired.
-
-    if not os.path.exists(path):
-        raise Exception(f'The path {path} was not a valid one. Please check.')    
-
-    #Loading the file:
-    with open(path) as f:
-        configs_registry = json.load(f)
-        config = configs_registry[name]
-
-    return config 
-    
 
 def log_config_writer(args_name, args_dict, logger):
     logger.info(f'Printing {args_name}: {os.linesep}')
@@ -938,6 +924,7 @@ def main():
     configs_labels_dict, dataloader = init_task_cases(
         dataset_dir=experiment_args['input_dataset_dir'],
         exp_task_configs=experiment_args['task_configs'],
+        metric_configs=experiment_args['metrics_configs'],
         shuffle_bool=experiment_args['shuffle_cases'],
         random_seed=experiment_args['random_seed'],
         last_completed_case=loaded_experiment_checkpoint["eval_state"]['last_completed_case'] if loaded_experiment_checkpoint != None else None,
