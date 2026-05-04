@@ -1,5 +1,8 @@
 from typing import Union 
-import re 
+import re
+import os
+import json 
+
 def extractor(x: dict, y: tuple[Union[tuple,str, int]]): 
     '''
     This general purpose function is adapted from a lambda function which iterates through the dict using the tuple, 
@@ -100,6 +103,77 @@ def dict_path_create(x: dict, y: tuple[Union[tuple, str, int]], item):
     else:
         raise ValueError('The input tuple must at least be length 1.')
     
+def extract_config(path, name):
+    #Function which extracts configs dicts from json or txt files. Takes the path to the file, and the name of the specific config desired.
+
+    if not os.path.exists(path):
+        raise Exception(f'The path {path} was not a valid one. Please check.')    
+
+    #Loading the file:
+    with open(path) as f:
+        configs_registry = json.load(f)
+        config = configs_registry[name]
+
+    return config 
+
+
+def dict_deep_equals(dict1, dict2):
+    """
+    Recursively checks if two dictionaries are exactly equal at all depths.
+    
+    Args:
+        dict1: First dictionary to compare
+        dict2: Second dictionary to compare
+    
+    Returns:
+        tuple: (bool indicating if equal, list of differences found)
+    
+    Supported types:
+        - dict: Recursively compared by keys and values
+        - list, tuple: Recursively compared element-wise (must be same type)
+        - Primitives (int, str, float, bool, None): Compared by equality
+    """
+    differences = []
+    
+    def _compare(val1, val2, path=""):
+        """Recursively compare values with type checking"""
+        # Type mismatch
+        if type(val1) != type(val2):
+            msg = f"Type mismatch at {path or 'root'}: {type(val1).__name__} vs {type(val2).__name__}"
+            differences.append(msg)
+            return
+        
+        # Dict comparison (recurse into nested dicts)
+        if isinstance(val1, dict):
+            for key in val1:
+                if key not in val2:
+                    differences.append(f"Key '{key}' missing in second dict at {path or 'root'}")
+                else:
+                    new_path = f"{path}.{key}" if path else key
+                    _compare(val1[key], val2[key], new_path)
+            
+            for key in val2:
+                if key not in val1:
+                    differences.append(f"Extra key '{key}' in second dict at {path or 'root'}")
+        
+        # List/Tuple comparison (recurse into nested iterables)
+        elif isinstance(val1, (list, tuple)):
+            if len(val1) != len(val2):
+                msg = f"Length mismatch at {path or 'root'}: {len(val1)} vs {len(val2)}"
+                differences.append(msg)
+            else:
+                for i, (v1, v2) in enumerate(zip(val1, val2)):
+                    new_path = f"{path}[{i}]" if path else f"[{i}]"
+                    _compare(v1, v2, new_path)
+        
+        # Primitive types (int, str, float, bool, None, etc.)
+        else:
+            if val1 != val2:
+                msg = f"Value mismatch at {path or 'root'}: {val1!r} != {val2!r}"
+                differences.append(msg)
+    
+    _compare(dict1, dict2)
+    return len(differences) == 0, differences
 
 
 def sort_infer_calls(infer_call_names):
