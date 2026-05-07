@@ -1,4 +1,4 @@
-from typing import Union 
+from typing import Optional, Union 
 import re
 import os
 import json 
@@ -103,8 +103,13 @@ def dict_path_create(x: dict, y: tuple[Union[tuple, str, int]], item):
     else:
         raise ValueError('The input tuple must at least be length 1.')
     
-def extract_config(path, name):
-    #Function which extracts configs dicts from json or txt files. Takes the path to the file, and the name of the specific config desired.
+def extract_config(
+    path: str, 
+    name: Optional[str] | None = None
+    ) -> dict:
+    #Function which extracts configs dicts from json or txt files. 
+    # Takes the path to the file, and the name of the specific config desired. If no name is provided,
+    # then the whole set of configs are returned instead.
 
     if not os.path.exists(path):
         raise Exception(f'The path {path} was not a valid one. Please check.')    
@@ -112,7 +117,10 @@ def extract_config(path, name):
     #Loading the file:
     with open(path) as f:
         configs_registry = json.load(f)
-        config = configs_registry[name]
+        if name == None:
+            config = configs_registry
+        else:
+            config = configs_registry[name]
 
     return config 
 
