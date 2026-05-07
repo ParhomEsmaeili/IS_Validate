@@ -155,7 +155,12 @@ class FrontEndSimulator:
             
         #Variable related to handling empty foreground cases for automatic segmentation configurations
         
-        sim_empty_fg_automatic: Boolean denoting whether to simulate/attempt automatic segmentation in cases where the foreground are empty (non-background). 
+        sim_empty_fg_automatic: Boolean denoting whether to simulate/attempt automatic segmentation 
+        in cases where the foreground are empty (non-background). It is only acceptable/relevant in 
+        cases where the inference config was configured to perform automatic initialisation. It would be
+        too messy to switch initialisation modes mid-experiment as this would change the parameters for
+        the experiment. 
+
         infer_run_configs: Dict containing inference run configs: (e.g., modes, number of refinement iterations)
     
         metrics_configs: configs for metrics being computed, eval annotation samples, prompt generation configs for parameter-dependent metrics (NOTE: latter not yet supported), etc.
@@ -900,19 +905,27 @@ class FrontEndSimulator:
         #Checking if the foreground for this instance is even non-empty. We will currently not be supporting this at all for 
         # interaction simulation. 
 
-        #NOTE:We check the reference label for the empty fg case as it is the one that could be used for
-        #simulating prompts. Therefore, it would be the primary cause for any code-breaking if empty. The
-        #eval annotation being empty is not relevant here, as misalignment with the eval annotation is 
-        #what we are testing against. Empty annotations for the eval label are still a valid use case.
+        #NOTE:
+        # We check the reference label for the empty fg case as it is the one that could be used for
+        #simulating prompts. Therefore, it would be the primary cause for any code-breaking if empty. 
+        # 
+        # The eval annotation being empty is not relevant here, as misalignment with the eval 
+        # annotation is what we are testing against. Empty annotations for the eval label are still a 
+        # valid use case.
 
-        #We initialise with a nonetype, and then update it if we have an empty foreground case which is also permitted to
-        #continue depending on the configuration flag (i.e., sim automated empty fg).
+        #We initialise with a nonetype, and then update it if we have an empty foreground 
+        # case, which is still a valid use case. NOTE: The validity of the case depends on the
+        # experiment config. If it is a fully-interactive experiment then it would never be
+        # valid. For an experiment with automatic initialisation, it can be valid up until 
+        # the automatic initialisation stage, if we have configured it as such
+        #  (i.e., sim automated empty fg)
+
         empty_foreground = None 
 
         if check_empty(data_instance['reference_label']['metatensor'], self.args['configs_labels_dict']['background']):
             if self.args['infer_run_configs']['init'].title() == 'Automatic Init':
                 if not self.args['sim_empty_fg_automatic']:
-                    warnings.warn(f'The gold standard segmentation for the task foreground is completely empty and sim_empty_fg_automatic flag is false, skipping... \n'
+                    warnings.warn(f'The gold standard segmentation used as the reference for the task foreground is completely empty and sim_empty_fg_automatic flag is false, skipping... \n'
                         f'If this is not intended, please check the data instance provided. \n'
                         f'Case name: {case_name} \n')
                     return  #We return and just continue onto the next data instance.
@@ -928,6 +941,14 @@ class FrontEndSimulator:
                     f'Case name: {case_name} \n')
                 return # We return here, since we do not want to raise an exception for this case, but rather skip the instance.
         
+        #We will also examine the eval label for the empty foreground case, this will NOT affect the 
+        #validity of the case, but is still relevant to flag for interpretation of results.
+        if check_empty(data_instance['eval_label']['metatensor'], self.args['configs_labels_dict']['background']):
+            for metric in self.args['metrics_configs']['metrics']:
+                # Process each metric
+                if metric['ignore_empty']:
+                    warnings.warn(f'The eval label for the fg is empty but the ignore empty flag is set to True for {metric["name"]}, so we will ignore this case for this metric. \n'
+                                  'Please check whether this is intended') 
 
         #Calling on the set_seeds function to re-initialise the seeds for each data instance (this ensures early
         #termination would not cause deterministic runs to vary across different models.)
