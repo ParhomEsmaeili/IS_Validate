@@ -1,0 +1,13 @@
+{
+  "config_id": "config_1",
+  "sources": {
+    "prescribed": {
+      "config_path": "/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/exp_configs",
+      "tolerance_path": "prototype.metrics.NSD.tolerance_mm"
+    },
+    "nnunet": {
+      "config_path": "/home/parhomesmaeili/Helmholtz Group/nnUNet/nnUNet_surface_distance/kfold_5_train",
+      "tolerance_path": "symmetric_surface_distance_95.0"
+    }
+  }
+}
