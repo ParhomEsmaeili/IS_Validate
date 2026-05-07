@@ -8,7 +8,8 @@ import os
 import sys
 import re
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) #Adding the parent directory to the path so that we can import utils from there.
-from general_utils.dict_utils import extractor #This is a custom utility function for extracting dicts.
+from general_utils.dict_utils import extractor, dict_iterable_overlap
+ #This is a custom utility function for extracting dicts.
 import copy 
 import logging
 import pathlib
@@ -16,7 +17,6 @@ import warnings
 from skimage.measure import label as cc_label
 from version_handling import monai_version 
 import gc
-# logger = logging.getLogger(__name__)
 import random 
 
 def init_task_cases(
@@ -485,7 +485,6 @@ def create_case_list(
                                     eval_annotation_keys.append(annotation_key)
                                     #We don't use sets because they have a randomisation component and we want to ensure that 
                                     #order is preserved for now until we have our own custom dataloader.
-        case_list.append(subdict) 
 
         #Now we will do the same for the prompter annotations. Same process as before, but derived from
         #a different configuration dictionary.
@@ -563,20 +562,29 @@ def dataloader_generator(
         assert eval_annotation_keys != None, 'If case_list is not empty, then eval_annotation_keys must not be None.'
         assert reference_annotation_keys != None, 'If case_list is not empty, then reference_annotation_keys must not be None.'
 
+        if eval_annotation_keys == reference_annotation_keys:
+            #In this case then the reference and annotation are the exact same, 
+            # so we can just load them in a single time.
+            load_keys = image_keys + eval_annotation_keys #We will just use the eval annotation keys for loading, and then merge them together in the transforms.
+        else:
+            if any([key in eval_annotation_keys for key in reference_annotation_keys]):
+                raise ValueError('There is some overlap in the keys for the eval annotations and the reference annotations, but they are not exactly the same. This is not supported as it creates ambiguity in the dataloader transforms.')
+            else:
+                load_keys = image_keys + eval_annotation_keys + reference_annotation_keys
     #Just the basic load transforms in order to load the files in for our custom transforms.
     if monai_version == '1.4.0':
         load_transforms = [
-            LoadImaged(keys=image_keys+eval_annotation_keys+reference_annotation_keys, reader="ITKReader", image_only=True),
-            EnsureChannelFirstd(keys=image_keys+eval_annotation_keys+reference_annotation_keys),
-            Orientationd(keys=image_keys+eval_annotation_keys+reference_annotation_keys, axcodes='RAS'),
-            EnsureTyped(keys=image_keys+eval_annotation_keys+reference_annotation_keys, dtype=[torch.float32]*len(image_keys)+[torch.uint8]*len(eval_annotation_keys)+[torch.uint8]*len(reference_annotation_keys)),
+            LoadImaged(keys=load_keys, reader="ITKReader", image_only=True),
+            EnsureChannelFirstd(keys=load_keys),
+            Orientationd(keys=load_keys, axcodes='RAS'),
+            EnsureTyped(keys=load_keys, dtype=[torch.float32]*len(image_keys)+[torch.uint8]*(len(load_keys)-len(image_keys))),
         ]
     elif monai_version == '0.9.0':
         load_transforms = [    
-            LoadImaged(keys=image_keys+eval_annotation_keys+reference_annotation_keys, image_only=False),
-            EnsureChannelFirstd(keys=image_keys+eval_annotation_keys+reference_annotation_keys),
-            Orientationd(keys=image_keys+eval_annotation_keys+reference_annotation_keys, axcodes='RAS'),
-            MetaTensorConstructor(keys=image_keys+eval_annotation_keys+reference_annotation_keys, dtypes=[torch.float32]*len(image_keys)+[torch.uint8]*len(eval_annotation_keys)+[torch.uint8]*len(reference_annotation_keys)),
+            LoadImaged(keys=load_keys, image_only=False),
+            EnsureChannelFirstd(keys=load_keys),
+            Orientationd(keys=load_keys, axcodes='RAS'),
+            MetaTensorConstructor(keys=load_keys, dtypes=[torch.float32]*len(image_keys)+[torch.uint8]*(len(load_keys)-len(image_keys))),
         ]
     else:
         raise Exception('Unknown monai version.')
@@ -667,7 +675,16 @@ class MergeSegmentations:
     #deprived brain.
     def __init__(self, keys:Sequence, sem_mapping: dict[str, list[str]], output_sem_code: dict[str, int], output_key:str = 'label'):
         self.input_keys = keys #input keys which contain all of the relevant segmentations which will need to be fused.
-        self.semantic_map_dict = sem_mapping #The strings which designated the semantic mapps/merging
+        #First we will flag if there are any keys which have instance id != 1, as we are
+        #currently not equipped to handle this. 
+        if not all([re.search(r'.*instance_1.*', key) for key in self.input_keys]):
+            raise NotImplementedError('We currently do not support any configuration which includes multi-instance data, '
+            'or any data which is not pre-mapped into a single instance format (i.e. semantic seg).') 
+        
+        
+        self.semantic_map_dict = sem_mapping 
+        #The strings which designated the semantic mapps/merging, key=output class, val = list of input classes
+        #being merged.
         if len(self.semantic_map_dict) != 2:
             raise Exception('Hardcoded for now that it is only being applied to binary semantic seg, lets add as many sanity-checks along the way.')        
         self.output_sem_code_dict = output_sem_code #The integer codes which designate what the values
@@ -677,9 +694,16 @@ class MergeSegmentations:
             raise Exception('There was a discrepancy in the task-domain semantic class descriptors for the semantic-mapping dict,' \
             'and the description of the integer-codes that will be allocated for each task-domain semantic class.')
          
-        #This is a temporary hack where we presume only semantic labelling is being applied, for now. 
+        #This is a temporary assertion where we presume only semantic labelling is being applied, for now. 
         # Presumes no complexity is going to arise from handling multi-annotator setups or samples with multi-instance explicitly
-        # outlined in the input dataset.  
+        # outlined in the input dataset. 
+        # 
+
+        #Lastly, we assert that the mapping must be injective, i.e. that no input semantic class
+        # can be mapped to more than one output semantic class.
+        if dict_iterable_overlap(self.semantic_map_dict):
+            raise Exception('The semantic mapping provided is not injective, there is at least one input semantic class which is mapped to more than one output semantic class, this is not supported as it creates ambiguity in the merging operation.')
+
         self.output_key = output_key 
     
     def merge_sem_seg(

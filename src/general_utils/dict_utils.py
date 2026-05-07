@@ -2,6 +2,7 @@ from typing import Optional, Union
 import re
 import os
 import json 
+from collections.abc import Iterable
 
 def extractor(x: dict, y: tuple[Union[tuple,str, int]]): 
     '''
@@ -224,3 +225,15 @@ def sort_infer_calls(infer_call_names):
 
     return tuple(infer_call_names_order)
 
+def dict_iterable_overlap(d: dict[object, object]) -> bool:
+    seen = set()
+    for k, group in d.items():
+        if not isinstance(group, Iterable) or isinstance(group, (str, bytes)):
+            raise TypeError(f"Value for key {k!r} is not a valid iterable")
+
+        for x in group:
+            if x in seen:
+                return True
+            seen.add(x)
+
+    return False
