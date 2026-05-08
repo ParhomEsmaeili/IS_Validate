@@ -98,9 +98,12 @@ def memory_cleanup(
             if edit_memory_len == 0:
                 raise Exception('Cannot be removing the interaction information of the current iteration state prior to the inference call, if you want no prompt conditioning then implement use_mem=False')
             
-            #Denotes the upper bound (exclusive) for removal of the memory states (inclusive of the current state).
+            #Denotes the upper bound (exclusive) for removal of the memory states.
             upper_bound_iter_clip = edit_iter_num - edit_memory_len + 1
-            #Eqn: Iter num (start current state) - memory len + 1 (because we are inclusive of the current state in our memory length, e.g. with memory len 2, at iter 5, it should only retain 5,4. Hence upper bound is 4 exclusive)
+            #Eqn: Iter num (start current state) - memory len + 1 
+            # (because we are inclusive of the current state in our memory length, 
+            # e.g. with memory len 2, at iter 5, it should only retain 5,4. 
+            # Hence upper bound is 4, as iterating through with an upper limit of 4 is exclusive of 4,5.)
                 
             if upper_bound_iter_clip <= 1:
                 print(f'Cannot clear yet, edit state memory retention length is {edit_memory_len} and current iter is {edit_iter_num}')
