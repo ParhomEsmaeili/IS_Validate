@@ -21,7 +21,8 @@ import random
 
 def init_task_cases(
     dataset_dir:str, 
-    exp_task_configs:dict, 
+    exp_task_configs:dict,
+    prompter_configs:dict,
     metric_configs: dict,
     shuffle_bool:bool=False, 
     random_seed:Optional[int]=None,
@@ -35,6 +36,8 @@ def init_task_cases(
     inputs: 
     dataset_dir (path to the dataset directory)
     exp_task_configs (a dictionary which contains information about the description of the task for loading the cases/building them.)
+    prompter_configs (a dictionary containing information about the prompting strategy being used.)
+    #Relevant for extracting the reference annotations. 
     metric_configs (a dictionary containing information about the metrics being used and any relevant data also -> e.g., the evaluation annotation configuration which
     may be relevant for building the case list.)
     shuffle_bool: bool, whether the shuffle the case list before returning it. Default = False.
@@ -270,6 +273,7 @@ def init_task_cases(
         ds_configs=ds_configs,
         sampling_metadata=sampling_metadata,
         exp_task_configs=exp_task_configs,
+        prompter_configs=prompter_configs,
         metric_configs=metric_configs,
         case_list=case_list)
 
@@ -278,8 +282,13 @@ def init_task_cases(
 
     #Almost always going to be required, for now anyways:
     # Semantic class mapping (i.e. mapping into the task domain for the loaded annotations)
-    # image structure mapping (i.e. what was the mechanism through which we generated the keys for the image-related fields.
-    # annotation_structure_mapping (i.e. what was the mechanism through which we generated the keys for the annotation-related fields.
+    # 
+    # image structure mapping (i.e. what was the mechanism through which we generated the keys 
+    # for the image-related fields.
+    # 
+    # annotation_structure_mapping (i.e. what was the mechanism through which we generated the 
+    # keys for the annotations which are to be merged/fused. For now, it is unused as we are opting for
+    # a hard-coded type of approach) This is provided for both ref, and eval annotations.
 
     #These are all required, for now, in order to merge them into structures which can be used downstream.
     transforms_configs = {
@@ -287,7 +296,8 @@ def init_task_cases(
         'semantic_class_mapping':semantic_class_mapping,
         'config_labels_dict': config_labels_dict, 
         'image_struct_mapping': extractor(exp_task_configs, ('data_sampling', 'image_conf')),
-        'annotation_struct_mapping':extractor(exp_task_configs, ('data_sampling', 'annotation_conf'))
+        'reference_annotation_struct_mapping':extractor(prompter_configs, ('annotation_conf',)),
+        'eval_annotation_struct_mapping':extractor(metric_configs, ('data_sampling', 'annotation_conf'))
     }
 
     #Now we add any other non-semantic class mapping transforms, i.e. the more atypical ones (with respect to the current
@@ -322,7 +332,8 @@ def create_case_list(
         dataset_dir, 
         ds_configs,
         sampling_metadata,
-        exp_task_configs, 
+        exp_task_configs,
+        prompter_configs,
         metric_configs,
         case_list):
     '''
@@ -339,6 +350,11 @@ def create_case_list(
 
     exp_task_configs: A dictionary containing all of the relevant information which could be required for describing the task being performed
     in the experiment. 
+
+    prompter_configs: A dictionary containing all of the relevant information which could be required for 
+    describing the prompter being used in the experiment, which may also be relevant for describing the 
+    source of annotations being used for prompting/adaptation. Will contain the description of the
+    annotation strata being used (henceforth this will constitute the reference annotation).
 
     metric_configs: A dictionary containing all of the relevant information which could be required for describing the metric being used in the experiment, which may also be relevant for describing the task.
     This will also contain the description of the annotation strata which are being used for evaluation, which is relevant for the construction of the case list.
@@ -367,7 +383,7 @@ def create_case_list(
     #Here we are extracting the dictionary which contains descriptors about the image data which can be required for this given task.
     #I.e., the description of which image channels to keep under consideration.
     image_conf_dict = extractor(exp_task_configs, ('data_sampling', 'image_conf'))
-    reference_annotation_conf_dict = extractor(exp_task_configs, ('data_sampling', 'annotation_conf'))
+    reference_annotation_conf_dict = extractor(prompter_configs, ('annotation_conf',))
     eval_annotation_conf_dict = extractor(metric_configs, ('data_sampling', 'annotation_conf'))
     # Temporary hack: Checking that all values in image_conf_dict and annotator_conf_dict are lists of length 1
     # Currently we will assume that all of the parameters (values) should be lists of length 1, as we do not yet support cases like 
@@ -601,12 +617,14 @@ def dataloader_generator(
             MergeSegmentations(
                 keys=eval_annotation_keys, 
                 sem_mapping=transforms_configs['semantic_class_mapping'], 
-                output_sem_code=transforms_configs['config_labels_dict'], 
+                output_sem_code=transforms_configs['config_labels_dict'],
+                annotation_struct_mapping=transforms_configs['eval_annotation_struct_mapping'],
                 output_key='eval_label'),
             MergeSegmentations(
                 keys=reference_annotation_keys, 
                 sem_mapping=transforms_configs['semantic_class_mapping'],
                 output_sem_code=transforms_configs['config_labels_dict'],
+                annotation_struct_mapping=transforms_configs['reference_annotation_struct_mapping'],
                 output_key='reference_label')
         ]
 
@@ -673,14 +691,24 @@ class MergeSegmentations:
 
     #Not been hyperoptimised for efficiency yet as I am sleep deprived and just putting something that is readable for my sleep
     #deprived brain.
-    def __init__(self, keys:Sequence, sem_mapping: dict[str, list[str]], output_sem_code: dict[str, int], output_key:str = 'label'):
+    def __init__(self, keys:Sequence, sem_mapping: dict[str, list[str]], output_sem_code: dict[str, int], annotation_struct_mapping: dict, output_key:str = 'label'):
         self.input_keys = keys #input keys which contain all of the relevant segmentations which will need to be fused.
-        #First we will flag if there are any keys which have instance id != 1, as we are
-        #currently not equipped to handle this. 
-        if not all([re.search(r'.*instance_1.*', key) for key in self.input_keys]):
-            raise NotImplementedError('We currently do not support any configuration which includes multi-instance data, '
-            'or any data which is not pre-mapped into a single instance format (i.e. semantic seg).') 
+        self.annotation_struct_mapping = annotation_struct_mapping #Stores the structure describing how annotators and instances are organized.
         
+        #Extract annotator and instance lists from the struct mapping
+        self.annotators = self.annotation_struct_mapping.get('annotator', [])
+        self.instances = self.annotation_struct_mapping.get('instance_id', [])
+        
+        #Check for multi-annotator or multi-instance cases (not yet supported)
+        if len(self.annotators) > 1 or len(self.instances) > 1:
+            raise NotImplementedError(
+                f'Multi-annotator (len={len(self.annotators)}) or multi-instance (len={len(self.instances)}) fusion is not yet implemented. '
+                'Fusion strategies (fusion_strategy_annotators, fusion_strategy_instances) must be defined in annotation_struct_mapping.'
+            )
+        
+        #For single annotator/instance cases, validate that we have the expected structure
+        if len(self.annotators) != 1 or len(self.instances) != 1:
+            raise ValueError('annotation_struct_mapping must define exactly one annotator and one instance for current implementation.')
         
         self.semantic_map_dict = sem_mapping 
         #The strings which designated the semantic mapps/merging, key=output class, val = list of input classes
@@ -709,12 +737,14 @@ class MergeSegmentations:
     def merge_sem_seg(
             self, 
             seg_array_shape: tuple,
-            input_semantic_arrays: dict[str, np.ndarray]):
+            input_semantic_arrays: dict[str, np.ndarray],
+            annotation_struct_mapping: dict):
             #We currently will assume for simplicity that all arrays have been pre-mapped into numpy arrays.
             #TODO: Modify this func and accelerate. 
         '''
         #function which takes the input keys describing the arrays in the  data dictionary, and a description of how the
         # semantic classes need to be mapped in order to generate a semantic segmentation for a basic single-annotator domain.
+        #Uses annotation_struct_mapping to construct keys dynamically instead of hardcoded regex patterns.
         '''
 
         if not isinstance(seg_array_shape, tuple):
@@ -722,20 +752,29 @@ class MergeSegmentations:
         else:
             merged_seg_array = np.zeros(seg_array_shape)
 
+        #Use the annotators and instances already validated in __init__
+        annotator_id = self.annotators[0]
+        instance_id = self.instances[0]
+        
+        #Validate that only instance_1 is being used (requirement for semantic seg fusion)
+        if instance_id != 'instance_1':
+            raise ValueError(f'Semantic segmentation fusion only supports instance_1, but got {instance_id}')
+
         #we create a mapping between the keys describing the arrays, and how we want to merge them.
-        #we will be hard-coding with the assumption that we are working with single annotator and single_instance
-        #key descriptors for now.
-        #TODO: Generalise this function for panoptic & multi-annotator.
+        #Using the struct mapping to construct keys dynamically instead of regex.
+        #For single annotator/instance, keys follow pattern: {annotator_id}_semclass{semantic_class}_{instance_id}
 
         new_sem_mapping = dict() 
         for output_sem, input_sems_list in self.semantic_map_dict.items():
-            #We will use regex to extract the relevant keys according to the semantic class.
+            #Construct keys based on struct mapping instead of regex
             matching_keys = []
             for sem in input_sems_list:
-                # Use regex to find input keys containing semclass{sem}_instance_1
-                pattern = rf'.*semclass{re.escape(sem)}_instance_1.*'
-                matched = [key for key in self.input_keys if re.match(pattern, key)]
-                matching_keys.extend(matched)
+                # Construct the expected key name using struct mapping
+                expected_key = f'{annotator_id}_semclass{sem}_{instance_id}'
+                if expected_key in self.input_keys:
+                    matching_keys.append(expected_key)
+                else:
+                    raise KeyError(f'Expected key {expected_key} not found in input_keys for semantic class {sem}')
             new_sem_mapping[output_sem] = matching_keys
 
         # Check for repeats across all lists. We need more modularity and unit-testing in order to scrap some of these
@@ -844,7 +883,8 @@ class MergeSegmentations:
 
         merged_seg = self.merge_sem_seg(
             seg_array_shape=output_shape,
-            input_semantic_arrays=input_semantic_arrays)
+            input_semantic_arrays=input_semantic_arrays,
+            annotation_struct_mapping=self.annotation_struct_mapping)
 
         # assert isinstance(merged_seg, np.ndarray), 'For now we have written the transform to require handling of np arrays'
         assert merged_seg.shape == output_shape, 'The merged seg did not have the correct shape as required for a 1HWD semantic seg.'

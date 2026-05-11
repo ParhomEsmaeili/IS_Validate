@@ -17,7 +17,12 @@ codebase_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(codebase_dir)
 from src.front_back_interactor.pseudo_ui import FrontEndSimulator 
 from src.general_utils.logging import experiment_args_logger
-from src.general_utils.dict_utils import extractor, extract_config
+from src.general_utils.dict_utils import (
+    extractor, 
+    extract_config, 
+    dict_deep_equals,
+    has_path
+)
 from src.data.utils import data_instance_reformat, iterate_dataloader_check, init_task_cases
 from src.results_utils.metric_save_util import init_all_csvs
 original_stdout = sys.stdout
@@ -34,81 +39,116 @@ def set_parse():
     # %% set up parser
     parser = argparse.ArgumentParser()
     
-    #Experimental name/job-continuation related args
-    parser.add_argument('--experiment_basename', type=str, required=False, default='debugging_eval_annotation_split')
-    parser.add_argument('--run_num', type=str, required=False, default='run1')
-    parser.add_argument('--split_name', type=str, required=False, default='kfold_5_train_fold_0_1_2_3')
-    parser.add_argument('--continue_execution', action='store_true', default=True)
-    parser.add_argument('--continue_exec_root', type=str, default='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/continue_execution_files') #None
-    #Data and application root related args
-    parser.add_argument('--skip_metric_and_prompting', action='store_true', default=False) 
-    #Whether to skip the metric and prompt generation steps and just execute adaptation with gold-standard annotations.
+    #Pathing arguments
     parser.add_argument('--data_root', type=str, default=codebase_dir)
-    parser.add_argument('--dataset_name', type=str, default='Dataset023_Kits23')
+    parser.add_argument('--dataset_name', type=str, default='Dataset031_Kits23') #'Dataset005_Prostate')
     parser.add_argument('--app_root', type=str, default= 
                         '/home/parhomesmaeili/IS_Codebase_Forks/nnInteractive_Fork') 
     #NOTE:Just set for debugging purposes.
-
     #This acts as the name of the app, but also temporarily acts as the relative path name within the input_applications folder in the app root folder.
     parser.add_argument('--app_name', type=str, default='nnInteractive_App')
     parser.add_argument('--metrics_root', type=str, default=os.path.join(codebase_dir, 'results'))
     parser.add_argument('--seg_root', type=str, default=os.path.join(codebase_dir, 'results'))
-
-    #Experimental process/method related args
-    parser.add_argument('--adaptation_config_name', type=str, default=None)
-    parser.add_argument('--enable_adaptation', action='store_true', default=False)
-    parser.add_argument('--execute_on_adapted', action='store_true', default=False)
-    parser.add_argument('--adaptation_episode', type=int, default=None) #Episode number to pull checkpoint for inference
-    #ONLY INTENDED when execute_on_adapted is enabled.
-    parser.add_argument('--algo_cache_name', type=str, default=None)
-    parser.add_argument('--reference_experiment_checkpoint', type=str, default=None) #This is a 
-    #string which denotes the reference name/run which we will be pulling episodes from.
-
-    #This is a bool which controls whether we execute on a pre-adapted method.
-    parser.add_argument('--provide_gold_standard_after_inference', action='store_true', default=False)
-    #Adaptation requires the capability to enable the algorithm to adapt, and so requires some knowledge of the 
-    #annotation. This boolean controls whether adaptation is enabled or not. This also requires some extra handling for
-    #continuing execution, as checkpoints will need to be restored. In addition to other information, e.g. position in the
-    #data stream etc. 
+    parser.add_argument('--continue_exec_root', type=str, default='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/continue_execution_files') #None
+    
+    #Experiment config paths:
+    parser.add_argument('--configs_root', type=str, default=os.path.join(codebase_dir, 'exp_configs'))
+    #The following arguments are relative to the expermiments configs directory 
+    parser.add_argument('--experiment_manifest_filename', type=str, default='experiment_manifest.json')
+    parser.add_argument('--metric_conf_filename', type=str, default='metrics_configs.txt')
+    #prompter pathing. prompter manifest = the set of prompters that will be used in a given experiment,
+    #it pairs init and edit prompt configs together. prompt_conf_filename contains configurations which
+    #are referenced by the manifest and actually contain a set of configurations for potential prompters.
+    parser.add_argument('--prompter_manifest_filename', type=str, default='prompter_manifest.json')
+    parser.add_argument('--prompt_conf_filename', type=str, default='prompts_configs.txt')
+    parser.add_argument('--task_conf_filename', type=str, default='task_configs.txt')
+    
+    
+    #########################
+    
+    #Name of the experiment, used to store results, checkpoints for continuation/auto
+    parser.add_argument('--experiment_basename', type=str, required=False, default='check_refactor_experiment_31')
+    
+    #Runtime environment arguments/system control.
+    parser.add_argument('--continue_execution', action='store_true', default=True)
+    #seeding
     parser.add_argument('--shuffle_cases', action='store_true', default=False)
     parser.add_argument('--random_seed', type=int, default=341103)
+    parser.add_argument('--run_num', type=str, required=False, default='run1')
+    #cuda and determinism arguments
     parser.add_argument('--cuda_deterministic_disable', action='store_true', default=False)
     parser.add_argument('--torch_deterministic_disable', action='store_true', default=False)
     parser.add_argument('--device_idx', type=int, default=0)
-    parser.add_argument('--infer_init', type=str, default='Interactive Init')
-    parser.add_argument('--infer_not_edit_bool', action='store_false', default=True)
-    parser.add_argument('--infer_edit_nums', type=int, default=100)
-    parser.add_argument('--dice_termination_thresh', type=float, default=1.0)
 
-    #Validation utilised constructors build args
-    parser.add_argument('--metric_conf_filename', type=str, default='metrics_configs.txt')
-    parser.add_argument('--prompt_conf_filename', type=str, default='prompts_configs.txt')
-    parser.add_argument('--task_conf_filename', type=str, default='task_configs.txt')
-    parser.add_argument('--metric_conf_name', type=str, default='cross_annotator_fold_0')
-    parser.add_argument('--task_conf_name', type=str, default='task_id_3')
-    parser.add_argument('--init_prompt_conf_name', type=str, default='points_prototype_simplified')
-    parser.add_argument('--edit_prompt_conf_name', type=str, default='points_prototype_simplified')
-    # parser.add_argument('--inf_prompt_procedure_type', type=str, default='heuristic')
-    parser.add_argument('--sim_empty_fg_automatic', action='store_true', default=False)
-    #TODO: Put use_mem and other related args like that for the im etc in here. 
-    parser.add_argument('--use_mem_inf_edit', action='store_true', default=False) #Whether im is used for conditioning prompt gen.
-    parser.add_argument('--im_conf_remove_init', action='store_true', default=True) 
-    #Bool for whether the init state in im will be removed from memory.
-    parser.add_argument('--im_conf_mem_len', type=int, default=1)#-1)
-    #Int which determines the memory length used at cleanup after the interaction memory is updated with the current edit iteration's interaction state (inclusive of current state). 
-    # This functionally has the same thing as using a memory length of N (where N is our variable here) for conditioning
-    #the prompt generation of the next iteration (if memory is being used for conditioning.) N is strictly > 0 or N = - 1, where N=-1 indicates full memory length paradoxically. 
-    # as N = 0 would remove the current iteration's interaction for inference, and also would be the same as ignoring the memory for prompt generation (for which we have a separate variable.)
-    #For now we will set both these parameters to being true (i.e. to delete) because we are having lots of memory issues.
-
-
-    #For the output processor/writing args which are optional.
+    #Auxiliary output arguments/controls whether to write additional outputs in addition to the
+    #metrics.
     parser.add_argument('--write_segmentation', action='store_true', default=False)
     # Whether to write the segmentations at all, or not (default is false for now)
     parser.add_argument('--is_seg_tmp', action='store_true', default=False)
     # Whether the segmentations are written as temp files, if they are written. Or whether they are permanent files.
     parser.add_argument('--save_prompts', action='store_true', default=False)
     
+    #Adaptation training related arguments.
+
+    #Whether to skip the metric and prompt generation steps.
+    #May be used to execute adaptation with gold-standard annotations.
+    parser.add_argument('--skip_metric', action='store_true', default=False) 
+    parser.add_argument('--skip_prompt', action='store_true', default=False) 
+    
+    #This is a bool which controls the adaptation config name, to steer the registry to pull the relevant
+    #config for adaptation. Realistically this is just a byproduct of how we have intertwined the
+    #apps and this framework... probably not ideal. 
+    parser.add_argument('--adaptation_config_name', type=str, default=None)
+    #Self explanatory, whether adaptation is enabled or not.
+    parser.add_argument('--enable_adaptation', action='store_true', default=False)
+    
+    #Adapted method hold-out inference related arguments:
+ 
+    #Whether we are going to execute on a pre-adapted method or not -> this informs whether
+    #we initialise an app which contained adaptation mechanisms with an adapted checkpoint.
+    #(We perform holdout inference on checkpoints even with adaptive methods as this represents expected
+    #performance as a function of training data).
+    parser.add_argument('--execute_on_adapted', action='store_true', default=False)
+    #Training episode number to pull the checkpoint from for hold out inference.
+    #ONLY INTENDED when execute_on_adapted is enabled.
+    parser.add_argument('--adaptation_episode', type=int, default=None) 
+    #What the cache name is within the algo cache directory (once again a byproduct of how we have
+    #intertwined the apps and framework to handle job submissions which can be interrupted...)
+    parser.add_argument('--algo_cache_name', type=str, default=None)
+    #This is a string which denotes the reference name/run from which we have stored an experiment
+    # execution checkpoint, from which we will be pulling episodes from.
+    parser.add_argument('--reference_experiment_checkpoint', type=str, default=None) 
+    #This bool controls whether we provide the gold standard annotation from the reference annotation,
+    #or if we pass through an inferred segmentation (i.e., through what the app has generated at
+    #termination of the editing process) for the adaptation step.
+    parser.add_argument('--provide_gold_standard_after_inference', action='store_true', default=False)
+
+    #Experiment configuration arg
+    parser.add_argument('--experiment_conf_id', type=int, default=31) #10)
+    #Validation utilised constructors build args
+    # parser.add_argument('--infer_init', type=str, default='Interactive Init')
+    # parser.add_argument('--infer_not_edit_bool', action='store_false', default=True)
+    # parser.add_argument('--infer_edit_nums', type=int, default=100)
+    # parser.add_argument('--dice_termination_thresh', type=float, default=1.0)
+
+    # #Validation utilised constructors build args
+    # parser.add_argument('--metric_conf_name', type=str, default='prototype_annotator_4') #'prototype'
+    # parser.add_argument('--task_conf_name', type=str, default='task_id_39') #'task_id_3')
+    # parser.add_argument('--init_prompt_conf_name', type=str, default='points_prototype_simplified')
+    # parser.add_argument('--edit_prompt_conf_name', type=str, default='points_prototype_simplified')
+    
+    # # parser.add_argument('--inf_prompt_procedure_type', type=str, default='heuristic')
+    # parser.add_argument('--sim_empty_fg_automatic', action='store_true', default=False)
+    # #TODO: Put use_mem and other related args like that for the im etc in here. 
+    # parser.add_argument('--use_mem_inf_edit', action='store_true', default=False) #Whether im is used for conditioning prompt gen.
+    # parser.add_argument('--im_conf_remove_init', action='store_true', default=False) 
+    # #Bool for whether the init state in im will be removed from memory.
+    # parser.add_argument('--im_conf_mem_len', type=int, default=1)#-1)
+    # #Int which determines the memory length used at cleanup after the interaction memory is updated with the current edit iteration's interaction state (inclusive of current state). 
+    # # This functionally has the same thing as using a memory length of N (where N is our variable here) for conditioning
+    # #the prompt generation of the next iteration (if memory is being used for conditioning.) N is strictly > 0 or N = - 1, where N=-1 indicates full memory length paradoxically. 
+    # # as N = 0 would remove the current iteration's interaction for inference, and also would be the same as ignoring the memory for prompt generation (for which we have a separate variable.)
+    # #For now we will set both these parameters to being true (i.e. to delete) because we are having lots of memory issues.
 
     args = parser.parse_args()
     return args
@@ -117,17 +157,16 @@ def gen_experiment_args(args):
     #Takes an argparse namedspace obj and constructs a dictionary required for the the run script (most of which will be inherited for the front end init).
 
     output_dict = dict() 
+
+
+    ################################ Pathing related arguments #############################################
+
     #Setting the app name for the experiment, also available for the build script. 
     output_dict['app_name'] = args.app_name 
-
-    #Creating paths
-    
     #Creating the relative path to the base build dir within the app.
     output_dict['build_app_rel_path'] = 'src_validate'
     #Temporarily creating an abspath using this relative path:
     output_dict['build_app_abspath'] = os.path.join(args.app_root, output_dict['app_name'], output_dict['build_app_rel_path'])
-    # output_dict['build_app_abspath'] = os.path.join(codebase_dir, 'input_application', output_dict['app_name'], output_dict['build_app_rel_path'])
-
     #Paths for results and logging etc. 
     output_dict['metrics_root'] = args.metrics_root #For the metrics themselves.
     output_dict['seg_root'] = args.seg_root #For the base directory for the segmentations. This will typically be the same as results, but in case of separate 
@@ -147,24 +186,27 @@ def gen_experiment_args(args):
     output_dict['seg_dataset_subdir'] = os.path.join(output_dict['seg_root'], args.dataset_name) #Subdir for the dataset which is being used in the task, this will
     #typically be the same as the results dataset subdir, but in case of separate mounts we want to be able to store these large files externally.
 
-    if args.skip_metric_and_prompting:
-        assert args.enable_adaptation, 'If skipping metric and prompting generation, then adaptation must be enabled, as we need the adaptation to be able to run without the metrics and prompting generation steps, please check your input arguments.'
-        output_dict['enable_adaptation'] = args.enable_adaptation
-        output_dict['skip_metric_and_prompting'] = args.skip_metric_and_prompting
-        assert args.continue_execution, 'If skipping metric and prompting generation, then continue execution must be enabled, as we need to be able to continue into the adaptation step without the metrics and prompting generation steps, please check your input arguments.'
-        output_dict['continue_execution'] = args.continue_execution
-        assert args.provide_gold_standard_after_inference, 'If skipping metric and prompting generation, then providing gold standard after inference must be enabled, as we need to be able to provide the gold standard for the adaptation step without the metrics and prompting generation steps, please check your input arguments.'
-    else:
-        pass 
-    #Experiment logging related arguments (i.e. for a specific run of the evaluation script!)
+    #Config pathing directory arguments:
+    exp_conf_dir = os.path.join(args.configs_root, args.dataset_name) 
+    exp_manifest_path = os.path.join(exp_conf_dir, args.experiment_manifest_filename)
+    prompter_manifest_path = os.path.join(exp_conf_dir, args.prompter_manifest_filename)
+    prompt_conf_path = os.path.join(exp_conf_dir, args.prompt_conf_filename) 
+    task_conf_path = os.path.join(exp_conf_dir, args.task_conf_filename)
+    metric_conf_path = os.path.join(exp_conf_dir, args.metric_conf_filename)
+    
+
+    ############################ Runtime environment/system control related arguments ########################################
+
+    #Auto-continuation related arguments, requires a fixed experiment name such that it need not be
+    #configured manually for continuation. 
     if args.continue_execution:
         if args.experiment_basename == None:
             raise ValueError('If configured for continuing an experiment execution, must provide the experiment basename to \n ' \
             'continue from otherwise we cannot proceed.')
         else:
-            output_dict['experiment_name'] = f'{args.experiment_basename}_{args.run_num}_{args.split_name}'
-            named_experiment = True 
-
+            output_dict['experiment_name'] = f'{args.experiment_basename}_{args.run_num}' #_{args.split_name}'
+            # named_experiment = True 
+            assert f'experiment_{args.experiment_conf_id}' in args.experiment_basename, 'If using named experiments, the experiment manifest filename must contain the experiment name to ensure consistency and clarity, please check your input arguments and the experiment manifest filename to ensure this is the case.'
         if args.continue_exec_root == None:
             raise ValueError('If continuing an experiment execution, must provide the root directory of the \n'
             'files to write/read where to continue from.')
@@ -173,144 +215,25 @@ def gen_experiment_args(args):
     else:
         if args.experiment_basename == None:
             output_dict['experiment_name'] = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-            named_experiment = False
+            # named_experiment = False
         else:
             raise Exception('If not continuing an experiment execution, cannot provide an experiment basename, \n'
             'this is redundant.')
-    if args.enable_adaptation:
-        assert not args.execute_on_adapted, 'If adaptation is enabled, then executing on pre-trained adapted should not be enabled, please check your input arguments.'
-        if not args.continue_execution:
-            raise ValueError('Adaptation almost certainly requires the capability to continue execution, please enable \n'
-            'the continue execution boolean flag to proceed for reassurance.')
-        else:
-            assert args.algo_cache_name is None, 'If adaptation is enabled, must not provide the algorithm cache name as an input argument, please check your input arguments. The algorithm cache name needs to be extracted from the adaptation experiment_checkpoint.'
-            assert args.adaptation_config_name is not None, 'If adaptation is enabled, must provide the adaptation config name as an input argument, please check your input arguments.'
-            output_dict['adaptation_config_name'] = args.adaptation_config_name
-            output_dict['enable_adaptation'] = args.enable_adaptation
-            output_dict['provide_gold_standard_after_inference'] = args.provide_gold_standard_after_inference
-    else:
-        output_dict['enable_adaptation'] = args.enable_adaptation
-        assert args.adaptation_config_name == None, 'If adaptation is disabled, cannot provide adaptation config name, please check your input arguments.'
-        output_dict['adaptation_config_name'] = None #Irrelevant if adaptation is disabled.
-        assert args.provide_gold_standard_after_inference == False, 'If adaptation is disabled, cannot provide gold standard after inference, please set this flag or check your input arguments.'
-        output_dict['provide_gold_standard_after_inference'] = False #Irrelevant if adaptation is disabled.
-
-    output_dict['execute_on_adapted'] = args.execute_on_adapted
-    if output_dict['execute_on_adapted']:
-        if args.enable_adaptation:
-            raise ValueError('If executing on adapted, then adaptation should not be enabled, as we are executing on a pre-adapted method, please check your input arguments.')
-        else:
-            output_dict['enable_adaptation'] = args.enable_adaptation
-            assert args.adaptation_episode is not None, 'If executing on adapted, must provide an adaptation episode number to pull the checkpoint from, please check your input arguments.'
-            output_dict['adaptation_episode'] = args.adaptation_episode
-            assert args.algo_cache_name is not None, 'If executing on adapted, must provide the algorithm cache name to pull the checkpoint from, please check your input arguments.'
-            output_dict['algo_cache_name'] = args.algo_cache_name
-            assert args.reference_experiment_checkpoint is not None, 'If executing on adapted, must provide the reference experiment checkpoint name to pull info from, please check your input arguments.'
-            output_dict['reference_experiment_checkpoint'] = os.path.join(args.continue_exec_root, args.reference_experiment_checkpoint)
-    else:
-        assert args.adaptation_episode is None, 'If not executing on adapted, cannot provide an adaptation episode number, please check your input arguments.'
-        output_dict['adaptation_episode'] = None
-        assert args.reference_experiment_checkpoint is None, 'If not executing on adapted, cannot provide a reference experiment checkpoint, please check your input arguments.'
-        output_dict['reference_experiment_checkpoint'] = None
-    output_dict['continue_execution'] = args.continue_execution #Storing this boolean.
+    
+    #Storing the directory for the results, segs, with the experiment name.
     output_dict['exp_results_dir'] = os.path.join(output_dict['results_dataset_subdir'], output_dict['experiment_name'])
     output_dict['exp_seg_dir'] = os.path.join(output_dict['seg_dataset_subdir'], output_dict['experiment_name'])
 
-    ########################################################################################################################
+    #Storing the continue execution bool, this informs downstream checkpointing.
+    output_dict['continue_execution'] = args.continue_execution
 
-    #Configuring more generic experiment related configs.
-
-
-    #Configuring the experimental configs, first the infer run configs:
-    if not args.infer_not_edit_bool: #Then init only.
-        output_dict['infer_run_configs'] = {
-            'init':args.infer_init,
-            'edit_bool':False,
-            'num_iters': None
-        }
-    else:
-        output_dict['infer_run_configs'] = {
-            'init':args.infer_init,
-            'edit_bool':True,
-            'num_iters': args.infer_edit_nums
-        }
-
-    #Configuring more experiment specific configs:
-
-    #Extracting the configs dicts for the dataloading, metrics and the prompt configs.
-    exp_conf_dir = os.path.join(codebase_dir, 'exp_configs', args.dataset_name) 
-    # output_dict['dataloading_type'] = args.dataloading_type
-    output_dict['task_id'] =args.task_conf_name
-    output_dict['task_configs'] = extract_config(os.path.join(exp_conf_dir, args.task_conf_filename), args.task_conf_name)
-    output_dict['seg_problem'] = output_dict['task_configs']['seg_problem']
-    
-    if named_experiment:
-        assert output_dict['task_configs']['data_sampling']['sample_group_category'][0] in output_dict['experiment_name'], 'The experiment name must contain the sample group category specified in the task configs for the experiment at hand, please check your input arguments and the task configs to ensure this is the case for consistency and clarity.'
-        subcategory_type = type(output_dict['task_configs']['data_sampling']['sample_group_category'][1])
-        if 'kfold' in output_dict['task_configs']['data_sampling']['sample_group_category'][0]:
-            if subcategory_type == str:
-                assert output_dict['task_configs']['data_sampling']['sample_group_category'][1] in output_dict['experiment_name'], 'If using kfold sample group category, the experiment name must also contain the specific fold numbers used in the sample group category specified in the task configs for the experiment at hand, please check your input arguments and the task configs to ensure this is the case for consistency and clarity.'
-            elif subcategory_type == list:
-                fold_merged_str = []
-                for fold in output_dict['task_configs']['data_sampling']['sample_group_category'][1]:
-                    assert 'fold' in fold
-                    fold_merged_str.append(fold.replace('fold_', ''))
-                fold_merged_str = 'fold_' + '_'.join(fold_merged_str)
-                assert fold_merged_str in output_dict['experiment_name'], 'If using kfold sample group category, the experiment name must also contain the specific fold numbers used in the sample group category specified in the task configs for the experiment at hand, please check your input arguments and the task configs to ensure this is the case for consistency and clarity.'
-            else: 
-                raise TypeError('Unknown datatype for the sample group subcategory, please check your task configs to ensure it is either a string or a list of strings for consistency and clarity.')
-        elif 'all_' in output_dict['task_configs']['data_sampling']['sample_group_category'][0]:
-            assert subcategory_type == str, 'If using all_ sample group category, the subcategory type must be a string, please check your task configs to ensure this is the case.'
-            assert 'all' in output_dict['task_configs']['data_sampling']['sample_group_category'][1] and output_dict['task_configs']['data_sampling']['sample_group_category'][1] in output_dict['experiment_name'], 'If using all_ sample group category, the experiment name must also contain the specific subcategory specified in the sample group category specified in the task configs for the experiment at hand, please check your input arguments and the task configs to ensure this is the case for consistency and clarity.'
-        else:
-            raise NotImplementedError('The current implementation only supports sample group categories which contain kfold or all_ as substrings, please check your task configs to ensure this is the case if you want to use named experiments for consistency and clarity.')
-    
-    
-    #Loading in the relevant information from the dataset
-
-    output_dict['dataset_info'] = {
-    'dataset_name': args.dataset_name,
-    'dataset_image_channels': extract_config(os.path.join(args.data_root, 'datasets', args.dataset_name, 'dataset.json'), 'channel_names'),
-    'task_channels': extractor(output_dict['task_configs'], ('data_sampling', 'image_conf', 'image_channel'))
-    }
-
-    #We pull the spacing config info here as it may be needed. If it does not exist we raise an error
-    #if the metrics configs require it (e.g. for NSD with tolerance sf instead of mms), but we don't want to pull it if it isn't needed to avoid unnecessary dependencies on the dataset configs.
-    try:
-        spacing_config = extract_config(os.path.join(codebase_dir, 'exp_configs', args.dataset_name, 'spacing_config.json'), 'reference_spacing')
-    except:
-        spacing_config = None 
-    output_dict['metrics_configs'] = process_metric_config(
-        extract_config(os.path.join(exp_conf_dir, args.metric_conf_filename), args.metric_conf_name),
-        spacing_config
-    )
-
-    #Extracting the config dict for handling the empty fg....? 
-    output_dict['sim_empty_fg_automatic'] = args.sim_empty_fg_automatic  
-
-    # output_dict['metric_prompt_procedure_type']
-    # output_dict['inf_prompt_procedure_type'] = args.inf_prompt_procedure_type 
-
-    #Extracting from inf prompt registry according to procedural type: 
-    # inf_prompt_registry = extract_config(os.path.join(exp_conf_dir, args.prompt_conf_filename), args.inf_prompt_procedure_type)
-
-    output_dict['inf_init_prompt_config'] =  extract_config(os.path.join(exp_conf_dir, args.prompt_conf_filename), args.init_prompt_conf_name) 
-    #inf_prompt_registry[args.init_prompt_conf_name]
-
-    output_dict['inf_edit_prompt_config'] = extract_config(os.path.join(exp_conf_dir, args.prompt_conf_filename), args.edit_prompt_conf_name) 
-    #inf_prompt_registry[args.edit_prompt_conf_name]
-    
-    # output_dict['metrics_prompts_configs']
-    
-    #Extracting the random seed/randomness related info:
+    #Extracting the random seed/randomness related info, cross-checking it with the experiment 
+    #number (for repeats).
     output_dict['shuffle_cases'] = args.shuffle_cases
     output_dict['random_seed'] = args.random_seed
     if args.random_seed != None:
         #Lets extract the run num. 
         run_num = args.run_num #re.search(r'run(\d+)', output_dict['experiment_name'])
-        # assert output_dict and len(re.findall(r'run(\d+)', output_dict['experiment_name'])) == 1, "Expected exactly one match"
-        # run_num = run_num.group()
-
         if run_num is None:
             raise ValueError('No run num was found at all with a pre-determined random seed!')
         if run_num not in run_vs_seed:
@@ -321,17 +244,7 @@ def gen_experiment_args(args):
     output_dict['cuda_deterministic'] = not args.cuda_deterministic_disable
     output_dict['torch_deterministic'] = not args.torch_deterministic_disable
 
-    #Now we extract the termination condition threshold:
-    output_dict['dice_termination_thresh'] = args.dice_termination_thresh 
-    #####################################################################################
-
-    #Extracting the writer info.
-    output_dict['write_segmentation'] = args.write_segmentation
-    output_dict['is_seg_tmp'] = args.is_seg_tmp
-    output_dict['save_prompts'] = args.save_prompts
-    ###########################################################################################
-    
-    #Extracting the inference and prompt gen device info. 
+    #Extracting the device info. 
     if args.device_idx == None:
         output_dict['device'] = torch.device('cpu')
     elif isinstance(args.device_idx, int):
@@ -368,21 +281,257 @@ def gen_experiment_args(args):
     else:
         raise TypeError('Device idx must be a None (i.e. cpu) or an int.')
     
-    ###########################################################################################
-    
-    #Extracting the info about the interaction memory usage:
+    ########################### Auxiliary output related arguments ####################################
+    output_dict['write_segmentation'] = args.write_segmentation
+    output_dict['is_seg_tmp'] = args.is_seg_tmp
+    output_dict['save_prompts'] = args.save_prompts
 
-    #The use of inf im for conditioning the prompt generation.
-    output_dict['use_mem_inf_edit'] = args.use_mem_inf_edit
-    #Handling the im configs in the front-end-simulator (e.g. memory len, keeping init)
-    output_dict['im_config'] = {
-        'keep_init':not args.im_conf_remove_init,
-        'im_len':args.im_conf_mem_len 
+#################################### Adaptation Related Arguments ###########################################
+
+    # First we check whether adaptation is enabled or not.
+    #If it is enabled, we assert that we cannot be running "execute on adapted", which is the 
+    #process of performing hold-out inference on an adapted model's checkpoints.
+    if args.enable_adaptation:
+        assert not args.execute_on_adapted, 'If adaptation is enabled, then executing on pre-trained adapted should not be enabled, please check your input arguments.'
+        if not args.continue_execution:
+            raise ValueError('Adaptation almost certainly requires the capability to continue execution, please enable \n'
+            'the continue execution boolean flag to proceed for reassurance.')
+        else:
+            assert args.algo_cache_name is None, 'If adaptation is enabled, must not provide the algorithm cache name as an input argument, please check your input arguments. The algorithm cache name needs to be extracted from the adaptation experiment_checkpoint.'
+            assert args.adaptation_config_name is not None, 'If adaptation is enabled, must provide the adaptation config name as an input argument, please check your input arguments.'
+            output_dict['adaptation_config_name'] = args.adaptation_config_name
+            output_dict['enable_adaptation'] = args.enable_adaptation
+            output_dict['provide_gold_standard_after_inference'] = args.provide_gold_standard_after_inference
+    else:
+        output_dict['enable_adaptation'] = args.enable_adaptation
+        assert args.adaptation_config_name == None, 'If adaptation is disabled, cannot provide adaptation config name, please check your input arguments.'
+        output_dict['adaptation_config_name'] = None #Irrelevant if adaptation is disabled.
+        #We cannot provide gold standard after inference because there should not be adaptation in the first place!
+        assert args.provide_gold_standard_after_inference == False, 'If adaptation is disabled, cannot provide gold standard after inference, please set this flag or check your input arguments.'
+        output_dict['provide_gold_standard_after_inference'] = False #Irrelevant if adaptation is disabled.
+
+    #Now we handle some arguments for the config where we want to skip metric computation and prompting
+    #this may be the case if we just want to run the adaptation process with gold standard annotations.
+
+    output_dict['skip_metric'] = args.skip_metric
+    output_dict['skip_prompt'] = args.skip_prompt
+    if args.skip_metric or args.skip_prompt:
+        assert args.enable_adaptation, 'If skipping metric or prompt generation, then adaptation must be enabled, as we need the adaptation to be able to run without the metrics and prompting generation steps, please check your input arguments.'
+        if 'enable_adaptation' in output_dict:
+            assert output_dict['enable_adaptation'] == args.enable_adaptation, 'The enable adaptation value in the output dict does not match the input argument, please check your input arguments and the logic for setting the enable adaptation value in the output dict to ensure consistency and clarity.'
+        else:
+            raise Exception('We should have enabled adaptation by this point, please check the logic, safety precautions implemented.')
+        assert args.continue_execution, 'Continue execution must be enabled as skip metric/prompt can only be used'
+        'for adaptation.'
+        if 'continue_execution' in output_dict:
+            assert output_dict['continue_execution'] == args.continue_execution, 'The continue execution value in the output dict does not match the input argument, please check your input arguments and the logic for setting the continue execution value in the output dict to ensure consistency and clarity.'
+        else:
+            raise Exception('We should have set the continue execution value in the output dict by this point, please check the logic, safety precautions implemented.')
+    if output_dict['skip_prompt']:
+        #If we skip prompting during adaptation, then there is no mechanism to generate a mask for training, other than
+        #to pass through a gold standard annotation.
+        assert args.provide_gold_standard_after_inference, 'If skipping prompting generation, then '
+        'providing gold standard after inference must be enabled. We need to be able to provide an annotation for'
+        'the adaptation step, please check your input arguments.'    
+
+    #Somewhat amusingly, I think we have implemented assertion checks which invert the logic of
+    #the checks implemented when adaptation is enabled. Let us leave this be. 
+    output_dict['execute_on_adapted'] = args.execute_on_adapted
+    if output_dict['execute_on_adapted']:
+        if args.enable_adaptation:
+            raise ValueError('If executing on adapted, then adaptation should not be enabled, as we are executing on a pre-adapted method, please check your input arguments.')
+        else:
+            if 'enable_adaptation' in output_dict:
+                assert output_dict['enable_adaptation'] == args.enable_adaptation, 'The enable adaptation value in the output dict does not match the input argument, please check your input arguments and the logic for setting the enable adaptation value in the output dict to ensure consistency and clarity.'
+            else:
+                raise Exception('We should have set the enable adaptation value in the output dict by this point, please check the logic, safety precautions implemented.')
+            assert args.adaptation_episode is not None, 'If executing on adapted, must provide an adaptation episode number to pull the checkpoint from, please check your input arguments.'
+            output_dict['adaptation_episode'] = args.adaptation_episode
+            assert args.algo_cache_name is not None, 'If executing on adapted, must provide the algorithm cache name to pull the checkpoint from, please check your input arguments.'
+            output_dict['algo_cache_name'] = args.algo_cache_name
+            assert args.reference_experiment_checkpoint is not None, 'If executing on adapted, must provide the reference experiment checkpoint name to pull info from, please check your input arguments.'
+            output_dict['reference_experiment_checkpoint'] = os.path.join(args.continue_exec_root, args.reference_experiment_checkpoint)
+    else:
+        assert args.adaptation_episode is None, 'If not executing on adapted, cannot provide an adaptation episode number, please check your input arguments.'
+        output_dict['adaptation_episode'] = None
+        assert args.reference_experiment_checkpoint is None, 'If not executing on adapted, cannot provide a reference experiment checkpoint, please check your input arguments.'
+        output_dict['reference_experiment_checkpoint'] = None
+
+    ############################# Experiment configuration arguments #########################################
+    exp_config_name = f'exp_config_{args.experiment_conf_id}'
+    #First we pull the experiment config from the manifest.
+    output_dict['experiment_config'] = extract_config(
+        exp_manifest_path, 
+        exp_config_name
+    )
+
+    #Now we will pull the task, metric configs, prompt configs and prompt manifest for cross-checking.
+    orig_task_configs = extract_config(
+        task_conf_path,
+        None
+    )
+    orig_prompter_manifest = extract_config(
+        prompter_manifest_path,
+        None
+    )
+    orig_prompt_configs = extract_config(
+        prompt_conf_path,
+        None
+    )
+    orig_metric_configs = extract_config(
+        metric_conf_path,
+        None
+    )
+
+    #Now we will cross-check the configs provided with the experiment manifest against the
+    #original task, prompt, metric configs to ensure that the config provided in the manifest is
+    # consistent with the referenced configs.
+    task_id = output_dict['experiment_config']['task']['task_id']
+    metric_id = output_dict['experiment_config']['metrics']['metrics_config_id']
+    prompter_id = output_dict['experiment_config']['prompter']['prompter_id']
+
+    orig_task_pulled = extractor(orig_task_configs, (task_id,))
+    orig_metric_pulled = extractor(orig_metric_configs, (metric_id,))
+    orig_prompter_pulled = extractor(orig_prompter_manifest, (prompter_id,))
+    #We do a dict deep equals
+    assert dict_deep_equals(orig_task_pulled, output_dict['experiment_config']['task']['config']), 'The task config pulled based on the experiment manifest does not match the original task config with the corresponding id, please check your experiment manifest and task configs for consistency and clarity.'
+    assert dict_deep_equals(orig_metric_pulled, output_dict['experiment_config']['metrics']['config']), 'The metric config pulled based on the experiment manifest does not match the original metric config with the corresponding id, please check your experiment manifest and metric configs for consistency and clarity.'
+    assert dict_deep_equals(orig_prompter_pulled, output_dict['experiment_config']['prompter']['config']), 'The prompt config pulled based on the experiment manifest does not match the original prompt config with the corresponding id, please check your experiment manifest and prompt configs for consistency and clarity.'
+
+
+    #If all ok, lets assign the relevant configs
+    output_dict['task_configs'] = output_dict['experiment_config']['task']['config']
+    output_dict['metrics_configs'] = output_dict['experiment_config']['metrics']['config']
+    output_dict['prompter_configs'] = output_dict['experiment_config']['prompter']['config']
+
+    #Lets make some assertions on what keypaths need to be provided.
+    #tasks first
+    assert has_path(output_dict['task_configs'], ('data_sampling', 'sample_group_category'))
+    assert has_path(output_dict['task_configs'], ('data_sampling', 'image_conf'))
+    assert has_path(output_dict['task_configs'], ('infer_info',))
+    assert has_path(output_dict['task_configs'], ('seg_problem',))
+    assert has_path(output_dict['task_configs'], ('data_transforms', 'semantic_class_mapping'))
+    #prompters
+    assert has_path(output_dict['prompter_configs'], ('init_prompt_conf',))
+    assert has_path(output_dict['prompter_configs'], ('edit_prompt_conf',))
+    assert has_path(output_dict['prompter_configs'], ('infer_edit_nums',))
+    assert has_path(output_dict['prompter_configs'], ('use_mem_inf_edit',))
+    assert has_path(output_dict['prompter_configs'], ('im_conf_remove_init',))
+    assert has_path(output_dict['prompter_configs'], ('im_conf_mem_len',))
+    assert has_path(output_dict['prompter_configs'], ('annotation_conf',))
+
+    #metrics
+    assert has_path(output_dict['metrics_configs'], ('metrics',))
+    assert has_path(output_dict['metrics_configs'], ('early_termination_criterion','metric'))
+    assert has_path(output_dict['metrics_configs'], ('early_termination_criterion','threshold'))
+    assert has_path(output_dict['metrics_configs'], ('data_sampling', 'annotation_conf'))
+
+    ######################   Task definition arguments ######################################
+    output_dict['seg_problem'] = output_dict['task_configs']['seg_problem']
+    #Configuring the experimental configs, first the infer run configs:
+    infer_info = output_dict['task_configs']['infer_info']
+    assert 'infer_init' in infer_info
+    assert 'infer_edit_bool' in infer_info
+    assert 'sim_empty_fg_automatic' in infer_info
+    num_edits = output_dict['prompter_configs']['infer_edit_nums']
+
+    #Pulling the number of iters for editing from the prompter config, we will cross-check this against
+    #the infer info. Why are they separate? Because prompter behaviour -> number of edits, meanwhile
+    #init mode, or editing use are mostly informing what the expected api should be? Edits (aside from interaction
+    #memory are fairly homogenous in the request structure otherwise/or what is expected), and different
+    #to the init sometimes. E.g., prompts which can only be used for init, but not edits.
+
+    #The infer_modes inform part of what the fingerprint of the segmentation task is expected, 
+    # meanwhile the prompter defines what will be used to generate prompts.
+    
+    #However this will be wrapped together in the higher-level of "init, edit format" and "number of
+    # "edits" as on the prompting side we need to loop iteratively.
+
+    if infer_info['infer_edit_bool']:
+        assert type(num_edits) == int, 'If infer_edit_bool is true, then the number of edits must be an integer, please check your experiment manifest and prompter configs for consistency and clarity.'
+        assert num_edits != None and num_edits > 0, 'If infer_edit_bool is true, then the number of edits must be a positive integer, please check your experiment manifest and prompter configs for consistency and clarity.'
+        output_dict['infer_run_configs'] = {
+            'init':infer_info['infer_init'],
+            'edit_bool':True,
+            'num_edits': num_edits
+        }
+    else:
+        assert num_edits == 0 or num_edits == None, 'If infer_edit_bool is false, then the number of edits must be 0 or None, please check your experiment manifest and prompter configs for consistency and clarity.'
+        output_dict['infer_run_configs'] = {
+            'init':infer_info['infer_init'],
+            'edit_bool':False,
+            'num_edits': None
+        }
+    #Extracting the config dict for handling the empty fg....? 
+    output_dict['sim_empty_fg_automatic'] = infer_info['sim_empty_fg_automatic']
+
+    #Loading in the relevant information from the dataset.
+
+    #We pull the spacing config info here as it may be needed. If it does not exist we raise an error
+    #if the metrics configs require it (e.g. for NSD with tolerance sf instead of mms), but we don't want to pull it if it isn't needed to avoid unnecessary dependencies on the dataset configs.
+    try:
+        spacing_config = extract_config(
+            os.path.join(exp_conf_dir, 'spacing_config.json'), 
+            None
+            )
+        reference_spacing = spacing_config['reference_spacing']
+    except:
+        spacing_config = None 
+        reference_spacing = None 
+
+    #TODO: Update this for the new dataset-level contract.
+    output_dict['dataset_info'] = {
+    'dataset_name': args.dataset_name,
+    'dataset_image_channels': extract_config(os.path.join(args.data_root, 'datasets', args.dataset_name, 'dataset.json'), 'channel_names'),
+    'task_channels': extractor(output_dict['task_configs'], ('data_sampling', 'image_conf', 'image_channel')),
+    'spacing_info': spacing_config
     }
 
+    ########################### Experiment manifest prompter arguments ##############################
+
+    #Extracting the prompting class initialisation configs...
+    #first lets cross-check that the config subdict is matching with what is in the prompt configs..
+    assert dict_deep_equals(
+        orig_prompt_configs[output_dict['prompter_configs']['init_prompt_conf']['name']],
+        output_dict['prompter_configs']['init_prompt_conf']['config']
+    )
+    assert dict_deep_equals(
+        orig_prompt_configs[output_dict['prompter_configs']['edit_prompt_conf']['name']],
+        output_dict['prompter_configs']['edit_prompt_conf']['config']
+    )
+    #If we passed it, then we can now assign the config dict.
+    output_dict['inf_init_prompt_config'] =  output_dict['prompter_configs']['init_prompt_conf']['config'] 
+    output_dict['inf_edit_prompt_config'] = output_dict['prompter_configs']['edit_prompt_conf']['config']
+
+    if infer_info['infer_init'] == 'Interactive Init':
+        assert output_dict['inf_init_prompt_config'] is not None, 'If infer init is interactive init, then the init prompt config must not be None, please check your experiment manifest and prompter configs for consistency and clarity.'
+    if infer_info['infer_edit_bool']:
+        assert output_dict['inf_edit_prompt_config'] is not None, 'If infer edit bool is true, then the edit prompt config must not be None, please check your experiment manifest and prompter configs for consistency and clarity.'
+
+    #Extracting configurations for interaction memory usage -> informs use of interaction memory in
+    #prompting and the memory length for conditioning the prompt generation.
+
+    #The use of inf im for conditioning the prompt generation.
+    output_dict['use_mem_inf_edit'] = output_dict['prompter_configs']['use_mem_inf_edit'] 
+    #Memory maintenance config in the front-end-simulator (e.g. memory len, keeping init)
+    output_dict['im_config'] = {
+        'keep_init': not output_dict['prompter_configs']['im_conf_remove_init'],
+        'im_len':output_dict['prompter_configs']['im_conf_mem_len'], 
+    }
+
+    ####################### Experiment manifest metric arguments ################################
+
+    output_dict['metrics_configs'] = process_metric_config(
+        output_dict['metrics_configs'],
+        reference_spacing
+    )
+    #Now we extract the termination condition threshold:
+    output_dict['early_termination_criterion'] = output_dict['metrics_configs']['early_termination_criterion'] 
+    #deprecated -> ['dice_termination_thresh'] = args.dice_termination_thresh 
+    
     return output_dict 
 
-def process_metric_config(metric_config, spacing_config):
+def process_metric_config(metric_config, reference_spacing):
     #Function which processes the metric configs for cases where we do not have a trivial config.
 
     #E.g., for NSD where we may want to calculate across multiple tolerance values.
@@ -391,8 +540,8 @@ def process_metric_config(metric_config, spacing_config):
             if 'tolerance_mm' not in conf:
                 assert 'tolerance_sf' in conf, 'If no tolerance_mm provided for NSD metric config, then must provide a tolerance_sf value to calculate the tolerance based on the dataset voxel spacing, please check your metric configs.'
                 #If we have a tolerance sf, then we must calculate tolerance mms from the tolerance sf. 
-                if spacing_config:
-                    tolerance_mms = [float(i) * float(spacing_config) for i in conf['tolerance_sf']]
+                if reference_spacing:
+                    tolerance_mms = [float(i) * float(reference_spacing) for i in conf['tolerance_sf']]
                     assert isinstance(tolerance_mms, list), 'The calculated tolerance mms values must be a list, even if there is only one value, to be consistent with the case where the tolerance mms values are provided directly in the metric configs, please check your metric configs and dataset spacing config to ensure this is the case.'
                     conf['tolerance_mms'] = {index:tolerance_mm for index,tolerance_mm in enumerate(tolerance_mms)}
 
@@ -434,8 +583,8 @@ def create_seg_dirs(exp_seg_dir, infer_run_conf, exist_ok=False):
     else:
         if infer_run_conf['edit_bool']:
 
-            if isinstance(infer_run_conf['num_iters'], int):
-                for iter in range(1, infer_run_conf['num_iters'] + 1):
+            if isinstance(infer_run_conf['num_edits'], int):
+                for iter in range(1, infer_run_conf['num_edits'] + 1):
                     os.makedirs(os.path.join(exp_seg_dir, f'Interactive Edit Iter {iter}'), exist_ok=exist_ok)
             else:
                 raise TypeError('If running editing, needs to be an int type for the number of iterations performed.')
@@ -827,7 +976,7 @@ def init_fe(infer_app, experiment_args):
         'use_mem_inf_edit',
         'im_config', 
         #Variables related to metrics and saving metrics/
-        'dice_termination_thresh',
+        'early_termination_criterion', # 'dice_termination_thresh',
         'metrics_savepaths',
         'exp_results_dir',
         #Variables related to saving segmentations and prompt info
@@ -836,10 +985,13 @@ def init_fe(infer_app, experiment_args):
         'save_prompts',
         'is_seg_tmp',
         'write_segmentation',
-        #Variables related to api-structure
-        'dataset_info',
+        #Supplementary info related to api-structure
+        'dataset_info', #Not sure if this should stay here?
+        #Adaptation configs
         'enable_adaptation',
-        'provide_gold_standard_after_inference'
+        'provide_gold_standard_after_inference',
+        'skip_metric',
+        'skip_prompt'
     ]
     args = {key:val for key,val in experiment_args.items() if key in keep_key_list}
 
@@ -925,6 +1077,7 @@ def main():
         dataset_dir=experiment_args['input_dataset_dir'],
         exp_task_configs=experiment_args['task_configs'],
         metric_configs=experiment_args['metrics_configs'],
+        prompter_configs=experiment_args['prompter_configs'],
         shuffle_bool=experiment_args['shuffle_cases'],
         random_seed=experiment_args['random_seed'],
         last_completed_case=loaded_experiment_checkpoint["eval_state"]['last_completed_case'] if loaded_experiment_checkpoint != None else None,

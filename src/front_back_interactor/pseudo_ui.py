@@ -192,7 +192,12 @@ class FrontEndSimulator:
         }  
         
         #Variables related to metrics and saving metrics/
-        dice_termination_thresh - threshold for early termination based on dice score.
+        early_termination_criterion - A dictionary containing the information regarding the early 
+        termination criterion, which is based on a metric score. For now contains the following fields:
+        - 'metric': The metric name to use for early termination.
+        - 'threshold': The threshold for the metric score.
+        NOTE: Future work may expand this into a more complex criterion.
+
         metrics_savepaths - dictionary mapping metric names to their save paths.
         exp_results_dir - base directory for saving experimental results.
 
@@ -293,7 +298,7 @@ class FrontEndSimulator:
         '''
         self.metrics_handler = MetricsHandler(
             calc_device=self.args['device'], 
-            dice_termination_threshold=self.args['dice_termination_thresh'],
+            early_termination_criterion=self.args['early_termination_criterion'], #self.args['dice_termination_thresh'],
             metrics_configs=self.args['metrics_configs']['metrics'],
             metrics_savepaths=self.args['metrics_savepaths'],
             config_labels_dict=self.args['configs_labels_dict']
@@ -310,33 +315,40 @@ class FrontEndSimulator:
         '''
         This function initialises the class objects which can generate the interaction states for use in inference.
         '''
-        # if self.args['inf_prompt_procedure_type'].title() == 'Heuristic':
-        # self.autoseg_state_generator = None  
-        # The Autosegmentation state does not require any interaction state generators since they contain no 
-        # interaction. All information for the autosegmentation state will be provided manually.
-
+        #First we check whether initialisation or editing config is a nulltype. 
+        #If init is a nulltype then no prompts are generated for init -> automatic init.
+        #If edit is a nulltype then no prompts are generated for editing -> initialisation only.
+        
         #First we initialise the init generator:
-        assert 'procedure_type' in self.args['inf_init_prompt_config'], 'The inference initialisation prompt config dictionary must contain the key "procedure_type"'
-        assert 'procedure_type' in self.args['inf_edit_prompt_config'], 'The inference editing prompt config dictionary must contain the key "procedure_type"'
-        if self.args['inf_init_prompt_config']['procedure_type'].title() == 'Heuristic':
-            self.inf_init_generator = HeuristicInteractionState(
-                sim_device=self.args['device'],
-                use_mem=False,
-                prompt_configs=self.args['inf_init_prompt_config']['config'],
-                config_labels_dict=self.args['configs_labels_dict']
-            )
+        if self.args['inf_init_prompt_config'] is None:
+            self.inf_init_generator = None
         else:
-            raise ValueError('The selected prompt generation algorithm-type is not supported')
-        #Then we initialise the edit generator:
-        if self.args['inf_edit_prompt_config']['procedure_type'].title() == 'Heuristic':
-            self.inf_edit_generator = HeuristicInteractionState(
-                sim_device=self.args['device'],
-                use_mem=self.args['use_mem_inf_edit'],
-                prompt_configs=self.args['inf_edit_prompt_config']['config'],
-                config_labels_dict=self.args['configs_labels_dict']
-            )
+            assert 'procedure_type' in self.args['inf_init_prompt_config'], 'The inference initialisation prompt config dictionary must contain the key "procedure_type"'
+            
+            if self.args['inf_init_prompt_config']['procedure_type'].title() == 'Heuristic':
+                self.inf_init_generator = HeuristicInteractionState(
+                    sim_device=self.args['device'],
+                    use_mem=False,
+                    prompt_configs=self.args['inf_init_prompt_config']['config'],
+                    config_labels_dict=self.args['configs_labels_dict']
+                )
+            else:
+                raise ValueError('The selected prompt generation algorithm-type is not supported')
+        
+        if self.args['inf_edit_prompt_config'] is None:
+            self.inf_edit_generator = None
         else:
-            raise ValueError('The selected prompt generation algorithm-type is not supported')
+            assert 'procedure_type' in self.args['inf_edit_prompt_config'], 'The inference editing prompt config dictionary must contain the key "procedure_type"'
+            #Then we initialise the edit generator:
+            if self.args['inf_edit_prompt_config']['procedure_type'].title() == 'Heuristic':
+                self.inf_edit_generator = HeuristicInteractionState(
+                    sim_device=self.args['device'],
+                    use_mem=self.args['use_mem_inf_edit'],
+                    prompt_configs=self.args['inf_edit_prompt_config']['config'],
+                    config_labels_dict=self.args['configs_labels_dict']
+                )
+            else:
+                raise ValueError('The selected prompt generation algorithm-type is not supported')
     
     def metric_prompt_gen_init(self):
         '''
@@ -408,6 +420,9 @@ class FrontEndSimulator:
             im = {'Automatic Init': None}
 
         elif infer_config['mode'].title() == 'Interactive Init':
+            if self.inf_init_generator is None:
+                raise Exception('The prompt generator for interactive initialisation was not initialised, but the inference config requires it.')
+            
             im = {'Interactive Init': self.inf_init_generator(
                 image=self.data_instance['image']['metatensor'], 
                 mode=infer_config['mode'], 
@@ -417,6 +432,9 @@ class FrontEndSimulator:
             
 
         elif infer_config['mode'].title() == 'Interactive Edit':
+            if self.inf_edit_generator is None:
+                raise Exception('The prompt generator for interactive editing was not initialised, but the inference config requires it.') 
+            
             im[f'Interactive Edit Iter {infer_config["edit_num"]}'] = self.inf_edit_generator(
                 image=self.data_instance['image']['metatensor'],
                 mode=infer_config['mode'],
@@ -752,7 +770,7 @@ class FrontEndSimulator:
         infer_run_configs = self.args['infer_run_configs']
         
         if not isinstance(infer_run_configs, dict):
-            raise TypeError('Inference run type configs must be presented in dict, with keys of "edit_bool" and "num_iters".')
+            raise TypeError('Inference run type configs must be presented in dict, with keys of "edit_bool" and "num_edits".')
         
         if not isinstance(infer_run_configs['edit_bool'],  bool):
             raise TypeError('edit_bool value must be a boolean in the inference run configs dict.')
@@ -771,7 +789,7 @@ class FrontEndSimulator:
                 #We will modify the infer_run_configs to only perform an automatic initialisation.
                 infer_run_configs['init'] = 'Automatic Init'
                 infer_run_configs['edit_bool'] = False
-                infer_run_configs['num_iters'] = 0
+                infer_run_configs['num_edits'] = 0
                 #This is only a temporary fix, we will implement a more robust solution in the future, but also it is only implemented for the current 
                 # data instance, the class attribute is not modified for other data instances. 
             elif not self.args['sim_empty_fg_automatic']:
@@ -820,12 +838,12 @@ class FrontEndSimulator:
 
         if infer_run_configs['edit_bool']:
             
-            if not isinstance(infer_run_configs['num_iters'], int):
-                raise TypeError('The num_iters value must be an int in the inference run configs if editing!')
+            if not isinstance(infer_run_configs['num_edits'], int):
+                raise TypeError('The num_edits value must be an int in the inference run configs if editing!')
             
             print('We are now performing iterative edits')
 
-            for iter_num in range(1, infer_run_configs['num_iters'] + 1):
+            for iter_num in range(1, infer_run_configs['num_edits'] + 1):
                 
                 #First we store the prior output paths here:
                 self.update_tracked_paths(output_paths=output_paths, inf_call_config={'mode': 'Interactive Edit', 'edit_num': iter_num})
@@ -989,7 +1007,7 @@ class FrontEndSimulator:
             case_name=case_name,
             empty_foreground=empty_foreground,
             terminated_early=terminated_early,
-            temporary_iter_lims=(iter_num, self.args['infer_run_configs']['num_iters']), #This is a tuple containing the lower and upper iteration limits for padding the tracked metrics, 
+            temporary_iter_lims=(iter_num, self.args['infer_run_configs']['num_edits']), #This is a tuple containing the lower and upper iteration limits for padding the tracked metrics, 
             # if early convergence occured.....
             tracked_metrics=self.tracked_metrics
         )

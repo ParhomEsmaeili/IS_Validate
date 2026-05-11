@@ -14,7 +14,7 @@ class MetricsHandler:
     def __init__(
         self,
         calc_device: torch.device, 
-        dice_termination_threshold: float,
+        early_termination_criterion: dict, #dice_termination_thresh: float,
         metrics_configs: dict[str, dict],
         metrics_savepaths: dict[str, dict[str, Union[str, None, dict]]],
         config_labels_dict: dict[str, int]
@@ -36,8 +36,9 @@ class MetricsHandler:
         per-class (Optional) scores for the given metric. CSVs are pre-initialised in the runscript.
 
         '''
-        self.calc_device = calc_device 
-        self.termination_thresh = dice_termination_threshold 
+        self.calc_device = calc_device
+        self.early_termination_criterion = early_termination_criterion 
+        # self.termination_thresh = dice_termination_threshold 
         self.metrics_configs = metrics_configs
         self.metrics_savepaths = metrics_savepaths 
         self.config_labels_dict = config_labels_dict 
@@ -63,18 +64,22 @@ class MetricsHandler:
         if not set(self.metrics_configs) <= all_metrics:
             raise Exception('The selected metrics in the metrics configs are not all supported.')
         
+        #Checking that the early-termination criterion metric is in the metrics configs, otherwise
+        #we will not be able to perform the early termination check.
+        if self.early_termination_criterion['metric'] not in self.metrics_configs:
+            raise Exception('The early termination criterion metric must be included in the selected metrics in the metrics configs, otherwise we will not be able to perform the early termination check.')
+        if 'threshold' not in self.early_termination_criterion:
+            raise Exception('The early termination criterion config must contain a field called threshold which denotes the threshold at which the process will be terminated early.')
+            #For now our only termination criterion will be based on a score -> in the future this may
+            #evolve into something more dependent on a characteristic of the segmentation e.g., connected-ness.
+        
         #Dividing the selected metrics into their corresponding subtype.
         self.base_metrics = self.supported_metrics['base'] & set(self.metrics_configs)
-        # self.base_relative_metrics = self.supported_metrics['base_relative'] & set(self.metrics_configs)
-        # self.human_centric_metrics = self.supported_metrics['human_centric'] & set(self.metrics_configs)
-        # self.human_centric_relative_metrics = self.supported_metrics['human_centric_relative'] & set(self.metrics_configs)
         # self.budget_metrics = self.supported_metrics['annotation_budget'] & set(self.metrics_configs)
 
         
         self.init_base_metrics()
-        #TODO: Populate the funcs for the others:
-        # self.init_base_relative_metrics() 
-        # self.init_human_centric_metrics()
+        #NOTE: Populate based off time-estimates.
         # self.init_budget_metrics()
 
     def output_checking(self, metric_type, metric_subdict):
@@ -176,16 +181,24 @@ class MetricsHandler:
                 tracked_metrics[metric_type].update({f'{infer_call_info["mode"].title()} Iter {infer_call_info["edit_num"]}':metrics_dict})
 
         #We implement an early-stopping check for termination based on overall Dice overlap score.
-
-        if float(metric_output['Dice']['cross_class_scores']) >= self.termination_thresh:
-            return tracked_metrics, True 
-        
-        else:
-            return tracked_metrics, False 
-        
-    # def exec_base_relative_metrics(self):
-    #     pass 
+        early_termination = self.check_early_termination(metric_output)
+        # if float(metric_output['Dice']['cross_class_scores']) >= self.termination_thresh:
+        #     return tracked_metrics, True 
+        # else:
+        #     return tracked_metrics, False 
+        return tracked_metrics, early_termination 
     
+    def check_early_termination(self, metric_output):
+        '''
+        Function which checks whether the early termination criterion has been met based on the provided metric output. 
+
+        For now, this is just based on a single metric score exceeding a threshold, but in the future this could be extended to be more complex and dependent on multiple factors. 
+        '''
+        if float(metric_output[self.early_termination_criterion['metric']]['cross_class_scores']) >= self.early_termination_criterion['threshold']:
+            return True 
+        else:
+            return False
+        
     def update_metrics(
         self,
         output_data:dict,
