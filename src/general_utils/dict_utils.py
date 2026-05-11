@@ -126,6 +126,46 @@ def extract_config(
     return config 
 
 
+def has_path(cfg: dict, path: tuple) -> bool:
+    """Return True if the given tuple path exists in cfg.
+
+    This treats values that are present but falsy (False, 0, "", [], None)
+    as present. It only returns False when the path cannot be resolved.
+    """
+    if not isinstance(path, tuple):
+        # allow lists for convenience
+        try:
+            path = tuple(path)
+        except Exception:
+            raise TypeError("path must be a tuple or list of keys/indices")
+
+    try:
+        # reuse extractor — it will raise if any key/index is missing
+        extractor(cfg, path)
+        return True
+    except Exception:
+        return False
+
+
+def require_path(cfg: dict, path: tuple, *, error_msg: str | None = None):
+    """Return the value at `path` or raise a KeyError with a clear message.
+
+    Use this when the config must be present; it distinguishes missing
+    keys from present-but-falsy values.
+    """
+    if not isinstance(path, tuple):
+        try:
+            path = tuple(path)
+        except Exception:
+            raise TypeError("path must be a tuple or list of keys/indices")
+
+    try:
+        return extractor(cfg, path)
+    except Exception as e:
+        msg = error_msg or f"Couldn't find config at path: {path}"
+        raise KeyError(msg) from e
+
+
 def dict_deep_equals(dict1, dict2):
     """
     Recursively checks if two dictionaries are exactly equal at all depths.
