@@ -1,0 +1,72 @@
+{
+	"prompter_0": {
+		"init_prompt_conf": {
+			"name": "points_prototype_simplified",
+			"config": {
+				"procedure_type": "heuristic",
+				"config": {
+					"methods": {
+						"points": [
+							"uniform_random"
+						],
+						"scribbles": null,
+						"bboxes": null,
+						"lassos": null
+					},
+					"build_params": {
+						"points": {
+							"uniform_random": {
+								"n_max": 1
+							}
+						},
+						"scribbles": null,
+						"bboxes": null,
+						"lassos": null
+					},
+					"mixture_params": null,
+					"prompter_class_type": "simplified_prototype_pseudo_mixture"
+				}
+			}
+		},
+		"edit_prompt_conf": {
+			"name": "points_prototype_simplified",
+			"config": {
+				"procedure_type": "heuristic",
+				"config": {
+					"methods": {
+						"points": [
+							"uniform_random"
+						],
+						"scribbles": null,
+						"bboxes": null,
+						"lassos": null
+					},
+					"build_params": {
+						"points": {
+							"uniform_random": {
+								"n_max": 1
+							}
+						},
+						"scribbles": null,
+						"bboxes": null,
+						"lassos": null
+					},
+					"mixture_params": null,
+					"prompter_class_type": "simplified_prototype_pseudo_mixture"
+				}
+			}
+		},
+		"infer_edit_nums": 100,
+		"use_mem_inf_edit": false,
+		"im_conf_remove_init": true,
+		"im_conf_mem_len": 1,
+		"annotation_conf": {
+			"annotator": [
+				"annotator_1"
+			],
+			"instance_id": [
+				"instance_1"
+			]
+		}
+	}
+}

@@ -1,0 +1,5662 @@
+{
+  "exp_config_1": {
+    "task": {
+      "task_id": "task_id_3",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_0"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_0",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_2": {
+    "task": {
+      "task_id": "task_id_4",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_1"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_0",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_3": {
+    "task": {
+      "task_id": "task_id_5",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_2"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_0",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_4": {
+    "task": {
+      "task_id": "task_id_6",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_3"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_0",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_5": {
+    "task": {
+      "task_id": "task_id_7",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_4"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_0",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_6": {
+    "task": {
+      "task_id": "task_id_8",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_1",
+              "fold_2",
+              "fold_3",
+              "fold_4"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_0",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_7": {
+    "task": {
+      "task_id": "task_id_9",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_0",
+              "fold_2",
+              "fold_3",
+              "fold_4"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_0",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_8": {
+    "task": {
+      "task_id": "task_id_10",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_0",
+              "fold_1",
+              "fold_3",
+              "fold_4"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_0",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_9": {
+    "task": {
+      "task_id": "task_id_11",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_0",
+              "fold_1",
+              "fold_2",
+              "fold_4"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_0",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_10": {
+    "task": {
+      "task_id": "task_id_12",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_0",
+              "fold_1",
+              "fold_2",
+              "fold_3"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_0",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_11": {
+    "task": {
+      "task_id": "task_id_3",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_0"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_1",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_2"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_12": {
+    "task": {
+      "task_id": "task_id_4",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_1"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_1",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_2"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_13": {
+    "task": {
+      "task_id": "task_id_5",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_2"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_1",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_2"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_14": {
+    "task": {
+      "task_id": "task_id_6",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_3"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_1",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_2"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_15": {
+    "task": {
+      "task_id": "task_id_7",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_4"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_1",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_2"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_16": {
+    "task": {
+      "task_id": "task_id_8",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_1",
+              "fold_2",
+              "fold_3",
+              "fold_4"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_1",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_2"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_17": {
+    "task": {
+      "task_id": "task_id_9",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_0",
+              "fold_2",
+              "fold_3",
+              "fold_4"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_1",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_2"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_18": {
+    "task": {
+      "task_id": "task_id_10",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_0",
+              "fold_1",
+              "fold_3",
+              "fold_4"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_1",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_2"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_19": {
+    "task": {
+      "task_id": "task_id_11",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_0",
+              "fold_1",
+              "fold_2",
+              "fold_4"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_1",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_2"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_20": {
+    "task": {
+      "task_id": "task_id_12",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_0",
+              "fold_1",
+              "fold_2",
+              "fold_3"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_1",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_2"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_21": {
+    "task": {
+      "task_id": "task_id_3",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_0"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_2",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_3"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_22": {
+    "task": {
+      "task_id": "task_id_4",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_1"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_2",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_3"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_23": {
+    "task": {
+      "task_id": "task_id_5",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_2"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_2",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_3"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_24": {
+    "task": {
+      "task_id": "task_id_6",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_3"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_2",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_3"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_25": {
+    "task": {
+      "task_id": "task_id_7",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_4"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_2",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_3"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_26": {
+    "task": {
+      "task_id": "task_id_8",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_1",
+              "fold_2",
+              "fold_3",
+              "fold_4"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_2",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_3"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_27": {
+    "task": {
+      "task_id": "task_id_9",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_0",
+              "fold_2",
+              "fold_3",
+              "fold_4"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_2",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_3"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_28": {
+    "task": {
+      "task_id": "task_id_10",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_0",
+              "fold_1",
+              "fold_3",
+              "fold_4"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_2",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_3"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_29": {
+    "task": {
+      "task_id": "task_id_11",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_0",
+              "fold_1",
+              "fold_2",
+              "fold_4"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_2",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_3"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_30": {
+    "task": {
+      "task_id": "task_id_12",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_0",
+              "fold_1",
+              "fold_2",
+              "fold_3"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_2",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_3"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_31": {
+    "task": {
+      "task_id": "task_id_3",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_0"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_3",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_4"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_32": {
+    "task": {
+      "task_id": "task_id_4",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_1"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_3",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_4"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_33": {
+    "task": {
+      "task_id": "task_id_5",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_2"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_3",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_4"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_34": {
+    "task": {
+      "task_id": "task_id_6",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_3"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_3",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_4"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_35": {
+    "task": {
+      "task_id": "task_id_7",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_4"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_3",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_4"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_36": {
+    "task": {
+      "task_id": "task_id_8",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_1",
+              "fold_2",
+              "fold_3",
+              "fold_4"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_3",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_4"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_37": {
+    "task": {
+      "task_id": "task_id_9",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_0",
+              "fold_2",
+              "fold_3",
+              "fold_4"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_3",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_4"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_38": {
+    "task": {
+      "task_id": "task_id_10",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_0",
+              "fold_1",
+              "fold_3",
+              "fold_4"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_3",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_4"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_39": {
+    "task": {
+      "task_id": "task_id_11",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_0",
+              "fold_1",
+              "fold_2",
+              "fold_4"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_3",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_4"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_40": {
+    "task": {
+      "task_id": "task_id_12",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_0",
+              "fold_1",
+              "fold_2",
+              "fold_3"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "CT"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": true,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_kidney",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_kidney": [
+              "whole_kidney"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_3",
+      "config": {
+        "init_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": "points_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": [
+                  "uniform_random"
+                ],
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "build_params": {
+                "points": {
+                  "uniform_random": {
+                    "n_max": 1
+                  }
+                },
+                "scribbles": null,
+                "bboxes": null,
+                "lassos": null
+              },
+              "mixture_params": null,
+              "prompter_class_type": "simplified_prototype_pseudo_mixture"
+            }
+          }
+        },
+        "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_4"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype_annotator_4",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1.0330772532390826
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_4"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  }
+}

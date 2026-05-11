@@ -1,17 +1,64 @@
 {
-	"prototype":{
-		"metrics":{
-			"Dice":{
-				"ignore_empty":true,
-				"include_per_class_scores":true,
+	"prototype": {
+		"metrics": {
+			"Dice": {
+				"ignore_empty": false,
+				"include_per_class_scores": true,
 				"include_background_metric": false
 			},
-			"NSD":{
-				"ignore_empty":true,
-				"include_per_class_scores":true,
-				"include_background_metric":false,
-				"tolerance_sf": ["1", "2", "3"]
+			"NSD": {
+				"ignore_empty": false,
+				"include_per_class_scores": true,
+				"include_background_metric": false,
+				"tolerance_sf": [
+					"1",
+					"2",
+					"3"
+				]
 			}
+		},
+		"data_sampling": {
+			"annotation_conf": {
+				"annotator": [
+					"annotator_1"
+				],
+				"instance_id": [
+					"instance_1"
+				]
+			}
+		},
+		"early_termination_criterion": {
+			"metric": "Dice",
+			"threshold": 1.0
+		}
+	},
+	"prototype_nnunet": {
+		"metrics": {
+			"Dice": {
+				"ignore_empty": false,
+				"include_per_class_scores": true,
+				"include_background_metric": false
+			},
+			"NSD": {
+				"ignore_empty": false,
+				"include_per_class_scores": true,
+				"include_background_metric": false,
+				"tolerance_mm": 0.7539765993596623
+			}
+		},
+		"data_sampling": {
+			"annotation_conf": {
+				"annotator": [
+					"annotator_1"
+				],
+				"instance_id": [
+					"instance_1"
+				]
+			}
+		},
+		"early_termination_criterion": {
+			"metric": "Dice",
+			"threshold": 1.0
 		}
 	}
 }

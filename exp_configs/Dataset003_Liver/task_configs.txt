@@ -1,242 +1,387 @@
 {
-	"task_id_1":{
-		"data_sampling":
-			{
-				"sample_group_category": ["all_train", "all_cases"],
-				"image_conf": {
-					"image_channel": ["CT"]
-					},	
-				 "annotation_conf": { 
-				 	"annotator": ["annotator_1"],
-				 	"instance_id": ["instance_1"]
-				 	}
-			},
+	"task_id_1": {
+		"data_sampling": {
+			"sample_group_category": [
+				"all_train",
+				"all_cases"
+			],
+			"image_conf": {
+				"image_channel": [
+					"CT"
+				]
+			}
+		},
+		"infer_info": {
+			"infer_init": "Interactive Init",
+			"infer_edit_bool": true,
+			"sim_empty_fg_automatic": false
+		},
 		"seg_problem": "liver",
-		"data_transforms":
-			{"semantic_class_mapping":{
-				"background":["background"],
-				"liver":["liver","cancer"]
-				}
+		"data_transforms": {
+			"semantic_class_mapping": {
+				"background": [
+					"background"
+				],
+				"liver": [
+					"liver",
+					"cancer"
+				]
 			}
+		}
 	},
-	"task_id_2":{
-		"data_sampling":
-			{
-				"sample_group_category": ["all_test", "all_cases"],
-				"image_conf": {
-					"image_channel": ["CT"]
-					},	
-				 "annotation_conf": { 
-				 	"annotator": ["annotator_1"],
-				 	"instance_id": ["instance_1"]
-				 	}
-			},
+	"task_id_2": {
+		"data_sampling": {
+			"sample_group_category": [
+				"all_test",
+				"all_cases"
+			],
+			"image_conf": {
+				"image_channel": [
+					"CT"
+				]
+			}
+		},
+		"infer_info": {
+			"infer_init": "Interactive Init",
+			"infer_edit_bool": true,
+			"sim_empty_fg_automatic": false
+		},
 		"seg_problem": "liver",
-	 	"data_transforms":
-			{"semantic_class_mapping":{
-				"background":["background"],
-				"liver":["liver","cancer"]
-				}
+		"data_transforms": {
+			"semantic_class_mapping": {
+				"background": [
+					"background"
+				],
+				"liver": [
+					"liver",
+					"cancer"
+				]
 			}
+		}
 	},
-	"task_id_3":{
-		"data_sampling":
-			{
-				"sample_group_category": ["kfold_5_train", "fold_0"],
-				"image_conf": {
-					"image_channel": ["CT"]
-					},	
-				 "annotation_conf": { 
-				 	"annotator": ["annotator_1"],
-				 	"instance_id": ["instance_1"]
-				 	}
-			},
+	"task_id_3": {
+		"data_sampling": {
+			"sample_group_category": [
+				"kfold_5_train",
+				"fold_0"
+			],
+			"image_conf": {
+				"image_channel": [
+					"CT"
+				]
+			}
+		},
+		"infer_info": {
+			"infer_init": "Interactive Init",
+			"infer_edit_bool": true,
+			"sim_empty_fg_automatic": false
+		},
 		"seg_problem": "liver",
-		"data_transforms":
-			{"semantic_class_mapping":{
-				"background":["background"],
-				"liver":["liver","cancer"]
-				}
+		"data_transforms": {
+			"semantic_class_mapping": {
+				"background": [
+					"background"
+				],
+				"liver": [
+					"liver",
+					"cancer"
+				]
 			}
+		}
 	},
-	"task_id_4":{
-		"data_sampling":
-			{
-				"sample_group_category": ["kfold_5_train", "fold_1"],
-				"image_conf": {
-					"image_channel": ["CT"]
-					},	
-				 "annotation_conf": { 
-				 	"annotator": ["annotator_1"],
-				 	"instance_id": ["instance_1"]
-				 	}
-			},
+	"task_id_4": {
+		"data_sampling": {
+			"sample_group_category": [
+				"kfold_5_train",
+				"fold_1"
+			],
+			"image_conf": {
+				"image_channel": [
+					"CT"
+				]
+			}
+		},
+		"infer_info": {
+			"infer_init": "Interactive Init",
+			"infer_edit_bool": true,
+			"sim_empty_fg_automatic": false
+		},
 		"seg_problem": "liver",
-		"data_transforms":
-			{"semantic_class_mapping":{
-				"background":["background"],
-				"liver":["liver","cancer"]
-				}
+		"data_transforms": {
+			"semantic_class_mapping": {
+				"background": [
+					"background"
+				],
+				"liver": [
+					"liver",
+					"cancer"
+				]
 			}
+		}
 	},
-	"task_id_5":{
-		"data_sampling":
-			{
-				"sample_group_category": ["kfold_5_train", "fold_2"],
-				"image_conf": {
-					"image_channel": ["CT"]
-					},	
-				 "annotation_conf": { 
-				 	"annotator": ["annotator_1"],
-				 	"instance_id": ["instance_1"]
-				 	}
-			},
+	"task_id_5": {
+		"data_sampling": {
+			"sample_group_category": [
+				"kfold_5_train",
+				"fold_2"
+			],
+			"image_conf": {
+				"image_channel": [
+					"CT"
+				]
+			}
+		},
+		"infer_info": {
+			"infer_init": "Interactive Init",
+			"infer_edit_bool": true,
+			"sim_empty_fg_automatic": false
+		},
 		"seg_problem": "liver",
-		"data_transforms":
-			{"semantic_class_mapping":{
-				"background":["background"],
-				"liver":["liver","cancer"]
-				}
+		"data_transforms": {
+			"semantic_class_mapping": {
+				"background": [
+					"background"
+				],
+				"liver": [
+					"liver",
+					"cancer"
+				]
 			}
+		}
 	},
-	"task_id_6":{
-		"data_sampling":
-			{
-				"sample_group_category": ["kfold_5_train", "fold_3"],
-				"image_conf": {
-					"image_channel": ["CT"]
-					},	
-				 "annotation_conf": { 
-				 	"annotator": ["annotator_1"],
-				 	"instance_id": ["instance_1"]
-				 	}
-			},
+	"task_id_6": {
+		"data_sampling": {
+			"sample_group_category": [
+				"kfold_5_train",
+				"fold_3"
+			],
+			"image_conf": {
+				"image_channel": [
+					"CT"
+				]
+			}
+		},
+		"infer_info": {
+			"infer_init": "Interactive Init",
+			"infer_edit_bool": true,
+			"sim_empty_fg_automatic": false
+		},
 		"seg_problem": "liver",
-		"data_transforms":
-			{"semantic_class_mapping":{
-				"background":["background"],
-				"liver":["liver","cancer"]
-				}
+		"data_transforms": {
+			"semantic_class_mapping": {
+				"background": [
+					"background"
+				],
+				"liver": [
+					"liver",
+					"cancer"
+				]
 			}
+		}
 	},
-	"task_id_7":{
-		"data_sampling":
-			{
-				"sample_group_category": ["kfold_5_train", "fold_4"],
-				"image_conf": {
-					"image_channel": ["CT"]
-					},	
-				 "annotation_conf": { 
-				 	"annotator": ["annotator_1"],
-				 	"instance_id": ["instance_1"]
-				 	}
-			},
+	"task_id_7": {
+		"data_sampling": {
+			"sample_group_category": [
+				"kfold_5_train",
+				"fold_4"
+			],
+			"image_conf": {
+				"image_channel": [
+					"CT"
+				]
+			}
+		},
+		"infer_info": {
+			"infer_init": "Interactive Init",
+			"infer_edit_bool": true,
+			"sim_empty_fg_automatic": false
+		},
 		"seg_problem": "liver",
-		"data_transforms":
-			{"semantic_class_mapping":{
-				"background":["background"],
-				"liver":["liver","cancer"]
-				}
+		"data_transforms": {
+			"semantic_class_mapping": {
+				"background": [
+					"background"
+				],
+				"liver": [
+					"liver",
+					"cancer"
+				]
 			}
+		}
 	},
-	"task_id_8":{
-		    "data_sampling":
-			{
-			    "sample_group_category": ["kfold_5_train", ["fold_1", "fold_2", "fold_3", "fold_4"]],
-			    "image_conf": {
-				"image_channel": ["CT"]
-				},	
-			     "annotation_conf": { 
-			     	"annotator": ["annotator_1"],
-			     	"instance_id": ["instance_1"]
-			     	}
-			},
-		    "seg_problem": "liver",
-		    "data_transforms":
-			{"semantic_class_mapping":{
-			    "background":["background"],
-			    "liver":["liver","cancer"]
-			    }
+	"task_id_8": {
+		"data_sampling": {
+			"sample_group_category": [
+				"kfold_5_train",
+				[
+					"fold_1",
+					"fold_2",
+					"fold_3",
+					"fold_4"
+				]
+			],
+			"image_conf": {
+				"image_channel": [
+					"CT"
+				]
 			}
+		},
+		"infer_info": {
+			"infer_init": "Interactive Init",
+			"infer_edit_bool": true,
+			"sim_empty_fg_automatic": false
+		},
+		"seg_problem": "liver",
+		"data_transforms": {
+			"semantic_class_mapping": {
+				"background": [
+					"background"
+				],
+				"liver": [
+					"liver",
+					"cancer"
+				]
+			}
+		}
 	},
-	"task_id_9":{
-		    "data_sampling":
-			{
-			    "sample_group_category": ["kfold_5_train", ["fold_0", "fold_2", "fold_3", "fold_4"]],
-			    "image_conf": {
-				"image_channel": ["CT"]
-				},	
-			     "annotation_conf": { 
-			     	"annotator": ["annotator_1"],
-			     	"instance_id": ["instance_1"]
-			     	}
-			},
-		    "seg_problem": "liver",
-		    "data_transforms":
-			{"semantic_class_mapping":{
-			    "background":["background"],
-			    "liver":["liver","cancer"]
-			    }
+	"task_id_9": {
+		"data_sampling": {
+			"sample_group_category": [
+				"kfold_5_train",
+				[
+					"fold_0",
+					"fold_2",
+					"fold_3",
+					"fold_4"
+				]
+			],
+			"image_conf": {
+				"image_channel": [
+					"CT"
+				]
 			}
+		},
+		"infer_info": {
+			"infer_init": "Interactive Init",
+			"infer_edit_bool": true,
+			"sim_empty_fg_automatic": false
+		},
+		"seg_problem": "liver",
+		"data_transforms": {
+			"semantic_class_mapping": {
+				"background": [
+					"background"
+				],
+				"liver": [
+					"liver",
+					"cancer"
+				]
+			}
+		}
 	},
-	"task_id_10":{
-		    "data_sampling":
-			{
-			    "sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_3", "fold_4"]],
-			    "image_conf": {
-				"image_channel": ["CT"]
-				},	
-			     "annotation_conf": { 
-			     	"annotator": ["annotator_1"],
-			     	"instance_id": ["instance_1"]
-			     	}
-			},
-		    "seg_problem": "liver",
-		    "data_transforms":
-			{"semantic_class_mapping":{
-			    "background":["background"],
-			    "liver":["liver","cancer"]
-			    }
+	"task_id_10": {
+		"data_sampling": {
+			"sample_group_category": [
+				"kfold_5_train",
+				[
+					"fold_0",
+					"fold_1",
+					"fold_3",
+					"fold_4"
+				]
+			],
+			"image_conf": {
+				"image_channel": [
+					"CT"
+				]
 			}
+		},
+		"infer_info": {
+			"infer_init": "Interactive Init",
+			"infer_edit_bool": true,
+			"sim_empty_fg_automatic": false
+		},
+		"seg_problem": "liver",
+		"data_transforms": {
+			"semantic_class_mapping": {
+				"background": [
+					"background"
+				],
+				"liver": [
+					"liver",
+					"cancer"
+				]
+			}
+		}
 	},
-	"task_id_11":{
-		    "data_sampling":
-			{
-			    "sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_2", "fold_4"]],
-			    "image_conf": {
-				"image_channel": ["CT"]
-				},	
-			     "annotation_conf": { 
-			     	"annotator": ["annotator_1"],
-			     	"instance_id": ["instance_1"]
-			     	}
-			},
-		    "seg_problem": "liver",
-		    "data_transforms":
-			{"semantic_class_mapping":{
-			    "background":["background"],
-			    "liver":["liver","cancer"]
-			    }
+	"task_id_11": {
+		"data_sampling": {
+			"sample_group_category": [
+				"kfold_5_train",
+				[
+					"fold_0",
+					"fold_1",
+					"fold_2",
+					"fold_4"
+				]
+			],
+			"image_conf": {
+				"image_channel": [
+					"CT"
+				]
 			}
+		},
+		"infer_info": {
+			"infer_init": "Interactive Init",
+			"infer_edit_bool": true,
+			"sim_empty_fg_automatic": false
+		},
+		"seg_problem": "liver",
+		"data_transforms": {
+			"semantic_class_mapping": {
+				"background": [
+					"background"
+				],
+				"liver": [
+					"liver",
+					"cancer"
+				]
+			}
+		}
 	},
-	"task_id_12":{
-		    "data_sampling":
-			{
-			    "sample_group_category": ["kfold_5_train", ["fold_0", "fold_1", "fold_2", "fold_3"]],
-			    "image_conf": {
-				"image_channel": ["CT"]
-				},	
-			     "annotation_conf": { 
-			     	"annotator": ["annotator_1"],
-			     	"instance_id": ["instance_1"]
-			     	}
-			},
-		    "seg_problem": "liver",
-		    "data_transforms":
-			{"semantic_class_mapping":{
-			    "background":["background"],
-			    "liver":["liver","cancer"]
-			    }
+	"task_id_12": {
+		"data_sampling": {
+			"sample_group_category": [
+				"kfold_5_train",
+				[
+					"fold_0",
+					"fold_1",
+					"fold_2",
+					"fold_3"
+				]
+			],
+			"image_conf": {
+				"image_channel": [
+					"CT"
+				]
 			}
+		},
+		"infer_info": {
+			"infer_init": "Interactive Init",
+			"infer_edit_bool": true,
+			"sim_empty_fg_automatic": false
+		},
+		"seg_problem": "liver",
+		"data_transforms": {
+			"semantic_class_mapping": {
+				"background": [
+					"background"
+				],
+				"liver": [
+					"liver",
+					"cancer"
+				]
+			}
+		}
 	}
 }

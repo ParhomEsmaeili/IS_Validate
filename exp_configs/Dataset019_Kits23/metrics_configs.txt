@@ -1,127 +1,60 @@
 {
-	"prototype":{
+	"prototype_annotator_4": {
 		"metrics": {
-			"Dice":{
-				"ignore_empty":true,
-				"include_per_class_scores":true,
+			"Dice": {
+				"ignore_empty": false,
+				"include_per_class_scores": true,
 				"include_background_metric": false
 			},
-			"NSD":{
-				"ignore_empty":true,
-				"include_per_class_scores":true,
-				"include_background_metric":false,
+			"NSD": {
+				"ignore_empty": false,
+				"include_per_class_scores": true,
+				"include_background_metric": false,
 				"tolerance_mm": 1.1328796488598762
 			}
+		},
+		"data_sampling": {
+			"annotation_conf": {
+				"annotator": [
+					"annotator_4"
+				],
+				"instance_id": [
+					"instance_1"
+				]
+			}
+		},
+		"early_termination_criterion": {
+			"metric": "Dice",
+			"threshold": 1.0
 		}
 	},
-	"cross_annotator_fold_0":{
+	"prototype_annotator_4_nnunet": {
 		"metrics": {
-			"Dice":{
-				"ignore_empty":true,
-				"include_per_class_scores":true,
+			"Dice": {
+				"ignore_empty": false,
+				"include_per_class_scores": true,
 				"include_background_metric": false
 			},
-			"NSD":{
-				"ignore_empty":true,
-				"include_per_class_scores":true,
-				"include_background_metric":false,
-				"tolerance_mm": 1.1328796488598762
+			"NSD": {
+				"ignore_empty": false,
+				"include_per_class_scores": true,
+				"include_background_metric": false,
+				"tolerance_mm": 3.8135665487114507
 			}
 		},
-		"data_sampling":{
-				"sample_group_category": ["kfold_5_train", "fold_0"],
-				 "annotation_conf": { 
-				 	"annotator": ["annotator_4"],
-				 	"instance_id": ["instance_1"]
-				 	}
-			}
-	},
-	"cross_annotator_fold_1":{
-		"metrics": {
-			"Dice":{
-				"ignore_empty":true,
-				"include_per_class_scores":true,
-				"include_background_metric": false
-			},
-			"NSD":{
-				"ignore_empty":true,
-				"include_per_class_scores":true,
-				"include_background_metric":false,
-				"tolerance_mm": 1.1328796488598762
+		"data_sampling": {
+			"annotation_conf": {
+				"annotator": [
+					"annotator_4"
+				],
+				"instance_id": [
+					"instance_1"
+				]
 			}
 		},
-		"data_sampling":{
-				"sample_group_category": ["kfold_5_train", "fold_1"],
-				 "annotation_conf": { 
-				 	"annotator": ["annotator_4"],
-				 	"instance_id": ["instance_1"]
-				 	}
-			}
-	},
-	"cross_annotator_fold_2":{
-		"metrics": {
-			"Dice":{
-				"ignore_empty":true,
-				"include_per_class_scores":true,
-				"include_background_metric": false
-			},
-			"NSD":{
-				"ignore_empty":true,
-				"include_per_class_scores":true,
-				"include_background_metric":false,
-				"tolerance_mm": 1.1328796488598762
-			}
-		},
-		"data_sampling":{
-				"sample_group_category": ["kfold_5_train", "fold_2"],
-				 "annotation_conf": { 
-				 	"annotator": ["annotator_4"],
-				 	"instance_id": ["instance_1"]
-				 	}
-			}
-	},
-	"cross_annotator_fold_3":{
-		"metrics": {
-			"Dice":{
-				"ignore_empty":true,
-				"include_per_class_scores":true,
-				"include_background_metric": false
-			},
-			"NSD":{
-				"ignore_empty":true,
-				"include_per_class_scores":true,
-				"include_background_metric":false,
-				"tolerance_mm": 1.1328796488598762
-			}
-		},
-		"data_sampling":{
-				"sample_group_category": ["kfold_5_train", "fold_3"],
-				 "annotation_conf": { 
-				 	"annotator": ["annotator_4"],
-				 	"instance_id": ["instance_1"]
-				 	}
-			}
-	},
-	"cross_annotator_fold_4":{
-		"metrics": {
-			"Dice":{
-				"ignore_empty":true,
-				"include_per_class_scores":true,
-				"include_background_metric": false
-			},
-			"NSD":{
-				"ignore_empty":true,
-				"include_per_class_scores":true,
-				"include_background_metric":false,
-				"tolerance_mm": 1.1328796488598762
-			}
-		},
-		"data_sampling":{
-				"sample_group_category": ["kfold_5_train", "fold_4"],
-				 "annotation_conf": { 
-				 	"annotator": ["annotator_4"],
-				 	"instance_id": ["instance_1"]
-				 	}
-			}
+		"early_termination_criterion": {
+			"metric": "Dice",
+			"threshold": 1.0
+		}
 	}
 }
