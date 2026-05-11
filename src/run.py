@@ -206,7 +206,7 @@ def gen_experiment_args(args):
         else:
             output_dict['experiment_name'] = f'{args.experiment_basename}_{args.run_num}' #_{args.split_name}'
             # named_experiment = True 
-            assert f'experiment_{args.experiment_conf_id}' in args.experiment_basename, 'If using named experiments, the experiment manifest filename must contain the experiment name to ensure consistency and clarity, please check your input arguments and the experiment manifest filename to ensure this is the case.'
+            assert f'experiment{args.experiment_conf_id}' in args.experiment_basename, 'If using named experiments, the experiment manifest filename must contain the experiment name to ensure consistency and clarity, please check your input arguments and the experiment manifest filename to ensure this is the case.'
         if args.continue_exec_root == None:
             raise ValueError('If continuing an experiment execution, must provide the root directory of the \n'
             'files to write/read where to continue from.')
