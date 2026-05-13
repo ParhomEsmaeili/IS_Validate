@@ -572,6 +572,7 @@ def dataloader_generator(
         # label_keys = ['dummy_label_key']
         eval_annotation_keys = ['dummy_eval_annotation_key']
         reference_annotation_keys = ['dummy_reference_annotation_key']
+        load_keys = image_keys + eval_annotation_keys + reference_annotation_keys
     else:
         assert image_keys != None, 'If case_list is not empty, then image_keys must not be None.'
         # assert label_keys != None, 'If case_list is not empty, then label_keys must not be None.'
