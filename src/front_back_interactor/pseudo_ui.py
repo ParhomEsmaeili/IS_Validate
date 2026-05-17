@@ -22,7 +22,7 @@ from src.output_processing.scoring import MetricsHandler
 from src.data.memory_cleanup import memory_cleanup
 from src.utils_checks.pseudo_ui_check import (
     check_empty,
-    check_config_labels
+    check_semantic_id_dict
 
 )
 from src.general_utils.dict_utils import dict_path_create, sort_infer_calls
@@ -63,7 +63,7 @@ class FrontEndSimulator:
                 2) Interactive Initialisation: 'IS_interactive_init'
                 3) Interactive Editing: 'IS_interactive_edit'
         
-        config_labels_dict: A dictionary containing the semantic class label - class integer code mapping relationship being used. 
+        semantic_id_dict: A dictionary containing the semantic class label - class integer code mapping relationship being used. 
         note that the codes are >= 0 with 0 = background always, and that the labels are pre-normalised. E.g., 0,1,2,3... and never 0,2,3,5.
 
         i_state: An interaction dictionary containing the current input interaction states OR a NoneType for automatic segmentation mode.:
@@ -141,17 +141,17 @@ class FrontEndSimulator:
     '''
 
     def __init__(self, 
-                infer_app: Callable, 
+                app: Callable, 
                 args: dict):
         '''
         Inputs: 
     
-        infer_app: Initialised inference application which can be called to process an input request (structure noted above).
+        app: Initialised application which can be called to process an input request (structure noted above).
         
         args: Dictionary containing the information required for performing the experiment, e.g.: 
         
         Variables related to the experimental configuration
-        config_labels_dict: Dictionary mapping class labels and integer codes #NOTE: Currently just assuming semantic segmentation support. 
+        semantic_id_dict: Dictionary mapping class labels and integer codes #NOTE: Currently just assuming semantic segmentation support. 
             
         #Variable related to handling empty foreground cases for automatic segmentation configurations
         
@@ -208,26 +208,22 @@ class FrontEndSimulator:
         save_prompts - Boolean denoting whether to save the prompts used during inference.
         is_seg_tmp - Boolean denoting whether to use a temporary directory for saving segmentations.
         write_segmentation - Boolean denoting whether to write the segmentation results to disk.
-
-        #Variables related to api-structure
-        dataset_info - Dictionary containing dataset information required for the application API structure (e.g., name, 
-        modality, etc.)
         
         '''
         
-        if not callable(infer_app):
+        if not callable(app):
             raise Exception('The inference app must be callable class.')
         else:
             #Check if it has a call attribute!
             try:
-                callback = getattr(infer_app, "__call__")
+                callback = getattr(app, "__call__")
             except:
                 raise Exception('The inference app did not have a function __call__')
             
             if not callable(callback):
                 raise Exception('The initialised inference app object had a __call__ attribute which was not a callable function') 
             
-        self.infer_app = infer_app
+        self.app = app
         self.args = args
 
         self.check_args()
@@ -241,8 +237,8 @@ class FrontEndSimulator:
         
         #Running checks on input args..
 
-        #Running a check on the class configs dictionary.
-        check_config_labels(self.args['configs_labels_dict'])
+        #Running a check on the semantic id dictionary.
+        check_semantic_id_dict(self.args['semantic_id_dict'])
 
         #Running a check on random seed is not required, any non-NoneType TypeErrors will be caught by init_seeds.
 
@@ -301,12 +297,12 @@ class FrontEndSimulator:
             early_termination_criterion=self.args['early_termination_criterion'], #self.args['dice_termination_thresh'],
             metrics_configs=self.args['metrics_configs']['metrics'],
             metrics_savepaths=self.args['metrics_savepaths'],
-            config_labels_dict=self.args['configs_labels_dict']
+            semantic_id_dict=self.args['semantic_id_dict']
         )
 
         self.output_processor = OutputProcessor(
             base_save_dir=self.args['exp_seg_dir'],
-            config_labels_dict=self.args['configs_labels_dict'],
+            semantic_id_dict=self.args['semantic_id_dict'],
             is_seg_tmp=self.args['is_seg_tmp'],
             save_prompts=self.args['save_prompts'],
             write_segmentation=self.args['write_segmentation']
@@ -330,7 +326,7 @@ class FrontEndSimulator:
                     sim_device=self.args['device'],
                     use_mem=False,
                     prompt_configs=self.args['inf_init_prompt_config']['config'],
-                    config_labels_dict=self.args['configs_labels_dict']
+                    semantic_id_dict=self.args['semantic_id_dict']
                 )
             else:
                 raise ValueError('The selected prompt generation algorithm-type is not supported')
@@ -345,7 +341,7 @@ class FrontEndSimulator:
                     sim_device=self.args['device'],
                     use_mem=self.args['use_mem_inf_edit'],
                     prompt_configs=self.args['inf_edit_prompt_config']['config'],
-                    config_labels_dict=self.args['configs_labels_dict']
+                    semantic_id_dict=self.args['semantic_id_dict']
                 )
             else:
                 raise ValueError('The selected prompt generation algorithm-type is not supported')
@@ -638,7 +634,26 @@ class FrontEndSimulator:
         )
         return output_paths, updated_metric_im, terminate_early
 
-    def infer_app_request_generator(self,
+    def generate_sample_level_schema(self, request: dict):
+        '''
+        This function generates the sample-level schema which is to be provided in the input request to the app. 
+        This is intended to provide the app with the necessary context, and conventions for addressing the output arrays
+        '''
+        assert 'image' in request, 'The input request dictionary must contain an "image" key for generating the sample-level data schema.'
+        
+        #We put a temporary assertion until we find a way to pass through the sample-level data schema in the dataloader,
+        #which is that the number of image channels must be FIXED and match the dataset level schema!
+        assert request['image']['metatensor'].ndim == 4, 'The input image must be in CHWD format for the sample-level data schema generation to work, as this is currently dependent on the dataset-level schema which is in CHWD format.'
+        assert request['image']['metatensor'].shape[0] == len(self.args['dataset_level_schema']['data_schema']['task_channels']), 'The number of channels in the input image must match the number of channels in the dataset-level schema for the sample-level data schema generation to work, as this is currently dependent on the dataset-level schema which is in CHWD format.'
+        return {
+            'data_schema': {
+                'task_channels': self.args['dataset_level_schema']['data_schema']['task_channels']
+            },
+            'segmentation_task_schema': {
+                'semantic_id_dict': self.args['semantic_id_dict']
+            }
+        }
+    def app_request_generator(self,
                             # data_instance: dict,
                             infer_call_config: dict,
                             im: Union[dict, None], 
@@ -745,16 +760,17 @@ class FrontEndSimulator:
         
         #Now we will perform some processing to ensure that the interface for the api-request is only dependent on torch
         #objects, and basic pythonic datatypes.
-        request['config_labels_dict'] = self.args['configs_labels_dict']
-        request['dataset_info'] = self.args['dataset_info'] 
+        # request['semantic_id_dict'] = self.args['semantic_id_dict']
         request['image'] = copy.deepcopy(self.data_instance['image'])
         request['image']['metatensor'] = torch.from_numpy(request['image']['metatensor'].clone().detach().numpy()) 
+        request['sample_level_schema'] = self.generate_sample_level_schema(request)
         i_state = self.im_to_is(im=im)        
         #Now we update the request with the interaction state and the dataset information.
         request['i_state'] = i_state
         
 
         return request, im
+    
     def iterative_loop(self, empty_foreground:bool=False):
         '''
         ''' 
@@ -803,14 +819,14 @@ class FrontEndSimulator:
             self.update_tracked_paths(output_paths=None, inf_call_config={'mode':infer_run_configs['init'].title(), 'edit_num': None}) 
 
             #Generate the inference request and initialises the inference interaction memory:
-            request, inf_im = self.infer_app_request_generator(
+            request, inf_im = self.app_request_generator(
                 # data_instance=data_instance, 
                 infer_call_config={'mode': infer_run_configs['init'].title(), 'edit_num': None},
                 im=None,
                 prev_output_data=None
             )
             #Take the generated request dict, and pass it through the callable application.
-            prev_output_data = self.infer_app(request)
+            prev_output_data = self.app(request)
             #This generates the output data.
 
             # We call on the output processor for processing of the prev_output_data dictionary for 
@@ -850,7 +866,7 @@ class FrontEndSimulator:
 
                 #Generate the inference request and initialises the inference interaction memory:
                 
-                request, inf_im = self.infer_app_request_generator(
+                request, inf_im = self.app_request_generator(
                     # data_instance=data_instance, 
                     infer_call_config={'mode': 'Interactive Edit', 'edit_num': iter_num},
                     im=inf_im,
@@ -858,7 +874,7 @@ class FrontEndSimulator:
                 )
             
                 #Take the generated request dict, and pass it through the callable application.
-                prev_output_data = self.infer_app(request)
+                prev_output_data = self.app(request)
                 #This generates the non-processed output data.
             
                 # We call on the output processor for reformatting/processing of the prev_output_data dictionary for 
@@ -906,7 +922,7 @@ class FrontEndSimulator:
 
         case_name - The string denoting the filename for the image and annotations. 
 
-        NOTE: KEY ASSUMPTION 1: The filename for both the image and annotations will be the same. 
+        NOTE: KEY ASSUMPTION 1: The case name for both the image and annotations will be the same. 
 
         tmp_dir_path - The path name for the current temporary directory initialised for the current data instance.
         '''
@@ -940,7 +956,7 @@ class FrontEndSimulator:
 
         empty_foreground = None 
 
-        if check_empty(data_instance['reference_label']['metatensor'], self.args['configs_labels_dict']['background']):
+        if check_empty(data_instance['reference_label']['metatensor'], self.args['semantic_id_dict']['background']):
             if self.args['infer_run_configs']['init'].title() == 'Automatic Init':
                 if not self.args['sim_empty_fg_automatic']:
                     warnings.warn(f'The gold standard segmentation used as the reference for the task foreground is completely empty and sim_empty_fg_automatic flag is false, skipping... \n'
@@ -961,7 +977,7 @@ class FrontEndSimulator:
         
         #We will also examine the eval label for the empty foreground case, this will NOT affect the 
         #validity of the case, but is still relevant to flag for interpretation of results.
-        if check_empty(data_instance['eval_label']['metatensor'], self.args['configs_labels_dict']['background']):
+        if check_empty(data_instance['eval_label']['metatensor'], self.args['semantic_id_dict']['background']):
             for metric in self.args['metrics_configs']['metrics']:
                 # Process each metric
                 if metric['ignore_empty']:
@@ -999,22 +1015,34 @@ class FrontEndSimulator:
         else:
             assert empty_foreground == True, 'The empty_foreground flag should either be True or False at this point.'
 
-        iter_num, terminated_early = self.iterative_loop(empty_foreground=empty_foreground)
+        if self.args['skip_prompt']:
+            assert self.args['skip_metric'], 'If prompt skipping is enabled, then metric skipping must also be enabled, as the metrics are dependent on the prompts for their generation, and therefore if no prompts are being generated then the metrics cannot be generated either. Please check the skip_prompt and skip_metric flags in the experiment config.'
+            logging.info('Skipping prompting and metric generation as per the skip_prompt flag -> this is effectively just using the framework to run the app in a loop and feed it an incremental data stream..')
+        else:
+            iter_num, terminated_early = self.iterative_loop(empty_foreground=empty_foreground)
     
         #Saving the final set of tracked metrics....
-
-        self.metrics_handler.save_metrics(
-            case_name=case_name,
-            empty_foreground=empty_foreground,
-            terminated_early=terminated_early,
-            temporary_iter_lims=(iter_num, self.args['infer_run_configs']['num_edits']), #This is a tuple containing the lower and upper iteration limits for padding the tracked metrics, 
-            # if early convergence occured.....
-            tracked_metrics=self.tracked_metrics
-        )
+        if self.args['skip_metric']:
+            logging.info('Skipping saving of metrics as per the skip_metric flag, moving on to next data instance...')
+        else:
+            self.metrics_handler.save_metrics(
+                case_name=case_name,
+                empty_foreground=empty_foreground,
+                terminated_early=terminated_early,
+                temporary_iter_lims=(iter_num, self.args['infer_run_configs']['num_edits']), #This is a tuple containing the lower and upper iteration limits for padding the tracked metrics, 
+                # if early convergence occured.....
+                tracked_metrics=self.tracked_metrics
+            )
 
         if self.args['enable_adaptation']:
+            if self.args['skip_prompt']: 
+                assert self.args['provide_gold_standard_after_inference'], 'If adaptation is enabled and prompt skipping is enabled, then the '
+                'provide_gold_standard_after_inference flag must be set to True, as the adaptation procedure requires some reference annotation'
+                'Since no prompting information would be provided for the sample due to the skip_prompt flag being set '
+                'to True it would have not generated any intermediate predictions to use for adaptation.'
+
             if self.args['provide_gold_standard_after_inference']:
-                self.infer_app.accept_new_sample(
+                self.app.accept_new_sample(
                     {
                     'image': {
                         'metatensor':torch.from_numpy(self.data_instance['image']['metatensor'].clone().detach().numpy()),
@@ -1027,7 +1055,7 @@ class FrontEndSimulator:
                     }
                 )
             else:
-                self.infer_app.accept_new_sample(
+                self.app.accept_new_sample(
                     {
                     'image': {
                         'metatensor':torch.from_numpy(self.data_instance['image']['metatensor'].clone().detach().numpy()),
@@ -1040,7 +1068,7 @@ class FrontEndSimulator:
             #Now we will make a callback to trigger a function which will handle the adaptation procedure (need not necessarily
             #make a change at every data instance, depends on the algorithm). This is solely for isolating the process of returning
             #updated meta-algorithm state for automatic continuation of experiment.
-            algorithm_state = self.infer_app.trigger_adaptation()       
+            algorithm_state = self.app.trigger_adaptation()       
 
             if algorithm_state == None or list(algorithm_state['meta_algorithm_state'].keys()) == ['algo_cache_name']: 
                 #We need something more than the cache name! Nothing else was changed/saved!

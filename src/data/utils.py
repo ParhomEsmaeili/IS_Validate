@@ -206,12 +206,12 @@ def init_task_cases(
         if 'semantic_class_mapping' in exp_task_configs['data_transforms'].keys():
             #In this case we will need to generate a mapping between descriptors for the downstream loader.
             semantic_class_mapping = exp_task_configs['data_transforms']['semantic_class_mapping']
-            config_labels_dict = {k:i for i, k in enumerate(semantic_class_mapping.keys())}
+            semantic_id_dict = {k:i for i, k in enumerate(semantic_class_mapping.keys())}
         else:
             warnings.warn('We revert to the default semantic classes, but take care that this is intended.')
             #If the semantic_class_mapping is not provided, we will just use the original semantic classes as the descriptor/integer code.
             semantic_class_mapping = {k:[k] for k in orig_semantic_classes_dict.keys()} #We create a one-to-one map to itself.
-            config_labels_dict = {k:v['id'] for k,v in orig_semantic_classes_dict.items()} 
+            semantic_id_dict = {k:v['id'] for k,v in orig_semantic_classes_dict.items()} 
         
         #  We need to check that all semantic classes from the dataset.json are present in the semantic_class_mapping,
         # and that each original semantic class appears only once in the mapping (no duplicates or missing classes).
@@ -240,7 +240,7 @@ def init_task_cases(
         #TODO: Integration of panoptic datasets, i.e. those with "thing" classes, is required. We have made a lot of simplifying
         #assumptions for this implementation with multi-class semantic seg.
         
-        if len(config_labels_dict) != 2:
+        if len(semantic_id_dict) != 2:
             raise NotImplementedError('Hardcoded exception, downstream apps are only designed to handle binary semantic segmentation problems.')
     
 
@@ -294,7 +294,7 @@ def init_task_cases(
     transforms_configs = {
         #Hardcoding some of the inputs for now.... TODO: Tidy this up later in a more abstracted capacity.
         'semantic_class_mapping':semantic_class_mapping,
-        'config_labels_dict': config_labels_dict, 
+        'semantic_id_dict': semantic_id_dict, 
         'image_struct_mapping': extractor(exp_task_configs, ('data_sampling', 'image_conf')),
         'reference_annotation_struct_mapping':extractor(prompter_configs, ('annotation_conf',)),
         'eval_annotation_struct_mapping':extractor(metric_configs, ('data_sampling', 'annotation_conf'))
@@ -304,7 +304,7 @@ def init_task_cases(
     # common conventions). This is just a temporary hacky fix until we build a proper infrastructure for the dataloading pipeline.
     transforms_configs.update({'non_standard_transfs':{k:v for k,v in exp_task_configs['data_transforms'].items() if k != 'semantic_class_mapping'}})
 
-    return config_labels_dict, dataloader_generator(case_list=case_list, image_keys=image_keys, eval_annotation_keys=eval_annotation_keys, reference_annotation_keys=reference_annotation_keys, transforms_configs=transforms_configs)
+    return semantic_id_dict, dataloader_generator(case_list=case_list, image_keys=image_keys, eval_annotation_keys=eval_annotation_keys, reference_annotation_keys=reference_annotation_keys, transforms_configs=transforms_configs)
 
 def create_filepath(dataset_dir, relpath):
     #Determining the actual abspath filepaths for the task at hand. 
@@ -618,13 +618,13 @@ def dataloader_generator(
             MergeSegmentations(
                 keys=eval_annotation_keys, 
                 sem_mapping=transforms_configs['semantic_class_mapping'], 
-                output_sem_code=transforms_configs['config_labels_dict'],
+                output_sem_code=transforms_configs['semantic_id_dict'],
                 annotation_struct_mapping=transforms_configs['eval_annotation_struct_mapping'],
                 output_key='eval_label'),
             MergeSegmentations(
                 keys=reference_annotation_keys, 
                 sem_mapping=transforms_configs['semantic_class_mapping'],
-                output_sem_code=transforms_configs['config_labels_dict'],
+                output_sem_code=transforms_configs['semantic_id_dict'],
                 annotation_struct_mapping=transforms_configs['reference_annotation_struct_mapping'],
                 output_key='reference_label')
         ]
@@ -636,8 +636,8 @@ def dataloader_generator(
                 additional_transforms = [
                     KeepTopCC(
                         keys=['eval_label', 'reference_label'], #['label'], 
-                        operated_classes=[k for k in transforms_configs['config_labels_dict'] if k.capitalize() != 'Background'],
-                        class_code_map=transforms_configs['config_labels_dict'], 
+                        operated_classes=[k for k in transforms_configs['semantic_id_dict'] if k.capitalize() != 'Background'],
+                        class_code_map=transforms_configs['semantic_id_dict'], 
                         component_descriptor='cc_largest',
                         connectivity=3
                         )

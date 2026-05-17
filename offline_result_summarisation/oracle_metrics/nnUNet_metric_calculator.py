@@ -53,8 +53,8 @@ def process_metric_config(metric_config, spacing_config):
                 conf['multiple_parameter_values'] = 'tolerance_mms'
     return metric_config
 
-def write_metrics(metrics_dict, metrics_configs, config_labels_dict, output_base_folder):
-    metric_paths_dict = init_all_csvs(output_base_folder, metrics_configs, config_labels_dict)
+def write_metrics(metrics_dict, metrics_configs, semantic_id_dict, output_base_folder):
+    metric_paths_dict = init_all_csvs(output_base_folder, metrics_configs, semantic_id_dict)
 
     for case, metrics in metrics_dict.items():
         write_to_csvs(
@@ -65,7 +65,7 @@ def write_metrics(metrics_dict, metrics_configs, config_labels_dict, output_base
         )
     print('done writing metrics.')
 
-def calculate_nnUNet_metrics(scoring_wrapper, seg_folder, gt_folder, config_labels_dict, datalist):
+def calculate_nnUNet_metrics(scoring_wrapper, seg_folder, gt_folder, semantic_id_dict, datalist):
     #check all of the files are in the seg and gt folder.
     for file in datalist:
         if not os.path.exists(os.path.join(gt_folder, file + '.nii.gz')):
@@ -90,7 +90,7 @@ def calculate_nnUNet_metrics(scoring_wrapper, seg_folder, gt_folder, config_labe
         # Calculate the metrics using the scoring wrapper
         img_masks = (
             torch.ones_like(seg_tensor, dtype=torch.int64), #'cross_class_mask':
-            {class_lab:torch.ones_like(seg_tensor,dtype=torch.int64) for class_lab in config_labels_dict.keys()} #'per_class_masks': 
+            {class_lab:torch.ones_like(seg_tensor,dtype=torch.int64) for class_lab in semantic_id_dict.keys()} #'per_class_masks': 
         )
 
         metrics = scoring_wrapper(
@@ -267,10 +267,10 @@ if __name__ == "__main__":
         if len(set(canonical_mappings)) != 1:
             raise ValueError(f"Semantic class mappings are not the same across the tasks specified by task_conf_id {args.task_conf_id}. Please ensure they are the same, or specify a single task_conf_id corresponding to a single task configuration.")
         else:
-            config_labels_dict = semantic_class_mappings[0]
-        print(f"Config labels dict: {config_labels_dict}")
-        # config_labels_dict = current_tasks[0]['data_transforms']['semantic_class_mapping']
-        config_labels_dict = {k:idx for idx, k in enumerate(config_labels_dict.keys())}  # Convert to a dictionary with labels as keys and indices as values
+            semantic_id_dict = semantic_class_mappings[0]
+        print(f"Config labels dict: {semantic_id_dict}")
+        # semantic_id_dict = current_tasks[0]['data_transforms']['semantic_class_mapping']
+        semantic_id_dict = {k:idx for idx, k in enumerate(semantic_id_dict.keys())}  # Convert to a dictionary with labels as keys and indices as values
 
     #Lets extract the spacing config if it exists. We will use a try-except here for convenience.
     try:
@@ -289,7 +289,7 @@ if __name__ == "__main__":
     scoring_wrapper = BaseScoringWrapper(
         calc_device=torch.device(0),
         metrics_configs=metric_config, 
-        config_labels_dict=config_labels_dict,
+        semantic_id_dict=semantic_id_dict,
     )
 
     # Calculate nnUNet metrics
@@ -297,8 +297,8 @@ if __name__ == "__main__":
         scoring_wrapper, 
         seg_folder, 
         gt_folder, 
-        config_labels_dict, 
+        semantic_id_dict, 
         datalist)
 
     #write the metrics to a csv.  
-    write_metrics(metrics_dict, metric_config, config_labels_dict, output_folder)
+    write_metrics(metrics_dict, metric_config, semantic_id_dict, output_folder)

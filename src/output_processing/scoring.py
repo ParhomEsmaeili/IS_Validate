@@ -16,8 +16,8 @@ class MetricsHandler:
         calc_device: torch.device, 
         early_termination_criterion: dict, #dice_termination_thresh: float,
         metrics_configs: dict[str, dict],
-        metrics_savepaths: dict[str, dict[str, Union[str, None, dict]]],
-        config_labels_dict: dict[str, int]
+        metrics_savepaths: dict[str, dict[str, Union[str, None, dict]]] | None,
+        semantic_id_dict: dict[str, int]
 
     ):
         '''
@@ -30,7 +30,8 @@ class MetricsHandler:
 
         Format - metric_type: dict of args.
 
-        metrics_savepaths: A nested dictionary - Contains the savepaths to each csv file being used for saving metrics.
+        metrics_savepaths: 
+        A nested dictionary (or NoneType if skipping over saving metrics) - Contains the savepaths to each csv file being used for saving metrics.
         
         Format - metric_type: Nested Dict of metric type specific paths containing the paths for cross-class and 
         per-class (Optional) scores for the given metric. CSVs are pre-initialised in the runscript.
@@ -41,13 +42,13 @@ class MetricsHandler:
         # self.termination_thresh = dice_termination_threshold 
         self.metrics_configs = metrics_configs
         self.metrics_savepaths = metrics_savepaths 
-        self.config_labels_dict = config_labels_dict 
+        self.semantic_id_dict = semantic_id_dict 
 
         #Note, each metric must contain a corresponding savepath!
-
-        if not set(self.metrics_configs) == set(self.metrics_savepaths):
-            raise Exception('The metrics configs and metrics savepaths must have the exact same keys')
-
+        if self.metrics_savepaths != None:
+            if not set(self.metrics_configs) == set(self.metrics_savepaths):
+                raise Exception('The metrics configs and metrics savepaths must have the exact same keys')
+        
         self.supported_metrics = {
             'base':{'Dice', 'NSD'},
             # 'base_relative':set(),#{'Consistent Dice Improvement'},
@@ -131,7 +132,7 @@ class MetricsHandler:
         self.base_computer = BaseScoringWrapper(
             calc_device=self.calc_device, 
             metrics_configs=base_metrics_configs,
-            config_labels_dict=self.config_labels_dict
+            semantic_id_dict=self.semantic_id_dict
         )
 
 
@@ -146,7 +147,7 @@ class MetricsHandler:
         '''
         return (
             torch.ones_like(tensor, dtype=torch.uint8), #'cross_class_mask':
-            {class_lab:torch.ones_like(tensor,dtype=torch.uint8) for class_lab in self.config_labels_dict.keys()} #'per_class_masks': 
+            {class_lab:torch.ones_like(tensor,dtype=torch.uint8) for class_lab in self.semantic_id_dict.keys()} #'per_class_masks': 
         )
     
     def exec_base_metrics(self, 
@@ -219,9 +220,6 @@ class MetricsHandler:
             infer_call_info
             )
         
-        # del extracted_gt
-        # del extracted_pred
-        # gc.collect() #Functionally this garbage collection is doing nothing! Lets remove it and speed things up
         torch.cuda.empty_cache()
         return tracked_metrics, terminate_bool
 
@@ -307,7 +305,7 @@ class MetricsHandler:
                             if 'multiple_parameter_values' in self.metrics_configs[metric_type]:
                                 metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'] = dict()
                                 parameter_name = self.metrics_configs[metric_type]['multiple_parameter_values']
-                                for class_lb in self.config_labels_dict.keys():
+                                for class_lb in self.semantic_id_dict.keys():
                                     if class_lb.title() == 'Background' and not self.metrics_configs[metric_type]['include_background_metric']:
                                         continue 
                                     metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'][class_lb] = dict()
@@ -315,7 +313,7 @@ class MetricsHandler:
                                         metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'][class_lb][parameter_idx] = 'empty_foreground'
                             else:
                                 metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'] = dict()
-                                for class_lb in self.config_labels_dict.keys():
+                                for class_lb in self.semantic_id_dict.keys():
                                     if class_lb.title() == 'Background' and not self.metrics_configs[metric_type]['include_background_metric']:
                                         continue 
                                     #We will pad the per-class scores with a string denoting empty foreground.
@@ -354,7 +352,7 @@ class MetricsHandler:
                                 if 'multiple_parameter_values' in self.metrics_configs[metric_type]:
                                     metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'] = dict()
                                     parameter_name = self.metrics_configs[metric_type]['multiple_parameter_values']
-                                    for class_lb in self.config_labels_dict.keys():
+                                    for class_lb in self.semantic_id_dict.keys():
                                         if class_lb.title() == 'Background' and not self.metrics_configs[metric_type]['include_background_metric']:
                                             continue 
                                         metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'][class_lb] = dict()
@@ -362,7 +360,7 @@ class MetricsHandler:
                                             metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'][class_lb][parameter_idx] = 'terminated_early'  
                                 else:
                                     metric_subdict['Interactive Edit Iter ' + str(iter_num)]['per_class_scores'] = dict()
-                                    for class_lb in self.config_labels_dict.keys():
+                                    for class_lb in self.semantic_id_dict.keys():
                                         if class_lb.title() == 'Background' and not self.metrics_configs[metric_type]['include_background_metric']:
                                             continue 
                                         #We will pad the per-class scores with a string denoting early termination.
@@ -372,7 +370,9 @@ class MetricsHandler:
                     raise Exception('If the process did not terminate early, the bottom iteration limit must be a NoneType. There is \n' \
                     'no need to pad the tracked metrics.')
                 # print('The process did not terminate early, so we will save the tracked metrics as they are without modification')
-
+        
+        if self.metrics_savepaths == None:
+            raise Exception('The metrics savepaths were not properly initialised, so we cannot save the metrics. Please check the metrics savepath initialisation.')
         write_to_csvs(
             case_name=case_name, 
             csv_paths=self.metrics_savepaths, 

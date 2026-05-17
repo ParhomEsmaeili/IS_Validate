@@ -34,11 +34,11 @@ class BaseScoringWrapper:
             self,
             calc_device: torch.device, 
             metrics_configs:dict, 
-            config_labels_dict:dict):
+            semantic_id_dict:dict):
 
         self.calc_device = calc_device
         self.metrics_configs = metrics_configs  
-        self.config_labels_dict = config_labels_dict 
+        self.semantic_id_dict = semantic_id_dict 
         self.metric_classes = {}
 
         self.metric_initialiser_map = {
@@ -57,7 +57,7 @@ class BaseScoringWrapper:
             ignore_empty=self.metrics_configs['Dice']['ignore_empty'],
             include_background=self.metrics_configs['Dice']['include_background_metric'],
             include_per_class_scores=self.metrics_configs['Dice']['include_per_class_scores'],
-            config_labels_dict=self.config_labels_dict
+            semantic_id_dict=self.semantic_id_dict
             )
     def init_NSD(self):
 
@@ -68,7 +68,7 @@ class BaseScoringWrapper:
             include_background=self.metrics_configs['NSD']['include_background_metric'],
             include_per_class_scores=self.metrics_configs['NSD']['include_per_class_scores'],
             tolerance_mms=self.metrics_configs['NSD']['tolerance_mms'], #this is the tolerance used in the metric, not the spacing for the image. 
-            config_labels_dict=self.config_labels_dict       
+            semantic_id_dict=self.semantic_id_dict       
             )
         
     def __call__(self,  
@@ -110,13 +110,13 @@ class Dice:
         ignore_empty: bool,
         include_background: bool,
         include_per_class_scores: bool,
-        config_labels_dict: dict[str, int]
+        semantic_id_dict: dict[str, int]
     ):
         self.calc_device = calc_device
         self.ignore_empty = ignore_empty
         self.include_background = include_background
         self.include_per_class_scores = include_per_class_scores
-        self.config_labels_dict = config_labels_dict
+        self.semantic_id_dict = semantic_id_dict
 
     def dice_score(self,
             cross_class_mask: Union[torch.Tensor, MetaTensor], 
@@ -149,7 +149,7 @@ class Dice:
         #For multi-class (or binary class where self-include background is TRUE)
 
         #We weight/mask this according to the class-separated image_masks (BINARISED).  
-        if len(self.config_labels_dict) > 2:
+        if len(self.semantic_id_dict) > 2:
             raise NotImplementedError('Optimal multi-class dice score computation not yet implemented for class-imbalance \n'
             'handling.')
         cross_class = self.dice_score_multiclass(pred, gt, cross_class_mask) 
@@ -160,7 +160,7 @@ class Dice:
             pred =pred.to(device=self.calc_device, dtype=torch.uint8)
             gt = gt.to(device=self.calc_device, dtype=torch.uint8)
 
-            for class_label, class_integer_code in self.config_labels_dict.items():
+            for class_label, class_integer_code in self.semantic_id_dict.items():
 
                 if not self.include_background:
                     if class_label.title() == 'Background':
@@ -261,7 +261,7 @@ class Dice:
             intersection = 0
             
             
-            for class_label, class_code in self.config_labels_dict.items():
+            for class_label, class_code in self.semantic_id_dict.items():
                 if not self.include_background:
                     if class_label.title() == 'Background':
                         continue 
@@ -337,7 +337,7 @@ class NSD:
         ignore_empty: bool,
         include_background: bool,
         include_per_class_scores: bool,
-        config_labels_dict: dict[str, int],
+        semantic_id_dict: dict[str, int],
         tolerance_mms: list[float] 
         #temporarily we will assume the same tolerance is to be used across all classes, which will be reasonable in binary semantic seg. 
         #should ideally be overridden on a target by target basis, or some reasonable measure across an instance-by-instance basis.
@@ -349,7 +349,7 @@ class NSD:
         self.ignore_empty = ignore_empty
         self.include_background = include_background
         self.include_per_class_scores = include_per_class_scores
-        self.config_labels_dict = config_labels_dict
+        self.semantic_id_dict = semantic_id_dict
         self.tolerance_mms = tolerance_mms 
  
     def NSD_calc(
@@ -368,7 +368,7 @@ class NSD:
         
         per_class_scores = dict() 
             
-        for class_label, class_integer_code in self.config_labels_dict.items():
+        for class_label, class_integer_code in self.semantic_id_dict.items():
             if class_label.title() == 'Background': 
                 #Background will never have an actual meaningful interpretation, it is a "stuff" class with no structure associated, 
                 # and is not particularly relevant, so typically we will not include it in the NSD computation.
@@ -576,9 +576,9 @@ if __name__ == '__main__':
                 'tolerance_mm':1
             }
         },
-        config_labels_dict={'background':0, 'tumour':1}
+        semantic_id_dict={'background':0, 'tumour':1}
     )  
-    # NSD_calc_class = NSD(ignore_empty=True, include_background=False, include_per_class_scores=True, config_labels_dict={'background':0, 'tumour':1}, tolerance_mm=1) 
+    # NSD_calc_class = NSD(ignore_empty=True, include_background=False, include_per_class_scores=True, semantic_id_dict={'background':0, 'tumour':1}, tolerance_mm=1) 
     #output = NSD_calc_class(None, im_metatensor[0], im_metatensor[0])
     output = scoring_class((torch.zeros([100,100,100]), dict()), im_metatensor[0], im_metatensor[0])
     print('fin')

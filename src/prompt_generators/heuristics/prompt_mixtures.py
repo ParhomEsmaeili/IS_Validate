@@ -24,7 +24,7 @@ This file contains the prompt mixture generation classes.
 Required arguments:
 
 use_mem: Bool - Denotes whether front-End IM memory is used for handling prompt placement (e.g., is IM used to inform prompt generation)
-config_labels_dict: Dict - Denotes the class-label to class-integer code mapping.
+semantic_id_dict: Dict - Denotes the class-label to class-integer code mapping.
 sim_device: torch.device - Denotes the device which the prompt generation will be performed on.
 heur_fn_dict: Dict - Prompt-type separated dictionary containing the set of heuristics fncs being used:
     
@@ -117,12 +117,12 @@ generated_prompt_labels:
 #about parametrisations, multi-class, multi-component etc. 
 
 class BaseMixture(PointBase, ScribbleBase, BboxBase):
-    def __init__(self, sim_device: torch.device, config_labels_dict: dict):
+    def __init__(self, sim_device: torch.device, semantic_id_dict: dict):
         self.supported_prompts = ['points', 'scribbles', 'bboxes', 'lassos']
         self.discrete_variables = [i + '_labels' for i in self.supported_prompts] #The labels are discrete variables, 
         #the spatial coordinates need not necessarily be discrete. To permit sub-voxel coordinates in future implementations.
         self.sim_device = sim_device
-        self.config_labels_dict = config_labels_dict 
+        self.semantic_id_dict = semantic_id_dict 
     
     def check_config_availability(self, input_configs: dict[dict], prompter_type: str):
         '''
@@ -516,10 +516,10 @@ class BasicValidOnlyMixture(BaseMixture):
             warnings.warn('The gt mask must be placed on the sim device')
             gt = gt.to(dtype=torch.int8, device=self.sim_device)
         
-        sampling_regions_dict['gt'] = dict.fromkeys(self.config_labels_dict.keys(), [])
+        sampling_regions_dict['gt'] = dict.fromkeys(self.semantic_id_dict.keys(), [])
 
         #We then split the gt, by class and into a list of components for each class. 
-        for label, value  in self.config_labels_dict.items():
+        for label, value  in self.semantic_id_dict.items():
             #We split gt by label. 
             gt_temp = torch.where(gt == value, 1, 0).to(dtype=torch.int8, device=self.sim_device)
             components_list, _ = get_label_ccp(gt_temp) 
@@ -550,14 +550,14 @@ class BasicValidOnlyMixture(BaseMixture):
             #Create the error regions dict: 
             err_regions_dict = dict() 
 
-            for l1, v1 in self.config_labels_dict.items():
+            for l1, v1 in self.semantic_id_dict.items():
                 #Splitting into classes according to gt (i.e. voxels where an error occured and where the gt class exists)                
                 temp_gt = torch.where(gt == v1, 1, 0).to(dtype=torch.int8, device=self.sim_device)
                 split_by_gt = error_map_bool * temp_gt 
                 
                 err_regions_dict[l1]  = dict() 
 
-                for l2, v2 in {key:val for key, val in self.config_labels_dict.items() if key != l1}.items():    
+                for l2, v2 in {key:val for key, val in self.semantic_id_dict.items() if key != l1}.items():    
                     #Splitting into classes according to predicted class that do not belong to.
                     
                     #NOTE: We use where key != l1 because error would not occur if the pred was the same as the gt label.
@@ -624,11 +624,11 @@ class BasicValidOnlyMixture(BaseMixture):
             warnings.warn('The gt mask must be placed on the sim device')
             gt = gt.to(dtype=torch.int8, device=self.sim_device)
         
-        sampling_regions_dict['gt'] = dict.fromkeys(self.config_labels_dict.keys(), None)
+        sampling_regions_dict['gt'] = dict.fromkeys(self.semantic_id_dict.keys(), None)
 
         #We then split the gt, by class for each class. 
         accum = None
-        for label, value  in self.config_labels_dict.items():
+        for label, value  in self.semantic_id_dict.items():
             #We split gt by label. 
             if not (gt == value).sum(): #0 evaluates to bool False.
                 warnings.warn(f'Class {label} was empty in gt.')
@@ -680,7 +680,7 @@ class BasicValidOnlyMixture(BaseMixture):
             err_regions_dict = dict() 
 
             accum = None
-            for l1, v1 in self.config_labels_dict.items():
+            for l1, v1 in self.semantic_id_dict.items():
                 #Splitting into classes according to gt (i.e. voxels where an error occured and where the gt class exists)                
                 # temp_gt = torch.where(gt == v1, 1, 0).to(dtype=torch.int8, device=self.sim_device) #DEPRECATED NOT NEEDED USE OF MEMORY!
 
@@ -852,7 +852,7 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
             args: dict
             ):
         
-        config_labels_dict = args['config_labels_dict'] #Dict
+        semantic_id_dict = args['semantic_id_dict'] #Dict
         sim_device = args['sim_device']
         heur_fn_dict = args['heur_fn_dict']
         build_args = args['build_args']
@@ -860,7 +860,7 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
         use_mem = args['use_mem']
         super().__init__(
             use_mem=use_mem,
-            config_labels_dict=config_labels_dict,
+            semantic_id_dict=semantic_id_dict,
             sim_device=sim_device,
         )
         self.heur_fn_dict = heur_fn_dict
@@ -1035,7 +1035,7 @@ class PrototypePseudoMixture(BasicValidOnlyMixture):
                     raise Exception('Cannot have a non-Nonetype for error region item if simulating initialisation.') 
                 
              
-            for class_lb, class_int in self.config_labels_dict.items():
+            for class_lb, class_int in self.semantic_id_dict.items():
                 
                 #By default, We just iterate through on a class by class basis. 
 
@@ -1467,7 +1467,7 @@ class SimplifiedPrototypePseudoMixture(BasicValidOnlyMixture):
             self,
             args: dict
             ):
-        config_labels_dict = args['config_labels_dict'] #Dict
+        semantic_id_dict = args['semantic_id_dict'] #Dict
         sim_device = args['sim_device']
         heur_fn_dict = args['heur_fn_dict']
         build_args = args['build_args']
@@ -1475,7 +1475,7 @@ class SimplifiedPrototypePseudoMixture(BasicValidOnlyMixture):
         use_mem = args['use_mem']
         super().__init__(
             use_mem=use_mem,
-            config_labels_dict=config_labels_dict,
+            semantic_id_dict=semantic_id_dict,
             sim_device=sim_device,
         )
         self.heur_fn_dict = heur_fn_dict
@@ -1642,7 +1642,7 @@ class SimplifiedPrototypePseudoMixture(BasicValidOnlyMixture):
                     raise Exception('Cannot have a non-Nonetype for error region item if simulating initialisation.') 
                 
              
-            for class_lb, class_int in self.config_labels_dict.items():
+            for class_lb, class_int in self.semantic_id_dict.items():
                 
                 #By default, We just iterate through on a class by class basis. 
 
@@ -2027,7 +2027,7 @@ class RandomPromptTypeAgent(BasicValidOnlyMixture):
     '''
     def __init__(
             self,
-            config_labels_dict: dict,
+            semantic_id_dict: dict,
             sim_device: torch.device,
             heur_fn_dict: dict,
             build_args: dict,
@@ -2037,7 +2037,7 @@ class RandomPromptTypeAgent(BasicValidOnlyMixture):
         
         super().__init__(
             use_mem=use_mem,
-            config_labels_dict=config_labels_dict,
+            semantic_id_dict=semantic_id_dict,
             sim_device=sim_device,
         )
 
@@ -2216,7 +2216,7 @@ class RandomPromptTypeAgent(BasicValidOnlyMixture):
                     raise Exception('Cannot have a non-Nonetype for error region item if simulating initialisation.') 
                 
              
-            for class_lb, class_int in self.config_labels_dict.items():
+            for class_lb, class_int in self.semantic_id_dict.items():
                 
                 #By default, We just iterate through on a class by class basis. 
 

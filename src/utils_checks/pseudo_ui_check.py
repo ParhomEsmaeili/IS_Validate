@@ -14,33 +14,33 @@ def check_empty(tensor: MetaTensor, bg_val):
     
     return torch.all(tensor == bg_val)
 
-def check_config_labels(config_labels_dict: dict):
+def check_semantic_id_dict(semantic_id_dict: dict):
     '''
-    Basic function which implements some checks on the config labels dictionary.
+    Basic function which implements some checks on the semantic id dictionary.
     '''
-    if not isinstance(config_labels_dict, dict) or not config_labels_dict:
-        raise TypeError('Config label-code mapping must be provided as a non-empty dict.')
+    if not isinstance(semantic_id_dict, dict) or not semantic_id_dict:
+        raise TypeError('Semantic id-code mapping must be provided as a non-empty dict.')
         
-    def check_ints(config_labels: dict):
-        if not all(isinstance(k, str) for k in config_labels.keys()):
-            raise TypeError("All keys in config_labels_dict must be strs")
-        if not all(isinstance(k, int) for k in config_labels.values()):
-            raise TypeError("All the values in config_labels_dict must be ints")
+    def check_ints(semantic_id_dict: dict):
+        if not all(isinstance(k, str) for k in semantic_id_dict.keys()):
+            raise TypeError("All keys in semantic_id_dict must be strs")
+        if not all(isinstance(k, int) for k in semantic_id_dict.values()):
+            raise TypeError("All the values in semantic_id_dict must be ints")
         
-    def check_bg(config_labels: dict):
-        if 'background' not in config_labels.keys():
-            raise KeyError('The background class must be in the config labels dict.')
+    def check_bg(semantic_id_dict: dict):
+        if 'background' not in semantic_id_dict.keys():
+            raise KeyError('The background class must be in the semantic id dict.')
         else:
-            if config_labels['background'] != 0:
+            if semantic_id_dict['background'] != 0:
                 raise ValueError('The value of the background class must be zero.')
     
-    def check_fg_empty(config_labels_dict):
-        if not set(config_labels_dict.keys()).difference({'background'}): #Empty set evaluates as False.
+    def check_fg_empty(semantic_id_dict):
+        if not set(semantic_id_dict.keys()).difference({'background'}): #Empty set evaluates as False.
             raise Exception('There must be at least one foreground class!')
     
 
-    check_ints(config_labels_dict)
-    check_bg(config_labels_dict)
-    check_fg_empty(config_labels_dict)
+    check_ints(semantic_id_dict)
+    check_bg(semantic_id_dict)
+    check_fg_empty(semantic_id_dict)
 
 

@@ -41,12 +41,14 @@ def set_parse():
     
     #Pathing arguments
     parser.add_argument('--data_root', type=str, default=codebase_dir)
-    parser.add_argument('--dataset_name', type=str, default='Dataset031_Kits23') #'Dataset005_Prostate')
-    parser.add_argument('--app_root', type=str, default= 
-                        '/home/parhomesmaeili/IS_Codebase_Forks/nnInteractive_Fork') 
+    parser.add_argument('--dataset_name', type=str, default='Dataset005_Prostate')
+    parser.add_argument('--app_root', type=str, 
+                        # default='/home/parhomesmaeili/IS_Codebase_Forks/nnInteractive_Fork'
+                        default='/home/parhomesmaeili/MY METHOD/'
+    ) 
     #NOTE:Just set for debugging purposes.
     #This acts as the name of the app, but also temporarily acts as the relative path name within the input_applications folder in the app root folder.
-    parser.add_argument('--app_name', type=str, default='nnInteractive_App')
+    parser.add_argument('--app_name', type=str, default='CLoPA') #'nnInteractive_App') #'CLoPA'
     parser.add_argument('--metrics_root', type=str, default=os.path.join(codebase_dir, 'results'))
     parser.add_argument('--seg_root', type=str, default=os.path.join(codebase_dir, 'results'))
     parser.add_argument('--continue_exec_root', type=str, default='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/continue_execution_files') #None
@@ -67,8 +69,7 @@ def set_parse():
     #########################
     
     #Name of the experiment, used to store results, checkpoints for continuation/auto
-    parser.add_argument('--experiment_basename', type=str, required=False, default='check_refactor_experiment_31')
-    
+    parser.add_argument('--experiment_basename', type=str, required=False, default=None)
     #Runtime environment arguments/system control.
     parser.add_argument('--continue_execution', action='store_true', default=True)
     #seeding
@@ -98,7 +99,7 @@ def set_parse():
     #This is a bool which controls the adaptation config name, to steer the registry to pull the relevant
     #config for adaptation. Realistically this is just a byproduct of how we have intertwined the
     #apps and this framework... probably not ideal. 
-    parser.add_argument('--adaptation_config_name', type=str, default=None)
+    parser.add_argument('--adaptation_config_name', type=str, default=None) #'adapt_prototype_debug')
     #Self explanatory, whether adaptation is enabled or not.
     parser.add_argument('--enable_adaptation', action='store_true', default=False)
     
@@ -117,39 +118,14 @@ def set_parse():
     parser.add_argument('--algo_cache_name', type=str, default=None)
     #This is a string which denotes the reference name/run from which we have stored an experiment
     # execution checkpoint, from which we will be pulling episodes from.
-    parser.add_argument('--reference_experiment_checkpoint', type=str, default=None) 
+    parser.add_argument('--reference_experiment_checkpoint', type=str, default=None)
     #This bool controls whether we provide the gold standard annotation from the reference annotation,
     #or if we pass through an inferred segmentation (i.e., through what the app has generated at
     #termination of the editing process) for the adaptation step.
     parser.add_argument('--provide_gold_standard_after_inference', action='store_true', default=False)
 
     #Experiment configuration arg
-    parser.add_argument('--experiment_conf_id', type=int, default=31) #10)
-    #Validation utilised constructors build args
-    # parser.add_argument('--infer_init', type=str, default='Interactive Init')
-    # parser.add_argument('--infer_not_edit_bool', action='store_false', default=True)
-    # parser.add_argument('--infer_edit_nums', type=int, default=100)
-    # parser.add_argument('--dice_termination_thresh', type=float, default=1.0)
-
-    # #Validation utilised constructors build args
-    # parser.add_argument('--metric_conf_name', type=str, default='prototype_annotator_4') #'prototype'
-    # parser.add_argument('--task_conf_name', type=str, default='task_id_39') #'task_id_3')
-    # parser.add_argument('--init_prompt_conf_name', type=str, default='points_prototype_simplified')
-    # parser.add_argument('--edit_prompt_conf_name', type=str, default='points_prototype_simplified')
-    
-    # # parser.add_argument('--inf_prompt_procedure_type', type=str, default='heuristic')
-    # parser.add_argument('--sim_empty_fg_automatic', action='store_true', default=False)
-    # #TODO: Put use_mem and other related args like that for the im etc in here. 
-    # parser.add_argument('--use_mem_inf_edit', action='store_true', default=False) #Whether im is used for conditioning prompt gen.
-    # parser.add_argument('--im_conf_remove_init', action='store_true', default=False) 
-    # #Bool for whether the init state in im will be removed from memory.
-    # parser.add_argument('--im_conf_mem_len', type=int, default=1)#-1)
-    # #Int which determines the memory length used at cleanup after the interaction memory is updated with the current edit iteration's interaction state (inclusive of current state). 
-    # # This functionally has the same thing as using a memory length of N (where N is our variable here) for conditioning
-    # #the prompt generation of the next iteration (if memory is being used for conditioning.) N is strictly > 0 or N = - 1, where N=-1 indicates full memory length paradoxically. 
-    # # as N = 0 would remove the current iteration's interaction for inference, and also would be the same as ignoring the memory for prompt generation (for which we have a separate variable.)
-    # #For now we will set both these parameters to being true (i.e. to delete) because we are having lots of memory issues.
-
+    parser.add_argument('--experiment_conf_id', type=int, default=5)
     args = parser.parse_args()
     return args
 
@@ -285,6 +261,8 @@ def gen_experiment_args(args):
     output_dict['write_segmentation'] = args.write_segmentation
     output_dict['is_seg_tmp'] = args.is_seg_tmp
     output_dict['save_prompts'] = args.save_prompts
+    if output_dict['is_seg_tmp'] == output_dict['write_segmentation']:
+        raise ValueError('The is_seg_tmp and write_segmentation flags cannot be the same, please check your input arguments. If write_segmentation is false, then it does not make sense for is_seg_tmp to be true, as we are not writing segmentations at all. If write_segmentation is true, then it does not make sense for is_seg_tmp to be false, as we want to write the segmentations as temp files.')
 
 #################################### Adaptation Related Arguments ###########################################
 
@@ -315,6 +293,7 @@ def gen_experiment_args(args):
 
     output_dict['skip_metric'] = args.skip_metric
     output_dict['skip_prompt'] = args.skip_prompt
+        
     if args.skip_metric or args.skip_prompt:
         assert args.enable_adaptation, 'If skipping metric or prompt generation, then adaptation must be enabled, as we need the adaptation to be able to run without the metrics and prompting generation steps, please check your input arguments.'
         if 'enable_adaptation' in output_dict:
@@ -332,8 +311,8 @@ def gen_experiment_args(args):
         #to pass through a gold standard annotation.
         assert args.provide_gold_standard_after_inference, 'If skipping prompting generation, then '
         'providing gold standard after inference must be enabled. We need to be able to provide an annotation for'
-        'the adaptation step, please check your input arguments.'    
-
+        'the adaptation step, please check your input arguments.'
+        assert args.skip_metric, 'If skipping prompting generation, then skipping metric generation mus be enabled. This is because if we are skipping prompt generation, then we are likely skipping metric generation as well since the metrics are dependent on the prompts for generating predictions, please check your input arguments.'     
     #Somewhat amusingly, I think we have implemented assertion checks which invert the logic of
     #the checks implemented when adaptation is enabled. Let us leave this be. 
     output_dict['execute_on_adapted'] = args.execute_on_adapted
@@ -480,7 +459,7 @@ def gen_experiment_args(args):
         reference_spacing = None 
 
     #TODO: Update this for the new dataset-level contract.
-    output_dict['dataset_info'] = {
+    output_dict['dataset_level_data_schema'] = {
     'dataset_name': args.dataset_name,
     'dataset_image_channels': extract_config(os.path.join(args.data_root, 'datasets', args.dataset_name, 'dataset.json'), 'channel_names'),
     'task_channels': extractor(output_dict['task_configs'], ('data_sampling', 'image_conf', 'image_channel')),
@@ -523,6 +502,7 @@ def gen_experiment_args(args):
 
     output_dict['metrics_configs'] = process_metric_config(
         output_dict['metrics_configs'],
+        output_dict['skip_metric'],
         reference_spacing
     )
     #Now we extract the termination condition threshold:
@@ -531,8 +511,35 @@ def gen_experiment_args(args):
     
     return output_dict 
 
-def process_metric_config(metric_config, reference_spacing):
+def process_metric_config(
+        metric_config: dict, 
+        skip_metric: bool,
+        reference_spacing: list[float]
+    ) -> dict:
     #Function which processes the metric configs for cases where we do not have a trivial config.
+
+    #First we check whether we are calculating metrics to be stored, or if we are skipping calculation. If we are 
+    #skipping calculation (we will still require that a termination criterion is provided )
+    if skip_metric:
+        #If we are skipping metrics for storage then the only metric configs we need to retain are those which are
+        #relevant for early termination criteria. 
+        assert 'early_termination_criterion' in metric_config, 'If skipping metric calculation, then the early termination criterion must be provided in the metric configs, please check your metric configs and input arguments for consistency and clarity.'
+        #This should have already been checked but just being safe here.
+        
+        #we pull the metric name.
+        metric_name = metric_config['early_termination_criterion'].get('metric', None)
+        if metric_name is None:
+            raise ValueError('Even when skipping metric calculation, then the early termination criterion must still specify a metric name, please check your metric configs and input arguments for consistency and clarity.')
+        #We check that the metric name is in the metric configs provided, as we will need to have the config available
+        #for the termination criterion metric to be configured!
+        metrics_to_remove = set()
+        for metric_name, conf in metric_config['metrics'].items():
+            if metric_name != metric_config['early_termination_criterion']['metric']:
+                #we delete the config for this metric as we will not be calculating it at all!
+                metrics_to_remove.add(metric_name)
+        #So unglamourous.
+        for metric_name in metrics_to_remove:
+            metric_config['metrics'].pop(metric_name)
 
     #E.g., for NSD where we may want to calculate across multiple tolerance values.
     for metric_name, conf in metric_config['metrics'].items():
@@ -589,12 +596,12 @@ def create_seg_dirs(exp_seg_dir, infer_run_conf, exist_ok=False):
             else:
                 raise TypeError('If running editing, needs to be an int type for the number of iterations performed.')
 
-def init_metrics_saves(exp_results_dir, metrics_configs, configs_labels_dict):
+def init_metrics_saves(exp_results_dir, metrics_configs, semantic_id_dict):
     #Function which creates metrics dirs and initialises the csvs for the metrics saver, takes the results base dir and the metrics configs dict.
     metrics_dir = os.path.join(exp_results_dir, 'metrics')
     os.makedirs(metrics_dir, exist_ok=False)
 
-    return init_all_csvs(metrics_dir, metrics_configs, configs_labels_dict)
+    return init_all_csvs(metrics_dir, metrics_configs, semantic_id_dict)
 
 def log_config_writer(args_name, args_dict, logger):
     logger.info(f'Printing {args_name}: {os.linesep}')
@@ -611,11 +618,30 @@ def generate_base64_filename(length=12):
     encoded = base64.urlsafe_b64encode(random_bytes).decode('utf-8')
     return encoded.rstrip('=')  # Remove padding
 
+def generate_dataset_level_schema(
+    experiment_args: dict
+    ):
+    assert experiment_args != None, 'The experiment args must be provided to generate the dataset level schema, please check your input arguments.'
+    assert 'dataset_level_data_schema' in experiment_args, 'The dataset level data schema must be provided in the experiment args to generate the dataset level schema'
+    
+    dataset_level_schema = dict()
+    #Appending the data schema
+    dataset_level_schema['data_schema'] = experiment_args['dataset_level_data_schema']
+    #Appending some segmentation task schema.
+    dataset_level_schema['segmentation_task_schema'] = {
+    'semantic_id_dict': experiment_args['semantic_id_dict']
+    }
 
-def build_infer_app(
+    #Assigning the dataset level schema. 
+    experiment_args['dataset_level_schema'] = dataset_level_schema
+
+    return experiment_args
+
+def build_app(
     build_app_path, 
     device, 
-    adaptation_config_name,
+    dataset_level_schema: dict,
+    adaptation_config_name: str,
     algorithm_state: dict, 
     enable_adaptation: bool,
     execute_on_adapted: bool,
@@ -646,11 +672,27 @@ def build_infer_app(
         spec.loader.exec_module(foo)
         InferApp = foo.InferApp
 
-    return InferApp(device, adaptation_config_name, algorithm_state, enable_adaptation, execute_on_adapted, adaptation_episode, algo_cache_name)
+    assert device != None, 'Device must be provided to build the inference app, please check your input arguments and the build app script to ensure this is the case.'
+    assert dataset_level_schema != None, 'The dataset level config must be provided to build the inference app, please check your input arguments and the build app script to ensure this is the case.'
 
-def init_infer_app(experiment_args:dict, loaded_experiment_checkpoint: Optional[dict] = None, reference_experiment_checkpoint: Optional[dict] = None): 
+    return InferApp(
+        device, 
+        dataset_level_schema,
+        adaptation_config_name, 
+        algorithm_state, 
+        enable_adaptation, 
+        execute_on_adapted, 
+        adaptation_episode, 
+        algo_cache_name
+        )
 
-    #Function which finds and initialises the inference app using the build script, then checks it has the necessary methods. 
+def init_app(
+    experiment_args:dict, 
+    loaded_experiment_checkpoint: Optional[dict] = None, 
+    reference_experiment_checkpoint: Optional[dict] = None
+    ): 
+
+    #Function which finds and initialises the app using the build script, then checks it has the necessary methods. 
     
     #We will DEMAND that there is some algorithm state info, even if empty for a non adaptive algorithm. 
     #Even if its an empty dict for a non-adapting model (this is just a hack for consistency).
@@ -716,12 +758,11 @@ def init_infer_app(experiment_args:dict, loaded_experiment_checkpoint: Optional[
                 #empty because it should have stored something about the meta-state of the algorithm.
                 raise ValueError('If adaptation is enabled and a sample is completed, the algorithm state in the loaded experiment checkpoint \n'
                                 'cannot be empty. Please provide a valid algorithm state.')
-
-        
-
-    infer_app = build_infer_app(
+    
+    app = build_app(
         build_app_path=experiment_args['build_app_abspath'], 
         device=experiment_args['device'], 
+        dataset_level_schema=experiment_args['dataset_level_schema'],
         adaptation_config_name=experiment_args.get('adaptation_config_name', None),
         algorithm_state=algorithm_state, 
         enable_adaptation=enable_adaptation,
@@ -729,25 +770,25 @@ def init_infer_app(experiment_args:dict, loaded_experiment_checkpoint: Optional[
         adaptation_episode=experiment_args.get('adaptation_episode', None),
         algo_cache_name=algo_cache_name)
     
-    if not callable(infer_app):
+    if not callable(app):
         raise Exception('The inference app must be callable class.')
     else:
         #Check if it has a call attribute!
         try:
-            callback = getattr(infer_app, "__call__")
+            callback = getattr(app, "__call__")
         except:
             raise Exception('The inference app did not have a function __call__')
         
         #Check if it has a app_configs attribute!
         try:
-            app_configs_callback = getattr(infer_app, "app_configs")
+            app_configs_callback = getattr(app, "app_configs")
         except:
             raise Exception('The inference app did not have a function app_configs (which can be empty!), for saving the app configs to the experiment logger file.')
 
         if enable_adaptation:
             #If adaptation is enabled, check if it has an accept_new_sample method.
             try:
-                accept_new_sample_callback = getattr(infer_app, "accept_new_sample")
+                accept_new_sample_callback = getattr(app, "accept_new_sample")
             except:
                 raise Exception('The inference app did not have a function accept_new_sample required for adaptation.')
 
@@ -755,7 +796,7 @@ def init_infer_app(experiment_args:dict, loaded_experiment_checkpoint: Optional[
                 raise Exception('The initialised inference app object had an accept_new_sample attribute which was not a callable function.')
             
             try:
-                trigger_adaptation_callback = getattr(infer_app, "trigger_adaptation")
+                trigger_adaptation_callback = getattr(app, "trigger_adaptation")
             except:
                 raise Exception('The inference app did not have a function trigger_adaptation required for adaptation.')
             
@@ -769,7 +810,7 @@ def init_infer_app(experiment_args:dict, loaded_experiment_checkpoint: Optional[
         if not callable(app_configs_callback):
             raise Exception("The initialised inference app object had a 'app_configs' attribute which was not a callable function. ")
         
-    return infer_app
+    return app
 
 def write_to_checkpoint(
         checkpoint_path:str,
@@ -955,11 +996,11 @@ def run_instances(
             
     logger.info('Successfully completed!')
 
-def init_fe(infer_app, experiment_args):
+def init_fe(app, experiment_args):
     #Function which initialises the front-end simulator.
     keep_key_list = [
         ##Variables related to the experimental configuration
-        'configs_labels_dict', #NOTE: Currently just assuming semantic segmentation support. 
+        'semantic_id_dict', #NOTE: Currently just assuming semantic segmentation support. 
         #Variable related to handling empty foreground cases for automatic segmentation configurations
         'sim_empty_fg_automatic',
         'infer_run_configs',
@@ -985,8 +1026,9 @@ def init_fe(infer_app, experiment_args):
         'save_prompts',
         'is_seg_tmp',
         'write_segmentation',
-        #Supplementary info related to api-structure
-        'dataset_info', #Not sure if this should stay here?
+        #schema variables, which will provide dataset level information, which could be useful for sample-level
+        #schema formatting.
+        'dataset_level_schema',
         #Adaptation configs
         'enable_adaptation',
         'provide_gold_standard_after_inference',
@@ -995,7 +1037,7 @@ def init_fe(infer_app, experiment_args):
     ]
     args = {key:val for key,val in experiment_args.items() if key in keep_key_list}
 
-    return FrontEndSimulator(infer_app=infer_app, args=args)
+    return FrontEndSimulator(app=app, args=args)
 
 
 def main():
@@ -1072,8 +1114,8 @@ def main():
 
     ################################## Configuration and extraction of data-related info.  ######################################################################
     
-    #Extraction of the config labels dictionary, and the initialisation of the dataloader
-    configs_labels_dict, dataloader = init_task_cases(
+    #Extraction of the semantic id dictionary, and the initialisation of the dataloader
+    semantic_id_dict, dataloader = init_task_cases(
         dataset_dir=experiment_args['input_dataset_dir'],
         exp_task_configs=experiment_args['task_configs'],
         metric_configs=experiment_args['metrics_configs'],
@@ -1085,11 +1127,11 @@ def main():
         )
     #Appending some relevant dataset information to the experiment args for passing through to the front-end simulator.
     num_samples = loaded_experiment_checkpoint["eval_state"]['last_completed_idx'] + 1 + len(dataloader) if loaded_experiment_checkpoint != None else len(dataloader)
-    experiment_args['dataset_info']['num_samples'] = num_samples
+    experiment_args['dataset_level_data_schema']['num_samples'] = num_samples
 
 
-    #We append the config labels dict to the experiment args. 
-    experiment_args['configs_labels_dict'] = configs_labels_dict
+    #We append the semantic id dict dict to the experiment args. 
+    experiment_args['semantic_id_dict'] = semantic_id_dict
 
     # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -1109,10 +1151,17 @@ def main():
 
     #Creating the subdirectories and the csv files for the metrics, then returning a dict of the savepaths according to each and every one of these.
     if loaded_experiment_checkpoint == None:
-        experiment_args['metrics_savepaths'] = init_metrics_saves(exp_results_dir=experiment_args['exp_results_dir'], metrics_configs=experiment_args['metrics_configs'], configs_labels_dict=configs_labels_dict)
+        if experiment_args['skip_metric']: 
+            experiment_args['metrics_savepaths'] = None #If skipping metric saving, then we set the metrics savepaths to None for the metrics handler, which will cause it to skip over the saving procedure in the metrics handler.
+        else:
+            experiment_args['metrics_savepaths'] = init_metrics_saves(exp_results_dir=experiment_args['exp_results_dir'], metrics_configs=experiment_args['metrics_configs'], semantic_id_dict=semantic_id_dict)
     else:
-        #We will load the path from the experiment's configuration pickle file.
-        experiment_args['metrics_savepaths'] = loaded_experiment_checkpoint["eval_state"]['metrics_savepaths']
+        if experiment_args['skip_metric']:
+            experiment_args['metrics_savepaths'] = None #If skipping metric saving, then we set the metrics savepaths to None for the metrics handler, which will cause it to skip over the saving procedure in the metrics handler.
+            assert loaded_experiment_checkpoint["eval_state"]['metrics_savepaths'] == None, 'If skipping metric saving, the loaded experiment checkpoint metrics savepaths must also be None. Please check your input arguments and loaded checkpoint.'
+        else:
+            #We will load the path from the experiment's configuration pickle file.
+            experiment_args['metrics_savepaths'] = loaded_experiment_checkpoint["eval_state"]['metrics_savepaths']
     
 
     #Based on whether the segmentation is being saved permanently, create the corresponding subdirectories or not. 
@@ -1142,15 +1191,24 @@ def main():
 
         exp_setup_logger.info(f'Moving onto build now!: {os.linesep} {os.linesep} {os.linesep}')
 
+    
+
+    ############################### Formulating config schemas ########################################################
+    
+    #Here we generate the schema which will be passed to the app at initialisation.
+    experiment_args = generate_dataset_level_schema(
+        experiment_args
+    )
+    
     #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     #Now we move onto building the app
     if loaded_experiment_checkpoint != None:
         #In this case we have a prior experiment checkpoint. 
-        infer_app = init_infer_app(experiment_args, loaded_experiment_checkpoint=loaded_experiment_checkpoint, reference_experiment_checkpoint=reference_experiment_checkpoint)
+        app = init_app(experiment_args, loaded_experiment_checkpoint=loaded_experiment_checkpoint, reference_experiment_checkpoint=reference_experiment_checkpoint)
     else:
-        infer_app = init_infer_app(experiment_args, loaded_experiment_checkpoint=None, reference_experiment_checkpoint=reference_experiment_checkpoint)
+        app = init_app(experiment_args, loaded_experiment_checkpoint=None, reference_experiment_checkpoint=reference_experiment_checkpoint)
     #Extract the app configs using the required method. 
-    app_config_dict = infer_app.app_configs()
+    app_config_dict = app.app_configs()
 
     if not app_config_dict:
         raise Exception('Should at least return the application name in the app_configs method.')
@@ -1164,7 +1222,7 @@ def main():
 
     #Build the front-end simulator: 
 
-    fe_sim_obj = init_fe(infer_app=infer_app, experiment_args=experiment_args)
+    fe_sim_obj = init_fe(app=app, experiment_args=experiment_args)
 
 
     # Iterating through the dataset:

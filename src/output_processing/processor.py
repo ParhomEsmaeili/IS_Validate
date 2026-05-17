@@ -27,7 +27,7 @@ class OutputProcessor:
     Class which initialises the output processing class. Takes as initialisation args:
 
     base_save_dir: Str - The abspath for the base directory in which all of the segmentations will be saved
-    config_labels_dict: Dict - The class-integer code mapping.
+    semantic_id_dict: Dict - The class-integer code mapping.
     is_seg_tmp: Bool - A boolean denoting whether the predicted segmentations should be saved as temporary files or permanent files.
     save_prompts: Bool - A boolean denoting whether the input prompts should be saved permanently. 
     write_segmentation: Bool - A temporary hack which overrides the is_seg_tmp flag to bypass the IO operations entirely. 
@@ -36,14 +36,14 @@ class OutputProcessor:
     def __init__(
       self,
       base_save_dir:str,
-      config_labels_dict:dict[str,int],
+      semantic_id_dict:dict[str,int],
       is_seg_tmp:bool = False,
       save_prompts:bool = False, 
       write_segmentation: bool = False
     ):
 
         self.base_save_dir = base_save_dir 
-        self.config_labels_dict = config_labels_dict 
+        self.semantic_id_dict = semantic_id_dict 
         self.is_seg_tmp = is_seg_tmp
         self.save_prompts = save_prompts
         self.write_segmentation = write_segmentation
@@ -74,7 +74,7 @@ class OutputProcessor:
             # Checking that the affine information (the only currently supported meta-information) must match that of the 
             # reference image.
             'check_probs':{
-                'reference_name':('reference', 'config_labels_dict'),
+                'reference_name':('reference', 'semantic_id_dict'),
                 'reference_paths':(('image','metatensor'), None),
                 'output_paths': (('probs','metatensor'), ('probs', 'metatensor')),
                 #NOTE: check_meta_affine is DEPRECATED since MetaTensor is no longer used at the API level. We exclusively use the metadict to
@@ -241,8 +241,8 @@ class OutputProcessor:
 
                 if check_info['reference_name'][idx] == 'reference':
                     self.check_integrity(reference_data, check_info['reference_paths'][idx], output_data, check_info['output_paths'][idx], checks_subtuple)
-                elif check_info['reference_name'][idx] == 'config_labels_dict':
-                    self.check_integrity(self.config_labels_dict, check_info['reference_paths'][idx], output_data, check_info['output_paths'][idx], checks_subtuple)
+                elif check_info['reference_name'][idx] == 'semantic_id_dict':
+                    self.check_integrity(self.semantic_id_dict, check_info['reference_paths'][idx], output_data, check_info['output_paths'][idx], checks_subtuple)
                 else:
                     raise KeyError('Error, the string denoting the reference name is not one of the supported ones.')
 
@@ -320,7 +320,7 @@ class OutputProcessor:
                 f.write(b'dummy!')
             pred_path = os.path.join(tmp_dir, 'dummy_pred.bin') 
             probs_paths = []
-            for class_lb in self.config_labels_dict.keys():
+            for class_lb in self.semantic_id_dict.keys():
                 with open(os.path.join(tmp_dir, f'dummy_prob_{class_lb}.bin'), 'wb') as f:
                     f.write(b'dummy')
                 probs_paths.append(os.path.join(tmp_dir, f'dummy_prob_{class_lb}.bin'))

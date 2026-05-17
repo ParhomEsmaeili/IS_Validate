@@ -13,7 +13,7 @@ class BuildHeuristic:
     def __init__(self,
                 sim_device: torch.device,
                 use_mem:bool,
-                config_labels_dict:dict,
+                semantic_id_dict:dict,
                 heuristics:dict,
                 heuristic_params: dict,
                 heuristic_mixtures: Union[dict, None],
@@ -31,7 +31,7 @@ class BuildHeuristic:
         use_mem: A bool - Denotes whether the interaction memory dictionary will be used so that stored memory
         is being retained/used to filter the error regions for prompt generation.
 
-        config_labels_dict: A dictionary mapping the class labels to the class integer codes. 
+        semantic_id_dict: A dictionary mapping the class labels to the class integer codes. 
 
         
         
@@ -97,7 +97,7 @@ class BuildHeuristic:
         
         self.sim_device = sim_device 
         self.use_mem = use_mem 
-        self.config_labels_dict = config_labels_dict
+        self.semantic_id_dict = semantic_id_dict
         self.heuristics = heuristics
         self.heuristic_params = heuristic_params
         self.heuristic_mixtures = heuristic_mixtures 
@@ -195,7 +195,7 @@ class BuildHeuristic:
                 heur_fn_dict[prompt_type] = prompt_heur_fns
 
             # return mixture_class_registry[self.heuristic_class_type](
-            #     config_labels_dict=self.config_labels_dict,
+            #     semantic_id_dict=self.semantic_id_dict,
             #     sim_device=self.sim_device,
             #     use_mem=self.use_mem,
             #     build_args=self.heuristic_params,
@@ -204,7 +204,7 @@ class BuildHeuristic:
             #     )
             return mixture_class_registry[self.heuristic_class_type](
                 args={
-                    'config_labels_dict': self.config_labels_dict,
+                    'semantic_id_dict': self.semantic_id_dict,
                     'sim_device': self.sim_device,
                     'use_mem': self.use_mem,
                     'build_args': self.heuristic_params,

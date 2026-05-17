@@ -71,7 +71,7 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
                     sim_device: torch.device,
                     use_mem:bool, 
                     prompt_configs: dict,
-                    config_labels_dict: dict,
+                    semantic_id_dict: dict,
                     ):
 
             '''
@@ -85,13 +85,13 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
             prompt_configs: The configurations for the simulation methods (for each prompt type), the build params,
             and the prompt mixture params. 
             
-            config_labels_dict: The dictionary mapping the class label and the integer-codes.
+            semantic_id_dict: The dictionary mapping the class label and the integer-codes.
 
             '''
             super().__init__(
                             sim_device=sim_device,
                             use_mem=use_mem,
-                            config_labels_dict=config_labels_dict,
+                            semantic_id_dict=semantic_id_dict,
                             sim_methods=prompt_configs['methods'], 
                             sim_build_params=prompt_configs['build_params'],
                             prompt_mixture_params=prompt_configs['mixture_params'],

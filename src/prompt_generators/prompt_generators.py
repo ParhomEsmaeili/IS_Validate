@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class BasicSpatialPromptGenerator(PromptReformatter):
     def __init__(self,
                 sim_device: torch.device,
-                config_labels_dict: dict,
+                semantic_id_dict: dict,
                 use_mem: bool,
                 sim_methods: dict,
                 sim_build_params: dict,
@@ -29,7 +29,7 @@ class BasicSpatialPromptGenerator(PromptReformatter):
 
         sim_device: A torch.device obj being used for the prompt generation computations. 
 
-        config_labels_dict: A dictionary mapping the class labels to the class integer codes. 
+        semantic_id_dict: A dictionary mapping the class labels to the class integer codes. 
 
         use_mem: A bool determining whether prompt generation will make use of any interaction memory as part of conditioning the current state of simulation. 
 
@@ -88,10 +88,10 @@ class BasicSpatialPromptGenerator(PromptReformatter):
         prompter_class_type: The class type to be used for prompt generation. This may provide some basic structure for
         prompt generation which acts as a skeleton to be filled out with prior arguments when generating the prompts.
         '''
-        super().__init__(config_labels_dict)
+        super().__init__(semantic_id_dict)
 
         self.sim_device = sim_device
-        self.config_labels_dict = config_labels_dict 
+        self.semantic_id_dict = semantic_id_dict 
         self.use_mem = use_mem 
         self.sim_methods = sim_methods
         self.sim_build_params = sim_build_params 
@@ -222,7 +222,7 @@ class HeuristicSpatialPromptGenerator(BasicSpatialPromptGenerator):
     def __init__(self,
                 sim_device: torch.device,
                 use_mem: bool,
-                config_labels_dict: dict[str, int],
+                semantic_id_dict: dict[str, int],
                 sim_methods:dict, 
                 sim_build_params:dict,
                 prompt_mixture_params:Union[dict, None],
@@ -231,7 +231,7 @@ class HeuristicSpatialPromptGenerator(BasicSpatialPromptGenerator):
         super().__init__(
                         sim_device=sim_device,
                         use_mem=use_mem,
-                        config_labels_dict=config_labels_dict,
+                        semantic_id_dict=semantic_id_dict,
                         sim_methods=sim_methods, 
                         sim_build_params=sim_build_params,
                         prompt_mixture_params=prompt_mixture_params,
@@ -243,7 +243,7 @@ class HeuristicSpatialPromptGenerator(BasicSpatialPromptGenerator):
         return BuildHeuristic(
                             sim_device=self.sim_device,
                             use_mem=self.use_mem,
-                            config_labels_dict=self.config_labels_dict, 
+                            semantic_id_dict=self.semantic_id_dict, 
                             heuristics=self.sim_methods, 
                             heuristic_params=self.sim_build_params,
                             heuristic_mixtures=self.prompt_mixture_params,
@@ -252,7 +252,7 @@ class HeuristicSpatialPromptGenerator(BasicSpatialPromptGenerator):
 
 if __name__=='__main__':
     generator = HeuristicSpatialPromptGenerator(sim_methods={'points':['uniform_random'], 'scribbles':None, 'bbox':None, 'lassos':None},
-                                    config_labels_dict={'tumour':1, 'background':0},
+                                    semantic_id_dict={'tumour':1, 'background':0},
                                     sim_build_params=None, #{'points':None, 'scribbles':None, 'bbox':None},
                                     prompt_mixture_params=None)
     generator.generate_prompt({'gt':torch.ones([128,128,128]), 'image':torch.ones([128,128,128])})

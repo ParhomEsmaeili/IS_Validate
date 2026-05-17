@@ -143,7 +143,7 @@ class PromptReformatter:
                 raise NotImplementedError('The currently selected prompt type is not supported')
 
 if __name__ == '__main__':
-    config_labels_dict = {'tumor':1, 'background':0}
+    semantic_id_dict = {'tumor':1, 'background':0}
 
     #Testing basic set ups where each each class has a prompt provided for all prompts.
     points_1 = [torch.Tensor([[1,2,3]]).to(dtype=torch.int64), torch.Tensor([[4,5,6]]).to(dtype=torch.int64)]
@@ -184,7 +184,7 @@ if __name__ == '__main__':
     lassos_lb_3 = scribbles_lb_3
 
     # Running the tests/debugging.
-    reformatter_class = PromptReformatter(class_config_dict=config_labels_dict)
+    reformatter_class = PromptReformatter(class_config_dict=semantic_id_dict)
 
     print(reformatter_class.reformat_to_dict('points', points_1, points_lb_1))
     print(reformatter_class.reformat_to_dict('points', points_2, points_lb_2))

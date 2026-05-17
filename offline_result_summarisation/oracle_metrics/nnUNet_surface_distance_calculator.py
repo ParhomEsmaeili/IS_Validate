@@ -108,7 +108,7 @@ def convert_tensor_to_numpy(tensor_data):
 def calculate_surface_distances(
         seg_folder, 
         gt_folder, 
-        config_labels_dict, 
+        semantic_id_dict, 
         datalist, 
         logger, 
         measure='hausdorff_distance',
@@ -122,7 +122,7 @@ def calculate_surface_distances(
         if not os.path.exists(os.path.join(seg_folder, file + '.nii.gz')):
             raise FileNotFoundError(f"Segmentation file not found for {file} in {seg_folder}")
     
-    logger.info(f"Computing surface distances for {len(datalist)} cases and {len(config_labels_dict)} classes (excluding background)")
+    logger.info(f"Computing surface distances for {len(datalist)} cases and {len(semantic_id_dict)} classes (excluding background)")
     
     surface_distances_dict = {}
     
@@ -151,14 +151,14 @@ def calculate_surface_distances(
         case_results = {}
         #Lets first assert that there is a foreground label in the GT for at least one of the classes.
         has_foreground = False
-        for class_name, class_idx in config_labels_dict.items():
+        for class_name, class_idx in semantic_id_dict.items():
             if class_idx != 0 and np.any(gt_array == class_idx):
                 has_foreground = True
                 break
         if not has_foreground:
             raise Exception(f"No foreground labels found in GT. This should not have happened! Revisit data preprocessing pipeline")
 
-        for class_name, class_idx in config_labels_dict.items():
+        for class_name, class_idx in semantic_id_dict.items():
             # Skip background class (typically class_idx == 0)
             if class_idx == 0:
                 logger.info(f'  Skipping background class: {class_name}')
@@ -381,9 +381,9 @@ if __name__ == "__main__":
     if len(set(canonical_mappings)) != 1:
         raise ValueError(f"Semantic class mappings are not the same across the tasks specified by task_conf_id {args.task_conf_id}. Please ensure they are the same, or specify a single task_conf_id corresponding to a single task configuration.")
     
-    config_labels_dict = semantic_class_mappings[0]
-    config_labels_dict = {k: idx for idx, k in enumerate(config_labels_dict.keys())}  # Convert to {label_name: index}
-    logger.info(f"Config labels dict: {config_labels_dict}")
+    semantic_id_dict = semantic_class_mappings[0]
+    semantic_id_dict = {k: idx for idx, k in enumerate(semantic_id_dict.keys())}  # Convert to {label_name: index}
+    logger.info(f"Config labels dict: {semantic_id_dict}")
 
     # Read data split
     data_split_path = os.path.join(args.reference_splits_base_folder, val_framework_dataset_name, 'dataset_split.json')
@@ -413,7 +413,7 @@ if __name__ == "__main__":
     surface_distances_dict = calculate_surface_distances(
         seg_folder, 
         gt_folder, 
-        config_labels_dict,
+        semantic_id_dict,
         datalist,
         logger,
         measure=args.measure,
