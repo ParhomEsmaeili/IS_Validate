@@ -35,6 +35,9 @@ run_vs_seed = {
     'run3': 754537
 }
 
+def str2bool(v):
+    return v.lower() in ('true')
+
 def set_parse():
     # %% set up parser
     parser = argparse.ArgumentParser()
@@ -71,37 +74,37 @@ def set_parse():
     #Name of the experiment, used to store results, checkpoints for continuation/auto
     parser.add_argument('--experiment_basename', type=str, required=False, default=None)
     #Runtime environment arguments/system control.
-    parser.add_argument('--continue_execution', action='store_true', default=True)
+    parser.add_argument('--continue_execution', type=str2bool, default=False)
     #seeding
-    parser.add_argument('--shuffle_cases', action='store_true', default=False)
+    parser.add_argument('--shuffle_cases', type=str2bool, default=False)
     parser.add_argument('--random_seed', type=int, default=341103)
     parser.add_argument('--run_num', type=str, required=False, default='run1')
     #cuda and determinism arguments
-    parser.add_argument('--cuda_deterministic_disable', action='store_true', default=False)
-    parser.add_argument('--torch_deterministic_disable', action='store_true', default=False)
+    parser.add_argument('--cuda_deterministic_disable', type=str2bool, default=False)
+    parser.add_argument('--torch_deterministic_disable', type=str2bool, default=False)
     parser.add_argument('--device_idx', type=int, default=0)
 
     #Auxiliary output arguments/controls whether to write additional outputs in addition to the
     #metrics.
-    parser.add_argument('--write_segmentation', action='store_true', default=False)
+    parser.add_argument('--write_segmentation', type=str2bool, default=False)
     # Whether to write the segmentations at all, or not (default is false for now)
-    parser.add_argument('--is_seg_tmp', action='store_true', default=False)
+    parser.add_argument('--is_seg_tmp', type=str2bool, default=True)
     # Whether the segmentations are written as temp files, if they are written. Or whether they are permanent files.
-    parser.add_argument('--save_prompts', action='store_true', default=False)
+    parser.add_argument('--save_prompts', type=str2bool, default=False)
     
     #Adaptation training related arguments.
 
     #Whether to skip the metric and prompt generation steps.
     #May be used to execute adaptation with gold-standard annotations.
-    parser.add_argument('--skip_metric', action='store_true', default=False) 
-    parser.add_argument('--skip_prompt', action='store_true', default=False) 
+    parser.add_argument('--skip_metric', type=str2bool, default=False) 
+    parser.add_argument('--skip_prompt', type=str2bool, default=False) 
     
     #This is a bool which controls the adaptation config name, to steer the registry to pull the relevant
     #config for adaptation. Realistically this is just a byproduct of how we have intertwined the
     #apps and this framework... probably not ideal. 
     parser.add_argument('--adaptation_config_name', type=str, default=None) #'adapt_prototype_debug')
     #Self explanatory, whether adaptation is enabled or not.
-    parser.add_argument('--enable_adaptation', action='store_true', default=False)
+    parser.add_argument('--enable_adaptation', type=str2bool, default=False)
     
     #Adapted method hold-out inference related arguments:
  
@@ -109,7 +112,7 @@ def set_parse():
     #we initialise an app which contained adaptation mechanisms with an adapted checkpoint.
     #(We perform holdout inference on checkpoints even with adaptive methods as this represents expected
     #performance as a function of training data).
-    parser.add_argument('--execute_on_adapted', action='store_true', default=False)
+    parser.add_argument('--execute_on_adapted', type=str2bool, default=False)
     #Training episode number to pull the checkpoint from for hold out inference.
     #ONLY INTENDED when execute_on_adapted is enabled.
     parser.add_argument('--adaptation_episode', type=int, default=None) 
@@ -122,7 +125,7 @@ def set_parse():
     #This bool controls whether we provide the gold standard annotation from the reference annotation,
     #or if we pass through an inferred segmentation (i.e., through what the app has generated at
     #termination of the editing process) for the adaptation step.
-    parser.add_argument('--provide_gold_standard_after_inference', action='store_true', default=False)
+    parser.add_argument('--provide_gold_standard_after_inference', type=str2bool, default=False)
 
     #Experiment configuration arg
     parser.add_argument('--experiment_conf_id', type=int, default=5)
