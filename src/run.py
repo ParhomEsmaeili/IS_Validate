@@ -36,6 +36,7 @@ run_vs_seed = {
 }
 
 def str2bool(v):
+    assert v.lower() in ('true', 'false'), 'Boolean value expected, please check your input arguments.'
     return v.lower() in ('true')
 
 def set_parse():
