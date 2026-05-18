@@ -73,16 +73,16 @@ def set_parse():
     #########################
     
     #Name of the experiment, used to store results, checkpoints for continuation/auto
-    parser.add_argument('--experiment_basename', type=str, required=False, default=None)
+    parser.add_argument('--experiment_basename', type=str, required=False, default='debugging_fullimage_cache_experiment10')
     #Runtime environment arguments/system control.
-    parser.add_argument('--continue_execution', type=str2bool, default=False)
+    parser.add_argument('--continue_execution', type=str2bool, default=True) #False)
     #seeding
-    parser.add_argument('--shuffle_cases', type=str2bool, default=False)
+    parser.add_argument('--shuffle_cases', type=str2bool, default=True) #False)
     parser.add_argument('--random_seed', type=int, default=341103)
     parser.add_argument('--run_num', type=str, required=False, default='run1')
     #cuda and determinism arguments
-    parser.add_argument('--cuda_deterministic_disable', type=str2bool, default=False)
-    parser.add_argument('--torch_deterministic_disable', type=str2bool, default=False)
+    parser.add_argument('--cuda_deterministic_disable', type=str2bool, default=True) #False)
+    parser.add_argument('--torch_deterministic_disable', type=str2bool, default=True) #False)
     parser.add_argument('--device_idx', type=int, default=0)
 
     #Auxiliary output arguments/controls whether to write additional outputs in addition to the
@@ -97,15 +97,15 @@ def set_parse():
 
     #Whether to skip the metric and prompt generation steps.
     #May be used to execute adaptation with gold-standard annotations.
-    parser.add_argument('--skip_metric', type=str2bool, default=False) 
-    parser.add_argument('--skip_prompt', type=str2bool, default=False) 
+    parser.add_argument('--skip_metric', type=str2bool, default=True) #False) 
+    parser.add_argument('--skip_prompt', type=str2bool, default=True) #False) 
     
     #This is a bool which controls the adaptation config name, to steer the registry to pull the relevant
     #config for adaptation. Realistically this is just a byproduct of how we have intertwined the
     #apps and this framework... probably not ideal. 
-    parser.add_argument('--adaptation_config_name', type=str, default=None) #'adapt_prototype_debug')
+    parser.add_argument('--adaptation_config_name', type=str, default='adapt_prototype_debug')
     #Self explanatory, whether adaptation is enabled or not.
-    parser.add_argument('--enable_adaptation', type=str2bool, default=False)
+    parser.add_argument('--enable_adaptation', type=str2bool, default=True) #False)
     
     #Adapted method hold-out inference related arguments:
  
@@ -126,10 +126,10 @@ def set_parse():
     #This bool controls whether we provide the gold standard annotation from the reference annotation,
     #or if we pass through an inferred segmentation (i.e., through what the app has generated at
     #termination of the editing process) for the adaptation step.
-    parser.add_argument('--provide_gold_standard_after_inference', type=str2bool, default=False)
+    parser.add_argument('--provide_gold_standard_after_inference', type=str2bool, default=True) #False)
 
     #Experiment configuration arg
-    parser.add_argument('--experiment_conf_id', type=int, default=5)
+    parser.add_argument('--experiment_conf_id', type=int, default=10)
     args = parser.parse_args()
     return args
 
@@ -635,7 +635,15 @@ def generate_dataset_level_schema(
     dataset_level_schema['segmentation_task_schema'] = {
     'semantic_id_dict': experiment_args['semantic_id_dict']
     }
-
+    #Now appending the full image cache.
+    dataset_level_schema['full_image_cache'] = experiment_args['full_image_cache']
+    # dataset_level_schema['data_root'] = os.path.join(experiment_args['input_dataset_dir'])
+    dataset_level_schema['full_image_cache'] = {
+        case_id: {k_1: {
+            k_2: os.path.join(experiment_args['input_dataset_dir'], v_2) for k_2,v_2 in v_1.items()
+            } if isinstance(v_1, dict) else v_1 for k_1,v_1 in case_cache.items()}
+        for case_id, case_cache in experiment_args['full_image_cache'].items()
+    }
     #Assigning the dataset level schema. 
     experiment_args['dataset_level_schema'] = dataset_level_schema
 
@@ -1119,7 +1127,7 @@ def main():
     ################################## Configuration and extraction of data-related info.  ######################################################################
     
     #Extraction of the semantic id dictionary, and the initialisation of the dataloader
-    semantic_id_dict, dataloader = init_task_cases(
+    semantic_id_dict, full_image_cache, dataloader = init_task_cases(
         dataset_dir=experiment_args['input_dataset_dir'],
         exp_task_configs=experiment_args['task_configs'],
         metric_configs=experiment_args['metrics_configs'],
@@ -1132,7 +1140,9 @@ def main():
     #Appending some relevant dataset information to the experiment args for passing through to the front-end simulator.
     num_samples = loaded_experiment_checkpoint["eval_state"]['last_completed_idx'] + 1 + len(dataloader) if loaded_experiment_checkpoint != None else len(dataloader)
     experiment_args['dataset_level_data_schema']['num_samples'] = num_samples
-
+    experiment_args['full_image_cache'] = full_image_cache #We store it in the experiment args, however we will
+    #NOT carry this forward into the evaluation side, it is just tidier to have it in the dictionary for
+    #generating the dataset level schema.
 
     #We append the semantic id dict dict to the experiment args. 
     experiment_args['semantic_id_dict'] = semantic_id_dict

@@ -65,6 +65,10 @@ class FrontEndSimulator:
         
         semantic_id_dict: A dictionary containing the semantic class label - class integer code mapping relationship being used. 
         note that the codes are >= 0 with 0 = background always, and that the labels are pre-normalised. E.g., 0,1,2,3... and never 0,2,3,5.
+        This is currently necessary such that there forms a cross-correspondence between the channel order
+        of the probability maps and the semantic labels.
+        #TODO: Future versions will require an explicit contract for the relationship between the semantic
+        class and the channel order that goes beyond the contiguous labelling assumption.
 
         i_state: An interaction dictionary containing the current input interaction states OR a NoneType for automatic segmentation mode.:
               
@@ -78,8 +82,24 @@ class FrontEndSimulator:
                     (where each prompt spatial coord is represented as a sublist).  
                     dict[prompt_type_str[class[list[list]] OR NONE]]
 
+        sample_level_schema: A dictionary containing the sample-level schema information, 
+        which is generated from the sample data instance and potentially the dataset-level schema. 
+        This is intended to provide the app with the necessary context, and conventions for addressing 
+        the output arrays. Contains the following fields currently:
+            data_schema: A dictionary containing the information regarding the data schema for the current sample, which is generated from the sample data instance and potentially the dataset-level schema. Contains the following fields:
+                task_channels: A dict denoting the channel-modality correspondence in the input image, which is 
+                currently in CHWD format. E.g., {'T1': 0, 'T2': 1, 'FLAIR': 2}. This need not necessarily
+                be contiguous, for now we assume any non-continguous indexing is handled by attaching an 
+                empty channel of zeros in the corresponding position in the input image.
+                 
+                Implicit assumption: The task channel in the dataset-schema is protected. Future versions 
+                may however override this protection. TBD.
+            semantic_id_dict: A dictionary containing the addressing convention for the arrays to correspond
+            to the semantic labels. Presently, this is assumed to align exactly with the dictionary provided at
+            dataset level (i.e., the semantic code is locked to a specific class always).
+            
 
-            -------------------------------------------------------------------------------------------------------
+                -------------------------------------------------------------------------------------------------------
 
     Inference app must generate the output in a dict format with the following fields:
 

@@ -8,7 +8,7 @@ import os
 import sys
 import re
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) #Adding the parent directory to the path so that we can import utils from there.
-from general_utils.dict_utils import extractor, dict_iterable_overlap
+from general_utils.dict_utils import extractor, dict_iterable_overlap, dict_path_modif
  #This is a custom utility function for extracting dicts.
 import copy 
 import logging
@@ -255,6 +255,16 @@ def init_task_cases(
         else:
             random.Random(random_seed).shuffle(case_list)
 
+    #Here we will store a duplicate of the case list, this is intended such that we can retain the full
+    #image cache for the dataset-level manifest. This is independent of the case list which is used as part
+    #of the dataloader, which would require that the caselist be filtered to only include the cases
+    #which have not yet been completed, in the case of continuation.
+    full_image_cache = {case: copy.deepcopy(extractor(ds_configs, (sampling_metadata['split'], case))) for case in case_list}
+    #We only retain the image relpaths, as this is only thing provided in the image cache!
+    for case in full_image_cache.keys():
+        full_image_cache = dict_path_modif(full_image_cache, (case, 'labels'), None)
+
+
     #Now we will filter the case list to only include cases after the last completed case, if provided.
     if last_completed_case is not None:
         if last_completed_case not in case_list:
@@ -304,7 +314,7 @@ def init_task_cases(
     # common conventions). This is just a temporary hacky fix until we build a proper infrastructure for the dataloading pipeline.
     transforms_configs.update({'non_standard_transfs':{k:v for k,v in exp_task_configs['data_transforms'].items() if k != 'semantic_class_mapping'}})
 
-    return semantic_id_dict, dataloader_generator(case_list=case_list, image_keys=image_keys, eval_annotation_keys=eval_annotation_keys, reference_annotation_keys=reference_annotation_keys, transforms_configs=transforms_configs)
+    return semantic_id_dict, full_image_cache, dataloader_generator(case_list=case_list, image_keys=image_keys, eval_annotation_keys=eval_annotation_keys, reference_annotation_keys=reference_annotation_keys, transforms_configs=transforms_configs)
 
 def create_filepath(dataset_dir, relpath):
     #Determining the actual abspath filepaths for the task at hand. 
