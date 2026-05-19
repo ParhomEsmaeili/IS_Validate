@@ -77,7 +77,7 @@ def set_parse():
     #Runtime environment arguments/system control.
     parser.add_argument('--continue_execution', type=str2bool, default=True) #False)
     #seeding
-    parser.add_argument('--shuffle_cases', type=str2bool, default=True) #False)
+    parser.add_argument('--shuffle_cases', type=str2bool, default=False)
     parser.add_argument('--random_seed', type=int, default=341103)
     parser.add_argument('--run_num', type=str, required=False, default='run1')
     #cuda and determinism arguments
