@@ -73,16 +73,16 @@ def set_parse():
     #########################
     
     #Name of the experiment, used to store results, checkpoints for continuation/auto
-    parser.add_argument('--experiment_basename', type=str, required=False, default='debugging_fullimage_cache_experiment10')
+    parser.add_argument('--experiment_basename', type=str, required=False, default=None)
     #Runtime environment arguments/system control.
-    parser.add_argument('--continue_execution', type=str2bool, default=True) #False)
+    parser.add_argument('--continue_execution', type=str2bool, default=False)
     #seeding
     parser.add_argument('--shuffle_cases', type=str2bool, default=False)
     parser.add_argument('--random_seed', type=int, default=341103)
     parser.add_argument('--run_num', type=str, required=False, default='run1')
     #cuda and determinism arguments
-    parser.add_argument('--cuda_deterministic_disable', type=str2bool, default=True) #False)
-    parser.add_argument('--torch_deterministic_disable', type=str2bool, default=True) #False)
+    parser.add_argument('--cuda_deterministic_disable', type=str2bool, default=False)
+    parser.add_argument('--torch_deterministic_disable', type=str2bool, default=False)
     parser.add_argument('--device_idx', type=int, default=0)
 
     #Auxiliary output arguments/controls whether to write additional outputs in addition to the
@@ -97,15 +97,15 @@ def set_parse():
 
     #Whether to skip the metric and prompt generation steps.
     #May be used to execute adaptation with gold-standard annotations.
-    parser.add_argument('--skip_metric', type=str2bool, default=True) #False) 
-    parser.add_argument('--skip_prompt', type=str2bool, default=True) #False) 
+    parser.add_argument('--skip_metric', type=str2bool, default=False) 
+    parser.add_argument('--skip_prompt', type=str2bool, default=False) 
     
     #This is a bool which controls the adaptation config name, to steer the registry to pull the relevant
     #config for adaptation. Realistically this is just a byproduct of how we have intertwined the
     #apps and this framework... probably not ideal. 
-    parser.add_argument('--adaptation_config_name', type=str, default='adapt_prototype_debug')
+    parser.add_argument('--adaptation_config_name', type=str, default=None)
     #Self explanatory, whether adaptation is enabled or not.
-    parser.add_argument('--enable_adaptation', type=str2bool, default=True) #False)
+    parser.add_argument('--enable_adaptation', type=str2bool, default=False)
     
     #Adapted method hold-out inference related arguments:
  
@@ -126,7 +126,7 @@ def set_parse():
     #This bool controls whether we provide the gold standard annotation from the reference annotation,
     #or if we pass through an inferred segmentation (i.e., through what the app has generated at
     #termination of the editing process) for the adaptation step.
-    parser.add_argument('--provide_gold_standard_after_inference', type=str2bool, default=True) #False)
+    parser.add_argument('--provide_gold_standard_after_inference', type=str2bool, default=False)
 
     #Experiment configuration arg
     parser.add_argument('--experiment_conf_id', type=int, default=10)
