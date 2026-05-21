@@ -6,7 +6,7 @@ import sys
 import numpy as np
 from monai.data import MetaTensor 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from src.prompt_generators.prompt_reformat_utils import PromptReformatter
+from prompt_generators.utils.prompt_reformat_utils import PromptReformatter
 from prompt_generators.heuristics.build_heuristics import BuildHeuristic
 import logging 
 
@@ -118,6 +118,8 @@ class BasicSpatialPromptGenerator(PromptReformatter):
             Scribbles: List of scribbles, each scribble is a torch tensor with shape [N_s.p x N_dim] denoting the 
             positional coordinate. NOTE: N_s.p is highly dependent on the scribble length which can vary between scribbles! 
             Bboxes: List of N_box torch tensors, each tensor is a 1 x 2*N_dim shape (Extrema of the bbox with order [i_min, j_min, k_min, i_max, j_max, k_max] where ijk = RAS convention) 
+            #BBox coordinates indicate the grid position (even at a sub-voxel level) for the extrema of the box.
+            Ergo: [0] = the edge of the image array, not the centre of the first voxel.
             Lassos: List of N_lasso torch tensors, each lasso is a torch tensor with shape [N_lasso.p x N_dim]. This outlines a set of points which
             describe the lasso. Downstream algorithms will be required to determine the enclosed region from this set.
         b) 'interactions_labels'
