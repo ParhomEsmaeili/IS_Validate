@@ -6,7 +6,7 @@ import sys
 import numpy as np
 from monai.data import MetaTensor 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from prompt_generators.utils.prompt_reformat_utils import PromptReformatter
+from prompt_generators.reformatting_utils.prompt_reformat_utils import PromptReformatter
 from prompt_generators.heuristics.build_heuristics import BuildHeuristic
 import logging 
 
