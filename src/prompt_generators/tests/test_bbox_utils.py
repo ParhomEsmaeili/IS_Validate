@@ -28,6 +28,7 @@ from src.prompt_generators.heuristics.spatial_utils.spatial_extent import (
 from src.prompt_generators.heuristics.heuristic_prompt_utils.bbox import (
     bbox_extrema,
     bbox_from_binary_mask,
+    two_point_five_d_bbox_from_binary_mask,
     extract_sampling_region,
     select_component,
 )
@@ -4652,13 +4653,13 @@ class TestBboxFromBinaryMask:
             }
         }
         
-        bbox, is_generated = bbox_from_binary_mask(binary_mask, args)
+        bbox_list, is_generated = bbox_from_binary_mask(binary_mask, args)
         
         assert is_generated is True
-        assert bbox is not None
-        assert bbox.shape == (1, 6)
-        assert bbox[0, 0] == 2  # min_x
-        assert bbox[0, 3] == 6  # max_x
+        assert len(bbox_list) == 1
+        assert bbox_list[0].shape == (1, 6)
+        assert bbox_list[0][0, 0] == 2  # min_x
+        assert bbox_list[0][0, 3] == 6  # max_x
     
     def test_bbox_from_binary_mask_2d(self):
         """Test 2D bbox generation."""
@@ -4680,13 +4681,13 @@ class TestBboxFromBinaryMask:
             }
         }
         
-        bbox, is_generated = bbox_from_binary_mask(binary_mask, args)
+        bbox_list, is_generated = bbox_from_binary_mask(binary_mask, args)
         
         assert is_generated is True
-        assert bbox is not None
-        assert bbox.shape == (1, 6)
-        assert bbox[0, 2] == 5  # collapsed dim
-        assert bbox[0, 5] == 5  # collapsed dim
+        assert len(bbox_list) == 1
+        assert bbox_list[0].shape == (1, 6)
+        assert bbox_list[0][0, 2] == 5  # collapsed dim
+        assert bbox_list[0][0, 5] == 5  # collapsed dim
     
     def test_bbox_from_binary_mask_empty_mask(self):
         """Test bbox generation with empty mask."""
@@ -4738,13 +4739,13 @@ class TestBboxFromBinaryMask:
             }
         }
         
-        bbox, is_generated = bbox_from_binary_mask(binary_mask, args)
+        bbox_list, is_generated = bbox_from_binary_mask(binary_mask, args)
         
         assert is_generated is True
-        assert bbox is not None
+        assert len(bbox_list) == 1
         # Bbox should be slightly jittered
-        assert bbox[0, 0] <= 3  # min_x was 2, can jitter by 1
-        assert bbox[0, 3] >= 5  # max_x was 6, can jitter by 1
+        assert bbox_list[0][0, 0] <= 3  # min_x was 2, can jitter by 1
+        assert bbox_list[0][0, 3] >= 5  # max_x was 6, can jitter by 1
 
     # ==================== Config Validation ====================
 
@@ -4919,6 +4920,228 @@ class TestBboxFromBinaryMask:
         }
 
         with pytest.raises(ValueError, match="augmentation"):
+            bbox_from_binary_mask(binary_mask, args)
+
+
+# ============================================================================
+# Test 2.5D bbox generation
+# ============================================================================
+
+class TestTwoPointFiveDBboxFromBinaryMask:
+
+    VALID_ARGS_TEMPLATE = {
+        'dimensionality': '2.5D',
+        'collapsed_dim': 2,
+        'component_sampling_config': {
+            'dimensionality': '2.5D',
+            'collapsed_dim': 2,
+            'region_extraction_config': {
+                'connectivity': 1,
+                'component_selection_process': 'top-k',
+                'top-k': 1,
+            }
+        }
+    }
+
+    def _make_cube_mask(self, shape=(10, 10, 10), cube_start=(2, 2, 2), cube_end=(8, 8, 8)):
+        mask = torch.zeros(shape)
+        mask[cube_start[0]:cube_end[0], cube_start[1]:cube_end[1], cube_start[2]:cube_end[2]] = 1
+        return mask
+
+    def test_2_5d_returns_list_of_bboxes(self):
+        """A valid 3D cube generates a 2D bbox for each slice along the collapsed dim."""
+        binary_mask = self._make_cube_mask()
+        bbox_list, is_generated = two_point_five_d_bbox_from_binary_mask(
+            binary_mask, self.VALID_ARGS_TEMPLATE
+        )
+        assert is_generated is True
+        assert isinstance(bbox_list, list)
+        assert len(bbox_list) > 0
+        for bbox in bbox_list:
+            assert bbox.shape == (1, 6)
+            # Verify it is a valid 2D bbox: collapsed dim extrema match
+            assert bbox[0, 2] == bbox[0, 5]
+
+    def test_2_5d_bboxes_spatial_extent(self):
+        """Each bbox should cover non-zero extent in non-collapsed dims."""
+        binary_mask = self._make_cube_mask()
+        bbox_list, is_generated = two_point_five_d_bbox_from_binary_mask(
+            binary_mask, self.VALID_ARGS_TEMPLATE
+        )
+        assert is_generated is True
+        for bbox in bbox_list:
+            # Non-collapsed dims (0 and 1) must have min < max
+            assert bbox[0, 0] < bbox[0, 3]
+            assert bbox[0, 1] < bbox[0, 4]
+
+    def test_2_5d_skips_invalid_slices(self):
+        """Slices with insufficient spatial extent are skipped."""
+        binary_mask = torch.zeros(10, 10, 10)
+        # Thick block in slices 5-8, single voxel in slices 3-4
+        binary_mask[3, 3, 3] = 1
+        binary_mask[4, 4, 4] = 1
+        binary_mask[2:8, 2:8, 5:9] = 1
+
+        bbox_list, is_generated = two_point_five_d_bbox_from_binary_mask(
+            binary_mask, self.VALID_ARGS_TEMPLATE
+        )
+        assert is_generated is True
+        # Slices 3 and 4 (single voxel) should be skipped
+        for bbox in bbox_list:
+            collapsed_val = bbox[0, 2].item()
+            collapsed_val_max = bbox[0, 5].item()
+            assert collapsed_val == collapsed_val_max, "Collapsed dim extrema should match"
+            assert collapsed_val >= 5, f"Expected slice >= 5, got {collapsed_val}"
+
+    def test_2_5d_empty_mask(self):
+        """Empty mask returns (None, False)."""
+        binary_mask = torch.zeros(10, 10, 10)
+        bbox_list, is_generated = two_point_five_d_bbox_from_binary_mask(
+            binary_mask, self.VALID_ARGS_TEMPLATE
+        )
+        assert is_generated is False
+        assert bbox_list is None
+
+    def test_2_5d_via_bbox_from_binary_mask(self):
+        """Dispatching through bbox_from_binary_mask with dimensionality='2.5D' works."""
+        binary_mask = self._make_cube_mask()
+        bbox_list, is_generated = bbox_from_binary_mask(
+            binary_mask, self.VALID_ARGS_TEMPLATE
+        )
+        assert is_generated is True
+        assert isinstance(bbox_list, list)
+        assert len(bbox_list) > 0
+
+    def test_2_5d_all_slices_invalid(self):
+        """When all slices have insufficient extent, returns (None, False)."""
+        binary_mask = torch.zeros(10, 10, 10)
+        # Single voxel per slice along dim 2 — all slices fail min_length check
+        for s in range(10):
+            binary_mask[0, 0, s] = 1
+
+        bbox_list, is_generated = two_point_five_d_bbox_from_binary_mask(
+            binary_mask, self.VALID_ARGS_TEMPLATE
+        )
+        assert is_generated is False
+        assert bbox_list is None
+
+    def test_2_5d_connectivity_3(self):
+        """26-connectivity works for 2.5D bbox extraction."""
+        binary_mask = torch.zeros(10, 10, 10)
+        binary_mask[3:7, 3:7, 3:7] = 1
+
+        args = {
+            'dimensionality': '2.5D',
+            'collapsed_dim': 2,
+            'component_sampling_config': {
+                'dimensionality': '2.5D',
+                'collapsed_dim': 2,
+                'region_extraction_config': {
+                    'connectivity': 3,
+                    'component_selection_process': 'top-k',
+                    'top-k': 1,
+                }
+            }
+        }
+        bbox_list, is_generated = two_point_five_d_bbox_from_binary_mask(
+            binary_mask, args
+        )
+        assert is_generated is True
+        assert len(bbox_list) == 4  # slices 3,4,5,6
+
+    def test_2_5d_collapsed_dim_0(self):
+        """2.5D with collapsed_dim=0 iterates slices along the first axis."""
+        binary_mask = torch.zeros(10, 10, 10)
+        binary_mask[2:8, 2:8, 2:8] = 1
+
+        args = {
+            'dimensionality': '2.5D',
+            'collapsed_dim': 0,
+            'component_sampling_config': {
+                'dimensionality': '2.5D',
+                'collapsed_dim': 0,
+                'region_extraction_config': {
+                    'connectivity': 1,
+                    'component_selection_process': 'top-k',
+                    'top-k': 1,
+                }
+            }
+        }
+        bbox_list, is_generated = two_point_five_d_bbox_from_binary_mask(
+            binary_mask, args
+        )
+        assert is_generated is True
+        assert len(bbox_list) == 6  # slices 2-7
+        for bbox in bbox_list:
+            assert bbox[0, 0] == bbox[0, 3]  # collapsed dim 0 matches
+
+    def test_2_5d_with_jitter(self):
+        """Per-slice jitter produces different bboxes for different slices."""
+        binary_mask = self._make_cube_mask()
+
+        args = {
+            'dimensionality': '2.5D',
+            'collapsed_dim': 2,
+            'component_sampling_config': {
+                'dimensionality': '2.5D',
+                'collapsed_dim': 2,
+                'region_extraction_config': {
+                    'connectivity': 1,
+                    'component_selection_process': 'top-k',
+                    'top-k': 1,
+                }
+            },
+            'augmentation_config': {
+                'jitter': {
+                    'dimensionality': {
+                        'expected_dimensionality': 2,
+                        'collapsed_dimension': 2,
+                    },
+                    'jitter_config': {
+                        'type': 'absolute',
+                        'sampling_mechanism': 'uniform_integer',
+                        'jitter_symmetric': False,
+                    },
+                    'jitter_parameterisation': [1, 1],
+                    'context_parameters': [
+                        'image_dimensions',
+                        'sampling_dimensions',
+                        'bbox_extrema',
+                        'collapsed_dim',
+                        'expected_dimensionality'
+                    ]
+                }
+            }
+        }
+
+        bbox_list, is_generated = two_point_five_d_bbox_from_binary_mask(
+            binary_mask, args
+        )
+        assert is_generated is True
+        assert len(bbox_list) > 0
+        for bbox in bbox_list:
+            assert bbox[0, 2] == bbox[0, 5]  # collapsed dim still matches after jitter
+            assert bbox[0, 0] < bbox[0, 3]   # non-degenerate
+            assert bbox[0, 1] < bbox[0, 4]
+
+    def test_2_5d_config_validation_rejects_slice_selection(self):
+        """2.5D config with slice_selection raises ValueError."""
+        binary_mask = self._make_cube_mask()
+        args = {
+            'dimensionality': '2.5D',
+            'collapsed_dim': 2,
+            'component_sampling_config': {
+                'dimensionality': '2.5D',
+                'collapsed_dim': 2,
+                'region_extraction_config': {
+                    'connectivity': 1,
+                    'component_selection_process': 'top-k',
+                    'top-k': 1,
+                    'slice_selection': 'center'
+                }
+            }
+        }
+        with pytest.raises(ValueError, match="slice_selection"):
             bbox_from_binary_mask(binary_mask, args)
 
 

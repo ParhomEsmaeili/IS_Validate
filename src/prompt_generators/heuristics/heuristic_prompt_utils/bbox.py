@@ -4,12 +4,14 @@ import os
 from os.path import dirname as up
 import sys
 import torch 
+from typing import List, Tuple
 sys.path.append(up(up(up(up(up(os.path.abspath(__file__)))))))
 from src.prompt_generators.heuristics.spatial_utils.component_extraction import (
     two_d_components_generation, 
     three_d_components_generation,
     select_component
 )
+from src.prompt_generators.heuristics.spatial_utils.spatial_extent import has_min_spatial_extent_2d
 from src.prompt_generators.heuristics.heuristic_prompt_utils.bbox_utils.bbox_validation import check_bbox_validity
 from src.prompt_generators.heuristics.heuristic_prompt_utils.bbox_utils.bbox_augmentations import jitter_bbox
 
@@ -19,7 +21,7 @@ def bbox_from_binary_mask(
     ):
     '''
     Unified function to generate bounding boxes from binary masks.
-    Handles both 2D and 3D based on the dimensionality argument.
+    Handles 2D, 3D, and 2.5D based on the dimensionality argument.
     
     This function:
     1. Structures configs necessary for component extraction
@@ -31,14 +33,15 @@ def bbox_from_binary_mask(
     Args:
         binary_mask: A binary mask tensor of shape (H,W,D)
         args: Configuration dictionary with required keys:
-            - 'dimensionality': 2 or 3
-            - 'collapsed_dim': int (0, 1, or 2) - required for 2D bbox generation
+            - 'dimensionality': 2, 3, or '2.5D'
+            - 'collapsed_dim': int (0, 1, or 2) - required for 2D/2.5D bbox generation
             - 'component_sampling_config': dict (not optional)
             - 'augmentation_config': dict (optional)
     
     Returns:
-        bbox: torch.Tensor of shape (1, 6) representing [min_x, min_y, min_z, max_x, max_y, max_z]
-        is_generated: bool which indicates whether we managed to generate a bbox.
+        bbox_list: List of torch.Tensor, each of shape (1, 6) representing a 2D/3D bbox.
+                   Empty list when no bbox could be generated.
+        is_generated: bool which indicates whether we managed to generate any bboxes.
 
     Raises:
         KeyError: If required configuration keys are missing
@@ -61,8 +64,8 @@ def bbox_from_binary_mask(
     #Now lets assert that we have the necessary configs.
     if 'dimensionality' not in component_sampling_config:
         raise KeyError("args must contain the key 'dimensionality' to specify whether the bounding box is 2D or 3D")
-    if component_sampling_config['dimensionality'] not in [2, 3]:
-        raise ValueError("component_sampling_config['dimensionality'] must be 2 or 3")
+    if component_sampling_config['dimensionality'] not in [2, 3, '2.5D']:
+        raise ValueError("component_sampling_config['dimensionality'] must be 2, 3, or '2.5D'")
 
 
     #Now lets assert that the dimensionality in the component sampling config matches the dimensionality
@@ -72,19 +75,19 @@ def bbox_from_binary_mask(
     else:
         assert args['dimensionality'] == component_sampling_config['dimensionality'], "Dimensionality specified in args must match the dimensionality specified in component_sampling_config"
     
-    #If dimensionality is 2D, then lets assert that the collapsed dim is also specified, and identical.
-    if component_sampling_config['dimensionality'] == 2:
+    #If dimensionality is 2D or 2.5D, then lets assert that the collapsed dim is also specified, and identical.
+    if component_sampling_config['dimensionality'] in [2, '2.5D']:
         if 'collapsed_dim' not in component_sampling_config:
-            raise KeyError("args must contain the key 'collapsed_dim' to specify which dimension is collapsed for 2D bounding box generation")
+            raise KeyError("args must contain the key 'collapsed_dim' to specify which dimension is collapsed for 2D/2.5D bounding box generation")
         if 'collapsed_dim' not in args:
-            raise KeyError("args must contain the key 'collapsed_dim' to specify which dimension is collapsed for 2D bounding box generation")
+            raise KeyError("args must contain the key 'collapsed_dim' to specify which dimension is collapsed for 2D/2.5D bounding box generation")
 
         if args['collapsed_dim'] != component_sampling_config['collapsed_dim']:
-            raise ValueError("The collapsed dimension specified in args must match the collapsed dimension specified in component_sampling_config for 2D bounding box generation.")
+            raise ValueError("The collapsed dimension specified in args must match the collapsed dimension specified in component_sampling_config for 2D/2.5D bounding box generation.")
 
-    if component_sampling_config['dimensionality'] == 2:
+    if component_sampling_config['dimensionality'] in [2, '2.5D']:
         if 'collapsed_dim' not in component_sampling_config:
-            raise KeyError("args must contain the key 'collapsed_dim' for 2D bbox generation")
+            raise KeyError("args must contain the key 'collapsed_dim' for 2D/2.5D bbox generation")
         if component_sampling_config['collapsed_dim'] not in [0, 1, 2]:
             raise ValueError("component_sampling_config['collapsed_dim'] must be 0, 1, or 2")
     if 'region_extraction_config' not in component_sampling_config:
@@ -108,19 +111,25 @@ def bbox_from_binary_mask(
         if component_sampling_config['dimensionality'] == 2:
             if 'slice_selection' not in component_sampling_config['region_extraction_config']:
                 raise KeyError("For 2D bbox generation, component_sampling_config['region_extraction_config'] must contain the key 'slice_selection' to specify the process for selecting the slice from which to generate the bbox.")
+        elif component_sampling_config['dimensionality'] == '2.5D':
+            if 'slice_selection' in component_sampling_config['region_extraction_config']:
+                raise ValueError("For 2.5D bbox generation, 'slice_selection' should not be specified — all slices along the collapsed dimension are iterated.")
 
     if binary_mask.sum() == 0 and binary_mask.unique().numel() == 1:
         torch.cuda.empty_cache()
         return None, False 
         #False because we can't generate anything for this binary mask.
 
+    # For 2.5D, delegate to two_point_five_d_bbox_from_binary_mask
+    if args['dimensionality'] == '2.5D':
+        return two_point_five_d_bbox_from_binary_mask(binary_mask, args)
+
     # Extract sampling region
     is_compatible, component_mask, slice_idx = extract_sampling_region(binary_mask, component_sampling_config)
 
     if not is_compatible:
         torch.cuda.empty_cache()
-        return None, False #We return a Nonetype as we will not handle the process of being unable to
-        #generate a bbox within the sampling utility. The bool indicates that we were not able to generate a bbox.
+        return None, False
     else:
         # Sanity check: extract_sampling_region guarantees non-zero components for is_compatible=True,
         # so an all-zero mask here indicates a logic error in component extraction.
@@ -163,7 +172,7 @@ def bbox_from_binary_mask(
     if augmentation_config == None:
         #If the augmentation config is nonetype, then we have no augmentation!
         torch.cuda.empty_cache()
-        return bbox, True
+        return [bbox], True
     else:
         ####### Now we generate the augmentation inputs, according to what is required by the 
         # augmentation util ##########
@@ -212,7 +221,131 @@ def bbox_from_binary_mask(
             else:
                 raise ValueError(f"Unsupported augmentation {augmentation}. Please check the augmentation config.")
         torch.cuda.empty_cache()
-        return bbox, True #The bool
+        return [bbox], True #The bool
+
+
+def two_point_five_d_bbox_from_binary_mask(
+    binary_mask: torch.Tensor,
+    args: dict
+) -> Tuple[List[torch.Tensor], bool]:
+    """
+    Generate a list of 2D bounding boxes, one per valid slice of a 3D component.
+
+    This function:
+    1. Extracts 3D connected components (same as the 3D bbox path)
+    2. Selects the top-k components
+    3. Iterates over each slice along the collapsed dimension
+    4. For each slice with sufficient spatial extent, generates a 2D bbox
+    5. Applies per-slice augmentation if configured
+
+    Args:
+        binary_mask: A binary mask tensor of shape (H, W, D)
+        args: Configuration dictionary with required keys:
+            - 'dimensionality': '2.5D'
+            - 'collapsed_dim': int (0, 1, or 2)
+            - 'component_sampling_config': dict
+            - 'augmentation_config': dict (optional)
+
+    Returns:
+        bbox_list: List of torch.Tensor, each of shape (1, 6) representing a 2D bbox
+        is_generated: bool indicating whether any bboxes were generated
+    """
+    component_sampling_config = args['component_sampling_config']
+    region_config = component_sampling_config['region_extraction_config']
+    connectivity = region_config['connectivity']
+    collapsed_dim = args['collapsed_dim']
+    min_length = region_config.get('min_length', 2)
+
+    # Guard: empty mask
+    if binary_mask.sum() == 0:
+        return None, False
+
+    # Step 1: Extract 3D components
+    components_3d, is_compatible = three_d_components_generation(
+        binary_mask, connectivity, min_length
+    )
+    if not is_compatible:
+        return None, False
+
+    # Step 2: Select the component
+    component_selection_config = {
+        'component_selection_process': copy.deepcopy(region_config['component_selection_process'])
+    }
+    component_selection_config.update({
+        component_selection_config['component_selection_process']:
+            copy.deepcopy(region_config[component_selection_config['component_selection_process']])
+    })
+    selected_3d = select_component(components_3d, component_selection_config)
+
+    if selected_3d.sum() == 0:
+        return None, False
+
+    # Step 3: Iterate slices along collapsed_dim
+    valid_bboxes = []
+    num_slices = binary_mask.shape[collapsed_dim]
+
+    for s in range(num_slices):
+        try:
+            # Extract 2D slice from the selected component
+            slice_2d = selected_3d[tuple(s if i == collapsed_dim else slice(None) for i in range(3))]
+
+            # Check spatial extent — skip slices that are too thin
+            if min_length >= 2 and not has_min_spatial_extent_2d(slice_2d, min_length):
+                continue
+
+            # Re-insert the 2D slice into a 3D volume (bbox_extrema expects 3D input)
+            slice_3d = torch.zeros_like(binary_mask)
+            slice_3d[tuple(s if i == collapsed_dim else slice(None) for i in range(3))] = slice_2d
+
+            # Compute 2D bbox from this slice
+            bbox_args = {
+                'dimensionality': 2,
+                'collapsed_dim': collapsed_dim,
+                'collapsed_slice_idx': s
+            }
+            slice_bbox = bbox_extrema(slice_3d.bool(), bbox_args)
+
+            # Apply per-slice jitter if configured
+            augmentation_config = args.get('augmentation_config')
+            if augmentation_config is not None:
+                augmentation_context_config_registry = {
+                    'image_dimensions': binary_mask.shape,
+                    'sampling_dimensions': torch.Size([
+                        binary_mask.shape[i] if i != collapsed_dim else 0 for i in range(3)
+                    ]),
+                    'bbox_extrema': slice_bbox.clone(),
+                    'collapsed_dim': collapsed_dim,
+                    'expected_dimensionality': 2
+                }
+
+                augmentation_context_config = {
+                    aug: {
+                        key: augmentation_context_config_registry[key]
+                        for key in augmentation_config[aug]['context_parameters']
+                    }
+                    for aug in augmentation_config
+                }
+
+                for augmentation in augmentation_config:
+                    if augmentation == 'jitter':
+                        slice_bbox = jitter_bbox(
+                            slice_bbox,
+                            augmentation_config[augmentation],
+                            augmentation_context_config[augmentation]
+                        )
+
+            valid_bboxes.append(slice_bbox)
+        except (ValueError, RuntimeError):
+            # Skip slices where bbox generation or augmentation fails
+            continue
+
+    if len(valid_bboxes) == 0:
+        torch.cuda.empty_cache()
+        return None, False
+
+    torch.cuda.empty_cache()
+    return valid_bboxes, True
+
 
 def bbox_extrema(
     binary_mask: torch.Tensor,
