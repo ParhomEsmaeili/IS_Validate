@@ -18,10 +18,12 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 
 from src.prompt_generators.heuristics.heuristic_prompt_utils.bbox_utils.bbox_validation import (
-    has_contiguous_sequence_vectorised,
-    can_generate_bbox_from_slice_fast,
-    can_generate_bbox_from_volume_fast,
     check_bbox_validity
+)
+from src.prompt_generators.heuristics.spatial_utils.spatial_extent import (
+    has_contiguous_sequence_vectorised,
+    has_min_spatial_extent_2d,
+    has_min_spatial_extent_3d,
 )
 from src.prompt_generators.heuristics.heuristic_prompt_utils.bbox import (
     bbox_extrema,
@@ -178,7 +180,7 @@ class TestHasContiguousSequenceVectorised:
 
 
 # ============================================================================
-# Test can_generate_bbox_from_slice_fast
+# Test has_min_spatial_extent_2d
 # ============================================================================
 
 class TestCanGenerateBboxFromSliceFast:
@@ -189,39 +191,39 @@ class TestCanGenerateBboxFromSliceFast:
         # 5x5 square - should pass
         slice_2d = torch.zeros(5, 5)
         slice_2d[1:4, 1:4] = 1
-        assert can_generate_bbox_from_slice_fast(slice_2d) is True
+        assert has_min_spatial_extent_2d(slice_2d) is True
     
     def test_single_pixel(self):
         """Test a single pixel - should fail."""
         slice_2d = torch.zeros(5, 5)
         slice_2d[2, 2] = 1
-        assert can_generate_bbox_from_slice_fast(slice_2d) is False
+        assert has_min_spatial_extent_2d(slice_2d) is False
     
     def test_line_horizontal(self):
         """Test a horizontal line - should fail (only 1 in y dimension)."""
         slice_2d = torch.zeros(5, 5)
         slice_2d[2, 1:4] = 1
-        assert can_generate_bbox_from_slice_fast(slice_2d) is False
+        assert has_min_spatial_extent_2d(slice_2d) is False
     
     def test_line_vertical(self):
         """Test a vertical line - should fail (only 1 in x dimension)."""
         slice_2d = torch.zeros(5, 5)
         slice_2d[1:4, 2] = 1
-        assert can_generate_bbox_from_slice_fast(slice_2d) is False
+        assert has_min_spatial_extent_2d(slice_2d) is False
     
     def test_l_shape(self):
         """Test L-shaped region - should pass."""
         slice_2d = torch.zeros(5, 5)
         slice_2d[1:4, 2] = 1  # vertical
         slice_2d[1, 1:4] = 1  # horizontal
-        assert can_generate_bbox_from_slice_fast(slice_2d) is True
+        assert has_min_spatial_extent_2d(slice_2d) is True
     
     def test_diagonal_line(self):
         """Test a diagonal line - should not fail (it is contiguous, and would be a valid component based on 8-connectivity)."""
         slice_2d = torch.zeros(5, 5)
         for i in range(5):
             slice_2d[i, i] = 1
-        assert can_generate_bbox_from_slice_fast(slice_2d) is True
+        assert has_min_spatial_extent_2d(slice_2d) is True
 
     def test_sparse_points(self):
         """Test sparse points - should fail."""
@@ -229,11 +231,11 @@ class TestCanGenerateBboxFromSliceFast:
         slice_2d[2, 2] = 1
         slice_2d[5, 5] = 1
         slice_2d[8, 8] = 1
-        assert can_generate_bbox_from_slice_fast(slice_2d) is False
+        assert has_min_spatial_extent_2d(slice_2d) is False
 
 
 # ============================================================================
-# Test can_generate_bbox_from_volume_fast
+# Test has_min_spatial_extent_3d
 # ============================================================================
 
 class TestCanGenerateBboxFromVolumeFast:
@@ -243,49 +245,49 @@ class TestCanGenerateBboxFromVolumeFast:
         """Test a 3D volume that can generate a valid bbox."""
         volume_3d = torch.zeros(5, 5, 5)
         volume_3d[1:4, 1:4, 1:4] = 1
-        assert can_generate_bbox_from_volume_fast(volume_3d) is True
+        assert has_min_spatial_extent_3d(volume_3d) is True
     
     def test_single_voxel(self):
         """Test a single voxel - should fail."""
         volume_3d = torch.zeros(5, 5, 5)
         volume_3d[2, 2, 2] = 1
-        assert can_generate_bbox_from_volume_fast(volume_3d) is False
+        assert has_min_spatial_extent_3d(volume_3d) is False
     
     def test_line_3d_x(self):
         """Test a 3D line - should fail."""
         volume_3d = torch.zeros(5, 5, 5)
         volume_3d[1:4, 2, 2] = 1
-        assert can_generate_bbox_from_volume_fast(volume_3d) is False
+        assert has_min_spatial_extent_3d(volume_3d) is False
     
     def test_line_3_y(self):
         """Test a 3D line - should fail."""
         volume_3d = torch.zeros(5, 5, 5)
         volume_3d[2, 1:4, 2] = 1
-        assert can_generate_bbox_from_volume_fast(volume_3d) is False
+        assert has_min_spatial_extent_3d(volume_3d) is False
 
     def test_line_3d_z(self):
         """Test a 3D line - should fail."""
         volume_3d = torch.zeros(5, 5, 5)
         volume_3d[2, 2, 1:4] = 1
-        assert can_generate_bbox_from_volume_fast(volume_3d) is False
+        assert has_min_spatial_extent_3d(volume_3d) is False
 
     def test_face_3d_transverse(self): #We pretend that Z = the length from head to foot. and Y is back to front. X is left to right, 
         """Test a 3D face (2D plane) - should fail."""
         volume_3d = torch.zeros(5, 5, 5)
         volume_3d[1:4, 1:4, 2] = 1
-        assert can_generate_bbox_from_volume_fast(volume_3d) is False
+        assert has_min_spatial_extent_3d(volume_3d) is False
 
     def test_face_3d_coronal(self):
         """Test a 3D face (2D plane) - should fail."""
         volume_3d = torch.zeros(5, 5, 5)
         volume_3d[1:4, 2, 1:4] = 1
-        assert can_generate_bbox_from_volume_fast(volume_3d) is False
+        assert has_min_spatial_extent_3d(volume_3d) is False
         
     def test_face_3d_sagittal(self):
         """Test a 3D face (2D plane) - should fail."""
         volume_3d = torch.zeros(5, 5, 5)
         volume_3d[2, 1:4, 1:4] = 1
-        assert can_generate_bbox_from_volume_fast(volume_3d) is False
+        assert has_min_spatial_extent_3d(volume_3d) is False
 
     def test_sparse_points_3d(self):
         """Test sparse points in 3D - should fail."""
@@ -293,14 +295,14 @@ class TestCanGenerateBboxFromVolumeFast:
         volume_3d[2, 2, 2] = 1
         volume_3d[5, 5, 5] = 1
         volume_3d[8, 8, 8] = 1
-        assert can_generate_bbox_from_volume_fast(volume_3d) is False
+        assert has_min_spatial_extent_3d(volume_3d) is False
     
     def test_inclined_plane(self):
         """Test an inclined plane in 3D - should pass (it is contiguous and has a valid bbox)."""
         volume_3d = torch.zeros(5, 5, 5)
         for i in range(1, 4):
             volume_3d[1:4, i,i] = 1 #Just a tilted face, essentially a line moving along X axis, and spread across the diagonal spanned by Y and Z.
-        assert can_generate_bbox_from_volume_fast(volume_3d) is True
+        assert has_min_spatial_extent_3d(volume_3d) is True
 
 # ============================================================================
 # Test check_bbox_validity

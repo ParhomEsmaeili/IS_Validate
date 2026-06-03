@@ -7,9 +7,9 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))))
 
-from src.prompt_generators.heuristics.heuristic_prompt_utils.bbox_utils.bbox_validation import (
-    can_generate_bbox_from_slice_fast,
-    can_generate_bbox_from_volume_fast
+from src.prompt_generators.heuristics.spatial_utils.spatial_extent import (
+    has_min_spatial_extent_2d,
+    has_min_spatial_extent_3d
 )
 from src.version_handling import monai_version
 
@@ -159,7 +159,8 @@ def extract_connected_components(
 def two_d_components_generation(
     binary_mask: torch.Tensor,
     slice_selection_config: dict,
-    connectivity: int
+    connectivity: int,
+    min_length: int = 2
 ):
     '''
     Helper function which selects a slice and extracts connected components from a binary mask based on a 
@@ -176,6 +177,7 @@ def two_d_components_generation(
                             # select the slice from.
     }  
     connectivity: int, the connectivity to use for connected component analysis (1, 2)
+    min_length: int, minimum required extent in each dimension (default 2). Set to 1 to skip size constraint.
     outputs:
     selected_slice_idx: int, the index of the selected slice along the collapsed dimension.
     '''
@@ -218,7 +220,7 @@ def two_d_components_generation(
         # #next one.
         # can_generate_bbox, _ = fast_check_bbox_generation_compatibility(candidate_region, slice_selection_config['collapsed_dim'])
 
-        is_compatible, components = generate_components_from_mask(candidate_region, 2, connectivity)
+        is_compatible, components = generate_components_from_mask(candidate_region, 2, connectivity, min_length=min_length)
         if is_compatible:
             assert components.sum() > 0, "Candidate region should contain non-zero values if it is compatible."
             #If compatible then return slice_idx and the candidate region.
@@ -233,7 +235,8 @@ def two_d_components_generation(
 
 def three_d_components_generation(
     binary_mask: torch.Tensor,
-    connectivity: int
+    connectivity: int,
+    min_length: int = 2
 ):
     '''
     Helper function which selects a slice and extracts connected components from a binary mask based on a 
@@ -244,6 +247,7 @@ def three_d_components_generation(
     inputs:
     binary_mask: A binary mask tensor of shape (H, W, D)
     connectivity: int, the connectivity to use for connected component analysis (1, 2, 3)
+    min_length: int, minimum required extent in each dimension (default 2). Set to 1 to skip size constraint.
 
     outputs:
     selected_slice_idx: int, the index of the selected slice along the collapsed dimension.
@@ -257,7 +261,7 @@ def three_d_components_generation(
     if binary_mask.sum() == 0 and binary_mask.unique() == torch.tensor([0], device=binary_mask.device):
         raise ValueError("Input binary mask must contain non-zero values.")
     
-    is_compatible, components = generate_components_from_mask(binary_mask, 3, connectivity)
+    is_compatible, components = generate_components_from_mask(binary_mask, 3, connectivity, min_length=min_length)
     return components, is_compatible 
 
 
@@ -266,31 +270,37 @@ def three_d_components_generation(
 def generate_components_from_mask(
     binary_mask: torch.Tensor,
     dimensionality: int,
-    connectivity: int = 1
+    connectivity: int = 1,
+    min_length: int = 2
 ) -> Tuple[bool, Optional[torch.Tensor]]:
     """
-    Check if a binary mask can potentially generate a valid bbox.
+    Extract connected components from a binary mask, optionally filtering by
+    minimum spatial extent.
     
     This function performs:
-    1. Fast pre-check using contiguous sequence analysis
-    2. If that passes, runs connected component analysis
-    3. Filters components to ensure each has length >= 2 in all dimensions
+    1. Fast pre-check using contiguous sequence analysis (if min_length >= 2)
+    2. Connected component analysis
+    3. Filters components to ensure each has length >= min_length in all dimensions
+       (if min_length >= 2)
     
     Args:
         binary_mask: Binary mask tensor (2D or 3D)
         dimensionality: 2 or 3, indicating the dimensionality of the mask
         connectivity: Connectivity for connected component analysis (1, 2, or 3)
+        min_length: Minimum required extent in each dimension. Set to 1 to skip
+                    the size constraint entirely (useful for e.g. lasso prompts).
     
     Returns:
         Tuple of (is_compatible, components) where:
-            - is_compatible: True if the mask can generate a bbox with valid components
+            - is_compatible: True if the mask can generate a valid components
             - components: The connected components tensor if valid, None otherwise
     """
     assert binary_mask.ndim == dimensionality, f"Expected binary mask with {dimensionality}" 
     f"dimensions, got {binary_mask.ndim}"
+    
     if dimensionality == 2:
-        # Fast pre-check for 2D
-        if not can_generate_bbox_from_slice_fast(binary_mask):
+        # Fast pre-check for 2D (skip when min_length <= 1, always true)
+        if min_length >= 2 and not has_min_spatial_extent_2d(binary_mask, min_length):
             return False, None
         
         try:
@@ -298,17 +308,19 @@ def generate_components_from_mask(
             if components.max() == 0:
                 return False, None
             
-            # Filter components: each must have length >= 2 in all dimensions
-            valid_components = filter_valid_components(components, dimensionality)
-            if valid_components.max() == 0:
-                return False, None
-            return True, valid_components
+            if min_length >= 2:
+                valid_components = filter_valid_components(components, dimensionality, min_length)
+                if valid_components.max() == 0:
+                    return False, None
+                return True, valid_components
+            else:
+                return True, components
         except ValueError:
             return False, None
     
     elif dimensionality == 3:
-        # Fast pre-check for 3D
-        if not can_generate_bbox_from_volume_fast(binary_mask):
+        # Fast pre-check for 3D (skip when min_length <= 1, always true)
+        if min_length >= 2 and not has_min_spatial_extent_3d(binary_mask, min_length):
             return False, None
         
         try:
@@ -316,11 +328,13 @@ def generate_components_from_mask(
             if components.max() == 0:
                 return False, None
             
-            # Filter components: each must have length >= 2 in all dimensions
-            valid_components = filter_valid_components(components, dimensionality)
-            if valid_components.max() == 0:
-                return False, None
-            return True, valid_components
+            if min_length >= 2:
+                valid_components = filter_valid_components(components, dimensionality, min_length)
+                if valid_components.max() == 0:
+                    return False, None
+                return True, valid_components
+            else:
+                return True, components
         except ValueError:
             return False, None
     
@@ -328,19 +342,24 @@ def generate_components_from_mask(
         raise ValueError(f"Unsupported dimensionality: {dimensionality}. Must be 2 or 3.")
 
 
-def filter_valid_components(components: torch.Tensor, dimensionality: int) -> torch.Tensor:
+def filter_valid_components(components: torch.Tensor, dimensionality: int, min_length: int = 2) -> torch.Tensor:
     """
-    Filter connected components to keep only those with length >= 2 in all dimensions.
-    Uses the existing fast check functions to validate each component for this purpose.
+    Filter connected components to keep only those with length >= min_length in all dimensions.
+    When min_length <= 1, all components are returned unchanged.
     
     Args:
         components: Connected components tensor where each component has a unique integer ID
         dimensionality: 2 or 3, indicating the dimensionality of the mask
+        min_length: Minimum required extent in each dimension. Set to 1 to skip filtering.
     
     Returns:
-        A new components tensor with only valid components (0 for invalid/filtered out)
+        A new components tensor with only valid components (0 for invalid/filtered out),
+        or the original tensor unchanged when min_length <= 1.
     """
     assert components.dim() == dimensionality, f"Expected components with {dimensionality} dimensions, got {components.dim()}"
+    
+    if min_length <= 1:
+        return components
     
     # Collect valid component IDs
     valid_ids = []
@@ -353,9 +372,9 @@ def filter_valid_components(components: torch.Tensor, dimensionality: int) -> to
         
         # Use the appropriate fast check function
         if dimensionality == 2:
-            is_compatible = can_generate_bbox_from_slice_fast(component_mask)
+            is_compatible = has_min_spatial_extent_2d(component_mask, min_length)
         else:
-            is_compatible = can_generate_bbox_from_volume_fast(component_mask)
+            is_compatible = has_min_spatial_extent_3d(component_mask, min_length)
         
         if is_compatible:
             valid_ids.append(component_id)
