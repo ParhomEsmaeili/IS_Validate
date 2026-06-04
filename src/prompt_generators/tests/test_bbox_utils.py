@@ -4705,7 +4705,7 @@ class TestBboxFromBinaryMask:
         
         bbox = bbox_from_binary_mask(binary_mask, args)
         
-        assert bbox is None
+        assert bbox == []
     
     def test_bbox_from_binary_mask_with_jitter(self):
         """Test bbox generation with jitter augmentation."""
@@ -4867,7 +4867,7 @@ class TestBboxFromBinaryMask:
     # ==================== Incompatibility Flag Tests ====================
 
     def test_bbox_from_binary_mask_incompatible_2d_nontrivial(self):
-        """2D nontrivial incompatible mask (passes contiguity, fails CC) returns None."""
+        """2D nontrivial incompatible mask (passes contiguity, fails CC) returns []."""
         binary_mask = torch.zeros(10, 10, 10)
         binary_mask[list(range(10)), list(range(10)), [3] * len(list(range(10)))] = 1
 
@@ -4888,7 +4888,7 @@ class TestBboxFromBinaryMask:
 
         bbox = bbox_from_binary_mask(binary_mask, args)
 
-        assert bbox is None
+        assert bbox == []
 
     # ==================== Augmentation Edge Cases ====================
 
@@ -4986,12 +4986,12 @@ class TestTwoPointFiveDBboxFromBinaryMask:
             assert collapsed_val >= 5, f"Expected slice >= 5, got {collapsed_val}"
 
     def test_2_5d_empty_mask(self):
-        """Empty mask returns None."""
+        """Empty mask returns []."""
         binary_mask = torch.zeros(10, 10, 10)
         bbox_list = two_point_five_d_bbox_from_binary_mask(
             binary_mask, self.VALID_ARGS_TEMPLATE
         )
-        assert bbox_list is None
+        assert bbox_list == []
 
     def test_2_5d_via_bbox_from_binary_mask(self):
         """Dispatching through bbox_from_binary_mask with dimensionality='2.5D' works."""
@@ -5003,7 +5003,7 @@ class TestTwoPointFiveDBboxFromBinaryMask:
         assert len(bbox_list) > 0
 
     def test_2_5d_all_slices_invalid(self):
-        """When all slices have insufficient extent, returns None."""
+        """When all slices have insufficient extent, returns []."""
         binary_mask = torch.zeros(10, 10, 10)
         # Single voxel per slice along dim 2 — all slices fail min_length check
         for s in range(10):
@@ -5012,7 +5012,7 @@ class TestTwoPointFiveDBboxFromBinaryMask:
         bbox_list = two_point_five_d_bbox_from_binary_mask(
             binary_mask, self.VALID_ARGS_TEMPLATE
         )
-        assert bbox_list is None
+        assert bbox_list == []
 
     def test_2_5d_connectivity_3(self):
         """26-connectivity works for 2.5D bbox extraction."""
