@@ -51,20 +51,41 @@ def update_binary_mask_freeform(coords: torch.Tensor, mask: torch.Tensor) -> tor
     torch.cuda.empty_cache() #Not sure if this is deallocating anything? #TODO diagnose this when we have more time.
     return mask.to(dtype=torch.bool) 
 
-def update_binary_mask_partition(prompt: list[list[torch.Tensor] | torch.Tensor], mask: torch.Tensor) -> torch.Tensor:
+def update_binary_mask_partition(prompt: list[torch.Tensor], mask: torch.Tensor) -> torch.Tensor:
     '''
     Modifies an existing binary mask by setting specified partition region to zero.
     
+    For bbox prompts, each tensor in the list has shape (1, 6) with format
+    [min_x, min_y, min_z, max_x, max_y, max_z] in voxel coordinates.
+    The entire enclosed region is zeroed out.
+    
     Args:
-        prompt (list[list[torch.Tensor] | torch.Tensor]): A list of prompts. Structure on a prompt-level depends on the underlying
-        prompt type. 
+        prompt (list[torch.Tensor]): A list of bbox tensors, each of shape (1, 6).
         mask (torch.Tensor): An existing binary mask.
     
     Returns:
         torch.Tensor: The modified binary mask with zeros at the specified partition locations.
 
     '''
-    raise NotImplementedError("Partition-based binary mask updating is not implemented yet.") 
+    if not prompt:
+        return mask
+
+    device = mask.device
+    ndim = mask.dim()
+
+    for bbox_tensor in prompt:
+        bbox = bbox_tensor.to(device)
+        if bbox.dim() == 2 and bbox.shape[0] == 1:
+            bbox = bbox[0]
+        min_coords = bbox[:ndim].long()
+        max_coords = bbox[ndim:2*ndim].long()
+        min_coords = torch.clamp(min_coords, min=0)
+        max_coords = torch.clamp(max_coords, max=torch.tensor(mask.shape, device=device) - 1)
+
+        slices = tuple(slice(min_c.item(), max_c.item() + 1) for min_c, max_c in zip(min_coords, max_coords))
+        mask[slices] = False
+
+    return mask.to(dtype=torch.bool) 
 
 if __name__ == "__main__":
     # Large 3D mask: 500 x 500 x 300 #Just checking the memory usage
