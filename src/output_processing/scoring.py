@@ -205,10 +205,32 @@ class MetricsHandler:
         output_data:dict,
         data_instance: dict,
         tracked_metrics: dict,
-        im_inf: Union[dict, None], #Should never be None for this, really..
-        im_metric: Union[dict, None], #Could be Nonetype for this if there are no parametrisation requirements.
         infer_call_info: dict,
         ):
+        if output_data is None:
+            for metric_type in self.metrics_configs:
+                if metric_type not in tracked_metrics:
+                    tracked_metrics[metric_type] = {}
+
+                if infer_call_info['mode'].title() != 'Interactive Edit':
+                    key = infer_call_info['mode'].title()
+                else:
+                    key = f"{infer_call_info['mode'].title()} Iter {infer_call_info['edit_num']}"
+
+                entry = {'cross_class_scores': 'could_not_generate_prompt'}
+
+                if self.metrics_configs[metric_type].get('include_per_class_scores', False):
+                    per_class = {}
+                    for class_lb in self.semantic_id_dict:
+                        if class_lb.title() == 'Background' and not self.metrics_configs[metric_type].get('include_background_metric', True):
+                            continue
+                        per_class[class_lb] = 'could_not_generate_prompt'
+                    entry['per_class_scores'] = per_class
+
+                tracked_metrics[metric_type][key] = entry
+
+            return tracked_metrics, True
+
         #The output data must have been post-processed and checked to ensure that the output of the user is valid
         #prior to metric computation. 
         

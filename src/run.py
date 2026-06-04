@@ -15,7 +15,7 @@ import re
 from typing import Optional
 codebase_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__))) 
 sys.path.append(codebase_dir)
-from src.front_back_interactor.pseudo_ui import FrontEndSimulator 
+from front_back_interactor.simulation_orchestrator import FrontEndSimulator 
 from src.general_utils.logging import experiment_args_logger
 from src.general_utils.dict_utils import (
     extractor, 
@@ -68,7 +68,7 @@ def set_parse():
     parser.add_argument('--prompter_manifest_filename', type=str, default='prompter_manifest.json')
     parser.add_argument('--prompt_conf_filename', type=str, default='prompts_configs.txt')
     parser.add_argument('--task_conf_filename', type=str, default='task_configs.txt')
-    
+
     
     #########################
     
@@ -129,7 +129,7 @@ def set_parse():
     parser.add_argument('--provide_gold_standard_after_inference', type=str2bool, default=False)
 
     #Experiment configuration arg
-    parser.add_argument('--experiment_conf_id', type=int, default=10)
+    parser.add_argument('--experiment_conf_id', type=int, default=5)
     args = parser.parse_args()
     return args
 

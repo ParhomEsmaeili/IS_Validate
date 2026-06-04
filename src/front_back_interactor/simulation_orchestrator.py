@@ -372,28 +372,6 @@ class FrontEndSimulator:
         '''
         pass 
 
-    def metric_im_handler(self, inf_im:dict, metric_im:Union[dict, None]):
-        ''' 
-        NOTE: This function may be deprecated if memory proves to be obsolete (i.e., no metrics require interaction information,
-        which may be likely as it is extremely challenging to parameterise such metrics in a generalisable manner!)
-
-        Function intended for interaction memory handling, but for instances where the generated data is used for metric
-        computation. Uses the inference interaction memory to access new interaction info from the input prompts.
-        Uses this to generate metric interaction memory/update metric interaction memory.
-
-        inf_im must be a dict type, cannot be a NoneType.
-        metric_im can be both as at initialisation it may not be initialised.
-        '''
-        if not isinstance(inf_im, dict) or not inf_im:
-            raise Exception('The inference im must be a non-empty dict')
-        if not isinstance(metric_im, dict) and metric_im is not None:
-            raise TypeError('The metric im must either be a dictionary or a NoneType')
-        if isinstance(metric_im, dict) and not metric_im:
-            raise ValueError('If the metric im is a dict, it cannot be empty!')
-
-        #Does absolutely nothing for now. 
-
-        return metric_im
     def prompting_im_handler(self,
                 infer_config: dict,
                 im:Union[dict, None],
@@ -573,13 +551,9 @@ class FrontEndSimulator:
                 raise KeyError('Reformatter info dictionary contained an unsupported key')
     
     def app_output_processor(self,
-                            # data_instance: dict,
-                            # inf_req: dict,
                             output_data:dict,
                             inf_im:dict,
-                            metric_im: Union[dict, None],
                             infer_call_config:dict,): 
-                            # tracked_metrics:dict):
         '''
         Makes use of the output processor class. This will tie together several functionalities such as 
         reformatting the output data dictionary, writing the segmentations, computing the metrics etc.
@@ -593,11 +567,6 @@ class FrontEndSimulator:
         
         inf_im: Dict - A dictionary containing the interaction memory for the input prompts. Cannot be a NoneType as even
         automatic initialisation has an IM.
-
-        metric_im: Dict - A dictionary containing the interaction memory info the metrics. (e.g. parametrisations)
-        (or a NoneType if initialisation!)
-        NOTE: Both are provided in the circumstance where any metrics would require memory which could not be
-        provided otherwise.
         
         infer_config: Dict - A dictionary containing two subfields:
             'mode': str - The mode that the inference call was be made for (Automatic Init, Interactive Init, Interactive Edit)
@@ -608,26 +577,15 @@ class FrontEndSimulator:
 
         output_paths : Dict - A dict containing the paths for the saved outputs of the inference call.
 
-        updated_im_metric: Dict or None - An optional dict containing the tracked im for the metrics.
-
         terminate_early: Bool - A bool which is returned during the updating of the tracked metrics, which determines whether
         or not to terminate the refinement process early with respect to a termination criterion (currently: Dice = 1.0).
         '''
         
         if not isinstance(self.data_instance, dict) or not self.data_instance:
             raise Exception('The data instance must be a non-empty dictionary, should have been flagged earlier.')
-
-        # if not isinstance(inf_req, dict) or not inf_req:
-        #     raise Exception('The inference request must be a dictionary which is non-empty.')
         
         if not isinstance(inf_im, dict) or not inf_im:
             raise Exception('The inference interaction memory must be a dictionary which is non-empty.')
-        
-        if not isinstance(metric_im, dict) and metric_im is not None:
-            raise TypeError('The metric interaction memory should be a dict or a NoneType')
-        
-        if isinstance(metric_im, dict) and not metric_im:
-            raise Exception('If the metric interaction memory exists, then it must not be empty')
 
         if not isinstance(infer_call_config, dict) or not infer_call_config:
             raise Exception('The inference call config must be a dictionary which is non-empty.')
@@ -635,13 +593,12 @@ class FrontEndSimulator:
         if not isinstance(self.tracked_metrics, dict):
             raise Exception('The tracked metrics must be a dictionary, even if empty for initialisation.')
         
-        #First we call on the metric_im handler for generating any parameters required for metrics.
-        updated_metric_im = self.metric_im_handler(inf_im=inf_im, metric_im=metric_im)
-        
         #Then we call on the output processor, which checks that the app call provided a valid output (within a prescribed set of rules)
         # writes any desired predictions and probs, and returns the paths to the corresponding files. 
-        output_paths = self.output_processor(data_instance=self.data_instance, case_name=self.case_name, output_dict=output_data, infer_call_config=infer_call_config, tmp_dir=self.tmp_dir_path)
-        #Tuple.
+        if output_data is not None:
+            output_paths = self.output_processor(data_instance=self.data_instance, case_name=self.case_name, output_dict=output_data, infer_call_config=infer_call_config, tmp_dir=self.tmp_dir_path)
+        else:
+            output_paths = None
 
         #Then we update the tracked metrics.
         self.tracked_metrics, terminate_early = self.metrics_handler.update_metrics(
@@ -649,10 +606,9 @@ class FrontEndSimulator:
             data_instance=self.data_instance,
             tracked_metrics=self.tracked_metrics,
             im_inf=inf_im,
-            im_metric=updated_metric_im,
             infer_call_info=infer_call_config
         )
-        return output_paths, updated_metric_im, terminate_early
+        return output_paths, terminate_early
 
     def generate_sample_level_schema(self, request: dict):
         '''
@@ -846,18 +802,23 @@ class FrontEndSimulator:
                 prev_output_data=None
             )
             #Take the generated request dict, and pass it through the callable application.
-            prev_output_data = self.app(request)
+            i_state = request.get('i_state')
+            no_prompts = i_state is not None and not any(
+                v is not None
+                for v in i_state.get('interaction_torch_format', {}).get('interactions', {}).values()
+            )
+            if no_prompts:
+                prev_output_data = None
+            else:
+                prev_output_data = self.app(request)
             #This generates the output data.
 
             # We call on the output processor for processing of the prev_output_data dictionary for 
             # writing of segs, and generation of metrics for tracking
 
-            output_paths, metric_im, terminated_early = self.app_output_processor(
-                # data_instance=data_instance,
-                # inf_req=request, 
+            output_paths, terminated_early = self.app_output_processor(
                 output_data=prev_output_data,
                 inf_im=inf_im,
-                metric_im=None,
                 infer_call_config={'mode': infer_run_configs['init'].title(), 'edit_num': None},
                 )
 
@@ -894,18 +855,23 @@ class FrontEndSimulator:
                 )
             
                 #Take the generated request dict, and pass it through the callable application.
-                prev_output_data = self.app(request)
+                i_state = request.get('i_state')
+                no_prompts = i_state is not None and not any(
+                    v is not None
+                    for v in i_state.get('interaction_torch_format', {}).get('interactions', {}).values()
+                )
+                if no_prompts:
+                    prev_output_data = None
+                else:
+                    prev_output_data = self.app(request)
                 #This generates the non-processed output data.
             
                 # We call on the output processor for reformatting/processing of the prev_output_data dictionary for 
                 # future interaction state construction, writing of segs, and generation of metrics for tracking
     
-                output_paths, metric_im, terminated_early = self.app_output_processor(
-                    # data_instance=data_instance,
-                    # inf_req=request,
+                output_paths, terminated_early = self.app_output_processor(
                     output_data=prev_output_data,
                     inf_im=inf_im,
-                    metric_im=metric_im, 
                     infer_call_config={'mode': 'Interactive Edit', 'edit_num': iter_num},
                     )
                 #We put a placeholder for handling the termination condition.
@@ -916,7 +882,7 @@ class FrontEndSimulator:
         
         #We delete the inference and metric interaction memory, prev output data, output paths etc just to be safe so it has zero chance of leaking over into the next
         # data instance
-        del inf_im, metric_im, prev_output_data, output_paths, self.tracked_paths
+        del inf_im, prev_output_data, output_paths, self.tracked_paths
 
         return None, terminated_early 
     
