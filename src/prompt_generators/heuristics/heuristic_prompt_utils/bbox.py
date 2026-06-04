@@ -4,7 +4,7 @@ import os
 from os.path import dirname as up
 import sys
 import torch 
-from typing import List, Tuple
+from typing import List
 sys.path.append(up(up(up(up(up(os.path.abspath(__file__)))))))
 from src.prompt_generators.heuristics.spatial_utils.component_extraction import (
     two_d_components_generation, 
@@ -40,8 +40,7 @@ def bbox_from_binary_mask(
     
     Returns:
         bbox_list: List of torch.Tensor, each of shape (1, 6) representing a 2D/3D bbox.
-                   Empty list when no bbox could be generated.
-        is_generated: bool which indicates whether we managed to generate any bboxes.
+                   Empty list when no bbox could be generated, or None if generation failed.
 
     Raises:
         KeyError: If required configuration keys are missing
@@ -51,7 +50,7 @@ def bbox_from_binary_mask(
         raise ValueError("Input binary_mask must be 3D for bbox generation")
     
     if binary_mask.sum() == 0:
-        return None, False
+        return None
     
     # Validate args
     if args is None:
@@ -117,8 +116,7 @@ def bbox_from_binary_mask(
 
     if binary_mask.sum() == 0 and binary_mask.unique().numel() == 1:
         torch.cuda.empty_cache()
-        return None, False 
-        #False because we can't generate anything for this binary mask.
+        return None
 
     # For 2.5D, delegate to two_point_five_d_bbox_from_binary_mask
     if args['dimensionality'] == '2.5D':
@@ -129,7 +127,7 @@ def bbox_from_binary_mask(
 
     if not is_compatible:
         torch.cuda.empty_cache()
-        return None, False
+        return None
     else:
         # Sanity check: extract_sampling_region guarantees non-zero components for is_compatible=True,
         # so an all-zero mask here indicates a logic error in component extraction.
@@ -172,7 +170,7 @@ def bbox_from_binary_mask(
     if augmentation_config == None:
         #If the augmentation config is nonetype, then we have no augmentation!
         torch.cuda.empty_cache()
-        return [bbox], True
+        return [bbox]
     else:
         ####### Now we generate the augmentation inputs, according to what is required by the 
         # augmentation util ##########
@@ -221,13 +219,13 @@ def bbox_from_binary_mask(
             else:
                 raise ValueError(f"Unsupported augmentation {augmentation}. Please check the augmentation config.")
         torch.cuda.empty_cache()
-        return [bbox], True #The bool
+        return [bbox]
 
 
 def two_point_five_d_bbox_from_binary_mask(
     binary_mask: torch.Tensor,
     args: dict
-) -> Tuple[List[torch.Tensor], bool]:
+) -> List[torch.Tensor]:
     """
     Generate a list of 2D bounding boxes, one per valid slice of a 3D component.
 
@@ -247,8 +245,8 @@ def two_point_five_d_bbox_from_binary_mask(
             - 'augmentation_config': dict (optional)
 
     Returns:
-        bbox_list: List of torch.Tensor, each of shape (1, 6) representing a 2D bbox
-        is_generated: bool indicating whether any bboxes were generated
+        bbox_list: List of torch.Tensor, each of shape (1, 6) representing a 2D bbox.
+                   None if no bboxes could be generated.
     """
     component_sampling_config = args['component_sampling_config']
     region_config = component_sampling_config['region_extraction_config']
@@ -258,14 +256,14 @@ def two_point_five_d_bbox_from_binary_mask(
 
     # Guard: empty mask
     if binary_mask.sum() == 0:
-        return None, False
+        return None
 
     # Step 1: Extract 3D components
     components_3d, is_compatible = three_d_components_generation(
         binary_mask, connectivity, min_length
     )
     if not is_compatible:
-        return None, False
+        return None
 
     # Step 2: Select the component
     component_selection_config = {
@@ -278,7 +276,7 @@ def two_point_five_d_bbox_from_binary_mask(
     selected_3d = select_component(components_3d, component_selection_config)
 
     if selected_3d.sum() == 0:
-        return None, False
+        return None
 
     # Step 3: Iterate slices along collapsed_dim
     valid_bboxes = []
@@ -341,10 +339,10 @@ def two_point_five_d_bbox_from_binary_mask(
 
     if len(valid_bboxes) == 0:
         torch.cuda.empty_cache()
-        return None, False
+        return None
 
     torch.cuda.empty_cache()
-    return valid_bboxes, True
+    return valid_bboxes
 
 
 def bbox_extrema(

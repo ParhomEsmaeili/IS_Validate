@@ -4653,9 +4653,8 @@ class TestBboxFromBinaryMask:
             }
         }
         
-        bbox_list, is_generated = bbox_from_binary_mask(binary_mask, args)
+        bbox_list = bbox_from_binary_mask(binary_mask, args)
         
-        assert is_generated is True
         assert len(bbox_list) == 1
         assert bbox_list[0].shape == (1, 6)
         assert bbox_list[0][0, 0] == 2  # min_x
@@ -4681,9 +4680,8 @@ class TestBboxFromBinaryMask:
             }
         }
         
-        bbox_list, is_generated = bbox_from_binary_mask(binary_mask, args)
+        bbox_list = bbox_from_binary_mask(binary_mask, args)
         
-        assert is_generated is True
         assert len(bbox_list) == 1
         assert bbox_list[0].shape == (1, 6)
         assert bbox_list[0][0, 2] == 5  # collapsed dim
@@ -4705,9 +4703,8 @@ class TestBboxFromBinaryMask:
             }
         }
         
-        bbox, is_generated = bbox_from_binary_mask(binary_mask, args)
+        bbox = bbox_from_binary_mask(binary_mask, args)
         
-        assert is_generated is False
         assert bbox is None
     
     def test_bbox_from_binary_mask_with_jitter(self):
@@ -4739,9 +4736,8 @@ class TestBboxFromBinaryMask:
             }
         }
         
-        bbox_list, is_generated = bbox_from_binary_mask(binary_mask, args)
+        bbox_list = bbox_from_binary_mask(binary_mask, args)
         
-        assert is_generated is True
         assert len(bbox_list) == 1
         # Bbox should be slightly jittered
         assert bbox_list[0][0, 0] <= 3  # min_x was 2, can jitter by 1
@@ -4871,7 +4867,7 @@ class TestBboxFromBinaryMask:
     # ==================== Incompatibility Flag Tests ====================
 
     def test_bbox_from_binary_mask_incompatible_2d_nontrivial(self):
-        """2D nontrivial incompatible mask (passes contiguity, fails CC) returns (None, False)."""
+        """2D nontrivial incompatible mask (passes contiguity, fails CC) returns None."""
         binary_mask = torch.zeros(10, 10, 10)
         binary_mask[list(range(10)), list(range(10)), [3] * len(list(range(10)))] = 1
 
@@ -4890,9 +4886,8 @@ class TestBboxFromBinaryMask:
             }
         }
 
-        bbox, is_generated = bbox_from_binary_mask(binary_mask, args)
+        bbox = bbox_from_binary_mask(binary_mask, args)
 
-        assert is_generated is False
         assert bbox is None
 
     # ==================== Augmentation Edge Cases ====================
@@ -4951,10 +4946,9 @@ class TestTwoPointFiveDBboxFromBinaryMask:
     def test_2_5d_returns_list_of_bboxes(self):
         """A valid 3D cube generates a 2D bbox for each slice along the collapsed dim."""
         binary_mask = self._make_cube_mask()
-        bbox_list, is_generated = two_point_five_d_bbox_from_binary_mask(
+        bbox_list = two_point_five_d_bbox_from_binary_mask(
             binary_mask, self.VALID_ARGS_TEMPLATE
         )
-        assert is_generated is True
         assert isinstance(bbox_list, list)
         assert len(bbox_list) > 0
         for bbox in bbox_list:
@@ -4965,10 +4959,9 @@ class TestTwoPointFiveDBboxFromBinaryMask:
     def test_2_5d_bboxes_spatial_extent(self):
         """Each bbox should cover non-zero extent in non-collapsed dims."""
         binary_mask = self._make_cube_mask()
-        bbox_list, is_generated = two_point_five_d_bbox_from_binary_mask(
+        bbox_list = two_point_five_d_bbox_from_binary_mask(
             binary_mask, self.VALID_ARGS_TEMPLATE
         )
-        assert is_generated is True
         for bbox in bbox_list:
             # Non-collapsed dims (0 and 1) must have min < max
             assert bbox[0, 0] < bbox[0, 3]
@@ -4982,10 +4975,9 @@ class TestTwoPointFiveDBboxFromBinaryMask:
         binary_mask[4, 4, 4] = 1
         binary_mask[2:8, 2:8, 5:9] = 1
 
-        bbox_list, is_generated = two_point_five_d_bbox_from_binary_mask(
+        bbox_list = two_point_five_d_bbox_from_binary_mask(
             binary_mask, self.VALID_ARGS_TEMPLATE
         )
-        assert is_generated is True
         # Slices 3 and 4 (single voxel) should be skipped
         for bbox in bbox_list:
             collapsed_val = bbox[0, 2].item()
@@ -4994,35 +4986,32 @@ class TestTwoPointFiveDBboxFromBinaryMask:
             assert collapsed_val >= 5, f"Expected slice >= 5, got {collapsed_val}"
 
     def test_2_5d_empty_mask(self):
-        """Empty mask returns (None, False)."""
+        """Empty mask returns None."""
         binary_mask = torch.zeros(10, 10, 10)
-        bbox_list, is_generated = two_point_five_d_bbox_from_binary_mask(
+        bbox_list = two_point_five_d_bbox_from_binary_mask(
             binary_mask, self.VALID_ARGS_TEMPLATE
         )
-        assert is_generated is False
         assert bbox_list is None
 
     def test_2_5d_via_bbox_from_binary_mask(self):
         """Dispatching through bbox_from_binary_mask with dimensionality='2.5D' works."""
         binary_mask = self._make_cube_mask()
-        bbox_list, is_generated = bbox_from_binary_mask(
+        bbox_list = bbox_from_binary_mask(
             binary_mask, self.VALID_ARGS_TEMPLATE
         )
-        assert is_generated is True
         assert isinstance(bbox_list, list)
         assert len(bbox_list) > 0
 
     def test_2_5d_all_slices_invalid(self):
-        """When all slices have insufficient extent, returns (None, False)."""
+        """When all slices have insufficient extent, returns None."""
         binary_mask = torch.zeros(10, 10, 10)
         # Single voxel per slice along dim 2 — all slices fail min_length check
         for s in range(10):
             binary_mask[0, 0, s] = 1
 
-        bbox_list, is_generated = two_point_five_d_bbox_from_binary_mask(
+        bbox_list = two_point_five_d_bbox_from_binary_mask(
             binary_mask, self.VALID_ARGS_TEMPLATE
         )
-        assert is_generated is False
         assert bbox_list is None
 
     def test_2_5d_connectivity_3(self):
@@ -5043,10 +5032,9 @@ class TestTwoPointFiveDBboxFromBinaryMask:
                 }
             }
         }
-        bbox_list, is_generated = two_point_five_d_bbox_from_binary_mask(
+        bbox_list = two_point_five_d_bbox_from_binary_mask(
             binary_mask, args
         )
-        assert is_generated is True
         assert len(bbox_list) == 4  # slices 3,4,5,6
 
     def test_2_5d_collapsed_dim_0(self):
@@ -5067,10 +5055,9 @@ class TestTwoPointFiveDBboxFromBinaryMask:
                 }
             }
         }
-        bbox_list, is_generated = two_point_five_d_bbox_from_binary_mask(
+        bbox_list = two_point_five_d_bbox_from_binary_mask(
             binary_mask, args
         )
-        assert is_generated is True
         assert len(bbox_list) == 6  # slices 2-7
         for bbox in bbox_list:
             assert bbox[0, 0] == bbox[0, 3]  # collapsed dim 0 matches
@@ -5114,10 +5101,9 @@ class TestTwoPointFiveDBboxFromBinaryMask:
             }
         }
 
-        bbox_list, is_generated = two_point_five_d_bbox_from_binary_mask(
+        bbox_list = two_point_five_d_bbox_from_binary_mask(
             binary_mask, args
         )
-        assert is_generated is True
         assert len(bbox_list) > 0
         for bbox in bbox_list:
             assert bbox[0, 2] == bbox[0, 5]  # collapsed dim still matches after jitter

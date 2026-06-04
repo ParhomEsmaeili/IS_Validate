@@ -1869,10 +1869,10 @@ class SimplifiedPrototypePseudoMixture(BasicValidOnlyMixture):
 
 def build_simplified_prototype_pseudo_mixture(args: dict):
     return SimplifiedPrototypePseudoMixture(args)
-def build_random_ptype_agent(args: dict):
-    return RandomPromptTypeAgent(args)
+# def build_random_ptype_agent(args: dict):
+#     return RandomPromptTypeAgent(args)
 
 mixture_class_registry = {
     'simplified_prototype_pseudo_mixture': build_simplified_prototype_pseudo_mixture,
-    'random_ptype_agent': build_random_ptype_agent,
+    # 'random_ptype_agent': build_random_ptype_agent,
 }
