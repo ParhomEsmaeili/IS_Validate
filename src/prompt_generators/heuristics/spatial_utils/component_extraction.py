@@ -440,7 +440,7 @@ def select_component(
         # - top-k_components reshaped to (K, 1, 1) for 2D or (K, 1, 1, 1) for 3D to broadcast across spatial dims
         # - The comparison produces an expanded boolean array where each "layer" corresponds to one selected component ID
         # - .any(dim=0) combines all layers with OR to produce the final binary mask
-        top_k_tensor = torch.tensor(top_k_components)
+        top_k_tensor = torch.tensor(top_k_components).to(device=components.device, dtype=components.dtype)
         top_k_tensor = top_k_tensor.view((len(top_k_components),) + (1,) * components.dim())
         selected_components = (components.unsqueeze(0) == top_k_tensor).any(dim=0).float()
 
