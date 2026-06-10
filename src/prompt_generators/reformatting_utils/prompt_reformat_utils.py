@@ -60,7 +60,7 @@ class PromptReformatter:
 
         ''' 
         prompt_reformat = dict()
-        point_lambda = lambda  p : p[0].clone().detach().to(int).tolist()
+        point_lambda = lambda  p : p[0].clone().detach().tolist()
 
         for class_label, class_code in self.class_config.items():
             #We use prompt[0] to be able to extract the spatial coords axis directly.
@@ -88,7 +88,7 @@ class PromptReformatter:
 
         prompt_reformat = dict() 
 
-        scribble_lambda = lambda prompt : [p.clone().detach().to(int).tolist() for p in prompt]
+        scribble_lambda = lambda prompt : [p.clone().detach().tolist() for p in prompt]
 
         for class_label, class_code in self.class_config.items():
             scribbles_list = [scribble_lambda(prompt) for idx, prompt in enumerate(prompts) if labels[idx] == class_code]
@@ -111,7 +111,7 @@ class PromptReformatter:
             [bbox-level[i_min, i_max, j_min, j_max, k_min, k_max]]
         '''
         prompt_reformat = dict() 
-        bbox_lambda = lambda b : b[0].clone().detach().to(int).tolist() 
+        bbox_lambda = lambda b : b[0].clone().detach().tolist() 
         #Same as the point implementation, as this is effectively a set of extreme values.
 
         for class_label, class_code in self.class_config.items():

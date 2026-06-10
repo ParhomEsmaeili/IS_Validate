@@ -205,6 +205,7 @@ class MetricsHandler:
         output_data:dict,
         data_instance: dict,
         tracked_metrics: dict,
+        im_inf: dict,
         infer_call_info: dict,
         ):
         if output_data is None:

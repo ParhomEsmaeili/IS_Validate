@@ -29,25 +29,27 @@ DATASETS=(
   "Dataset027_Kits23"
   "Dataset031_Kits23"
 )
+
 # Task config IDs (comma-separated or space-separated)
 TASK_CONFIG_IDS=(
-  "task_id_3"
-  "task_id_4"
-  "task_id_5"
-  "task_id_6"
-  "task_id_7"
-  "task_id_8"
-  "task_id_9"
-  "task_id_10"
-  "task_id_11"
-  "task_id_12"
+  "task_id_15"
+  "task_id_16"
+  "task_id_17"
+  "task_id_18"
+  "task_id_19"
+  "task_id_20"
+  "task_id_21"
+  "task_id_22"
+  "task_id_23"
+  "task_id_24"
 )
 
 # Metrics config IDs (comma-separated or space-separated)
 METRICS_CONFIG_IDS=("prototype_annotator_4")
 
 # Prompter IDs (comma-separated or space-separated)
-PROMPTER_IDS=("prompter_3")
+PROMPTER_IDS=("prompter_4" "prompter_5" "prompter_6" "prompter_7" "prompter_8" "prompter_9" "prompter_10" "prompter_11" "prompter_12" "prompter_13" "prompter_14" "prompter_15") 
+# "prompter_3")
 
 # ============================================================================
 # Script Execution - Do not edit below this line unless needed

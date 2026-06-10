@@ -18,6 +18,12 @@ from src.prompt_generators.heuristics.prompt_bases import PointBase, ScribbleBas
 from src.general_utils.dict_utils import extractor, dict_path_modif
 # from src.prompt_generators.heuristics.spatial_utils.component_extraction import get_label_ccp#, extract_connected_components
 from src.prompt_generators.heuristics.spatial_utils.update_binary_mask import update_binary_mask_freeform, update_binary_mask_partition
+from src.prompt_generators.reformatting_utils.coordinate_representation import (
+    voxel_to_coordinate_conversion,
+    coordinate_to_voxel_conversion,
+    voxel_to_coordinate_conversion_bbox,
+    coordinate_to_voxel_conversion_bbox,
+)
 '''
 This file contains the prompt mixture generation classes.
 
@@ -117,12 +123,13 @@ generated_prompt_labels:
 #about parametrisations, multi-class, multi-component etc. 
 
 class BaseMixture(PointBase, ScribbleBase, BboxBase):
-    def __init__(self, sim_device: torch.device, semantic_id_dict: dict):
+    def __init__(self, sim_device: torch.device, semantic_id_dict: dict, output_conversion: dict = None):
         self.supported_prompts = ['points', 'scribbles', 'bboxes', 'lassos']
         self.discrete_variables = [i + '_labels' for i in self.supported_prompts] #The labels are discrete variables, 
         #the spatial coordinates need not necessarily be discrete. To permit sub-voxel coordinates in future implementations.
         self.sim_device = sim_device
-        self.semantic_id_dict = semantic_id_dict 
+        self.semantic_id_dict = semantic_id_dict
+        self.output_conversion = output_conversion if output_conversion else None
     
     def check_config_availability(self, input_configs: dict[dict], prompter_type: str):
         '''
@@ -245,6 +252,21 @@ class BaseMixture(PointBase, ScribbleBase, BboxBase):
                 if tensor.device != device:
                     data[idx] = tensor.to(device=device)
         return data
+
+    def _voxel_to_subvoxel(self, tensor: torch.Tensor, ptype: str, strategy: str, params: dict) -> torch.Tensor:
+        registry = {
+            'center': self._strategy_center,
+        }
+        fn = registry.get(strategy)
+        if fn is None:
+            raise NotImplementedError(f'Unsupported output_conversion strategy: {strategy}')
+        return fn(tensor, ptype, params)
+
+    def _strategy_center(self, tensor: torch.Tensor, ptype: str, params: dict) -> torch.Tensor:
+        if ptype == 'bboxes':
+            return voxel_to_coordinate_conversion_bbox(tensor)
+        else:
+            return voxel_to_coordinate_conversion(tensor)
         
     def output_processor(self, prompts_dict: dict, prompts_lbs_dict: dict):
         '''
@@ -266,8 +288,23 @@ class BaseMixture(PointBase, ScribbleBase, BboxBase):
             if ptype in self.discrete_variables:
                 tmp_plist = self.discrete_checker(data=tmp_plist)
             if p_lb_type in self.discrete_variables:
-                # prompts_lbs_dict[f'{ptype}_labels'] = self.discrete_checker(prompt_list=tmp_plb_list, device=torch.device('cpu'))
                 tmp_plb_list = self.discrete_checker(data=tmp_plb_list)
+
+            if tmp_plist is not None:
+                apply = ptype in ('points', 'bboxes') or (
+                    self.output_conversion and ptype in self.output_conversion
+                )
+                if apply:
+                    if ptype in ('points', 'bboxes'):
+                        strategy = 'center'
+                        cfg_params = {}
+                    else:
+                        cfg = self.output_conversion[ptype]
+                        strategy = cfg['strategy']
+                        cfg_params = cfg.get('params', {})
+                    for i, tensor in enumerate(tmp_plist):
+                        if tensor is not None:
+                            tmp_plist[i] = self._voxel_to_subvoxel(tensor, ptype, strategy, cfg_params)
             
             prompts_dict[ptype] = tmp_plist 
             prompts_lbs_dict[p_lb_type] = tmp_plb_list
@@ -384,6 +421,17 @@ class BaseMixture(PointBase, ScribbleBase, BboxBase):
                     ordered_prompts_dict[ptype] = None 
                     ordered_prompts_lb_dict[ptype] = None 
 
+            for ptype in ptypes:
+                plist = ordered_prompts_dict[ptype]
+                if plist is not None:
+                    for i, tensor in enumerate(plist):
+                        if tensor is not None:
+                            if ptype == 'bboxes':
+                                plist[i] = coordinate_to_voxel_conversion_bbox(tensor)
+                            elif ptype in ('points', 'scribbles'):
+                                plist[i] = coordinate_to_voxel_conversion(tensor)
+                            else:
+                                raise NotImplementedError(f'Prompt type {ptype} not supported for coordinate to voxel conversion in IM reformatting.')
             del im_copy 
 
             return ordered_prompts_dict, ordered_prompts_lb_dict 
@@ -646,7 +694,7 @@ class BasicValidOnlyMixture(BaseMixture):
                 raise Exception('The spatial dimensions of the input prompts must match the number of spatial dimensions in the mask.')
 
             if region_mask.device != self.sim_device:
-                region_mask.to(device=self.sim_device)
+                region_mask = region_mask.to(device=self.sim_device)
 
             # for coords in free_form_prompts:  
             region_mask = update_binary_mask_freeform(coords, region_mask)
@@ -659,8 +707,6 @@ class BasicValidOnlyMixture(BaseMixture):
         else:
             raise Exception(f'Prompt subtype {prompt_type} not recognised for region updating.')
         return region_mask
-    
-    
 
 class SimplifiedPrototypePseudoMixture(BasicValidOnlyMixture):
     '''
@@ -697,13 +743,14 @@ class SimplifiedPrototypePseudoMixture(BasicValidOnlyMixture):
         semantic_id_dict = args['semantic_id_dict'] #Dict
         sim_device = args['sim_device']
         heur_fn_dict = args['heur_fn_dict']
-        build_args = args['build_args']
-        mixture_args = args['mixture_args']
+        cascade_config = args['cascade_config']
         use_mem = args['use_mem']
+        output_conversion = args.get('output_conversion')
         super().__init__(
             use_mem=use_mem,
             semantic_id_dict=semantic_id_dict,
             sim_device=sim_device,
+            output_conversion=output_conversion,
         )
         self.heur_fn_dict = heur_fn_dict
 
@@ -724,13 +771,97 @@ class SimplifiedPrototypePseudoMixture(BasicValidOnlyMixture):
         self.free_form_prompts_ls = ['points', 'scribbles']
 
         #Initialising the list of valid prompt types.
-        self.init_valid_ptypes(build_args=build_args)
+        self.init_valid_ptypes(build_args=cascade_config.get('intra_heur_level', {}))
+
+        #Validating output_conversion config.
+        scribble_or_lasso_configured = any(
+            p in self.valid_ptypes for p in ('scribbles', 'lassos')
+        )
+        if not self.output_conversion:
+            if scribble_or_lasso_configured:
+                raise ValueError(
+                    'Scribbles/lassos require explicit output_conversion config'
+                )
+        else:
+            for ptype in self.output_conversion:
+                val = self.output_conversion[ptype]
+                if ptype in ('points', 'bboxes') and val is not None:
+                    raise ValueError(f'{ptype} entry in output_conversion must be None')
+                if ptype in ('scribbles', 'lassos') and val is None:
+                    raise ValueError(f'{ptype} entry in output_conversion needs a strategy')
+            for ptype in ('scribbles', 'lassos'):
+                if ptype in self.valid_ptypes and ptype not in self.output_conversion:
+                    raise ValueError(
+                        f'{ptype} is configured but missing from output_conversion'
+                    )
 
         #Initialising the toggling dict which provides the information necessary for toggling throughout the cascade.
-        self.init_toggle_dict(heur_build_args=build_args, mixture_args=mixture_args)
+        self.init_toggle_dict(cascade_config=cascade_config)
         
         #Checking that the heuristic level params are actually supported.
         self.check_heur_params() 
+
+    def init_toggle_dict(self, cascade_config: dict):
+        if cascade_config.get('intra_heur_level') is None:
+            raise Exception('intra_heur_level is required in cascade_config.')
+
+        for level in ('class_level', 'inter_prompt_level', 'intra_prompt_level'):
+            if cascade_config.get(level) is not None:
+                raise ValueError(
+                    f'SimplifiedPrototypePseudoMixture does not support non-None '
+                    f'"{level}". Use "simplified_prototype_mixture" instead.'
+                )
+
+        self.toggling_dict = {
+            'class_level': None,
+            'inter_prompt_level': None,
+            'intra_prompt_level': None,
+            'intra_heur_level': cascade_config['intra_heur_level'],
+        }
+
+    def _sample_class(self, class_lb, class_int, samp_regions_dict, init_bool, tracked_prompts, tracked_prompt_lbs):
+        '''
+        Per-class sampling body used by both SimplifiedPrototypePseudoMixture and SimplifiedPrototypeMixture.
+        '''
+        if samp_regions_dict['gt'][class_lb] is None:
+            print(f'Skipping class {class_lb} as it has no gt and (or by extension) false-negative error region \n')
+            return tracked_prompts, tracked_prompt_lbs
+        else:
+            if init_bool:
+                regions_dict = {
+                    'gt': samp_regions_dict['gt'][class_lb],
+                    'error_regions': None
+                }
+            else:
+                if samp_regions_dict['error_regions'][class_lb] is None:
+                    print(f'Skipping class {class_lb} for editing as it has no false negative error region, hence no free-form prompts can be placed (necessary) \n')
+                    return tracked_prompts, tracked_prompt_lbs
+                else:
+                    regions_dict = {
+                        'gt': samp_regions_dict['gt'][class_lb],
+                        'error_regions': samp_regions_dict['error_regions'][class_lb]
+                    }
+
+        gen_prompts = self.togg_inter_prompt_level(
+            samp_regions_dict=regions_dict,
+            init_bool=init_bool
+        )
+
+        for ptype in self.valid_ptypes:
+            assert type(gen_prompts[ptype]) == list, 'Generated prompts, even if empty, must be a list'
+
+            temp_plist = copy.deepcopy(tracked_prompts[ptype])
+            temp_plist.extend(gen_prompts[ptype])
+
+            temp_plab_list = copy.deepcopy(tracked_prompt_lbs[f'{ptype}_labels'])
+            gen_prompts_lbs = [torch.tensor([class_int], dtype=torch.int8, device=self.sim_device)] * len(gen_prompts[ptype])
+
+            temp_plab_list.extend(gen_prompts_lbs)
+
+            tracked_prompts[ptype] = temp_plist
+            tracked_prompt_lbs[f'{ptype}_labels'] = temp_plab_list
+
+        return tracked_prompts, tracked_prompt_lbs
 
     def check_heur_params(self):
         
@@ -742,8 +873,8 @@ class SimplifiedPrototypePseudoMixture(BasicValidOnlyMixture):
             else:
                 if heurs_configs is not None:
                     raise Exception('Attempted to provide heuristics configuration for a non-valid prompt type.')
-              
-                 
+                  
+
     def init_valid_ptypes(self, build_args: dict, simulation_type: str = 'simplified_prototype'):
         '''
         Function which extracts the list of valid prompt types according to the build args dict.
@@ -796,142 +927,31 @@ class SimplifiedPrototypePseudoMixture(BasicValidOnlyMixture):
 
         return prompts, prompt_lbs
 
-    def init_toggle_dict(self, 
-                        heur_build_args: dict,
-                        mixture_args: Union[dict, None]):
-        
-        if heur_build_args is None:
-            raise Exception('Heuristic level build arguments are ALWAYS required. At least one per heuristic!')
-        elif heur_build_args is not None and mixture_args is None:
-            self.toggling_dict = {
-                'class_level': None,
-                'inter_prompt_level': None,
-                'intra_prompt_level': None,
-                'intra_heur_level': heur_build_args,
-            }
-        elif heur_build_args is not None and mixture_args is not None:
-            self.toggling_dict = {
-                'class_level': mixture_args.get('class_level'),
-                'inter_prompt_level': None,
-                'intra_prompt_level': None,
-                'intra_heur_level': heur_build_args,
-            }
-        else:
-            raise NotImplementedError('Not implemented anything for handling the toggling of anything non-default wrt mixture strategies.')
-        
-    def _sample_class(self, class_lb, class_int, samp_regions_dict, init_bool, tracked_prompts, tracked_prompt_lbs):
-        '''
-        Per-class sampling body used by all class_level modes.
-        '''
-        if samp_regions_dict['gt'][class_lb] is None:
-            print(f'Skipping class {class_lb} as it has no gt and (or by extension) false-negative error region \n')
-            return tracked_prompts, tracked_prompt_lbs
-        else:
-            if init_bool:
-                regions_dict = {
-                    'gt': samp_regions_dict['gt'][class_lb],
-                    'error_regions': None
-                }
-            else:
-                if samp_regions_dict['error_regions'][class_lb] is None:
-                    print(f'Skipping class {class_lb} for editing as it has no false negative error region, hence no free-form prompts can be placed (necessary) \n')
-                    return tracked_prompts, tracked_prompt_lbs
-                else:
-                    regions_dict = {
-                        'gt': samp_regions_dict['gt'][class_lb],
-                        'error_regions': samp_regions_dict['error_regions'][class_lb]
-                    }
-
-        gen_prompts = self.togg_inter_prompt_level(
-            samp_regions_dict=regions_dict,
-            init_bool=init_bool
-        )
-
-        for ptype in self.valid_ptypes:
-            assert type(gen_prompts[ptype]) == list, 'Generated prompts, even if empty, must be a list'
-
-            temp_plist = copy.deepcopy(tracked_prompts[ptype])
-            temp_plist.extend(gen_prompts[ptype])
-
-            temp_plab_list = copy.deepcopy(tracked_prompt_lbs[f'{ptype}_labels'])
-            gen_prompts_lbs = [torch.tensor([class_int], dtype=torch.int8, device=self.sim_device)] * len(gen_prompts[ptype])
-
-            temp_plab_list.extend(gen_prompts_lbs)
-
-            tracked_prompts[ptype] = temp_plist
-            tracked_prompt_lbs[f'{ptype}_labels'] = temp_plab_list
-
-        return tracked_prompts, tracked_prompt_lbs
-
-    def togg_class_level(self, 
-                        tracked_prompts, 
-                        tracked_prompt_lbs, 
+    def togg_class_level(self,
+                        tracked_prompts,
+                        tracked_prompt_lbs,
                         samp_regions_dict,
                         init_bool):
-        '''
-        Executes the prompt simulation process by the class level toggling using the toggling dictionary.
+        if samp_regions_dict['gt'] is None:
+            raise Exception('The entire ground truth cannot be a NoneType..otherwise we cannot even sample.')
+        if all([val is None for key,val in samp_regions_dict['gt'].items() if key.title() != 'Background']):
+            raise Exception('Error in code, no foreground gt available, should have been flagged earlier?')
 
-        Inputs:
-        
-        tracked_prompts: P-type separated dict (The initialised tracking prompts which will be tracked throughout)
-        
-        tracked_propmt_lbs: P-type separated dict (The initialised tracking prompt labels which will be tracked throughout)
-        
-        samp_regions_dict: The nested dictionary (split by gt and error region) denoting the class separated regions (or Nones for empty gt/error regions for a given class)
-        
-        init_bool: A bool, denotes whether the inference call the prompt generation is for is an init or edit, this
-        is required for downstream in order to delineate between instances where prompts are being placed on gt or 
-        error region. Required because we cannot infer reliably from the datatype of the error-region and gt after
-        we pass deeper past the class-level toggling.
-
-        (e.g., Error-region separated on class level could have a NoneType for a class because it is empty, or it 
-        could just be because the error-region entry empty because it is an initialisation, the GT must always be not a 
-        nonetype at that level, otherwise there would be no error-region anyways!)
-
-        '''
-        
-        if self.toggling_dict['class_level'] is None:
-            #None = default behaviour.
-            if samp_regions_dict['gt'] is None:
-                raise Exception('The entire ground truth cannot be a NoneType..otherwise we cannot even sample.')
-            #Checking that at least one foreground class has a GT..., should already be handled in the front-end but just in case!
-            if all([val is None for key,val in samp_regions_dict['gt'].items() if key.title() != 'Background']):
-                raise Exception('Error in code, no foreground gt available, should have been flagged earlier?')
-             
-            #Checks in place for handling init/edit.
-            if not init_bool:
-                if samp_regions_dict['error_regions'] is None: 
-                    raise Exception('Cannot have a nonetype for error region dictionary if simulating edit') 
-                    
-                if all([item is None for item in samp_regions_dict['error_regions'].values()]):
-                        #If all the error regions for all classes are NoneTypes
-                        raise Exception('Error in code, no errors remain, should have exited the iterative loop simulation on full convergence, and should have flagged this in the error region extraction phase.')
-            else:
-                if samp_regions_dict['error_regions'] is not None:
-                    raise Exception('Cannot have a non-Nonetype for error region item if simulating initialisation.') 
-                
-              
-            for class_lb, class_int in self.semantic_id_dict.items():
-                tracked_prompts, tracked_prompt_lbs = self._sample_class(
-                    class_lb, class_int, samp_regions_dict, init_bool, tracked_prompts, tracked_prompt_lbs
-                )
-            return tracked_prompts, tracked_prompt_lbs
-
-        elif self.toggling_dict['class_level'] is not None and self.toggling_dict['class_level'].get('mode') == 'basic_skip':
-            skip_classes = self.toggling_dict['class_level']['skip_classes']
-            invalid = set(skip_classes) - set(self.semantic_id_dict.keys())
-            if invalid:
-                raise ValueError(f'skip_classes contains unknown labels: {invalid}')
-            for class_lb, class_int in self.semantic_id_dict.items():
-                if class_lb in skip_classes:
-                    continue
-                tracked_prompts, tracked_prompt_lbs = self._sample_class(
-                    class_lb, class_int, samp_regions_dict, init_bool, tracked_prompts, tracked_prompt_lbs
-                )
-            return tracked_prompts, tracked_prompt_lbs
-
+        if not init_bool:
+            if samp_regions_dict['error_regions'] is None:
+                raise Exception('Cannot have a nonetype for error region dictionary if simulating edit')
+            if all([item is None for item in samp_regions_dict['error_regions'].values()]):
+                raise Exception('Error in code, no errors remain, should have exited the iterative loop simulation on full convergence, and should have flagged this in the error region extraction phase.')
         else:
-            raise NotImplementedError(f"Unknown class_level config: {self.toggling_dict['class_level']}")    
+            if samp_regions_dict['error_regions'] is not None:
+                raise Exception('Cannot have a non-Nonetype for error region item if simulating initialisation.')
+
+        for class_lb, class_int in self.semantic_id_dict.items():
+            tracked_prompts, tracked_prompt_lbs = self._sample_class(
+                class_lb, class_int, samp_regions_dict, init_bool, tracked_prompts, tracked_prompt_lbs
+            )
+        return tracked_prompts, tracked_prompt_lbs
+    
     def togg_inter_prompt_level(self, 
                                 samp_regions_dict,
                                 init_bool):
@@ -1226,6 +1246,79 @@ class SimplifiedPrototypePseudoMixture(BasicValidOnlyMixture):
             tracked_prompts, tracked_prompts_lbs = self.output_processor(tracked_prompts, tracked_prompts_lbs)
             return tracked_prompts, tracked_prompts_lbs
  
+
+
+class SimplifiedPrototypeMixture(SimplifiedPrototypePseudoMixture):
+    '''
+    Like SimplifiedPrototypePseudoMixture but allows cascade deviations
+    (class_level, inter/intra prompt level toggling) via the cascade_config.
+    '''
+    def init_toggle_dict(self, cascade_config: dict):
+        supported = {'class_level', 'inter_prompt_level', 'intra_prompt_level', 'intra_heur_level'}
+        extra = set(cascade_config) - supported
+        if extra:
+            raise ValueError(f'Unrecognised cascade config keys: {extra}')
+
+        if cascade_config.get('intra_heur_level') is None:
+            raise Exception('intra_heur_level is required in cascade_config.')
+
+        self.toggling_dict = {
+            'class_level': cascade_config.get('class_level'),
+            'inter_prompt_level': cascade_config.get('inter_prompt_level'),
+            'intra_prompt_level': cascade_config.get('intra_prompt_level'),
+            'intra_heur_level': cascade_config['intra_heur_level'],
+        }
+
+    def togg_class_level(self, tracked_prompts, tracked_prompt_lbs,
+                         samp_regions_dict, init_bool):
+        if self.toggling_dict['class_level'] is None:
+            if samp_regions_dict['gt'] is None:
+                raise Exception('The entire ground truth cannot be a NoneType..otherwise we cannot even sample.')
+            if all([val is None for key,val in samp_regions_dict['gt'].items() if key.title() != 'Background']):
+                raise Exception('Error in code, no foreground gt available, should have been flagged earlier?')
+
+            if not init_bool:
+                if samp_regions_dict['error_regions'] is None:
+                    raise Exception('Cannot have a nonetype for error region dictionary if simulating edit')
+                if all([item is None for item in samp_regions_dict['error_regions'].values()]):
+                    raise Exception('Error in code, no errors remain, should have exited the iterative loop simulation on full convergence, and should have flagged this in the error region extraction phase.')
+            else:
+                if samp_regions_dict['error_regions'] is not None:
+                    raise Exception('Cannot have a non-Nonetype for error region item if simulating initialisation.')
+
+            for class_lb, class_int in self.semantic_id_dict.items():
+                tracked_prompts, tracked_prompt_lbs = self._sample_class(
+                    class_lb, class_int, samp_regions_dict, init_bool, tracked_prompts, tracked_prompt_lbs
+                )
+            return tracked_prompts, tracked_prompt_lbs
+
+        elif self.toggling_dict['class_level'] is not None:
+            cl = self.toggling_dict['class_level']
+            modes = cl.get('mode')
+            if not isinstance(modes, list) or len(modes) != 1:
+                raise ValueError(
+                    f'class_level mode must be a list of exactly one mode string, got {modes}'
+                )
+            mode = modes[0]
+            if mode == 'basic_skip':
+                skip_classes = cl[mode]['skip_classes']
+                assert isinstance(skip_classes, list), 'The skip classes for basic_skip mode must be provided as a list of class labels (strs).'
+                assert bool(skip_classes), 'The skip classes for basic_skip mode cannot be an empty list, otherwise it would be the same as no toggling at all.'
+                invalid = set(skip_classes) - set(self.semantic_id_dict.keys())
+                if invalid:
+                    raise ValueError(f'skip_classes contains unknown labels: {invalid}')
+                for class_lb, class_int in self.semantic_id_dict.items():
+                    if class_lb in skip_classes:
+                        continue
+                    tracked_prompts, tracked_prompt_lbs = self._sample_class(
+                        class_lb, class_int, samp_regions_dict, init_bool, tracked_prompts, tracked_prompt_lbs
+                    )
+                return tracked_prompts, tracked_prompt_lbs
+            else:
+                raise NotImplementedError(f"Unknown class_level mode: {mode}")
+        else:
+            raise NotImplementedError(f"Unknown class_level config: {self.toggling_dict['class_level']}")
+        
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -1862,6 +1955,8 @@ class SimplifiedPrototypePseudoMixture(BasicValidOnlyMixture):
         
 #####################################################################################################################
 
+
+
 #Mixture registry is for classes which wrap together the prompt generation process with class/inter/intra-prompt 
 # relationships taken into account.
 
@@ -1869,10 +1964,15 @@ class SimplifiedPrototypePseudoMixture(BasicValidOnlyMixture):
 
 def build_simplified_prototype_pseudo_mixture(args: dict):
     return SimplifiedPrototypePseudoMixture(args)
+
+def build_simplified_prototype_mixture(args: dict):
+    return SimplifiedPrototypeMixture(args)
+
 # def build_random_ptype_agent(args: dict):
 #     return RandomPromptTypeAgent(args)
 
 mixture_class_registry = {
     'simplified_prototype_pseudo_mixture': build_simplified_prototype_pseudo_mixture,
+    'simplified_prototype_mixture': build_simplified_prototype_mixture,
     # 'random_ptype_agent': build_random_ptype_agent,
 }

@@ -2,9 +2,10 @@ import os
 from os.path import dirname as up
 import sys
 sys.path.append(up(up(up(up(os.path.abspath(__file__))))))
-
-from typing import Union 
 import torch
+from typing import Union
+import sys 
+sys.path.append(up(up(up(os.path.abspath(__file__)))))
 from src.prompt_generators.heuristics.prompt_mixtures import mixture_class_registry
 from src.prompt_generators.heuristics.heuristic_prompt_utils.heuristic_utils_registry import base_registry
 
@@ -16,8 +17,9 @@ class BuildHeuristic:
                 semantic_id_dict:dict,
                 heuristics:dict,
                 heuristic_params: dict,
-                heuristic_mixtures: Union[dict, None],
-                heuristic_class_type: str
+                cascade_config: Union[dict, None],
+                heuristic_class_type: str,
+                output_conversion: dict = None
                 ):
         
         '''
@@ -48,60 +50,31 @@ class BuildHeuristic:
         NOTE: If any prompt drop-out methods are used, it is possible for an output to be a NoneType even if the 
         input arg for the prompt type is not.
 
-        
-        
-        (REQUIRED) heuristic_params: A twice nested dictionary, for each prompt strategy within a prompt type it 
-        contains a dictionary of build arguments for each corresponding strategy implemented. 
+        (REQUIRED) heuristic_params: A twice-nested dictionary of build arguments per prompt strategy.
+        Same structure as heuristics. For valid prompt types this must be non-None.
 
-        Similar structure as prompt_methods, as they must correspond together!:
+        (OPTIONAL) cascade_config: The cascade toggling configuration dict (e.g. class_level).
+        May optionally be None for default cascade behaviour.
 
-        NOTE: For each heuristic it must contain information about handling at the heuristic-level.
+        It is expected to have the same structure as the cascade's toggling dict:
 
-        NOTE: For prompt types which are not valid, it should be a NoneType. 
-        
-        NOTE: CAN NEVER BE NONETYPE OTHERWISE! 
+            {
+                'class_level': ... | None,
+                'inter_prompt_level': ... | None,
+                'intra_prompt_level': ... | None,
+            }
 
-
-        (OPTIONAL)heuristic_mixture: An arbitrarily nested dict denoting a strategy for the cascading functions which
-        outline the basic strategy of handling prompting interactions, e.g. class-level toggling, inter-prompt level toggling, 
-        intra-prompt level toggling.
-
-        This heuristic mixture arg will control whether/how prompt-methods will interact/condition one another 
-        during the simulation (e.g. constraining error regions, prompt placements, or even switching on/off specific 
-        prompts).
-
-
-        For example, a structure may look like: 
-        
-        dict(
-            'class_level': dict of mixture args/None
-        
-            'inter_prompt':dict[tuple(prompt cross-interaction combinations), mixture_args/None], 
-                            
-            'intra_prompt': dict[prompt_type_str : dict[tuple(prompt_strategy cross-interaction combinations), mixture_args/None])
-        
-            NOTE: Tuples can provide an immutable set of combinations
-
-            NOTE: Downstream use will likely necessitate the use of set logic to verify combinations as the tuple 
-            is immutable. Verification likely will entail the following: Generate set of potential combinations from
-            prompt_types (or strategy), cross-reference with the corresponding dict item by converting key into set.
-
-
-        NOTE: Can optionally be fully Nonetype i.e. default behaviour.
-
-
-        REQUIRED (heuristic class_type): The heuristic class type to be used for prompt generation. This provides some basic 
-        structure which acts as a skeleton to be filled out with the prior arguments when generating the prompts. 
-
+        The intra_heur_level key is appended internally from heuristic_params.
         '''
-        
+
         self.sim_device = sim_device 
         self.use_mem = use_mem 
         self.semantic_id_dict = semantic_id_dict
         self.heuristics = heuristics
         self.heuristic_params = heuristic_params
-        self.heuristic_mixtures = heuristic_mixtures 
+        self.cascade_config = cascade_config or {}
         self.heuristic_class_type = heuristic_class_type
+        self.output_conversion = output_conversion if output_conversion else None
         self.free_form_prompts = ['points', 'scribbles']
         self.partition_prompts = ['bboxes', 'lassos'] 
 
@@ -128,35 +101,23 @@ class BuildHeuristic:
         data: The data dictionary which was passed into the call operation, contains info about the prev_output_data.
         '''
 
-        #Determining what the mode is implicitly from the data dictionary.
-
-        if data['prev_output_data'] is None:
-            mode = 'init'
-        else:
-            mode = 'edit' 
-
         #Checking for empty lists to raise an exception about code elsewhere.
 
         if [] in generated_prompts.values() or [] in generated_prompts_labels.values():
             raise ValueError('Any empty prompt lists or prompt labels lists must be replaced with a NoneType for the value')
 
+        #Free-form prompts (points, scribbles) can always generate from any voxel, so failure means something is wrong.
+        #Partition prompts (bboxes, lassos) can legitimately fail — no raise needed.
 
-        #If mode is init, then check it has at least one valid prompt type populating it
+        free_form_configured = any(
+            self.heuristics.get(ptype) is not None
+            for ptype in self.free_form_prompts
+        )
 
-        if mode == 'init':
-        # I.e., if it went through the exception handling for every valid prompt type then it would be only NoneTypes throughout.
-            if not any(generated_prompts.values()) or not any(generated_prompts_labels.values()):
-                raise ValueError('There must be at least one prompt!')
-        elif mode == 'edit':
-            if not any(generated_prompts.values()) or not any(generated_prompts_labels.values()):
-                raise ValueError('There must be at least one prompt!')
-            # if not any([generated_prompts[key] for key in self.free_form_prompts]) or not any([generated_prompts_labels[f'{key}_labels'] for key in self.free_form_prompts]):
-                # raise ValueError('There must be one free_form prompt in the editing iterations.')
-            #NOTE: We have deprecated the above code, as it is not necessarily true that partition-based prompts (what we 
-            # previously were classifying as grounded prompts incorrectly) cannot be used for editing.
-
-        else:
-            raise Exception('Error in the implementation here.')
+        if free_form_configured:
+            if not any(generated_prompts.values()):
+                raise ValueError('At least one prompt must be generated if free-form prompts are configured! If there is a candidate region then' \
+                'there should always be prompts generated if free form prompts are configured! ')
          
 
         
@@ -170,68 +131,53 @@ class BuildHeuristic:
         Returns:
         
         heur_caller: An initialised class which can be used to generate the prompts.
-
-        #TODO: Implementation for non-prototype mixtures incorporation.
         '''
 
-        if not self.heuristic_mixtures:
-            #Here we will initialise the heuristics for prototype prompt generation method (prototype pseudo-mixture).
-            heur_fn_dict = dict()
+        intra_heur = self.heuristic_params
+        if not isinstance(intra_heur, dict):
+            raise ValueError(
+                'heuristic_params must be a dict (per-ptype heuristic build arguments)'
+            )
 
-            for prompt_type, heuristics in self.heuristics.items():
-                prompt_heur_fns = dict() 
-                
-                if heuristics: #If ptype heuristics is not a NoneType or empty/I.e. if config exists for a prompt type
-                    if self.heuristic_params[prompt_type] is None:
-                        raise Exception('There must be args provided at heuristic level, if heuristics are being provided')
-                    for heuristic in heuristics: 
-                        prompt_heur_fns[heuristic] = base_registry[prompt_type][heuristic]
-                        if self.heuristic_params[prompt_type][heuristic] is None: 
-                            raise Exception('There must be an arg provided at heuristic level, cannot be NoneType')
+        for prompt_type, heuristics in self.heuristics.items():
+            if heuristics:
+                if not intra_heur.get(prompt_type):
+                    raise ValueError(
+                        f'heuristic_params missing or empty for configured '
+                        f'prompt type "{prompt_type}"'
+                    )
+                for heuristic in heuristics:
+                    if not intra_heur[prompt_type].get(heuristic):
+                        raise ValueError(
+                            f'heuristic_params["{prompt_type}"] missing or empty '
+                            f'for heuristic "{heuristic}"'
+                        )
 
-                else:
-                    prompt_heur_fns = None 
-                
-                heur_fn_dict[prompt_type] = prompt_heur_fns
+        heur_fn_dict = dict()
 
-            # return mixture_class_registry[self.heuristic_class_type](
-            #     semantic_id_dict=self.semantic_id_dict,
-            #     sim_device=self.sim_device,
-            #     use_mem=self.use_mem,
-            #     build_args=self.heuristic_params,
-            #     mixture_args=self.heuristic_mixtures,
-            #     heur_fn_dict=heur_fn_dict,                                
-            #     )
-            return mixture_class_registry[self.heuristic_class_type](
-                args={
-                    'semantic_id_dict': self.semantic_id_dict,
-                    'sim_device': self.sim_device,
-                    'use_mem': self.use_mem,
-                    'build_args': self.heuristic_params,
-                    'mixture_args': self.heuristic_mixtures,
-                    'heur_fn_dict': heur_fn_dict,                                
-                })
-        else:
-            raise NotImplementedError('Implement the code for initialising non-prototype prompt mixture methods. I.e., \n' \
-            'those for which heuristic_mixtures is not a NoneType.')
-            '''
-            Info: 
+        for prompt_type, heuristics in self.heuristics.items():
+            prompt_heur_fns = dict() 
+            
+            if heuristics:
+                for heuristic in heuristics: 
+                    prompt_heur_fns[heuristic] = base_registry[prompt_type][heuristic]
+            else:
+                prompt_heur_fns = None 
+            
+            heur_fn_dict[prompt_type] = prompt_heur_fns
 
-            self.heuristic_mixtures: A twice nested dict denoting a strategy for mixing prompt simulation across intra
-            and inter-prompting strategies. The mixture args are a dictionary for each corresponding pairing of cross-interactions.
+        full_cascade = dict(self.cascade_config)
+        full_cascade['intra_heur_level'] = intra_heur
 
-            This prompt mixture arg will control whether/how prompt-methods will interact/condition one another during the 
-            simulation. 
-
-                Has structure: dict('inter_prompt':dict[tuple(prompt cross-interaction combinations), mixture_args/None], 
-                                    'intra_prompt': dict[prompt_type_str : dict[tuple(prompt_strategy cross-interaction combinations), mixture_args/None])
-                
-                Tuple can provide an immutable set of combinations
-
-                NOTE: Downstream use will likely necessitate the use of set logic to verify combinations as the tuple 
-                is immutable. Verification likely will entail the following: Generate set of potential combinations from
-                prompt_types (or methods), cross-reference with the corresponding item by converting key into set.
-            '''
+        return mixture_class_registry[self.heuristic_class_type](
+            args={
+                'semantic_id_dict': self.semantic_id_dict,
+                'sim_device': self.sim_device,
+                'use_mem': self.use_mem,
+                'cascade_config': full_cascade,
+                'heur_fn_dict': heur_fn_dict,
+                'output_conversion': self.output_conversion,
+            })
 
     def extract_prompts(self, data: dict):
         '''
@@ -256,16 +202,12 @@ class BuildHeuristic:
 
         '''
 
-        if not self.heuristic_mixtures:
-            #We populate the prompts:
-            generated_prompts, generated_prompt_labels = self.heuristic_caller(data)
-                    
-            #We check that the output was generated correctly/with a valid output.
-            self.at_least_one_prompt(generated_prompts, generated_prompt_labels, data)
+        generated_prompts, generated_prompt_labels = self.heuristic_caller(data)
+                
+        #We check that the output was generated correctly/with a valid output.
+        self.at_least_one_prompt(generated_prompts, generated_prompt_labels, data)
 
-            return generated_prompts, generated_prompt_labels
-        else: 
-            raise NotImplementedError('The heuristic mixture strategy has not yet been implemented')
+        return generated_prompts, generated_prompt_labels
 
     def __call__(self, data):
 
@@ -305,10 +247,6 @@ class BuildHeuristic:
         prompts_labels_torch_format: dict - A dictionary, separated by the prompt type, which contains the prompt
         labels for the corresponding prompts (or NoneTypes for the empty prompts!). 
         '''
-        if not self.heuristic_mixtures:
-            prompts_torch_format, prompts_labels_torch_format = self.extract_prompts(data)
-        
-        elif self.heuristic_mixtures:
-            raise NotImplementedError('The heuristic mixture strategy has not yet been implemented')
+        prompts_torch_format, prompts_labels_torch_format = self.extract_prompts(data)
     
         return prompts_torch_format, prompts_labels_torch_format 

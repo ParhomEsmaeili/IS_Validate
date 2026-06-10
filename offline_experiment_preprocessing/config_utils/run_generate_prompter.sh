@@ -5,28 +5,28 @@
 # ============================================================================
 
 # Dataset name (used to construct config paths)
-# DATASETS=(
-#   "Dataset001_BrainTumour"
-#   "Dataset003_Liver"
-#   "Dataset004_Hippocampus"
-#   "Dataset005_Prostate"
-#   "Dataset006_Lung"
-#   "Dataset007_Pancreas"
-#   "Dataset008_HepaticVessel"
-#   "Dataset010_Colon"
-# )
-
 DATASETS=(
-  "Dataset011_Kits23"
-  "Dataset015_Kits23"
-  "Dataset019_Kits23"
-  "Dataset023_Kits23"
-  "Dataset027_Kits23"
-  "Dataset031_Kits23"
+  "Dataset001_BrainTumour"
+  # "Dataset003_Liver"
+  # "Dataset004_Hippocampus"
+  # "Dataset005_Prostate"
+  # "Dataset006_Lung"
+  # "Dataset007_Pancreas"
+  # "Dataset008_HepaticVessel"
+  # "Dataset010_Colon"
 )
 
 # DATASETS=(
-#   "Dataset040_MSMultispine"
+#   "Dataset011_Kits23"
+#   "Dataset015_Kits23"
+#   "Dataset019_Kits23"
+#   "Dataset023_Kits23"
+#   "Dataset027_Kits23"
+#   "Dataset031_Kits23"
+# )
+
+# DATASETS=(
+#   # "Dataset040_MSMultispine"
 #   "Dataset041_Parse"
 #   "Dataset042_TopCowCT"
 #   "Dataset043_TopCowMR"
@@ -34,13 +34,13 @@ DATASETS=(
 #   "Dataset045_TopBrainMR"
 # )
 
-INIT_PROMPT_CONF_NAME="points_prototype_simplified"
-EDIT_PROMPT_CONF_NAME="points_prototype_simplified"
-INFER_EDIT_NUMS=100
+INIT_PROMPT_CONF_NAME="2_point_5_d_bbox_prototype_simplified" #"2d_bbox_prototype_simplified" #"3d_bbox_prototype_simplified" #
+EDIT_PROMPT_CONF_NAME="" #"points_prototype_simplified"
+INFER_EDIT_NUMS=0 #100
 USE_MEM_INF_EDIT=False
 IM_CONF_REMOVE_INIT=True
 IM_CONF_MEM_LEN=1
-ANNOTATION_CONF='{"annotator": ["annotator_4"], "instance_id": ["instance_1"]}'
+ANNOTATION_CONF='{"annotator": ["annotator_1"], "instance_id": ["instance_1"]}'
 
 # ============================================================================
 # Script Execution - Do not edit below this line unless needed
@@ -57,7 +57,7 @@ for DATASET in "${DATASETS[@]}"; do
   python3 generate_prompter_manifest.py \
     --prompts-configs "${PROMPT_CONFIGS_FILE}" \
     --init-prompt-conf-name "${INIT_PROMPT_CONF_NAME}" \
-    --edit-prompt-conf-name "${EDIT_PROMPT_CONF_NAME}" \
+    ${EDIT_PROMPT_CONF_NAME:+--edit-prompt-conf-name "${EDIT_PROMPT_CONF_NAME}"} \
     --infer-edit-nums "${INFER_EDIT_NUMS}" \
     --use-mem-inf-edit "${USE_MEM_INF_EDIT}" \
     --im-conf-remove-init "${IM_CONF_REMOVE_INIT}" \

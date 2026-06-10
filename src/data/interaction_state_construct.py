@@ -92,10 +92,11 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
                             sim_device=sim_device,
                             use_mem=use_mem,
                             semantic_id_dict=semantic_id_dict,
-                            sim_methods=prompt_configs['methods'], 
+                            sim_methods=prompt_configs['methods'],
                             sim_build_params=prompt_configs['build_params'],
-                            prompt_mixture_params=prompt_configs['mixture_params'],
-                            prompter_class_type=prompt_configs['prompter_class_type'])
+                            cascade_config=prompt_configs['cascade_config'],
+                            prompter_class_type=prompt_configs['prompter_class_type'],
+                            output_conversion=prompt_configs.get('output_conversion'))
             
             self.init_modes = ['Interactive Init'] 
             self.edit_modes = ['Interactive Edit']

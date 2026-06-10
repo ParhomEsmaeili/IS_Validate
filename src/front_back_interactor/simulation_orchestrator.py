@@ -1015,7 +1015,7 @@ class FrontEndSimulator:
                 case_name=case_name,
                 empty_foreground=empty_foreground,
                 terminated_early=terminated_early,
-                temporary_iter_lims=(iter_num, self.args['infer_run_configs']['num_edits']), #This is a tuple containing the lower and upper iteration limits for padding the tracked metrics, 
+                temporary_iter_lims=(iter_num, self.args['infer_run_configs']['num_edits']) if self.args['infer_run_configs']['edit_bool'] else (iter_num, 0), #This is a tuple containing the lower and upper iteration limits for padding the tracked metrics, 
                 # if early convergence occured.....
                 tracked_metrics=self.tracked_metrics
             )

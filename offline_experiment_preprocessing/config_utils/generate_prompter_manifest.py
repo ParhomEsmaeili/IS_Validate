@@ -138,10 +138,14 @@ def generate_prompter_ids(
 ) -> dict[str, dict[str, Any]]:
 	if config.im_conf_mem_len == 0:
 		raise ValueError("im_conf_mem_len must be -1 or a positive integer")
-	if config.infer_edit_nums < 1:
-		raise ValueError("infer_edit_nums must be >= 1")
+	if config.edit_prompt_conf_name is not None:
+		if config.infer_edit_nums < 1:
+			raise ValueError("infer_edit_nums must be >= 1")
+	else:
+		if config.infer_edit_nums != 0:
+			raise ValueError("infer_edit_nums must be 0 when edit_prompt_conf_name is None")
 	if prompts_registry is not None:
-		missing = [name for name in (config.init_prompt_conf_name, config.edit_prompt_conf_name) if name not in prompts_registry]
+		missing = [name for name in (config.init_prompt_conf_name, config.edit_prompt_conf_name) if name is not None and name not in prompts_registry]
 		if missing:
 			raise KeyError(f"Unknown prompt conf name(s): {missing}. Available: {sorted(prompts_registry.keys())}")
 
@@ -244,9 +248,12 @@ def main() -> int:
 	# actual dictionaries rather than just the names. Makes it more self-contained and robust to
 	# changes in the prompts registry.
 	prompts_registry = extract_config(args.prompts_configs)
+	# Normalise "null" string to None for optional prompt conf names
+	init_name = None if args.init_prompt_conf_name in (None, "null", "None") else args.init_prompt_conf_name
+	edit_name = None if args.edit_prompt_conf_name in (None, "null", "None") else args.edit_prompt_conf_name
 	config = PrompterGenerationConfig(
-		init_prompt_conf_name=args.init_prompt_conf_name,
-		edit_prompt_conf_name=args.edit_prompt_conf_name,
+		init_prompt_conf_name=init_name,
+		edit_prompt_conf_name=edit_name,
 		infer_edit_nums=args.infer_edit_nums,
 		use_mem_inf_edit=args.use_mem_inf_edit,
 		im_conf_remove_init=args.im_conf_remove_init,

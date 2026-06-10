@@ -23,7 +23,7 @@
 						"bboxes": null,
 						"lassos": null
 					},
-					"mixture_params": null,
+					"cascade_config": null,
 					"prompter_class_type": "simplified_prototype_pseudo_mixture"
 				}
 			}
@@ -51,7 +51,7 @@
 						"bboxes": null,
 						"lassos": null
 					},
-					"mixture_params": null,
+					"cascade_config": null,
 					"prompter_class_type": "simplified_prototype_pseudo_mixture"
 				}
 			}

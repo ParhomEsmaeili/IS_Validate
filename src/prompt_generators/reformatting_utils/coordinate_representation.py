@@ -108,7 +108,10 @@ def coordinate_to_voxel_conversion(
 ) -> torch.Tensor:
     '''
     Function which converts continuous coordinates back to voxel indices.
-    This is the inverse of voxel_to_coordinate_conversion.
+    
+    For any coordinate in the half-open interval [i, i+1), this returns i.
+    This is the inverse of voxel_to_coordinate_conversion only when the
+    coordinate is at the voxel center (i + 0.5).
     
     Args:
         coords: A tensor of shape (N, 3) or (3,) containing continuous coordinates.
@@ -117,7 +120,7 @@ def coordinate_to_voxel_conversion(
     
     Returns:
         A tensor of the same shape as coords, where each continuous coordinate has been 
-        converted to its corresponding voxel index by subtracting 0.5 and rounding down.
+        converted to its corresponding voxel index by flooring.
         
     Examples:
         >>> coordinate_to_voxel_conversion(torch.tensor([0.5, 0.5, 0.5]))
@@ -165,14 +168,42 @@ def coordinate_to_voxel_conversion(
                 )
     
     # Convert continuous coordinates to voxel indices
-    # Subtract 0.5 and floor to get the voxel index
-    voxel_indices = torch.floor(coords.float() - 0.5).long()
+    # floor gives the voxel index for any coordinate in [i, i+1)
+    voxel_indices = torch.floor(coords.float()).long()
     
     # Restore original shape if input was a single triplet
     if single_input:
         voxel_indices = voxel_indices.squeeze(0)
     
     return voxel_indices
+
+
+def voxel_to_coordinate_conversion_bbox(
+    bbox_coords: torch.Tensor,
+    image_shape: torch.Size = None
+) -> torch.Tensor:
+    '''
+    Wrapper around voxel_to_coordinate_conversion for bbox extrema tensors of shape (1, 6).
+    Reshapes (1, 6) into (2, 3) [min extrema, max extrema], applies the standard conversion,
+    then reshapes back to (1, 6).
+    '''
+    coords_2x3 = bbox_coords.reshape(2, 3)
+    converted = voxel_to_coordinate_conversion(coords_2x3, image_shape)
+    return converted.reshape(1, 6)
+
+
+def coordinate_to_voxel_conversion_bbox(
+    coords: torch.Tensor,
+    image_shape: torch.Size = None
+) -> torch.Tensor:
+    '''
+    Wrapper around coordinate_to_voxel_conversion for bbox extrema tensors of shape (1, 6).
+    Reshapes (1, 6) into (2, 3) [min extrema, max extrema], applies the standard conversion,
+    then reshapes back to (1, 6).
+    '''
+    coords_2x3 = coords.reshape(2, 3)
+    converted = coordinate_to_voxel_conversion(coords_2x3, image_shape)
+    return converted.reshape(1, 6)
 
 
 if __name__ == '__main__':

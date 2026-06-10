@@ -59,7 +59,7 @@
                 "bboxes": null,
                 "lassos": null
               },
-              "mixture_params": null,
+              "cascade_config": null,
               "prompter_class_type": "simplified_prototype_pseudo_mixture"
             }
           }
@@ -87,7 +87,7 @@
                 "bboxes": null,
                 "lassos": null
               },
-              "mixture_params": null,
+              "cascade_config": null,
               "prompter_class_type": "simplified_prototype_pseudo_mixture"
             }
           }
@@ -199,7 +199,7 @@
                 "bboxes": null,
                 "lassos": null
               },
-              "mixture_params": null,
+              "cascade_config": null,
               "prompter_class_type": "simplified_prototype_pseudo_mixture"
             }
           }
@@ -227,7 +227,7 @@
                 "bboxes": null,
                 "lassos": null
               },
-              "mixture_params": null,
+              "cascade_config": null,
               "prompter_class_type": "simplified_prototype_pseudo_mixture"
             }
           }
@@ -339,7 +339,7 @@
                 "bboxes": null,
                 "lassos": null
               },
-              "mixture_params": null,
+              "cascade_config": null,
               "prompter_class_type": "simplified_prototype_pseudo_mixture"
             }
           }
@@ -367,7 +367,7 @@
                 "bboxes": null,
                 "lassos": null
               },
-              "mixture_params": null,
+              "cascade_config": null,
               "prompter_class_type": "simplified_prototype_pseudo_mixture"
             }
           }
@@ -479,7 +479,7 @@
                 "bboxes": null,
                 "lassos": null
               },
-              "mixture_params": null,
+              "cascade_config": null,
               "prompter_class_type": "simplified_prototype_pseudo_mixture"
             }
           }
@@ -507,7 +507,7 @@
                 "bboxes": null,
                 "lassos": null
               },
-              "mixture_params": null,
+              "cascade_config": null,
               "prompter_class_type": "simplified_prototype_pseudo_mixture"
             }
           }
@@ -619,7 +619,7 @@
                 "bboxes": null,
                 "lassos": null
               },
-              "mixture_params": null,
+              "cascade_config": null,
               "prompter_class_type": "simplified_prototype_pseudo_mixture"
             }
           }
@@ -647,7 +647,7 @@
                 "bboxes": null,
                 "lassos": null
               },
-              "mixture_params": null,
+              "cascade_config": null,
               "prompter_class_type": "simplified_prototype_pseudo_mixture"
             }
           }
@@ -764,7 +764,7 @@
                 "bboxes": null,
                 "lassos": null
               },
-              "mixture_params": null,
+              "cascade_config": null,
               "prompter_class_type": "simplified_prototype_pseudo_mixture"
             }
           }
@@ -792,7 +792,7 @@
                 "bboxes": null,
                 "lassos": null
               },
-              "mixture_params": null,
+              "cascade_config": null,
               "prompter_class_type": "simplified_prototype_pseudo_mixture"
             }
           }
@@ -909,7 +909,7 @@
                 "bboxes": null,
                 "lassos": null
               },
-              "mixture_params": null,
+              "cascade_config": null,
               "prompter_class_type": "simplified_prototype_pseudo_mixture"
             }
           }
@@ -937,7 +937,7 @@
                 "bboxes": null,
                 "lassos": null
               },
-              "mixture_params": null,
+              "cascade_config": null,
               "prompter_class_type": "simplified_prototype_pseudo_mixture"
             }
           }
@@ -1054,7 +1054,7 @@
                 "bboxes": null,
                 "lassos": null
               },
-              "mixture_params": null,
+              "cascade_config": null,
               "prompter_class_type": "simplified_prototype_pseudo_mixture"
             }
           }
@@ -1082,7 +1082,7 @@
                 "bboxes": null,
                 "lassos": null
               },
-              "mixture_params": null,
+              "cascade_config": null,
               "prompter_class_type": "simplified_prototype_pseudo_mixture"
             }
           }
@@ -1199,7 +1199,7 @@
                 "bboxes": null,
                 "lassos": null
               },
-              "mixture_params": null,
+              "cascade_config": null,
               "prompter_class_type": "simplified_prototype_pseudo_mixture"
             }
           }
@@ -1227,7 +1227,7 @@
                 "bboxes": null,
                 "lassos": null
               },
-              "mixture_params": null,
+              "cascade_config": null,
               "prompter_class_type": "simplified_prototype_pseudo_mixture"
             }
           }
@@ -1344,7 +1344,7 @@
                 "bboxes": null,
                 "lassos": null
               },
-              "mixture_params": null,
+              "cascade_config": null,
               "prompter_class_type": "simplified_prototype_pseudo_mixture"
             }
           }
@@ -1372,12 +1372,4247 @@
                 "bboxes": null,
                 "lassos": null
               },
-              "mixture_params": null,
+              "cascade_config": null,
               "prompter_class_type": "simplified_prototype_pseudo_mixture"
             }
           }
         },
         "infer_edit_nums": 100,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_11": {
+    "task": {
+      "task_id": "task_id_15",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_0"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_1",
+      "config": {
+        "init_prompt_conf": {
+          "name": "3d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": 3,
+                    "component_sampling_config": {
+                      "dimensionality": 3,
+                      "region_extraction_config": {
+                        "connectivity": 3,
+                        "component_selection_process": "top-k",
+                        "top-k": 1
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_12": {
+    "task": {
+      "task_id": "task_id_16",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_1"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_1",
+      "config": {
+        "init_prompt_conf": {
+          "name": "3d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": 3,
+                    "component_sampling_config": {
+                      "dimensionality": 3,
+                      "region_extraction_config": {
+                        "connectivity": 3,
+                        "component_selection_process": "top-k",
+                        "top-k": 1
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_13": {
+    "task": {
+      "task_id": "task_id_17",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_2"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_1",
+      "config": {
+        "init_prompt_conf": {
+          "name": "3d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": 3,
+                    "component_sampling_config": {
+                      "dimensionality": 3,
+                      "region_extraction_config": {
+                        "connectivity": 3,
+                        "component_selection_process": "top-k",
+                        "top-k": 1
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_14": {
+    "task": {
+      "task_id": "task_id_18",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_3"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_1",
+      "config": {
+        "init_prompt_conf": {
+          "name": "3d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": 3,
+                    "component_sampling_config": {
+                      "dimensionality": 3,
+                      "region_extraction_config": {
+                        "connectivity": 3,
+                        "component_selection_process": "top-k",
+                        "top-k": 1
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_15": {
+    "task": {
+      "task_id": "task_id_19",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_4"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_1",
+      "config": {
+        "init_prompt_conf": {
+          "name": "3d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": 3,
+                    "component_sampling_config": {
+                      "dimensionality": 3,
+                      "region_extraction_config": {
+                        "connectivity": 3,
+                        "component_selection_process": "top-k",
+                        "top-k": 1
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_16": {
+    "task": {
+      "task_id": "task_id_20",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_1",
+              "fold_2",
+              "fold_3",
+              "fold_4"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_1",
+      "config": {
+        "init_prompt_conf": {
+          "name": "3d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": 3,
+                    "component_sampling_config": {
+                      "dimensionality": 3,
+                      "region_extraction_config": {
+                        "connectivity": 3,
+                        "component_selection_process": "top-k",
+                        "top-k": 1
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_17": {
+    "task": {
+      "task_id": "task_id_21",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_0",
+              "fold_2",
+              "fold_3",
+              "fold_4"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_1",
+      "config": {
+        "init_prompt_conf": {
+          "name": "3d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": 3,
+                    "component_sampling_config": {
+                      "dimensionality": 3,
+                      "region_extraction_config": {
+                        "connectivity": 3,
+                        "component_selection_process": "top-k",
+                        "top-k": 1
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_18": {
+    "task": {
+      "task_id": "task_id_22",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_0",
+              "fold_1",
+              "fold_3",
+              "fold_4"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_1",
+      "config": {
+        "init_prompt_conf": {
+          "name": "3d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": 3,
+                    "component_sampling_config": {
+                      "dimensionality": 3,
+                      "region_extraction_config": {
+                        "connectivity": 3,
+                        "component_selection_process": "top-k",
+                        "top-k": 1
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_19": {
+    "task": {
+      "task_id": "task_id_23",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_0",
+              "fold_1",
+              "fold_2",
+              "fold_4"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_1",
+      "config": {
+        "init_prompt_conf": {
+          "name": "3d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": 3,
+                    "component_sampling_config": {
+                      "dimensionality": 3,
+                      "region_extraction_config": {
+                        "connectivity": 3,
+                        "component_selection_process": "top-k",
+                        "top-k": 1
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_20": {
+    "task": {
+      "task_id": "task_id_24",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_0",
+              "fold_1",
+              "fold_2",
+              "fold_3"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_1",
+      "config": {
+        "init_prompt_conf": {
+          "name": "3d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": 3,
+                    "component_sampling_config": {
+                      "dimensionality": 3,
+                      "region_extraction_config": {
+                        "connectivity": 3,
+                        "component_selection_process": "top-k",
+                        "top-k": 1
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_21": {
+    "task": {
+      "task_id": "task_id_15",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_0"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_2",
+      "config": {
+        "init_prompt_conf": {
+          "name": "2d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": 2,
+                    "collapsed_dim": 2,
+                    "component_sampling_config": {
+                      "dimensionality": 2,
+                      "collapsed_dim": 2,
+                      "region_extraction_config": {
+                        "connectivity": 2,
+                        "component_selection_process": "top-k",
+                        "top-k": 1,
+                        "slice_selection": "center"
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_22": {
+    "task": {
+      "task_id": "task_id_16",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_1"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_2",
+      "config": {
+        "init_prompt_conf": {
+          "name": "2d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": 2,
+                    "collapsed_dim": 2,
+                    "component_sampling_config": {
+                      "dimensionality": 2,
+                      "collapsed_dim": 2,
+                      "region_extraction_config": {
+                        "connectivity": 2,
+                        "component_selection_process": "top-k",
+                        "top-k": 1,
+                        "slice_selection": "center"
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_23": {
+    "task": {
+      "task_id": "task_id_17",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_2"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_2",
+      "config": {
+        "init_prompt_conf": {
+          "name": "2d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": 2,
+                    "collapsed_dim": 2,
+                    "component_sampling_config": {
+                      "dimensionality": 2,
+                      "collapsed_dim": 2,
+                      "region_extraction_config": {
+                        "connectivity": 2,
+                        "component_selection_process": "top-k",
+                        "top-k": 1,
+                        "slice_selection": "center"
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_24": {
+    "task": {
+      "task_id": "task_id_18",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_3"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_2",
+      "config": {
+        "init_prompt_conf": {
+          "name": "2d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": 2,
+                    "collapsed_dim": 2,
+                    "component_sampling_config": {
+                      "dimensionality": 2,
+                      "collapsed_dim": 2,
+                      "region_extraction_config": {
+                        "connectivity": 2,
+                        "component_selection_process": "top-k",
+                        "top-k": 1,
+                        "slice_selection": "center"
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_25": {
+    "task": {
+      "task_id": "task_id_19",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_4"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_2",
+      "config": {
+        "init_prompt_conf": {
+          "name": "2d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": 2,
+                    "collapsed_dim": 2,
+                    "component_sampling_config": {
+                      "dimensionality": 2,
+                      "collapsed_dim": 2,
+                      "region_extraction_config": {
+                        "connectivity": 2,
+                        "component_selection_process": "top-k",
+                        "top-k": 1,
+                        "slice_selection": "center"
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_26": {
+    "task": {
+      "task_id": "task_id_20",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_1",
+              "fold_2",
+              "fold_3",
+              "fold_4"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_2",
+      "config": {
+        "init_prompt_conf": {
+          "name": "2d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": 2,
+                    "collapsed_dim": 2,
+                    "component_sampling_config": {
+                      "dimensionality": 2,
+                      "collapsed_dim": 2,
+                      "region_extraction_config": {
+                        "connectivity": 2,
+                        "component_selection_process": "top-k",
+                        "top-k": 1,
+                        "slice_selection": "center"
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_27": {
+    "task": {
+      "task_id": "task_id_21",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_0",
+              "fold_2",
+              "fold_3",
+              "fold_4"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_2",
+      "config": {
+        "init_prompt_conf": {
+          "name": "2d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": 2,
+                    "collapsed_dim": 2,
+                    "component_sampling_config": {
+                      "dimensionality": 2,
+                      "collapsed_dim": 2,
+                      "region_extraction_config": {
+                        "connectivity": 2,
+                        "component_selection_process": "top-k",
+                        "top-k": 1,
+                        "slice_selection": "center"
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_28": {
+    "task": {
+      "task_id": "task_id_22",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_0",
+              "fold_1",
+              "fold_3",
+              "fold_4"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_2",
+      "config": {
+        "init_prompt_conf": {
+          "name": "2d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": 2,
+                    "collapsed_dim": 2,
+                    "component_sampling_config": {
+                      "dimensionality": 2,
+                      "collapsed_dim": 2,
+                      "region_extraction_config": {
+                        "connectivity": 2,
+                        "component_selection_process": "top-k",
+                        "top-k": 1,
+                        "slice_selection": "center"
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_29": {
+    "task": {
+      "task_id": "task_id_23",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_0",
+              "fold_1",
+              "fold_2",
+              "fold_4"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_2",
+      "config": {
+        "init_prompt_conf": {
+          "name": "2d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": 2,
+                    "collapsed_dim": 2,
+                    "component_sampling_config": {
+                      "dimensionality": 2,
+                      "collapsed_dim": 2,
+                      "region_extraction_config": {
+                        "connectivity": 2,
+                        "component_selection_process": "top-k",
+                        "top-k": 1,
+                        "slice_selection": "center"
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_30": {
+    "task": {
+      "task_id": "task_id_24",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_0",
+              "fold_1",
+              "fold_2",
+              "fold_3"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_2",
+      "config": {
+        "init_prompt_conf": {
+          "name": "2d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": 2,
+                    "collapsed_dim": 2,
+                    "component_sampling_config": {
+                      "dimensionality": 2,
+                      "collapsed_dim": 2,
+                      "region_extraction_config": {
+                        "connectivity": 2,
+                        "component_selection_process": "top-k",
+                        "top-k": 1,
+                        "slice_selection": "center"
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_31": {
+    "task": {
+      "task_id": "task_id_15",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_0"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_3",
+      "config": {
+        "init_prompt_conf": {
+          "name": "2_point_5_d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": "2.5D",
+                    "collapsed_dim": 2,
+                    "component_sampling_config": {
+                      "dimensionality": "2.5D",
+                      "collapsed_dim": 2,
+                      "region_extraction_config": {
+                        "connectivity": 2,
+                        "component_selection_process": "top-k",
+                        "top-k": 1
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_32": {
+    "task": {
+      "task_id": "task_id_16",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_1"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_3",
+      "config": {
+        "init_prompt_conf": {
+          "name": "2_point_5_d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": "2.5D",
+                    "collapsed_dim": 2,
+                    "component_sampling_config": {
+                      "dimensionality": "2.5D",
+                      "collapsed_dim": 2,
+                      "region_extraction_config": {
+                        "connectivity": 2,
+                        "component_selection_process": "top-k",
+                        "top-k": 1
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_33": {
+    "task": {
+      "task_id": "task_id_17",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_2"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_3",
+      "config": {
+        "init_prompt_conf": {
+          "name": "2_point_5_d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": "2.5D",
+                    "collapsed_dim": 2,
+                    "component_sampling_config": {
+                      "dimensionality": "2.5D",
+                      "collapsed_dim": 2,
+                      "region_extraction_config": {
+                        "connectivity": 2,
+                        "component_selection_process": "top-k",
+                        "top-k": 1
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_34": {
+    "task": {
+      "task_id": "task_id_18",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_3"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_3",
+      "config": {
+        "init_prompt_conf": {
+          "name": "2_point_5_d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": "2.5D",
+                    "collapsed_dim": 2,
+                    "component_sampling_config": {
+                      "dimensionality": "2.5D",
+                      "collapsed_dim": 2,
+                      "region_extraction_config": {
+                        "connectivity": 2,
+                        "component_selection_process": "top-k",
+                        "top-k": 1
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_35": {
+    "task": {
+      "task_id": "task_id_19",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            "fold_4"
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_3",
+      "config": {
+        "init_prompt_conf": {
+          "name": "2_point_5_d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": "2.5D",
+                    "collapsed_dim": 2,
+                    "component_sampling_config": {
+                      "dimensionality": "2.5D",
+                      "collapsed_dim": 2,
+                      "region_extraction_config": {
+                        "connectivity": 2,
+                        "component_selection_process": "top-k",
+                        "top-k": 1
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_36": {
+    "task": {
+      "task_id": "task_id_20",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_1",
+              "fold_2",
+              "fold_3",
+              "fold_4"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_3",
+      "config": {
+        "init_prompt_conf": {
+          "name": "2_point_5_d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": "2.5D",
+                    "collapsed_dim": 2,
+                    "component_sampling_config": {
+                      "dimensionality": "2.5D",
+                      "collapsed_dim": 2,
+                      "region_extraction_config": {
+                        "connectivity": 2,
+                        "component_selection_process": "top-k",
+                        "top-k": 1
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_37": {
+    "task": {
+      "task_id": "task_id_21",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_0",
+              "fold_2",
+              "fold_3",
+              "fold_4"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_3",
+      "config": {
+        "init_prompt_conf": {
+          "name": "2_point_5_d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": "2.5D",
+                    "collapsed_dim": 2,
+                    "component_sampling_config": {
+                      "dimensionality": "2.5D",
+                      "collapsed_dim": 2,
+                      "region_extraction_config": {
+                        "connectivity": 2,
+                        "component_selection_process": "top-k",
+                        "top-k": 1
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_38": {
+    "task": {
+      "task_id": "task_id_22",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_0",
+              "fold_1",
+              "fold_3",
+              "fold_4"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_3",
+      "config": {
+        "init_prompt_conf": {
+          "name": "2_point_5_d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": "2.5D",
+                    "collapsed_dim": 2,
+                    "component_sampling_config": {
+                      "dimensionality": "2.5D",
+                      "collapsed_dim": 2,
+                      "region_extraction_config": {
+                        "connectivity": 2,
+                        "component_selection_process": "top-k",
+                        "top-k": 1
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_39": {
+    "task": {
+      "task_id": "task_id_23",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_0",
+              "fold_1",
+              "fold_2",
+              "fold_4"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_3",
+      "config": {
+        "init_prompt_conf": {
+          "name": "2_point_5_d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": "2.5D",
+                    "collapsed_dim": 2,
+                    "component_sampling_config": {
+                      "dimensionality": "2.5D",
+                      "collapsed_dim": 2,
+                      "region_extraction_config": {
+                        "connectivity": 2,
+                        "component_selection_process": "top-k",
+                        "top-k": 1
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
+        "use_mem_inf_edit": false,
+        "im_conf_remove_init": true,
+        "im_conf_mem_len": 1,
+        "annotation_conf": {
+          "annotator": [
+            "annotator_1"
+          ],
+          "instance_id": [
+            "instance_1"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "metrics_config_id": "prototype",
+      "config": {
+        "metrics": {
+          "Dice": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false
+          },
+          "NSD": {
+            "ignore_empty": false,
+            "include_per_class_scores": true,
+            "include_background_metric": false,
+            "tolerance_mm": 1
+          }
+        },
+        "data_sampling": {
+          "annotation_conf": {
+            "annotator": [
+              "annotator_1"
+            ],
+            "instance_id": [
+              "instance_1"
+            ]
+          }
+        },
+        "early_termination_criterion": {
+          "metric": "Dice",
+          "threshold": 1.0
+        }
+      }
+    }
+  },
+  "exp_config_40": {
+    "task": {
+      "task_id": "task_id_24",
+      "config": {
+        "data_sampling": {
+          "sample_group_category": [
+            "kfold_5_train",
+            [
+              "fold_0",
+              "fold_1",
+              "fold_2",
+              "fold_3"
+            ]
+          ],
+          "image_conf": {
+            "image_channel": [
+              "MRI"
+            ]
+          }
+        },
+        "infer_info": {
+          "infer_init": "Interactive Init",
+          "infer_edit_bool": false,
+          "sim_empty_fg_automatic": false
+        },
+        "seg_problem": "whole_hippocampus",
+        "data_transforms": {
+          "semantic_class_mapping": {
+            "background": [
+              "background"
+            ],
+            "whole_hippocampus": [
+              "Anterior",
+              "Posterior"
+            ]
+          }
+        }
+      }
+    },
+    "prompter": {
+      "prompter_id": "prompter_3",
+      "config": {
+        "init_prompt_conf": {
+          "name": "2_point_5_d_bbox_prototype_simplified",
+          "config": {
+            "procedure_type": "heuristic",
+            "config": {
+              "methods": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": [
+                  "orchestrator"
+                ],
+                "lassos": null
+              },
+              "build_params": {
+                "points": null,
+                "scribbles": null,
+                "bboxes": {
+                  "orchestrator": {
+                    "dimensionality": "2.5D",
+                    "collapsed_dim": 2,
+                    "component_sampling_config": {
+                      "dimensionality": "2.5D",
+                      "collapsed_dim": 2,
+                      "region_extraction_config": {
+                        "connectivity": 2,
+                        "component_selection_process": "top-k",
+                        "top-k": 1
+                      }
+                    }
+                  }
+                },
+                "lassos": null
+              },
+              "cascade_config": {
+                "class_level": {
+                  "mode": [
+                    "basic_skip"
+                  ],
+                  "basic_skip": {
+                    "skip_classes": [
+                      "background"
+                    ]
+                  }
+                },
+                "inter_prompt_level": null,
+                "intra_prompt_level": null
+              },
+              "prompter_class_type": "simplified_prototype_mixture"
+            }
+          }
+        },
+        "edit_prompt_conf": {
+          "name": null,
+          "config": null
+        },
+        "infer_edit_nums": 0,
         "use_mem_inf_edit": false,
         "im_conf_remove_init": true,
         "im_conf_mem_len": 1,

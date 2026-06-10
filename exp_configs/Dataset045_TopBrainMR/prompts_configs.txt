@@ -1,64 +1,195 @@
 {
-	"prototype":{
-		"procedure_type":"heuristic",
-		"config":{
-		
-			"methods":{
-				
-				"points":["uniform_random"],
-				"scribbles":null,
-				"bboxes":null,
-				"lassos":null
-				
-				},
-			"build_params":{
-			
-				"points":{
-					
+	"prototype": {
+		"procedure_type": "heuristic",
+		"config": {
+			"methods": {
+				"points": [
+					"uniform_random"
+				],
+				"scribbles": null,
+				"bboxes": null,
+				"lassos": null
+			},
+			"build_params": {
+				"points": {
 					"uniform_random": {
 						"n_max": 1
-						}
-					
-					},
-				"scribbles":null,
-				"bboxes":null,
-				"lassos":null
-				
+					}
 				},
-				
-			"mixture_params":null,
-			"prompter_class_type":"prototype_pseudo_mixture"
+				"scribbles": null,
+				"bboxes": null,
+				"lassos": null
+			},
+			"cascade_config": null,
+			"prompter_class_type": "prototype_pseudo_mixture"
 		}
 	},
-	"points_prototype_simplified":{
-		"procedure_type":"heuristic",
-		"config":{
-		
-			"methods":{
-				
-				"points":["uniform_random"],
-				"scribbles":null,
-				"bboxes":null,
-				"lassos":null
-				
-				},
-			"build_params":{
-			
-				"points":{
-					
+	"points_prototype_simplified": {
+		"procedure_type": "heuristic",
+		"config": {
+			"methods": {
+				"points": [
+					"uniform_random"
+				],
+				"scribbles": null,
+				"bboxes": null,
+				"lassos": null
+			},
+			"build_params": {
+				"points": {
 					"uniform_random": {
 						"n_max": 1
-						}
-					
-					},
-				"scribbles":null,
-				"bboxes":null,
-				"lassos":null
-				
+					}
 				},
-				
-			"mixture_params":null,
-			"prompter_class_type":"simplified_prototype_pseudo_mixture"
+				"scribbles": null,
+				"bboxes": null,
+				"lassos": null
+			},
+			"cascade_config": null,
+			"prompter_class_type": "simplified_prototype_pseudo_mixture"
+		}
+	},
+	"3d_bbox_prototype_simplified": {
+		"procedure_type": "heuristic",
+		"config": {
+			"methods": {
+				"points": null,
+				"scribbles": null,
+				"bboxes": [
+					"orchestrator"
+				],
+				"lassos": null
+			},
+			"build_params": {
+				"points": null,
+				"scribbles": null,
+				"bboxes": {
+					"orchestrator": {
+						"dimensionality": 3,
+						"component_sampling_config": {
+							"dimensionality": 3,
+							"region_extraction_config": {
+								"connectivity": 3,
+								"component_selection_process": "top-k",
+								"top-k": 1
+							}
+						}
+					}
+				},
+				"lassos": null
+			},
+			"cascade_config": {
+				"class_level": {
+					"mode": [
+						"basic_skip"
+					],
+					"basic_skip": {
+						"skip_classes": [
+							"background"
+						]
+					}
+				},
+				"inter_prompt_level": null,
+				"intra_prompt_level": null
+			},
+			"prompter_class_type": "simplified_prototype_mixture"
+		}
+	},
+	"2d_bbox_prototype_simplified": {
+		"procedure_type": "heuristic",
+		"config": {
+			"methods": {
+				"points": null,
+				"scribbles": null,
+				"bboxes": [
+					"orchestrator"
+				],
+				"lassos": null
+			},
+			"build_params": {
+				"points": null,
+				"scribbles": null,
+				"bboxes": {
+					"orchestrator": {
+						"dimensionality": 2,
+						"collapsed_dim": 2,
+						"component_sampling_config": {
+							"dimensionality": 2,
+							"collapsed_dim": 2,
+							"region_extraction_config": {
+								"connectivity": 2,
+								"component_selection_process": "top-k",
+								"top-k": 1,
+								"slice_selection": "center"
+							}
+						}
+					}
+				},
+				"lassos": null
+			},
+			"cascade_config": {
+				"class_level": {
+					"mode": [
+						"basic_skip"
+					],
+					"basic_skip": {
+						"skip_classes": [
+							"background"
+						]
+					}
+				},
+				"inter_prompt_level": null,
+				"intra_prompt_level": null
+			},
+			"prompter_class_type": "simplified_prototype_mixture"
+		}
+	},
+	"2_point_5_d_bbox_prototype_simplified": {
+		"procedure_type": "heuristic",
+		"config": {
+			"methods": {
+				"points": null,
+				"scribbles": null,
+				"bboxes": [
+					"orchestrator"
+				],
+				"lassos": null
+			},
+			"build_params": {
+				"points": null,
+				"scribbles": null,
+				"bboxes": {
+					"orchestrator": {
+						"dimensionality": "2.5D",
+						"collapsed_dim": 2,
+						"component_sampling_config": {
+							"dimensionality": "2.5D",
+							"collapsed_dim": 2,
+							"region_extraction_config": {
+								"connectivity": 2,
+								"component_selection_process": "top-k",
+								"top-k": 1
+							}
+						}
+					}
+				},
+				"lassos": null
+			},
+			"cascade_config": {
+				"class_level": {
+					"mode": [
+						"basic_skip"
+					],
+					"basic_skip": {
+						"skip_classes": [
+							"background"
+						]
+					}
+				},
+				"inter_prompt_level": null,
+				"intra_prompt_level": null
+			},
+			"prompter_class_type": "simplified_prototype_mixture"
 		}
 	}
 }

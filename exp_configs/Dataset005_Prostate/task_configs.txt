@@ -383,5 +383,390 @@
 				]
 			}
 		}
+	},
+	"task_id_13": {
+		"data_sampling": {
+			"sample_group_category": [
+				"all_train",
+				"all_cases"
+			],
+			"image_conf": {
+				"image_channel": [
+					"T2"
+				]
+			}
+		},
+		"infer_info": {
+			"infer_init": "Interactive Init",
+			"infer_edit_bool": false,
+			"sim_empty_fg_automatic": false
+		},
+		"seg_problem": "whole_prostate",
+		"data_transforms": {
+			"semantic_class_mapping": {
+				"background": [
+					"background"
+				],
+				"whole_prostate": [
+					"PZ",
+					"TZ"
+				]
+			}
+		}
+	},
+	"task_id_14": {
+		"data_sampling": {
+			"sample_group_category": [
+				"all_test",
+				"all_cases"
+			],
+			"image_conf": {
+				"image_channel": [
+					"T2"
+				]
+			}
+		},
+		"infer_info": {
+			"infer_init": "Interactive Init",
+			"infer_edit_bool": false,
+			"sim_empty_fg_automatic": false
+		},
+		"seg_problem": "whole_prostate",
+		"data_transforms": {
+			"semantic_class_mapping": {
+				"background": [
+					"background"
+				],
+				"whole_prostate": [
+					"PZ",
+					"TZ"
+				]
+			}
+		}
+	},
+	"task_id_15": {
+		"data_sampling": {
+			"sample_group_category": [
+				"kfold_5_train",
+				"fold_0"
+			],
+			"image_conf": {
+				"image_channel": [
+					"T2"
+				]
+			}
+		},
+		"infer_info": {
+			"infer_init": "Interactive Init",
+			"infer_edit_bool": false,
+			"sim_empty_fg_automatic": false
+		},
+		"seg_problem": "whole_prostate",
+		"data_transforms": {
+			"semantic_class_mapping": {
+				"background": [
+					"background"
+				],
+				"whole_prostate": [
+					"PZ",
+					"TZ"
+				]
+			}
+		}
+	},
+	"task_id_16": {
+		"data_sampling": {
+			"sample_group_category": [
+				"kfold_5_train",
+				"fold_1"
+			],
+			"image_conf": {
+				"image_channel": [
+					"T2"
+				]
+			}
+		},
+		"infer_info": {
+			"infer_init": "Interactive Init",
+			"infer_edit_bool": false,
+			"sim_empty_fg_automatic": false
+		},
+		"seg_problem": "whole_prostate",
+		"data_transforms": {
+			"semantic_class_mapping": {
+				"background": [
+					"background"
+				],
+				"whole_prostate": [
+					"PZ",
+					"TZ"
+				]
+			}
+		}
+	},
+	"task_id_17": {
+		"data_sampling": {
+			"sample_group_category": [
+				"kfold_5_train",
+				"fold_2"
+			],
+			"image_conf": {
+				"image_channel": [
+					"T2"
+				]
+			}
+		},
+		"infer_info": {
+			"infer_init": "Interactive Init",
+			"infer_edit_bool": false,
+			"sim_empty_fg_automatic": false
+		},
+		"seg_problem": "whole_prostate",
+		"data_transforms": {
+			"semantic_class_mapping": {
+				"background": [
+					"background"
+				],
+				"whole_prostate": [
+					"PZ",
+					"TZ"
+				]
+			}
+		}
+	},
+	"task_id_18": {
+		"data_sampling": {
+			"sample_group_category": [
+				"kfold_5_train",
+				"fold_3"
+			],
+			"image_conf": {
+				"image_channel": [
+					"T2"
+				]
+			}
+		},
+		"infer_info": {
+			"infer_init": "Interactive Init",
+			"infer_edit_bool": false,
+			"sim_empty_fg_automatic": false
+		},
+		"seg_problem": "whole_prostate",
+		"data_transforms": {
+			"semantic_class_mapping": {
+				"background": [
+					"background"
+				],
+				"whole_prostate": [
+					"PZ",
+					"TZ"
+				]
+			}
+		}
+	},
+	"task_id_19": {
+		"data_sampling": {
+			"sample_group_category": [
+				"kfold_5_train",
+				"fold_4"
+			],
+			"image_conf": {
+				"image_channel": [
+					"T2"
+				]
+			}
+		},
+		"infer_info": {
+			"infer_init": "Interactive Init",
+			"infer_edit_bool": false,
+			"sim_empty_fg_automatic": false
+		},
+		"seg_problem": "whole_prostate",
+		"data_transforms": {
+			"semantic_class_mapping": {
+				"background": [
+					"background"
+				],
+				"whole_prostate": [
+					"PZ",
+					"TZ"
+				]
+			}
+		}
+	},
+	"task_id_20": {
+		"data_sampling": {
+			"sample_group_category": [
+				"kfold_5_train",
+				[
+					"fold_1",
+					"fold_2",
+					"fold_3",
+					"fold_4"
+				]
+			],
+			"image_conf": {
+				"image_channel": [
+					"T2"
+				]
+			}
+		},
+		"infer_info": {
+			"infer_init": "Interactive Init",
+			"infer_edit_bool": false,
+			"sim_empty_fg_automatic": false
+		},
+		"seg_problem": "whole_prostate",
+		"data_transforms": {
+			"semantic_class_mapping": {
+				"background": [
+					"background"
+				],
+				"whole_prostate": [
+					"PZ",
+					"TZ"
+				]
+			}
+		}
+	},
+	"task_id_21": {
+		"data_sampling": {
+			"sample_group_category": [
+				"kfold_5_train",
+				[
+					"fold_0",
+					"fold_2",
+					"fold_3",
+					"fold_4"
+				]
+			],
+			"image_conf": {
+				"image_channel": [
+					"T2"
+				]
+			}
+		},
+		"infer_info": {
+			"infer_init": "Interactive Init",
+			"infer_edit_bool": false,
+			"sim_empty_fg_automatic": false
+		},
+		"seg_problem": "whole_prostate",
+		"data_transforms": {
+			"semantic_class_mapping": {
+				"background": [
+					"background"
+				],
+				"whole_prostate": [
+					"PZ",
+					"TZ"
+				]
+			}
+		}
+	},
+	"task_id_22": {
+		"data_sampling": {
+			"sample_group_category": [
+				"kfold_5_train",
+				[
+					"fold_0",
+					"fold_1",
+					"fold_3",
+					"fold_4"
+				]
+			],
+			"image_conf": {
+				"image_channel": [
+					"T2"
+				]
+			}
+		},
+		"infer_info": {
+			"infer_init": "Interactive Init",
+			"infer_edit_bool": false,
+			"sim_empty_fg_automatic": false
+		},
+		"seg_problem": "whole_prostate",
+		"data_transforms": {
+			"semantic_class_mapping": {
+				"background": [
+					"background"
+				],
+				"whole_prostate": [
+					"PZ",
+					"TZ"
+				]
+			}
+		}
+	},
+	"task_id_23": {
+		"data_sampling": {
+			"sample_group_category": [
+				"kfold_5_train",
+				[
+					"fold_0",
+					"fold_1",
+					"fold_2",
+					"fold_4"
+				]
+			],
+			"image_conf": {
+				"image_channel": [
+					"T2"
+				]
+			}
+		},
+		"infer_info": {
+			"infer_init": "Interactive Init",
+			"infer_edit_bool": false,
+			"sim_empty_fg_automatic": false
+		},
+		"seg_problem": "whole_prostate",
+		"data_transforms": {
+			"semantic_class_mapping": {
+				"background": [
+					"background"
+				],
+				"whole_prostate": [
+					"PZ",
+					"TZ"
+				]
+			}
+		}
+	},
+	"task_id_24": {
+		"data_sampling": {
+			"sample_group_category": [
+				"kfold_5_train",
+				[
+					"fold_0",
+					"fold_1",
+					"fold_2",
+					"fold_3"
+				]
+			],
+			"image_conf": {
+				"image_channel": [
+					"T2"
+				]
+			}
+		},
+		"infer_info": {
+			"infer_init": "Interactive Init",
+			"infer_edit_bool": false,
+			"sim_empty_fg_automatic": false
+		},
+		"seg_problem": "whole_prostate",
+		"data_transforms": {
+			"semantic_class_mapping": {
+				"background": [
+					"background"
+				],
+				"whole_prostate": [
+					"PZ",
+					"TZ"
+				]
+			}
+		}
 	}
 }

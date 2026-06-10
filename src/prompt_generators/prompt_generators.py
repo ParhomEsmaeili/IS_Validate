@@ -19,8 +19,9 @@ class BasicSpatialPromptGenerator(PromptReformatter):
                 use_mem: bool,
                 sim_methods: dict,
                 sim_build_params: dict,
-                prompt_mixture_params: Union[dict, None],
-                prompter_class_type: str
+                cascade_config: Union[dict, None],
+                prompter_class_type: str,
+                output_conversion: dict = None
                 ):
         '''
         Prompt generation class for generating the interactive spatial prompts for an interaction state.
@@ -55,16 +56,16 @@ class BasicSpatialPromptGenerator(PromptReformatter):
         NOTE: Can also be a Nonetype if there is no prompt of that type being used.
 
         NOTE: Child classes where the prompt generation method may be the same across prompt types
-        e.g. prompt generation D.L models, may  necessitate that the prompt mixture argument denotes the strategy for
+        e.g. prompt generation D.L models, may  necessitate that the cascade config denotes the strategy for
         cross-interaction (e.g., conditioning the model with a prompt prior, or passing all prompt-type requests concurrently 
         through). NOTE: However, prompt-type/method specific args must still be passed through in the build_params.
     
 
-        (OPTIONAL) prompt_mixture: An arbitrarily nested dict denoting a strategy for handling prompt simulation 
+        (OPTIONAL) cascade_config: An arbitrarily nested dict denoting a strategy for handling prompt simulation 
         e.g. class-level, intra-prompt level and inter-prompting level strategies etc.
         
     
-        This prompt mixture arg will control whether/how prompt-methods will interact/condition one another 
+        This cascade config will control whether/how prompt-methods will interact/condition one another 
         during the simulation. 
 
             For example, a structure may look like: 
@@ -95,8 +96,9 @@ class BasicSpatialPromptGenerator(PromptReformatter):
         self.use_mem = use_mem 
         self.sim_methods = sim_methods
         self.sim_build_params = sim_build_params 
-        self.prompt_mixture_params = prompt_mixture_params 
+        self.cascade_config = cascade_config 
         self.prompter_class_type = prompter_class_type
+        self.output_conversion = output_conversion if output_conversion else None
 
         self.prompt_types = list(sim_methods.keys()) 
 
@@ -105,7 +107,7 @@ class BasicSpatialPromptGenerator(PromptReformatter):
         self.interactive_prompter = self.build_prompt_generator() 
 
     @abstractmethod
-    def build_prompt_generator(self): #, sim_device, prompt_methods, prompt_build_params, prompt_mixture_params): 
+    def build_prompt_generator(self): #, sim_device, prompt_methods, sim_build_params, cascade_config): 
         pass
     
     
@@ -227,8 +229,9 @@ class HeuristicSpatialPromptGenerator(BasicSpatialPromptGenerator):
                 semantic_id_dict: dict[str, int],
                 sim_methods:dict, 
                 sim_build_params:dict,
-                prompt_mixture_params:Union[dict, None],
-                prompter_class_type: str):
+                cascade_config:Union[dict, None],
+                prompter_class_type: str,
+                output_conversion: Union[dict, None]):
         
         super().__init__(
                         sim_device=sim_device,
@@ -236,7 +239,8 @@ class HeuristicSpatialPromptGenerator(BasicSpatialPromptGenerator):
                         semantic_id_dict=semantic_id_dict,
                         sim_methods=sim_methods, 
                         sim_build_params=sim_build_params,
-                        prompt_mixture_params=prompt_mixture_params,
+                        cascade_config=cascade_config,
+                        output_conversion=output_conversion,
                         prompter_class_type=prompter_class_type
                         )  
 
@@ -246,15 +250,16 @@ class HeuristicSpatialPromptGenerator(BasicSpatialPromptGenerator):
                             sim_device=self.sim_device,
                             use_mem=self.use_mem,
                             semantic_id_dict=self.semantic_id_dict, 
-                            heuristics=self.sim_methods, 
+                            heuristics=self.sim_methods,
                             heuristic_params=self.sim_build_params,
-                            heuristic_mixtures=self.prompt_mixture_params,
-                            heuristic_class_type=self.prompter_class_type
+                            cascade_config=self.cascade_config,
+                            heuristic_class_type=self.prompter_class_type,
+                            output_conversion=self.output_conversion,
                             )
 
 if __name__=='__main__':
     generator = HeuristicSpatialPromptGenerator(sim_methods={'points':['uniform_random'], 'scribbles':None, 'bbox':None, 'lassos':None},
                                     semantic_id_dict={'tumour':1, 'background':0},
-                                    sim_build_params=None, #{'points':None, 'scribbles':None, 'bbox':None},
-                                    prompt_mixture_params=None)
+                                    sim_build_params=None,
+                                    cascade_config=None)
     generator.generate_prompt({'gt':torch.ones([128,128,128]), 'image':torch.ones([128,128,128])})
