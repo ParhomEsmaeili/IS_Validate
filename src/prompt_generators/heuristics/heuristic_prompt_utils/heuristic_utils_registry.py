@@ -36,6 +36,6 @@ base_registry = {
     'skeletonise': lambda x,y: y
     },
     'bboxes':{
-    'extrema': bbox_from_binary_mask,
+    'orchestrator': bbox_from_binary_mask,
     }
 }

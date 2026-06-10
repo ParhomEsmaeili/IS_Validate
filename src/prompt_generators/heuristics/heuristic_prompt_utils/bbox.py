@@ -399,7 +399,7 @@ def bbox_extrema(
     #for the non-zero voxels. we then take the min and max along the 0th dimension to get the extrema.
     min_i, min_j, min_k = [x.item() for x in torch.min(positions, dim=0)[0]]
     max_i, max_j, max_k = [x.item() for x in torch.max(positions, dim=0)[0]]
-    bbox = torch.tensor([[min_i, min_j, min_k, max_i, max_j, max_k]])
+    bbox = torch.tensor([[min_i, min_j, min_k, max_i, max_j, max_k]], device=binary_mask.device)
     if bbox_args['dimensionality'] == 3:
         #3D case: We check if any min = max because this is a failure! We should have not reached this
         #position.

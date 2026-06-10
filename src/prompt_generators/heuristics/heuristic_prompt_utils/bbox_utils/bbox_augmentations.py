@@ -75,6 +75,10 @@ def generate_jitter(
     raw_param_values = sampling_config['jitter_parameterisation']
     if isinstance(raw_param_values, list):
         raw_param_values = torch.tensor(raw_param_values)
+
+    device = context_config['bbox_extrema'].device if context_config is not None and 'bbox_extrema' in context_config else torch.device('cpu')
+    if isinstance(raw_param_values, torch.Tensor) and raw_param_values.device != device:
+        raw_param_values = raw_param_values.to(device=device)
     
     if sampling_config['dimensionality']['expected_dimensionality'] not in [2, 3]:
         raise ValueError("Sampling config 'dimensionality' must be either 2 or 3.")
@@ -108,7 +112,7 @@ def generate_jitter(
         #Pad the 2D parameterisation (2 elements) to 3D (3 elements) by inserting 0
         #at the collapsed dimension position.
         raw_param_padded = copy.deepcopy(raw_param_values)
-        jitter_parameterisation = torch.zeros(3)
+        jitter_parameterisation = torch.zeros(3, device=device)
         non_collapsed_dims = [d for d in range(3) if d != collapsed_dim]
         for i, dim in enumerate(non_collapsed_dims):
             jitter_parameterisation[dim] = raw_param_padded[i]
@@ -153,7 +157,7 @@ def generate_jitter(
         #which is also not what we want! 
 
     elif sampling_config['jitter_config']['type'] == 'relative_array':
-        sampling_thresholds = jitter_parameterisation * torch.tensor(context_config['sampling_dimensions'])
+        sampling_thresholds = jitter_parameterisation * torch.tensor(context_config['sampling_dimensions'], device=device)
         #We take the size of the array in each dimension and multiply by the relative jitter parameterisation
         #to get the absolute jitter thresholds.
     else:
@@ -169,7 +173,7 @@ def generate_jitter(
     if sampling_config['jitter_config']['jitter_symmetric']:
         if sampling_config['jitter_config']['sampling_mechanism'] == 'uniform_integer':
             #If we use a symmetric jitter, then only need to sample one jitter value per dimension.
-            uniform_samples = torch.empty(3).uniform_(-1, 1)
+            uniform_samples = torch.empty(3, device=device).uniform_(-1, 1)
             jitter_samples = (uniform_samples * sampling_thresholds).round().int()
             #Why round and int? Well, we need to displace the coordinate by an integer amount in the voxel representation
             #and we choose to round instead of ceil or floor because of the following diagrams.
@@ -189,7 +193,7 @@ def generate_jitter(
         if sampling_config['jitter_config']['sampling_mechanism'] == 'uniform_integer':
 
             #We do not use a symmetric jitter, so we need to sample two jitter values per dimension, min and max extrema jitter
-            uniform_samples = torch.empty(6).uniform_(-1, 1)
+            uniform_samples = torch.empty(6, device=device).uniform_(-1, 1)
             #Hence we will sample uniformly between -1 and 1 and then multiply by the parameterisation! 
             thresholds_expanded = sampling_thresholds.repeat(2)
             jitter = ((uniform_samples * thresholds_expanded).round().int()).unsqueeze(0) 
