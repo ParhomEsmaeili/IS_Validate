@@ -47,12 +47,12 @@ def set_parse():
     parser.add_argument('--data_root', type=str, default=codebase_dir)
     parser.add_argument('--dataset_name', type=str, default='Dataset005_Prostate')
     parser.add_argument('--app_root', type=str, 
-                        # default='/home/parhomesmaeili/IS_Codebase_Forks/nnInteractive_Fork'
-                        default='/home/parhomesmaeili/MY METHOD/'
+                        default='/home/parhomesmaeili/IS_Codebase_Forks/nnInteractive_Fork'
+                        # default='/home/parhomesmaeili/MY METHOD/'
     ) 
     #NOTE:Just set for debugging purposes.
     #This acts as the name of the app, but also temporarily acts as the relative path name within the input_applications folder in the app root folder.
-    parser.add_argument('--app_name', type=str, default='CLoPA') #'nnInteractive_App')
+    parser.add_argument('--app_name', type=str, default='nnInteractive_App')
     parser.add_argument('--metrics_root', type=str, default=os.path.join(codebase_dir, 'results'))
     parser.add_argument('--seg_root', type=str, default=os.path.join(codebase_dir, 'results'))
     parser.add_argument('--continue_exec_root', type=str, default='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/continue_execution_files') #None
@@ -73,7 +73,7 @@ def set_parse():
     #########################
     
     #Name of the experiment, used to store results, checkpoints for continuation/auto
-    parser.add_argument('--experiment_basename', type=str, required=False, default='clopatrain_debug_experiment6_run1') #None)
+    parser.add_argument('--experiment_basename', type=str, required=False, default=None)
     #Runtime environment arguments/system control.
     parser.add_argument('--continue_execution', type=str2bool, default=False)
     #seeding
