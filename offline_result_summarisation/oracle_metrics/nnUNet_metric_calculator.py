@@ -28,7 +28,7 @@ monai_transforms = Compose([
 def process_metric_config(metric_config, spacing_config):
     #Function which processes the metric configs for cases where we do not have a trivial config.
     #E.g., for NSD where we may want to calculate across multiple tolerance values.
-    for metric_name, conf in metric_config.items():
+    for metric_name, conf in metric_config['metrics'].items():
         if metric_name == 'NSD':
             if 'tolerance_mm' not in conf:
                 assert 'tolerance_sf' in conf, 'If no tolerance_mm provided for NSD metric config, then must provide a tolerance_sf value to calculate the tolerance based on the dataset voxel spacing, please check your metric configs.'
@@ -61,7 +61,7 @@ def write_metrics(metrics_dict, metrics_configs, semantic_id_dict, output_base_f
             case_name=case,
             csv_paths=metric_paths_dict,
             tracked_metrics=metrics,
-            metrics_configs=metrics_configs,
+            metrics_configs=metrics_configs['metrics'],
         )
     print('done writing metrics.')
 
@@ -288,7 +288,7 @@ if __name__ == "__main__":
     # Initialise the scoring wrapper
     scoring_wrapper = BaseScoringWrapper(
         calc_device=torch.device(0),
-        metrics_configs=metric_config, 
+        metrics_configs=metric_config['metrics'], 
         semantic_id_dict=semantic_id_dict,
     )
 
