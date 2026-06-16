@@ -1,5 +1,4 @@
 #!/bin/bash
-
 SCRIPT_DIR="$( cd "$(dirname "${BASH_SOURCE[0]}")" && pwd )"
 
 
@@ -36,7 +35,7 @@ fi
 SPLIT_NAME=$MASTER_SPLIT
 
 
-REFERENCE_METRICS_ROOT="/home/parhomesmaeili/IS-Validation-Framework/Results_Summary/$SPLIT_NAME"
+REFERENCE_METRICS_ROOT="$MASTER_RESULTS_ROOT/Results_Summary/$SPLIT_NAME"
 
 NNUNET_STATISTIC=("${MASTER_NNUNET_STATISTIC[@]}")
 NNUNET_BOUND=("${MASTER_NNUNET_BOUND[@]}")
@@ -69,7 +68,7 @@ for RUN_NUM in "${RUN_NUMS[@]}"; do
         for APP in "${APPS[@]}"; do
             echo "=============================================="
             echo "Merging episode wise metrics for dataset $DATASET_NAME application: $APP"
-            GREPPING_EPISODES_PATH="/home/parhomesmaeili/IS-Validation-Framework/Results/$SPLIT_NAME/$DATASET_NAME";
+            GREPPING_EPISODES_PATH="$MASTER_RESULTS_ROOT/Results/$SPLIT_NAME/$DATASET_NAME";
             # echo $GREPPING_EPISODES_PATH;
             echo "=============================================="
 
@@ -86,14 +85,14 @@ for RUN_NUM in "${RUN_NUMS[@]}"; do
                 #Now lets construct the paths to each episode's metrics, which we will pass to the merging script.
                 # EPISODE_METRIC_ROOTS=()
                 #we will need to start off with the pre-adaptation phase.
-                EPISODE_METRIC_ROOTS=("/home/parhomesmaeili/IS-Validation-Framework/Results_Summary/$SPLIT_NAME/$MASTER_PRETRAINED/$DATASET_NAME/$PROMPTER/run$RUN_NUM")
+                EPISODE_METRIC_ROOTS=("$MASTER_RESULTS_ROOT/Results_Summary/$SPLIT_NAME/$MASTER_PRETRAINED/$DATASET_NAME/$PROMPTER/run$RUN_NUM")
                 
-                # LOGS_DIR="/home/parhomesmaeili/IS-Validation-Framework/Results/$TRAIN_SPLIT_NAME/Results/$DATASET_NAME/logs"
+                # LOGS_DIR="$MASTER_RESULTS_ROOT/Results/$TRAIN_SPLIT_NAME/Results/$DATASET_NAME/logs"
                 TRAIN_LOGS_SUBPATH=()
                 for ((EPISODE_INDEX=0; EPISODE_INDEX<$EPISODE_NUM; EPISODE_INDEX++)); do
                     EXP_NAME=$APP-episode$EPISODE_INDEX-dataset${DATASET_ID}-$PROMPTER-run$RUN_NUM
-                    EPISODE_METRIC_ROOTS+=("/home/parhomesmaeili/IS-Validation-Framework/Results_Summary/$SPLIT_NAME/$APP-episode$EPISODE_INDEX/$DATASET_NAME/$PROMPTER/run$RUN_NUM")
-                    TEST_LOG_DIR="/home/parhomesmaeili/IS-Validation-Framework/Results/$SPLIT_NAME/$DATASET_NAME/$EXP_NAME"
+                    EPISODE_METRIC_ROOTS+=("$MASTER_RESULTS_ROOT/Results_Summary/$SPLIT_NAME/$APP-episode$EPISODE_INDEX/$DATASET_NAME/$PROMPTER/run$RUN_NUM")
+                    TEST_LOG_DIR="$MASTER_RESULTS_ROOT/Results/$SPLIT_NAME/$DATASET_NAME/$EXP_NAME"
                     TEST_LOG_PATH="$TEST_LOG_DIR/experiment_${EXP_NAME}_logs.log"
                     #Now we read from the log file. We grep the name of the design run.
                     REFERENCE_CHECKPOINT=$(grep "reference_experiment_checkpoint" "$TEST_LOG_PATH" | sed 's/.*\/\([^/]*\)\.pkl.*/\1/')    
@@ -106,7 +105,7 @@ for RUN_NUM in "${RUN_NUMS[@]}"; do
                 fi
                 echo "Reference checkpoint for all episodes: ${TRAIN_LOGS_SUBPATH[0]}"
                 REFERENCE_LOGS_SUBPATH="${TRAIN_LOGS_SUBPATH[0]}"
-                REFERENCE_LOG_PATH="/home/parhomesmaeili/IS-Validation-Framework/Results/$TRAIN_SPLIT_NAME/$DATASET_NAME/$REFERENCE_LOGS_SUBPATH/experiment_${REFERENCE_LOGS_SUBPATH}_logs.log"
+                REFERENCE_LOG_PATH="$MASTER_RESULTS_ROOT/Results/$TRAIN_SPLIT_NAME/$DATASET_NAME/$REFERENCE_LOGS_SUBPATH/experiment_${REFERENCE_LOGS_SUBPATH}_logs.log"
                 
                 echo "==============================================="
                 echo "Reference log path for extracting adaptation timestamps for pseudotime fitting: $REFERENCE_LOG_PATH"
@@ -159,7 +158,7 @@ print(' '.join(matches))
 ")
 
                 # Extract total samples from dataset_split.json using CONFIG
-                DATASET_SPLIT_JSON="/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/${DATASET_NAME}/dataset_split.json"
+                DATASET_SPLIT_JSON="$MASTER_PROJECT_ROOT/IS_Validate/datasets/${DATASET_NAME}/dataset_split.json"
                 TOTAL_SAMPLES=$(python3 -c "
 import json
 import sys
@@ -205,13 +204,13 @@ except Exception as e:
                     exit 1
                 fi
                 EPISODE_NUM="0"
-                EPISODE_METRIC_ROOTS=("/home/parhomesmaeili/IS-Validation-Framework/Results_Summary/$SPLIT_NAME/$APP/$DATASET_NAME/$PROMPTER/run$RUN_NUM")
+                EPISODE_METRIC_ROOTS=("$MASTER_RESULTS_ROOT/Results_Summary/$SPLIT_NAME/$APP/$DATASET_NAME/$PROMPTER/run$RUN_NUM")
                 
                 #NOTE: This will break if we have not passed 
                 REFERENCE_LOGS_SUBPATH="${DUMMY_LOGS_SUBPATH[0]}"
                 
                 # Extract total samples for non-episodic case from dataset_split.json using CONFIG
-                DATASET_SPLIT_JSON="/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/datasets/${DATASET_NAME}/dataset_split.json"
+                DATASET_SPLIT_JSON="$MASTER_PROJECT_ROOT/IS_Validate/datasets/${DATASET_NAME}/dataset_split.json"
                 TOTAL_SAMPLES=$(python3 -c "
 import json
 import sys
@@ -238,7 +237,7 @@ except Exception as e:
             fi  
     
             OUTPUT_SUBPATH="$APP/$DATASET_NAME/$PROMPTER/run$RUN_NUM"
-            OUTPUT_RESULT_ROOT="/home/parhomesmaeili/IS-Validation-Framework/Results_Pseudotime/$SPLIT_NAME/$OUTPUT_SUBPATH";
+            OUTPUT_RESULT_ROOT="$MASTER_RESULTS_ROOT/Results_Pseudotime/$SPLIT_NAME/$OUTPUT_SUBPATH";
             if [[ "$ADAPTED_FLAG" == "true" ]]; then
                 echo "Running episode merging for episodic app: $APP with roots ${EPISODE_METRIC_ROOTS[@]}, which will involve merging across episodes with padding using the pretrained model metrics for the pre-adaptation phase."
                 python3 $SCRIPT_DIR/"merge_episodes.py" \

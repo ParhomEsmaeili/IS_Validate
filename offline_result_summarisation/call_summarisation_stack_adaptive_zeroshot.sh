@@ -1,13 +1,16 @@
 #!/bin/bash
+
+export MASTER_RESULTS_ROOT="/home/parhomesmaeili/IS-Validation-Framework/MICCAI_2026_Storage"
+export MASTER_NNUNET_METRICS_ROOT="/home/parhomesmaeili/Helmholtz Group/nnUNet_miccai_main_2026"
+export MASTER_NNUNET_METRICS_SUBFOLDER="nnUNet_Metrics/holdoutset"
+export MASTER_PROJECT_ROOT="/home/parhomesmaeili/IS-Validation-Framework"
 export MASTER_PRETRAINED="nnintv1" #This is used to determine which pretrained method to pull results from for
 #padding purposes on the pseudo-time conversion!
 export MASTER_SPLIT="holdoutset" #"designset"
 declare -ax MASTER_DATASET_NAMES=("Dataset001_BrainTumour" "Dataset003_Liver" "Dataset004_Hippocampus" "Dataset005_Prostate" "Dataset006_Lung" "Dataset007_Pancreas" "Dataset008_HepaticVessel" "Dataset010_Colon")
 declare -ax MASTER_DATASET_IDS=("001" "003" "004" "005" "006" "007" "008" "010")
-# declare -ax MASTER_DATASET_NAMES=("Dataset001_BrainTumour" "Dataset004_Hippocampus" "Dataset005_Prostate" "Dataset006_Lung" "Dataset007_Pancreas" "Dataset010_Colon")
-# declare -ax MASTER_DATASET_IDS=("001" "004" "005" "006" "007" "010")
 
-CONF_NAME="adatest2_nnint_comparison_means"
+CONF_NAME="clopa2_nnint_comparison_means"
 
 declare -ax MASTER_NNUNET_STATISTIC=("gaussian") #("quantile") #("gaussian") #("quantile") #("gaussian")
 declare -ax MASTER_NNUNET_BOUND=("0") #("0.5") #("0") #("0.5") #("0") #("0.5") #("0")
@@ -91,6 +94,8 @@ declare -ax MASTER_APPS=("nnintv1" "adatest2") #"adatest4" "adatest5" "adatest6"
 declare -ax MASTER_RUN_NUMS=("-aggregated") #We run it only on the aggregated runs now, as the single runs can be too volatile to obtain a meaningful metric here.
 source ./trajectory_metrics/num_of_samples_run.sh
 
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 # # # # # #Number crunching mostly over. Time for plotting and stat sig tests. this depends on the apps we have calculated, so
 # # # # # #we keep it at the end here so we can avoid re-running the whole pipeline if we want to permute the combination of apps.
 
@@ -103,7 +108,7 @@ declare -ax MASTER_CONFIG_NAME=$CONF_NAME"_traj"
 # # # # # # # source ./trajectory_metrics/generate_pseudotime_tensorboard.sh
 
 declare -ax MASTER_CONFIG_NAME=$CONF_NAME"_final_episode_comparison"
-declare -ax MASTER_APPS=("nnintv1" "adatest2-episodefinal") #"adatest4-episodefinal" "adatest5-episodefinal" "adatest6-episodefinal") #"adatest2-episode3")
+declare -ax MASTER_APPS=("nnintv1" "adatest2-episodefinal") 
 source ./ranking_and_stat_tests/execute_sig_and_ranking.sh
 
 # # declare -ax MASTER_CONFIG_NAME="zero_shot_baseline_subset" #full"
@@ -111,6 +116,9 @@ source ./ranking_and_stat_tests/execute_sig_and_ranking.sh
 # # declare -ax MASTER_APPS=("segvolv1" "nnintv1")
 # # source ./ranking_and_stat_tests/execute_sig_and_ranking.sh
 
+#NOTE: For now we will depend on this as the trajectory stat test is not
+# implemented correctly with the assumption of independence between sample 
+# pairs required for the wilcoxon test. Will be rectified.
 
 declare -ax MASTER_APPS=("nnintv1" "adatest2") #"adatest4" "adatest5" "adatest6") #"adatest2")
 declare -ax MASTER_CONFIG_NAME=$CONF_NAME"_traj"
@@ -119,16 +127,11 @@ source ./ranking_and_stat_tests/execute_sig_and_ranking_traj.sh
 # #Now generate tables.
 # #First the snapshot.
 
-# declare -ax MASTER_APPS=("sammed2dv1" "sam2v1" "segvolv1" "sammed3dv1" "nnintv1")
-# declare -ax MASTER_APPS=("segvolv1" "nnintv1")
-# declare -ax MASTER_CONFIG_NAME="zero_shot_baseline_subset"
-# source ./table_generation/table_generator_run.sh
-
 declare -ax MASTER_APPS=("nnintv1" "adatest2-episodefinal") #"adatest4-episodefinal" "adatest5-episodefinal" "adatest6-episodefinal") #"adatest2-episode3")
 declare -ax MASTER_CONFIG_NAME=$CONF_NAME"_final_episode_comparison"
 source ./table_generation/table_generator_run.sh
 
 # #Then the trajectory table.
-declare -ax MASTER_APPS=("nnintv1" "adatest2") #"adatest4" "adatest5" "adatest6") #"adatest2")
+declare -ax MASTER_APPS=("nnintv1" "adatest2")
 declare -ax MASTER_CONFIG_NAME=$CONF_NAME"_traj"
 source ./table_generation/table_generator_run_traj.sh

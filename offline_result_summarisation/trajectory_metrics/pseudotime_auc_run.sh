@@ -31,10 +31,6 @@ RUN_NUMS=("${MASTER_RUN_NUMS[@]}") #("-aggregated")
 SPLIT_NAME=$MASTER_SPLIT
 REFERENCE_FILE="all_pseudotime_metrics.csv"
 
-QUANTILE="0.5"
-METRICS_CONFIG='{"all_auc_summaries.csv": {"Dice_auc_mean": null, "NSD_auc_mean": null}, "all_iteration_summaries.csv": {"Dice_mean": {"rows": ["Interactive Init", "Interactive Edit Iter 100"]}, "NSD_mean": {"rows": ["Interactive Init", "Interactive Edit Iter 100"]}}, "summarised_num_interactions_fitting.csv": {"Normalised_Mean_NOI": {"rows": ["quantile_Q = '${QUANTILE}'"]}, "Failure_Cases_Fraction": {"rows": ["quantile_Q = '${QUANTILE}'"]}}}'
-
-
 #Now we do per-run. 
 for index in ${!DATASET_NAMES[@]}; do
   DATASET_NAME=${DATASET_NAMES[$index]};
@@ -45,10 +41,10 @@ for index in ${!DATASET_NAMES[@]}; do
     echo "=============================================="
 
     for RUN_NUM in "${ORIGINAL_RUN_NUMS[@]}"; do
-      ALGORITHM_RESULTS_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/Results_Pseudotime/$SPLIT_NAME";
+      ALGORITHM_RESULTS_ROOT_PATH="$MASTER_RESULTS_ROOT/Results_Pseudotime/$SPLIT_NAME";
       EXPERIMENT_NAME="$APP/$DATASET_NAME/$PROMPTER/run$RUN_NUM";
       OUTPUT_SUBPATH="$APP/$DATASET_NAME/$PROMPTER/run$RUN_NUM"
-      OUTPUT_RESULT_ROOT="/home/parhomesmaeili/IS-Validation-Framework/Results_Pseudotime/$SPLIT_NAME/$OUTPUT_SUBPATH/pseudotime_metrics";
+      OUTPUT_RESULT_ROOT="$MASTER_RESULTS_ROOT/Results_Pseudotime/$SPLIT_NAME/$OUTPUT_SUBPATH/pseudotime_metrics";
       ALGORITHM_RESULTS_ROOT="$ALGORITHM_RESULTS_ROOT_PATH/$EXPERIMENT_NAME/pseudotime_metrics";
       echo ALGORITHM_RESULTS_ROOT: "$ALGORITHM_RESULTS_ROOT";
       echo OUTPUT_RESULT_ROOT: "$OUTPUT_RESULT_ROOT";
@@ -65,7 +61,7 @@ for index in ${!DATASET_NAMES[@]}; do
     
     for RUN_NUM in "${RUN_NUMS[@]}"; do
       if [ "$RUN_NUM" == "-aggregated" ]; then
-        ALGORITHM_RESULTS_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/Results_Pseudotime/$SPLIT_NAME";
+        ALGORITHM_RESULTS_ROOT_PATH="$MASTER_RESULTS_ROOT/Results_Pseudotime/$SPLIT_NAME";
         EXPERIMENT_NAME="$APP/$DATASET_NAME/$PROMPTER/run$RUN_NUM"; #Aggregated runs are stored in summary folder.
       else
         #Raise Exception here because we should have already calculated the trajectory AUCs for the individual runs in the previous loop, and we don't want to accidentally recalculate them here.
@@ -79,7 +75,7 @@ for index in ${!DATASET_NAMES[@]}; do
       done
       
       OUTPUT_SUBPATH="$APP/$DATASET_NAME/$PROMPTER/run$RUN_NUM"
-      OUTPUT_RESULT_ROOT="/home/parhomesmaeili/IS-Validation-Framework/Results_Pseudotime/$SPLIT_NAME/$OUTPUT_SUBPATH/pseudotime_metrics";
+      OUTPUT_RESULT_ROOT="$MASTER_RESULTS_ROOT/Results_Pseudotime/$SPLIT_NAME/$OUTPUT_SUBPATH/pseudotime_metrics";
       ALGORITHM_RESULTS_ROOT="$ALGORITHM_RESULTS_ROOT_PATH/$EXPERIMENT_NAME/pseudotime_metrics";
       REFERENCE_RESULTS_ROOTS=()
       for EXPERIMENT in "${AGGREGATE_EXPERIMENT_NAMES[@]}"; do

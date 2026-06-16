@@ -52,11 +52,11 @@ for index in ${!DATASET_NAMES[@]}; do
           exit 1
         fi      
         echo "Running summarisation on episodic app: $APP for FINAL episode across runs"
-        ALGORITHM_RESULTS_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/Results_Summary/$SPLIT_NAME";
+        ALGORITHM_RESULTS_ROOT_PATH="$MASTER_RESULTS_ROOT/Results_Summary/$SPLIT_NAME";
         EXPERIMENT_NAME="$APP-episodefinal/$DATASET_NAME/$PROMPTER/run$RUN_NUM"; #Aggregated runs are stored in summary folder.
           
         OUTPUT_SUBPATH="$APP-episodefinal/$DATASET_NAME/$PROMPTER/run$RUN_NUM"
-        OUTPUT_RESULT_ROOT="/home/parhomesmaeili/IS-Validation-Framework/Results_Summary/$SPLIT_NAME/$OUTPUT_SUBPATH";
+        OUTPUT_RESULT_ROOT="$MASTER_RESULTS_ROOT/Results_Summary/$SPLIT_NAME/$OUTPUT_SUBPATH";
         ALGORITHM_RESULTS_ROOT="$ALGORITHM_RESULTS_ROOT_PATH/$EXPERIMENT_NAME/metrics";
         echo ALGORITHM_RESULTS_ROOT: "$ALGORITHM_RESULTS_ROOT";
         echo OUTPUT_RESULT_ROOT: "$OUTPUT_RESULT_ROOT";
@@ -75,9 +75,9 @@ for index in ${!DATASET_NAMES[@]}; do
       for RUN_NUM in "${RUN_NUMS[@]}"; do
         
         if [ "$RUN_NUM" == "-aggregated" ]; then
-          EPISODE_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/Results/$SPLIT_NAME/$DATASET_NAME";
+          EPISODE_ROOT_PATH="$MASTER_RESULTS_ROOT/Results/$SPLIT_NAME/$DATASET_NAME";
         else
-          EPISODE_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/Results/$SPLIT_NAME/$DATASET_NAME";
+          EPISODE_ROOT_PATH="$MASTER_RESULTS_ROOT/Results/$SPLIT_NAME/$DATASET_NAME";
           # EXPERIMENT_NAME="$APP-dataset${DATASET_ID}-$PROMPTER-run$RUN_NUM";
         fi
         
@@ -103,13 +103,13 @@ for index in ${!DATASET_NAMES[@]}; do
         if [ "$EPISODE_NUM" == "0" ]; then
           echo "Running summarisation on non-episodic app: $APP"
           OUTPUT_SUBPATH="$APP/$DATASET_NAME/$PROMPTER/run$RUN_NUM"
-          OUTPUT_RESULT_ROOT="/home/parhomesmaeili/IS-Validation-Framework/Results_Summary/$SPLIT_NAME/$OUTPUT_SUBPATH";
+          OUTPUT_RESULT_ROOT="$MASTER_RESULTS_ROOT/Results_Summary/$SPLIT_NAME/$OUTPUT_SUBPATH";
                   
           if [ "$RUN_NUM" == "-aggregated" ]; then
-            ALGORITHM_RESULTS_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/Results_Summary/$SPLIT_NAME";
+            ALGORITHM_RESULTS_ROOT_PATH="$MASTER_RESULTS_ROOT/Results_Summary/$SPLIT_NAME";
             EXPERIMENT_NAME="$APP/$DATASET_NAME/$PROMPTER/run$RUN_NUM";
           else
-            ALGORITHM_RESULTS_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/Results/$SPLIT_NAME/$DATASET_NAME";
+            ALGORITHM_RESULTS_ROOT_PATH="$MASTER_RESULTS_ROOT/Results/$SPLIT_NAME/$DATASET_NAME";
             EXPERIMENT_NAME="$APP-dataset${DATASET_ID}-$PROMPTER-run$RUN_NUM";
           fi
           ALGORITHM_RESULTS_ROOT="$ALGORITHM_RESULTS_ROOT_PATH/$EXPERIMENT_NAME/metrics";
@@ -126,14 +126,14 @@ for index in ${!DATASET_NAMES[@]}; do
           echo "Running summarisation on episodic app: $APP for episode num: $EPISODE_NUM"
           for ((ADAPTATION_EPISODE=0; ADAPTATION_EPISODE<$EPISODE_NUM; ADAPTATION_EPISODE++)); do
             if [ "$RUN_NUM" == "-aggregated" ]; then
-              ALGORITHM_RESULTS_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/Results_Summary/$SPLIT_NAME";
+              ALGORITHM_RESULTS_ROOT_PATH="$MASTER_RESULTS_ROOT/Results_Summary/$SPLIT_NAME";
               EXPERIMENT_NAME="$APP-episode$ADAPTATION_EPISODE/$DATASET_NAME/$PROMPTER/run$RUN_NUM"; #Aggregated runs are stored in summary folder.
             else
-              ALGORITHM_RESULTS_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/Results/$SPLIT_NAME/$DATASET_NAME";
+              ALGORITHM_RESULTS_ROOT_PATH="$MASTER_RESULTS_ROOT/Results/$SPLIT_NAME/$DATASET_NAME";
               EXPERIMENT_NAME="$APP-episode$ADAPTATION_EPISODE-dataset${DATASET_ID}-$PROMPTER-run$RUN_NUM";
             fi
             OUTPUT_SUBPATH="$APP-episode$ADAPTATION_EPISODE/$DATASET_NAME/$PROMPTER/run$RUN_NUM"
-            OUTPUT_RESULT_ROOT="/home/parhomesmaeili/IS-Validation-Framework/Results_Summary/$SPLIT_NAME/$OUTPUT_SUBPATH";
+            OUTPUT_RESULT_ROOT="$MASTER_RESULTS_ROOT/Results_Summary/$SPLIT_NAME/$OUTPUT_SUBPATH";
             ALGORITHM_RESULTS_ROOT="$ALGORITHM_RESULTS_ROOT_PATH/$EXPERIMENT_NAME/metrics";
             echo ALGORITHM_RESULTS_ROOT: "$ALGORITHM_RESULTS_ROOT";
             echo OUTPUT_RESULT_ROOT: "$OUTPUT_RESULT_ROOT";

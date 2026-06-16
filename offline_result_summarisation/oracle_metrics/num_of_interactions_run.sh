@@ -20,7 +20,7 @@ echo "  Apps: ${APPS[@]}"
 echo "  Datasets: ${DATASET_NAMES[@]}"
 echo "=============================================="
 
-NNUNET_ROOT_PATH="/home/parhomesmaeili/Helmholtz Group/MICCAI2026_nnunet/nnUNet_Metrics_$SPLIT_NAME"
+NNUNET_ROOT_PATH="$MASTER_NNUNET_METRICS_ROOT/$MASTER_NNUNET_METRICS_SUBFOLDER"
 # RUN_NUMS=("1" "2" "3")
 RUN_NUMS=("${MASTER_RUN_NUMS[@]}") #("1" "2" "3" "-aggregated")
 INFER_INFO='{"init": "Interactive Init", "edit": 100}'
@@ -41,7 +41,7 @@ for index in ${!DATASET_NAMES[@]}; do
     for APP in "${APPS[@]}"; do
       for RUN_NUM in "${RUN_NUMS[@]}"; do
         if [ "$RUN_NUM" == "-aggregated" ]; then
-          ALGORITHM_RESULTS_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/Results_Summary/$SPLIT_NAME";
+          ALGORITHM_RESULTS_ROOT_PATH="$MASTER_RESULTS_ROOT/Results_Summary/$SPLIT_NAME";
           EXPERIMENT_NAME="$APP-episodefinal/$DATASET_NAME/$PROMPTER/run$RUN_NUM"; #Aggregated runs are stored in summary folder.
           # EXPERIMENT_NAME="$APP/$DATASET_NAME/$PROMPTER/run$RUN_NUM"; #Aggregated runs are stored in summary folder.
         else
@@ -50,7 +50,7 @@ for index in ${!DATASET_NAMES[@]}; do
         fi
 
         OUTPUT_SUBPATH=$EXPERIMENT_NAME #"$APP-episodefinal/$DATASET_NAME/$PROMPTER/run$RUN_NUM"
-        OUTPUT_RESULT_ROOT="/home/parhomesmaeili/IS-Validation-Framework/Results_Summary/$SPLIT_NAME/$OUTPUT_SUBPATH";
+        OUTPUT_RESULT_ROOT="$MASTER_RESULTS_ROOT/Results_Summary/$SPLIT_NAME/$OUTPUT_SUBPATH";
         ALGORITHM_RESULTS_PATH="$ALGORITHM_RESULTS_ROOT_PATH/$EXPERIMENT_NAME/metrics/$REFERENCE_METRIC/$REFERENCE_FILE";
         REFERENCE_RESULT_PATH="$NNUNET_ROOT_PATH/$DATASET_NAME/nnUNet_metrics/$REFERENCE_METRIC/$REFERENCE_FILE";
         python3 "$SCRIPT_DIR/num_of_interaction.py" \
@@ -65,14 +65,14 @@ for index in ${!DATASET_NAMES[@]}; do
     done;
   else
 
-    EPISODES_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/Results/$SPLIT_NAME/$DATASET_NAME"
+    EPISODES_ROOT_PATH="$MASTER_RESULTS_ROOT/Results/$SPLIT_NAME/$DATASET_NAME"
     for APP in "${APPS[@]}"; do
       for RUN_NUM in "${RUN_NUMS[@]}"; do
         if [ "$RUN_NUM" == "-aggregated" ]; then
-          ALGORITHM_RESULTS_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/Results_Summary/$SPLIT_NAME";
+          ALGORITHM_RESULTS_ROOT_PATH="$MASTER_RESULTS_ROOT/Results_Summary/$SPLIT_NAME";
           # EXPERIMENT_NAME="$APP/$DATASET_NAME/$PROMPTER/run$RUN_NUM"; #Aggregated runs are stored in summary folder.
         else
-          ALGORITHM_RESULTS_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/Results/$SPLIT_NAME/$DATASET_NAME";
+          ALGORITHM_RESULTS_ROOT_PATH="$MASTER_RESULTS_ROOT/Results/$SPLIT_NAME/$DATASET_NAME";
           # EXPERIMENT_NAME="$APP-dataset${DATASET_ID}-$PROMPTER-run$RUN_NUM";
         fi
         
@@ -99,15 +99,15 @@ for index in ${!DATASET_NAMES[@]}; do
           echo "Running NoI extraction on non-episodic app: $APP"
           
           if [ "$RUN_NUM" == "-aggregated" ]; then
-            # ALGORITHM_RESULTS_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/Results_Summary/$SPLIT_NAME";
+            # ALGORITHM_RESULTS_ROOT_PATH="$MASTER_RESULTS_ROOT/Results_Summary/$SPLIT_NAME";
             EXPERIMENT_NAME="$APP/$DATASET_NAME/$PROMPTER/run$RUN_NUM"; #Aggregated runs are stored in summary folder.
           else
-            # ALGORITHM_RESULTS_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/Results/$SPLIT_NAME/$DATASET_NAME";
+            # ALGORITHM_RESULTS_ROOT_PATH="$MASTER_RESULTS_ROOT/Results/$SPLIT_NAME/$DATASET_NAME";
             EXPERIMENT_NAME="$APP-dataset${DATASET_ID}-$PROMPTER-run$RUN_NUM";
           fi
           # EXPERIMENT_NAME="$APP-dataset${DATASET_ID}-$PROMPTER-run$RUN_NUM";
           OUTPUT_SUBPATH="$APP/$DATASET_NAME/$PROMPTER/run$RUN_NUM"
-          OUTPUT_RESULT_ROOT="/home/parhomesmaeili/IS-Validation-Framework/Results_Summary/$SPLIT_NAME/$OUTPUT_SUBPATH";
+          OUTPUT_RESULT_ROOT="$MASTER_RESULTS_ROOT/Results_Summary/$SPLIT_NAME/$OUTPUT_SUBPATH";
           ALGORITHM_RESULTS_PATH="$ALGORITHM_RESULTS_ROOT_PATH/$EXPERIMENT_NAME/metrics/$REFERENCE_METRIC/$REFERENCE_FILE";
           REFERENCE_RESULT_PATH="$NNUNET_ROOT_PATH/$DATASET_NAME/nnUNet_metrics/$REFERENCE_METRIC/$REFERENCE_FILE";
           python3 "$SCRIPT_DIR/num_of_interaction.py" \
@@ -123,15 +123,15 @@ for index in ${!DATASET_NAMES[@]}; do
           for ((ADAPTATION_EPISODE=0; ADAPTATION_EPISODE<$EPISODE_NUM; ADAPTATION_EPISODE++)); do
             
             if [ "$RUN_NUM" == "-aggregated" ]; then
-              ALGORITHM_RESULTS_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/Results_Summary/$SPLIT_NAME";
+              ALGORITHM_RESULTS_ROOT_PATH="$MASTER_RESULTS_ROOT/Results_Summary/$SPLIT_NAME";
               EXPERIMENT_NAME="$APP-episode$ADAPTATION_EPISODE/$DATASET_NAME/$PROMPTER/run$RUN_NUM"; #Aggregated runs are stored in summary folder.
             else
-              ALGORITHM_RESULTS_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/Results/$SPLIT_NAME/$DATASET_NAME";
+              ALGORITHM_RESULTS_ROOT_PATH="$MASTER_RESULTS_ROOT/Results/$SPLIT_NAME/$DATASET_NAME";
               EXPERIMENT_NAME="$APP-episode$ADAPTATION_EPISODE-dataset${DATASET_ID}-$PROMPTER-run$RUN_NUM";
             fi
             OUTPUT_SUBPATH="$APP-episode$ADAPTATION_EPISODE/$DATASET_NAME/$PROMPTER/run$RUN_NUM"
 
-            OUTPUT_RESULT_ROOT="/home/parhomesmaeili/IS-Validation-Framework/Results_Summary/$SPLIT_NAME/$OUTPUT_SUBPATH";
+            OUTPUT_RESULT_ROOT="$MASTER_RESULTS_ROOT/Results_Summary/$SPLIT_NAME/$OUTPUT_SUBPATH";
             ALGORITHM_RESULTS_PATH="$ALGORITHM_RESULTS_ROOT_PATH/$EXPERIMENT_NAME/metrics/$REFERENCE_METRIC/$REFERENCE_FILE";
             REFERENCE_RESULT_PATH="$NNUNET_ROOT_PATH/$DATASET_NAME/nnUNet_metrics/$REFERENCE_METRIC/$REFERENCE_FILE";
             python3 "$SCRIPT_DIR/num_of_interaction.py" \

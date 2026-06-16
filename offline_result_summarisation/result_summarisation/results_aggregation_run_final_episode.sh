@@ -28,12 +28,12 @@ REFERENCE_FILE="cross_class_scores.csv"
 for index in ${!DATASET_NAMES[@]}; do
   DATASET_NAME=${DATASET_NAMES[$index]};
   DATASET_ID=${DATASET_IDS[$index]};
-  EPISODES_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/Results/$SPLIT_NAME/$DATASET_NAME"
+  EPISODES_ROOT_PATH="$MASTER_RESULTS_ROOT/Results/$SPLIT_NAME/$DATASET_NAME"
   for METRIC in "${METRICS[@]}"; do
     
     for APP in "${APPS[@]}"; do
       
-      ALGORITHM_RESULTS_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/Results/$SPLIT_NAME/$DATASET_NAME"
+      ALGORITHM_RESULTS_ROOT_PATH="$MASTER_RESULTS_ROOT/Results/$SPLIT_NAME/$DATASET_NAME"
   
       if [[ "$APP" == *"adatest"* ]]; then
         echo "========================================="
@@ -120,10 +120,10 @@ for index in ${!DATASET_NAMES[@]}; do
         # Only process if we found all valid run
         if [ ${#ALGORITHM_RESULTS_ROOTS[@]} -gt 0 ] && [ ${#ALGORITHM_RESULTS_ROOTS[@]} -eq ${#RUN_NUMS[@]} ]; then
           # #First lets move over the per-run results to results summary for ease of downstream use......
-          # cp -r "${ALGORITHM_RESULTS_ROOTS[@]}" "/home/parhomesmaeili/IS-Validation-Framework/Results_Summary/$SPLIT_NAME/$APP/$DATASET_NAME/$PROMPTER/"
+          # cp -r "${ALGORITHM_RESULTS_ROOTS[@]}" "$MASTER_RESULTS_ROOT/Results_Summary/$SPLIT_NAME/$APP/$DATASET_NAME/$PROMPTER/"
           echo ALGORITHM_RESULTS_ROOTS: "${ALGORITHM_RESULTS_ROOTS[@]}"
           OUTPUT_SUBPATH="$APP-episodefinal/$DATASET_NAME/$PROMPTER/run-aggregated"
-          OUTPUT_RESULT_ROOT="/home/parhomesmaeili/IS-Validation-Framework/Results_Summary/$SPLIT_NAME/$OUTPUT_SUBPATH";
+          OUTPUT_RESULT_ROOT="$MASTER_RESULTS_ROOT/Results_Summary/$SPLIT_NAME/$OUTPUT_SUBPATH";
 
           # Write reference paths JSON before aggregation (no trailing comma)
           REFERENCE_JSON_PATH="$OUTPUT_RESULT_ROOT/reference_paths.json"

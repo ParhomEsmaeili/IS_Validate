@@ -22,7 +22,6 @@ DICE_ITERATION_STATISTIC=("${MASTER_DICE_ITERATION_STATISTIC[@]}")
 NSD_ITERATION_STATISTIC=("${MASTER_NSD_ITERATION_STATISTIC[@]}")
 NOI_STATISTIC=("${MASTER_NOI_STATISTIC[@]}")
 METRICS_CONFIG="{\"Dice_auc_${DICE_AUC_STATISTIC[0]}\": null, \"NSD_auc_${NSD_AUC_STATISTIC[0]}\": null, \"Dice_${DICE_ITERATION_STATISTIC[0]}\": [\"Interactive Init\", \"Interactive Edit Iter 100\"], \"NSD_${NSD_ITERATION_STATISTIC[0]}\": [\"Interactive Init\", \"Interactive Edit Iter 100\"], \"Normalised_${NOI_STATISTIC[0]^}_NOI\": null, \"Failure_Cases_Fraction\": null}"
-# METRICS_CONFIG='{\"Dice_auc_${DICE_AUC_STATISTIC[0]}\": null, "NSD_auc_${NSD_AUC_STATISTIC[0]}": null, "Dice_${DICE_ITERATION_STATISTIC[0]}": ["Interactive Init", "Interactive Edit Iter 100"], "NSD_${NSD_ITERATION_STATISTIC[0]}": ["Interactive Init", "Interactive Edit Iter 100"], "Normalised_${NOI_STATISTIC[0]}_NOI": null, "Failure_Cases_Fraction": null}'
 EPOCH=("${MASTER_PSEUDOTIME_NOS_EPOCH[@]}") 
 
 
@@ -45,7 +44,7 @@ TRAJECTORY_REFERENCE_FILE="all_trajectory_aucs.csv"
 # VARIABILITY_SUBPATH="pseudotime/variability/" #We can introduce this later. not relevant for NOW.
 
 
-NNUNET_ROOT_PATH="/home/parhomesmaeili/Helmholtz Group/MICCAI2026_nnunet/nnUNet_Metrics_$SPLIT_NAME"
+NNUNET_ROOT_PATH="$MASTER_NNUNET_METRICS_ROOT/$MASTER_NNUNET_METRICS_SUBFOLDER"
 NNUNET_REFERENCE_FILE="cross_class_scores.csv"
 REFERENCE_COLUMN="Automatic Init"
 
@@ -55,7 +54,7 @@ CONFIG_NAME="$MASTER_CONFIG_NAME"
   echo "Processing applications: ${APPS[@]}" for runs on dataset $DATASET_NAME for pseudotime plotting
   echo "=============================================="
   for RUN_NUM in "${RUN_NUMS[@]}"; do
-      ALGORITHM_RESULTS_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/Results_Pseudotime/$SPLIT_NAME";
+      ALGORITHM_RESULTS_ROOT_PATH="$MASTER_RESULTS_ROOT/Results_Pseudotime/$SPLIT_NAME";
       if [ "$RUN_NUM" == "-aggregated" ]; then
         EXPERIMENT_NAMES=()
         for DATASET_NAME in "${DATASET_NAMES[@]}"; do
@@ -66,7 +65,7 @@ CONFIG_NAME="$MASTER_CONFIG_NAME"
         exit 1 #We should only be plotting the aggregated runs, as the single runs can be too volatile to obtain a meaningful plot here.
       fi
       OUTPUT_SUBPATH="$SPLIT_NAME/$PROMPTER/run$RUN_NUM/$CONFIG_NAME/selection_plot" #We can specify the config name here to avoid overwriting when we run different configurations of the plot.
-      OUTPUT_RESULT_ROOT="/home/parhomesmaeili/IS-Validation-Framework/Results_Plotting/$OUTPUT_SUBPATH" #$OUTPUT_SUBPATH"
+      OUTPUT_RESULT_ROOT="$MASTER_RESULTS_ROOT/Results_Plotting/$OUTPUT_SUBPATH" #$OUTPUT_SUBPATH"
       REFERENCE_RESULT_ROOTS=()
       for DATASET_NAME in "${DATASET_NAMES[@]}"; do
         REFERENCE_RESULT_ROOTS+=("$NNUNET_ROOT_PATH/$DATASET_NAME/nnUNet_metrics")

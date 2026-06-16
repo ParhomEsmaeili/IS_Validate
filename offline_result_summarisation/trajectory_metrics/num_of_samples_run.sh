@@ -20,7 +20,7 @@ echo "  Apps: ${APPS[@]}"
 echo "  Datasets: ${DATASET_NAMES[@]}"
 echo "=============================================="
 
-NNUNET_ROOT_PATH="/home/parhomesmaeili/Helmholtz Group/MICCAI2026_nnunet/nnUNet_Metrics_$SPLIT_NAME"
+NNUNET_ROOT_PATH="$MASTER_NNUNET_METRICS_ROOT/$MASTER_NNUNET_METRICS_SUBFOLDER"
 # RUN_NUMS=("1" "2" "3")
 RUN_NUMS=("${MASTER_RUN_NUMS[@]}") #("1" "2" "3" "-aggregated")
 
@@ -38,7 +38,7 @@ for index in ${!DATASET_NAMES[@]}; do
   for APP in "${APPS[@]}"; do
     for RUN_NUM in "${RUN_NUMS[@]}"; do
       if [ "$RUN_NUM" == "-aggregated" ]; then
-        ALGORITHM_RESULTS_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/Results_Pseudotime/$SPLIT_NAME";
+        ALGORITHM_RESULTS_ROOT_PATH="$MASTER_RESULTS_ROOT/Results_Pseudotime/$SPLIT_NAME";
         EXPERIMENT_NAME="$APP/$DATASET_NAME/$PROMPTER/run$RUN_NUM";  
         OUTPUT_RESULT_ROOT="$ALGORITHM_RESULTS_ROOT_PATH/$EXPERIMENT_NAME/pseudotime_metrics";
         ALGORITHM_RESULTS_PATH="$ALGORITHM_RESULTS_ROOT_PATH/$EXPERIMENT_NAME/pseudotime_metrics"

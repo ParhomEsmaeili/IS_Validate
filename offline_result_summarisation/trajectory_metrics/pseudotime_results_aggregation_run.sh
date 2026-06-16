@@ -26,7 +26,7 @@ REFERENCE_FILE="all_pseudotime_metrics.csv"
 for index in ${!DATASET_NAMES[@]}; do
   DATASET_NAME=${DATASET_NAMES[$index]};
   DATASET_ID=${DATASET_IDS[$index]};
-  ALGORITHM_RESULTS_ROOT_PATH="/home/parhomesmaeili/IS-Validation-Framework/Results_Pseudotime/$SPLIT_NAME"
+  ALGORITHM_RESULTS_ROOT_PATH="$MASTER_RESULTS_ROOT/Results_Pseudotime/$SPLIT_NAME"
 
   for APP in "${APPS[@]}"; do
     echo "=============================================="
@@ -51,7 +51,7 @@ for index in ${!DATASET_NAMES[@]}; do
     if [ ${#ALGORITHM_RESULTS_ROOTS[@]} -gt 0 ]; then
       echo ALGORITHM_RESULTS_ROOTS: "${ALGORITHM_RESULTS_ROOTS[@]}"
       OUTPUT_SUBPATH="$EXPERIMENT_BASENAME/run-aggregated"
-      OUTPUT_RESULT_ROOT="/home/parhomesmaeili/IS-Validation-Framework/Results_Pseudotime/$SPLIT_NAME/$OUTPUT_SUBPATH";
+      OUTPUT_RESULT_ROOT="$MASTER_RESULTS_ROOT/Results_Pseudotime/$SPLIT_NAME/$OUTPUT_SUBPATH";
 
       python3 $SCRIPT_DIR/"pseudotime_result_aggregation.py" \
           --algorithm_result_roots "${ALGORITHM_RESULTS_ROOTS[@]}" \

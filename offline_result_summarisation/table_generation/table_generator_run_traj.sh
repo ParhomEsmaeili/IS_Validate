@@ -29,8 +29,8 @@ DICE_ITERATION_STATISTIC=("${MASTER_DICE_ITERATION_STATISTIC[@]}")
 NSD_ITERATION_STATISTIC=("${MASTER_NSD_ITERATION_STATISTIC[@]}")
 NOI_STATISTIC=("${MASTER_NOI_STATISTIC[@]}")
 
-RANKING_ROOT="/home/parhomesmaeili/IS-Validation-Framework/Results_Ranking/$SPLIT_NAME/$CONFIG_NAME"
-REFERENCE_METRICS_ROOT="/home/parhomesmaeili/IS-Validation-Framework/Results_Pseudotime/$SPLIT_NAME"
+RANKING_ROOT="$MASTER_RESULTS_ROOT/Results_Ranking/$SPLIT_NAME/$CONFIG_NAME"
+REFERENCE_METRICS_ROOT="$MASTER_RESULTS_ROOT/Results_Pseudotime/$SPLIT_NAME"
 # QUANTILE="0.5"
 
 AXIS_OF_COMPLEXITY_NAME="All Tasks Visualised, nnU-Net Threshold: $NNUNET_STATISTIC_NAME_CALL" #Quantile $QUANTILE"
@@ -38,7 +38,7 @@ AXIS_OF_COMPLEXITY_NAME="All Tasks Visualised, nnU-Net Threshold: $NNUNET_STATIS
 DATASET_NAMES=("${MASTER_DATASET_NAMES[@]}")
 
 
-OUTPUT_ROOT="/home/parhomesmaeili/IS-Validation-Framework/PrintedResults/$SPLIT_NAME/$CONFIG_NAME/$AXIS_OF_COMPLEXITY_NAME"
+OUTPUT_ROOT="$MASTER_RESULTS_ROOT/PrintedResults/$SPLIT_NAME/$CONFIG_NAME/$AXIS_OF_COMPLEXITY_NAME"
 CAPTION="${AXIS_OF_COMPLEXITY_NAME} on $SPLIT_NAME Comparison Table"
 LABEL="tab:${AXIS_OF_COMPLEXITY_NAME}_${SPLIT_NAME}_comparison_${CONFIG_NAME[@]}"
 
@@ -50,12 +50,6 @@ EXPERIMENT_SUBPATHS=()
 for DATASET_NAME in "${DATASET_NAMES[@]}"; do
     EXPERIMENT_SUBPATHS+=("$DATASET_NAME/$PROMPTER/run$RUN_NAME/pseudotime_metrics")
 done
-# METRICS_CONFIG='{"all_auc_summaries.csv": {"Dice_auc_median": null, "NSD_auc_median": null}, "all_iteration_summaries.csv": {"Dice_median": {"rows": ["Interactive Init", "Interactive Edit Iter 100"]}, "NSD_median": {"rows": ["Interactive Init", "Interactive Edit Iter 100"]}}, "summarised_num_interactions_fitting.csv": {"Normalised_Median_NOI": null, "Failure_Cases_Fraction": null}}'
-# METRICS_CONFIG='{"all_auc_summaries.csv": {"Dice_auc_median": null, "NSD_auc_median": null}, "all_iteration_summaries.csv": {"Dice_median": {"rows": ["Interactive Init", "Interactive Edit Iter 100"]}, "NSD_median": {"rows": ["Interactive Init", "Interactive Edit Iter 100"]}}, "summarised_num_interactions_fitting.csv": {"Normalised_Median_NOI": {"rows": ["quantile_Q = '${QUANTILE}'"]}, "Failure_Cases_Fraction": {"rows": ["quantile_Q = '${QUANTILE}'"]}}}'
-
-# METRICS_CONFIG="{\"all_auc_summaries.csv\": {\"Dice_auc_mean\": null, \"NSD_auc_mean\": null}, \"all_iteration_summaries.csv\": {\"Dice_mean\": {\"rows\": [\"Interactive Init\", \"Interactive Edit Iter 100\"]}, \"NSD_mean\": {\"rows\": [\"Interactive Init\", \"Interactive Edit Iter 100\"]}}, \"summarised_num_interactions_fitting.csv\": {\"Normalised_Mean_NOI\": {\"rows\": [\"quantile_Q = '${QUANTILE}'\"]}, \"Failure_Cases_Fraction\": {\"rows\": [\"quantile_Q = '${QUANTILE}'\"]}}}"
-# METRICS_CONFIG="{\"all_auc_summaries.csv\": {\"Dice_auc_${DICE_AUC_STATISTIC[0]}\": null, \"NSD_auc_${NSD_AUC_STATISTIC[0]}\": null}, \"all_iteration_summaries.csv\": {\"Dice_${DICE_ITERATION_STATISTIC[0]}\": {\"rows\": [\"Interactive Init\", \"Interactive Edit Iter 100\"]}, \"NSD_${NSD_ITERATION_STATISTIC[0]}\": {\"rows\": [\"Interactive Init\", \"Interactive Edit Iter 100\"]}}, \"summarised_num_interactions_fitting.csv\": {\"Normalised_${NOI_STATISTIC[0]^}_NOI\": {\"rows\": [\"${NNUNET_STATISTIC_NAME_CALL}\"]}, \"Failure_Cases_Fraction\": {\"rows\": [\"${NNUNET_STATISTIC_NAME_CALL}\"]}}}"
-# TRAJ_SIG_METRICS_CONFIG="{\"all_trajectory_aucs.csv\": {\"NOI\": {\"cols\": [\"Normalised_${NOI_STATISTIC[0]^}_NOI_trajectory_auc\"]}, \"NoF\": {\"cols\": [\"Failure_Cases_Fraction_trajectory_auc\"]}}}}, \"AUC\": {\"subpath\": \"all_trajectory_aucs.csv\", \"confs\": {\"Dice_AUC\": {\"cols\": [\"Dice_auc_${DICE_AUC_STATISTIC[0]}_trajectory_auc\"]}, \"NSD_AUC\": {\"cols\": [\"NSD_auc_${NSD_AUC_STATISTIC[0]}_trajectory_auc\"]}}}}, \"Dice\": {\"subpath\": \"all_trajectory_aucs.csv\", \"confs\": {\"Dice Init.\": {\"cols\": [\"Dice_${DICE_ITERATION_STATISTIC[0]} Init._trajectory_auc\"]}, \"Dice Interactive Edit Iter 100\": {\"cols\": [\"Dice_${DICE_ITERATION_STATISTIC[0]} Interactive Edit Iter 100_trajectory_auc\"]}}}}, \"NSD\": {\"subpath\": \"all_trajectory_aucs.csv\", \"confs\": {\"NSD Init.\": {\"cols\": [\"NSD_${NSD_ITERATION_STATISTIC[0]} Init._trajectory_auc\"]}, \"NSD Interactive Edit Iter 100\": {\"cols\": [\"NSD_${NSD_ITERATION_STATISTIC[0]} Interactive Edit Iter 100_trajectory_auc\"]}}}}"
 TRAJ_SIG_METRICS_CONFIG="{\"all_trajectory_aucs.csv\": {\"Dice_auc_${DICE_AUC_STATISTIC[0]}_trajectory_auc\": null, \"NSD_auc_${NSD_AUC_STATISTIC[0]}_trajectory_auc\": null, \"Dice_${DICE_ITERATION_STATISTIC[0]} Init._trajectory_auc\": null, \"Dice_${DICE_ITERATION_STATISTIC[0]} Interactive Edit Iter 100_trajectory_auc\": null, \"NSD_${NSD_ITERATION_STATISTIC[0]} Init._trajectory_auc\": null, \"NSD_${NSD_ITERATION_STATISTIC[0]} Interactive Edit Iter 100_trajectory_auc\": null, \"Normalised_${NOI_STATISTIC[0]^}_NOI_trajectory_auc\": null, \"Failure_Cases_Fraction_trajectory_auc\": null}}"
 
 
