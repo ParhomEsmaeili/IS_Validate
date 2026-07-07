@@ -259,6 +259,10 @@ def init_task_cases(
     #image cache for the dataset-level manifest. This is independent of the case list which is used as part
     #of the dataloader, which would require that the caselist be filtered to only include the cases
     #which have not yet been completed, in the case of continuation.
+    # full_image_cache: {case_id: {"images": {ch_name: rel_path, ...}, "labels": None}}
+    # Images values are relative paths from dataset.json — downstream consumers (e.g.
+    # generate_dataset_level_schema in run.py) must join with input_dataset_dir to get
+    # absolute paths. 'labels' is always set to None here as it is not part of the cache.
     full_image_cache = {case: copy.deepcopy(extractor(ds_configs, (sampling_metadata['split'], case))) for case in case_list}
     #We only retain the image relpaths, as this is only thing provided in the image cache!
     for case in full_image_cache.keys():

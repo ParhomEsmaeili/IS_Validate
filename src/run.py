@@ -47,12 +47,15 @@ def set_parse():
     parser.add_argument('--data_root', type=str, default=codebase_dir)
     parser.add_argument('--dataset_name', type=str, default='Dataset005_Prostate')
     parser.add_argument('--app_root', type=str, 
-                        default='/home/parhomesmaeili/IS_Codebase_Forks/nnInteractive_Fork'
-                        # default='/home/parhomesmaeili/MY METHOD/'
+                        # default='/home/parhomesmaeili/IS_Codebase_Forks/nnInteractive_Fork'
+                        default='/home/parhomesmaeili/MY METHOD/'
     ) 
     #NOTE:Just set for debugging purposes.
     #This acts as the name of the app, but also temporarily acts as the relative path name within the input_applications folder in the app root folder.
-    parser.add_argument('--app_name', type=str, default='nnInteractive_App')
+    parser.add_argument('--app_name', type=str, 
+                        # default='nnInteractive_App'
+                        default='CLoPA'
+    )
     parser.add_argument('--metrics_root', type=str, default=os.path.join(codebase_dir, 'results'))
     parser.add_argument('--seg_root', type=str, default=os.path.join(codebase_dir, 'results'))
     parser.add_argument('--continue_exec_root', type=str, default='/home/parhomesmaeili/IS-Validation-Framework/IS_Validate/continue_execution_files') #None
@@ -73,9 +76,9 @@ def set_parse():
     #########################
     
     #Name of the experiment, used to store results, checkpoints for continuation/auto
-    parser.add_argument('--experiment_basename', type=str, required=False, default=None)
+    parser.add_argument('--experiment_basename', type=str, required=False, default='post_refactor_experiment6')
     #Runtime environment arguments/system control.
-    parser.add_argument('--continue_execution', type=str2bool, default=False)
+    parser.add_argument('--continue_execution', type=str2bool, default=True)
     #seeding
     parser.add_argument('--shuffle_cases', type=str2bool, default=False)
     parser.add_argument('--random_seed', type=int, default=341103)
@@ -638,12 +641,16 @@ def generate_dataset_level_schema(
     'semantic_id_dict': experiment_args['semantic_id_dict']
     }
     #Now appending the full image cache.
+    # full_image_cache from init_task_cases:
+    #   {case_id: {"images": {ch_name: rel_path, ...}, "labels": None}}
+    # rel paths come from dataset.json — wrap with input_dataset_dir to make absolute.
+    # 'labels' is always None (removed by init_task_cases), so we guard with isinstance.
     dataset_level_schema['full_image_cache'] = experiment_args['full_image_cache']
     # dataset_level_schema['data_root'] = os.path.join(experiment_args['input_dataset_dir'])
     dataset_level_schema['full_image_cache'] = {
         case_id: {k_1: {
-            k_2: os.path.join(experiment_args['input_dataset_dir'], v_2) for k_2,v_2 in v_1.items()
-            } if isinstance(v_1, dict) else v_1 for k_1,v_1 in case_cache.items()}
+            k_2: os.path.abspath(os.path.join(experiment_args['input_dataset_dir'], v_2)) for k_2,v_2 in v_1.items()
+        } if isinstance(v_1, dict) else v_1 for k_1,v_1 in case_cache.items()}
         for case_id, case_cache in experiment_args['full_image_cache'].items()
     }
     #Assigning the dataset level schema. 

@@ -1,0 +1,32 @@
+[project]
+name = "is_validate"
+version = "0.1.0"
+description = "IS Validation Framework"
+requires-python = ">=3.9"
+dependencies = []
+
+[project.scripts]
+export-napari-config = "src.export_napari_config:main"
+
+[project.optional-dependencies]
+clopa = [
+    "batchgenerators==0.25.1",
+    "itk==5.4.2",
+    "kornia==0.8.2",
+    "matplotlib==3.10.7",
+    "monai==1.4.0",
+    "nibabel==5.3.2",
+    "numpy==1.26.4",
+    "opencv-python-headless==4.11.0.86",
+    "scikit-image==0.25.2",
+    "SimpleITK==2.5.2",
+    "surface-distance==0.1",
+    "torch==2.6.0",
+]
+
+[build-system]
+requires = ["setuptools>=42.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
