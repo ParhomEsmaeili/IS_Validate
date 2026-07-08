@@ -2,7 +2,7 @@
 name = "is_validate"
 version = "0.1.0"
 description = "IS Validation Framework"
-requires-python = "==3.10"
+requires-python = "==3.10.*"
 dependencies = []
 
 [project.scripts]
