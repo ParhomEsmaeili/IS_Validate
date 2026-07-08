@@ -134,6 +134,7 @@ dmypy.json
 venv/
 ENV/
 ubuntu_venv/
+uv.lock
 
 # IDE
 .idea/
