@@ -1,5 +1,49 @@
 # IS-Validation-Framework
 
+## Build / Installation
+
+### As a package
+
+```bash
+pip install "is-validate[clopa] @ git+https://github.com/ParhomEsmaeili/IS_Validate.git"
+```
+
+After install, the `export-napari-config` CLI is available globally:
+
+```bash
+export-napari-config --help
+```
+
+### CUDA support (optional)
+
+The `[clopa]` group pins `torch==2.6.0`. For GPU usage, install CUDA-compatible PyTorch **first** so pip doesn't pull the CPU-only default:
+
+```bash
+pip install torch==2.6.0 torchvision==0.21.0 \
+    --index-url https://download.pytorch.org/whl/cu126
+```
+
+Then install the package — pip sees torch is already satisfied and won't replace it:
+
+```bash
+pip install "is-validate[clopa] @ git+https://github.com/ParhomEsmaeili/IS_Validate.git"
+```
+
+### Local development
+
+```bash
+git clone https://github.com/ParhomEsmaeili/IS_Validate.git
+cd IS_Validate
+
+# Using pip
+pip install -e ".[clopa]"
+
+# Or using uv (faster)
+uv sync --extra clopa
+```
+
+---
+
 # Contract Specification
 
 > ⚠️ **Work in Progress** — Implementation of and adjustment into these contract formats is actively under development. Definitions are subject to change as the working group progresses through its action items.
