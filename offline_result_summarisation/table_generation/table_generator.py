@@ -12,7 +12,7 @@ import copy
 RESULT_SEARCHSTRING = {
     'Dice': 'Dice',
     'NSD': 'NSD',
-    'NoI': ['NOI', 'Failure_Cases_Fraction']
+    'NoI': ['NOI', 'Failure_Cases_Fraction', 'NoF']
 }
 MAPPING_SUBCATEGORIES = {
     'auc': 'nAUC',
@@ -580,30 +580,140 @@ def merge_task_column_latex(latex_str, task_col=0):
 def parse_args():
     parser = argparse.ArgumentParser(description="Generate summary table (Excel + LaTeX) from algorithm result folders.")
     parser.add_argument("--ranking_root", type=str, required=False, help="Root path to the folder which contains the rankings across all the algorithms.")
-    parser.add_argument("--metrics_root", type=str, required=True, help="Root path to the folder which contains the metrics across all the algorithms.")
+    parser.add_argument("--metrics_root", type=str, required=False, help="Root path to the folder which contains the metrics across all the algorithms.")
     parser.add_argument("--algorithm_names", nargs="+", required=True, help="Names of algorithms to summarise.")
-    #We explicitly pass algorithm names as we will use this to print the table!
-    parser.add_argument("--experiment_subpath", nargs="+", required=True, help="Subpath under each algorithm folder where metrics are stored.")
-    #NOTE: The subpath is assumed to be the same for all algorithms! 
+    parser.add_argument("--experiment_subpath", nargs="+", required=False, help="Subpath under each algorithm folder where metrics are stored.")
     parser.add_argument("--metrics_config", required=True, help="JSON file mapping metrics to information required for pulling.")
     parser.add_argument("--output_root", required=True, help="Output root path for Excel (.xlsx) and LaTeX (.tex) files.")
     parser.add_argument("--caption", default="", help="Caption to include in LaTeX table.")
     parser.add_argument("--label", default="", help="Label to include in LaTeX table.")
+    parser.add_argument("--cross_fold_mode", action='store_true', default=False,
+                        help="If set, read metric values from cross_fold_summary CSVs instead of per-algorithm folders.")
+    parser.add_argument("--cross_fold_root", type=str, default=None,
+                        help="Path to Results_CrossSplit/<CONFIG_NAME>/ containing cross_fold_summary_snapshot.csv and _trajectory.csv")
     return parser.parse_args()
+
+def build_cross_fold_table(
+    ranking_root: str,
+    cross_fold_root: str,
+    task_name: str,
+    metrics_config: Dict[str, Any],
+    algorithm_names: List[str],
+) -> pd.DataFrame:
+    """
+    metrics_config is a flat {metric_name: None} mapping. metric_name must match the
+    'metric' column exactly as written by cross_fold_sig_and_ranking.py (e.g. 'NOI',
+    'NoF', 'Dice_AUC', 'Dice Init.', 'Dice Interactive Edit Iter 100') -- these are
+    already final, fully-composed labels, unlike the per-run metrics_config used by
+    build_table, so no per-file/per-row extraction is needed here.
+    """
+    summary_csv = os.path.join(cross_fold_root, task_name, 'cross_fold_summary_snapshot.csv')
+    if not os.path.isfile(summary_csv):
+        summary_csv = os.path.join(cross_fold_root, task_name, 'cross_fold_summary_trajectory.csv')
+    if not os.path.isfile(summary_csv):
+        raise FileNotFoundError(f"No cross_fold_summary CSV found for dataset {task_name} in {cross_fold_root}.")
+    summary_df = pd.read_csv(summary_csv)
+
+    metric_names = list(metrics_config.keys())
+
+    metrics_storage = {}
+    for alg_name in algorithm_names:
+        alg_metrics = {}
+        for metric_name in metric_names:
+            matched = summary_df[(summary_df['algorithm'] == alg_name) & (summary_df['metric'] == metric_name)]
+            if matched.empty:
+                continue
+            mean_val = matched['cross_fold_mean'].values[0]
+            std_val = matched['cross_fold_std'].values[0]
+            alg_metrics[metric_name] = f"{mean_val:.3f}±{std_val:.3f}"
+        metrics_storage[alg_name] = alg_metrics
+
+    first_alg = algorithm_names[0]
+    counts = dict()
+    extracted_submetrics = dict()
+    for k, v in RESULT_SEARCHSTRING.items():
+        if isinstance(v, list):
+            submetrics = [key for key in metrics_storage[first_alg] if any([substring in key for substring in v])]
+        else:
+            submetrics = [key for key in metrics_storage[first_alg] if v in key]
+        counts[k] = len(submetrics)
+        extracted_submetrics[k] = submetrics
+
+    columns = [[k] * v for k, v in counts.items()]
+    columns = [i for sublist in columns for i in sublist]
+    ordered_dict = {k: sort_by_substring_order(v, COLUMN_ORDERING) for k, v in extracted_submetrics.items()}
+    subcolumns = [i for sublist in ordered_dict.values() for i in sublist]
+    arrays = [columns, subcolumns]
+    tuples = list(zip(*arrays))
+    flat_cols = [('Task', ''), ('Algorithm', '')]
+    full_cols = pd.MultiIndex.from_tuples(flat_cols + tuples, names=["Metric Type", "Submetric"])
+    rows = []
+
+    if ranking_root is not None:
+        ranking_path = os.path.join(ranking_root, task_name, 'per_metric_algorithm_rankings.csv')
+        if os.path.isfile(ranking_path):
+            rankings = pd.read_csv(ranking_path, index_col=0)
+        else:
+            rankings = None
+    else:
+        rankings = None
+
+    bold_cells = set()
+    for idx, alg_name in enumerate(algorithm_names):
+        metrics = metrics_storage[alg_name]
+        rankings_alg = rankings.loc[alg_name] if (rankings is not None and alg_name in rankings.index) else None
+        row = [task_name, alg_name]
+        for col in tuples:
+            submetric = col[-1]
+            metric_value = metrics.get(submetric, '')
+            # submetric is already the exact ranking column name (cross-fold metric
+            # names are final labels, e.g. 'Dice Init.', 'NoF'), so no name rebuilding
+            # via RANKING_NON_ITERABLE_MAP/iterable_metrics is needed here.
+            if rankings_alg is not None and submetric in rankings_alg.index:
+                if rankings_alg[submetric] == 1:
+                    bold_cells.add((idx, col))
+            row.append(metric_value)
+        rows.append(row)
+
+    df = pd.DataFrame(rows, columns=full_cols)
+    for col in set([col for _, col in bold_cells]):
+        tied_cells = [cell for cell in bold_cells if cell[1] == col]
+        if len(tied_cells) > 1:
+            for cell in tied_cells:
+                bold_cells.discard(cell)
+
+    for row_idx, col_tuple in bold_cells:
+        col_pos = df.columns.get_loc(col_tuple)
+        df.iloc[row_idx, col_pos] = f"**{df.iloc[row_idx, col_pos]}**"
+
+    return df
+
 
 def main():
     args = parse_args()
 
     cfg = load_metrics_config(args.metrics_config)
     df_cumulative = pd.DataFrame()
-    for experiment_subpath in args.experiment_subpath:
-        folders = {alg_name: os.path.join(args.metrics_root, alg_name, experiment_subpath) for alg_name in args.algorithm_names}
-        if os.name == 'posix':
-            df_cumulative = pd.concat([df_cumulative, build_table(args.ranking_root, folders, experiment_subpath.split('/')[0], cfg)])
-            
-            
-        else:
-            raise NotImplementedError("Windows OS is not currently supported for table generation.")
+
+    if args.cross_fold_mode:
+        if args.cross_fold_root is None:
+            raise ValueError("--cross_fold_root must be provided when --cross_fold_mode is set.")
+        for dataset_name in [p for p in os.listdir(args.cross_fold_root) if os.path.isdir(os.path.join(args.cross_fold_root, p))]:
+            if os.name == 'posix':
+                df_cumulative = pd.concat([df_cumulative, build_cross_fold_table(
+                    args.ranking_root, args.cross_fold_root, dataset_name, cfg, args.algorithm_names
+                )])
+            else:
+                raise NotImplementedError("Windows OS is not currently supported for table generation.")
+    else:
+        if args.metrics_root is None or args.experiment_subpath is None:
+            raise ValueError("--metrics_root and --experiment_subpath must be provided when --cross_fold_mode is not set.")
+        for experiment_subpath in args.experiment_subpath:
+            folders = {alg_name: os.path.join(args.metrics_root, alg_name, experiment_subpath) for alg_name in args.algorithm_names}
+            if os.name == 'posix':
+                df_cumulative = pd.concat([df_cumulative, build_table(args.ranking_root, folders, experiment_subpath.split('/')[0], cfg)])
+            else:
+                raise NotImplementedError("Windows OS is not currently supported for table generation.")
 
     write_csv(df_cumulative, args.output_root)
     generate_latex(df_cumulative, caption=args.caption, label=args.label, output_path=args.output_root + '/summary_tex.txt')
