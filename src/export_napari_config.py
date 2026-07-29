@@ -17,10 +17,24 @@ this script:
   3. Checks for an existing algorithm-state checkpoint (.pkl) to determine
      the default adaptation episode number.
 
-  4. Writes everything to config.json, which bundles the full experiment
-     configuration and checkpoint reference. This allows the same task
-     to be reproduced in the front-end for interactive experimentation
-     with the continually adapted method.
+  4. Writes everything to config.json with the following fields:
+
+       dataset_level_schema:
+         data_schema:
+           dataset_name           Name of the dataset
+           dataset_image_channels Channel name to index mapping
+           task_channels          Selected channels for this task
+           spacing_info           Median spacing and anisotropy metadata
+         segmentation_task_schema:
+           semantic_id_dict       Class name to integer ID mapping
+         full_image_cache         Case ID -> absolute paths to image files
+
+       checkpoint_path            Path to the algorithm-state .pkl (or null)
+       default_episode_number     Adaptation episode to load (null = latest)
+
+     This bundles the full experiment configuration and checkpoint reference,
+     allowing the same task to be reproduced in the front-end for interactive
+     experimentation with the continually adapted method.
 
   With --preprocess, also runs the MONAI transform pipeline
   (LoadImaged -> Orientationd -> channel/label merging) on every case
