@@ -1,4 +1,34 @@
 #!/usr/bin/env python3
+"""
+export-napari-config: bundle an experiment configuration for initialising a
+continually adapted method in an interactive front-end.
+
+Given a dataset, experiment config ID, and optional adapted-model checkpoint,
+this script:
+
+  1. Resolves the experiment config from the validation framework's config
+     registry (task configs, prompter configs, metric configs).
+
+  2. Builds a dataset-level schema containing:
+       - dataset metadata (channels, spacing)
+       - semantic class mapping (e.g. background=0, whole_prostate=1)
+       - full image cache with absolute paths to every case
+
+  3. Checks for an existing algorithm-state checkpoint (.pkl) to determine
+     the default adaptation episode number.
+
+  4. Writes everything to config.json, which bundles the full experiment
+     configuration and checkpoint reference. This allows the same task
+     to be reproduced in the front-end for interactive experimentation
+     with the continually adapted method.
+
+  With --preprocess, also runs the MONAI transform pipeline
+  (LoadImaged -> Orientationd -> channel/label merging) on every case
+  and writes per-case nifti triplets (image, eval_label, reference_label)
+  so the front-end receives data in a consistent format (RAS orientation,
+  merged channels/labels). The image cache is updated to point to these
+  preprocessed files instead of the originals.
+"""
 import argparse
 import json
 import os
@@ -176,7 +206,8 @@ def build_dataset_level_schema(dataset_level_data_schema, semantic_id_dict, full
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Export napari config for CLoPA adapted model inference'
+        description='Bundle experiment config, dataset schema, and checkpoint reference '
+                    'for initialising a continually adapted method in an interactive front-end'
     )
     parser.add_argument('--dataset_name', type=str, default='Dataset005_Prostate',
                         help='Name of the dataset subfolder under datasets/')
