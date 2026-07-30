@@ -380,9 +380,9 @@ def gen_experiment_args(args):
     orig_metric_pulled = extractor(orig_metric_configs, (metric_id,))
     orig_prompter_pulled = extractor(orig_prompter_manifest, (prompter_id,))
     #We do a dict deep equals
-    assert dict_deep_equals(orig_task_pulled, output_dict['experiment_config']['task']['config']), 'The task config pulled based on the experiment manifest does not match the original task config with the corresponding id, please check your experiment manifest and task configs for consistency and clarity.'
-    assert dict_deep_equals(orig_metric_pulled, output_dict['experiment_config']['metrics']['config']), 'The metric config pulled based on the experiment manifest does not match the original metric config with the corresponding id, please check your experiment manifest and metric configs for consistency and clarity.'
-    assert dict_deep_equals(orig_prompter_pulled, output_dict['experiment_config']['prompter']['config']), 'The prompt config pulled based on the experiment manifest does not match the original prompt config with the corresponding id, please check your experiment manifest and prompt configs for consistency and clarity.'
+    assert dict_deep_equals(orig_task_pulled, output_dict['experiment_config']['task']['config'])[0], 'The task config pulled based on the experiment manifest does not match the original task config with the corresponding id, please check your experiment manifest and task configs for consistency and clarity.'
+    assert dict_deep_equals(orig_metric_pulled, output_dict['experiment_config']['metrics']['config'])[0], 'The metric config pulled based on the experiment manifest does not match the original metric config with the corresponding id, please check your experiment manifest and metric configs for consistency and clarity.'
+    assert dict_deep_equals(orig_prompter_pulled, output_dict['experiment_config']['prompter']['config'])[0], 'The prompt config pulled based on the experiment manifest does not match the original prompt config with the corresponding id, please check your experiment manifest and prompt configs for consistency and clarity.'
 
 
     #If all ok, lets assign the relevant configs
@@ -481,12 +481,12 @@ def gen_experiment_args(args):
         assert dict_deep_equals(
             orig_prompt_configs[output_dict['prompter_configs']['init_prompt_conf']['name']],
             output_dict['prompter_configs']['init_prompt_conf']['config']
-        )
+        )[0]
     if output_dict['prompter_configs']['edit_prompt_conf']['name'] is not None:
         assert dict_deep_equals(
             orig_prompt_configs[output_dict['prompter_configs']['edit_prompt_conf']['name']],
             output_dict['prompter_configs']['edit_prompt_conf']['config']
-        )
+        )[0]
     #If we passed it, then we can now assign the config dict.
     output_dict['inf_init_prompt_config'] =  output_dict['prompter_configs']['init_prompt_conf']['config'] 
     output_dict['inf_edit_prompt_config'] = output_dict['prompter_configs']['edit_prompt_conf']['config']

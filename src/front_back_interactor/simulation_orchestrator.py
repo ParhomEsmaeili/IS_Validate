@@ -621,6 +621,13 @@ class FrontEndSimulator:
         #which is that the number of image channels must be FIXED and match the dataset level schema!
         assert request['image']['metatensor'].ndim == 4, 'The input image must be in CHWD format for the sample-level data schema generation to work, as this is currently dependent on the dataset-level schema which is in CHWD format.'
         assert request['image']['metatensor'].shape[0] == len(self.args['dataset_level_schema']['data_schema']['task_channels']), 'The number of channels in the input image must match the number of channels in the dataset-level schema for the sample-level data schema generation to work, as this is currently dependent on the dataset-level schema which is in CHWD format.'
+        # TODO: task_channels below is just echoed from the dataset-level schema, not
+        # actually derived from this sample/case. Fine while every case has the same
+        # channels, but if we ever branch out to genuine multi-channel cases (some
+        # samples missing a modality, or varying channel sets per case), this needs to
+        # become a real per-sample channel schema threaded through from the dataloader,
+        # not a pass-through of the dataset-level default. See matching TODO at the
+        # consuming assertion in clopa/app.py's binary_subject_prep().
         return {
             'data_schema': {
                 'task_channels': self.args['dataset_level_schema']['data_schema']['task_channels']

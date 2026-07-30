@@ -83,15 +83,15 @@ def resolve_experiment_config(
     assert dict_deep_equals(
         extractor(orig_task_configs, (task_id,)),
         exp_config['task']['config'],
-    )
+    )[0]
     assert dict_deep_equals(
         extractor(orig_metric_configs, (metric_id,)),
         exp_config['metrics']['config'],
-    )
+    )[0]
     assert dict_deep_equals(
         extractor(orig_prompter_manifest, (prompter_id,)),
         exp_config['prompter']['config'],
-    )
+    )[0]
 
     task_configs = exp_config['task']['config']
     prompter_configs = exp_config['prompter']['config']
@@ -196,21 +196,74 @@ def save_triplet(case_dict, case_staging_dir):
     return img_path
 
 
-def build_dataset_level_schema(dataset_level_data_schema, semantic_id_dict, full_image_cache, input_dataset_dir):
-    # full_image_cache from init_task_cases:
+def filter_case_images_and_task_channels(full_image_cache, task_channels, input_dataset_dir):
+    """For each case: restrict 'images' to only the dataset's task_channels, dropping any
+    other declared channel (e.g. non-task modalities like ADC) — they're never used for
+    inference, so there's no reason to carry them through. Then filter that down further
+    to only channels whose file actually exists on disk (a final safety precaution
+    against dataset.json declaring a file that isn't actually there). The channels that
+    survive both checks become this case's own task_channels. A case whose task_channels
+    ends up empty is excluded from full_image_cache entirely.
+
+    This script is intentionally more general than single-channel-
+    task constraint (app.py's binary_subject_prep() requires len(task_channels) == 1)
+    — task_channels here can be a genuine per-case subset if more than one is ever
+    configured at the dataset level, not just an all-or-nothing match.
+
+    Returns (filtered_full_image_cache, case_task_channels, excluded_case_ids):
+      filtered_full_image_cache: full_image_cache with 'images' restricted to each
+                                  case's surviving task channels, excluded cases removed
+      case_task_channels: {case_id: [present task channels]} for surviving cases
+      excluded_case_ids: case_ids with none of the task channels present
+    """
+    filtered_cache = {}
+    case_task_channels = {}
+    excluded_case_ids = []
+
+    for case_id, case_cache in full_image_cache.items():
+        images = case_cache.get('images', {})
+        present_task_channels = [
+            ch for ch in task_channels
+            if ch in images and os.path.exists(os.path.join(input_dataset_dir, images[ch]))
+        ]
+
+        if not present_task_channels:
+            excluded_case_ids.append(case_id)
+            continue
+
+        new_case_cache = dict(case_cache)
+        new_case_cache['images'] = {ch: images[ch] for ch in present_task_channels}
+        filtered_cache[case_id] = new_case_cache
+        case_task_channels[case_id] = present_task_channels
+
+    return filtered_cache, case_task_channels, excluded_case_ids
+
+
+def build_dataset_level_schema(dataset_level_data_schema, semantic_id_dict, full_image_cache, input_dataset_dir, case_task_channels):
+    # full_image_cache from init_task_cases (or, with --preprocess, already rewritten
+    # to {"merged": path} per case):
     #   {case_id: {"images": {ch_name: rel_path, ...}, "labels": None}}
     # rel paths come from dataset.json — wrap with input_dataset_dir to make absolute.
+    # os.path.join discards input_dataset_dir if the path is already absolute (e.g. the
+    # --preprocess merged path), so this is safe either way.
     # 'labels' is always None (removed by init_task_cases), so we guard with isinstance.
+    # 'images' has already been filtered down to existing channels, and cases with none
+    # of the task channels present have already been excluded from full_image_cache, by
+    # filter_case_images_and_task_channels() in main() — every case remaining here has
+    # an entry in case_task_channels.
     schema = {
         'data_schema': dataset_level_data_schema,
         'segmentation_task_schema': {'semantic_id_dict': semantic_id_dict},
         'full_image_cache': {
             case_id: {
-                k_1: {
-                    k_2: os.path.abspath(os.path.join(input_dataset_dir, v_2))
-                    for k_2, v_2 in v_1.items()
-                } if isinstance(v_1, dict) else v_1
-                for k_1, v_1 in case_cache.items()
+                **{
+                    k_1: {
+                        k_2: os.path.abspath(os.path.join(input_dataset_dir, v_2))
+                        for k_2, v_2 in v_1.items()
+                    } if isinstance(v_1, dict) else v_1
+                    for k_1, v_1 in case_cache.items()
+                },
+                'task_channels': case_task_channels[case_id],
             }
             for case_id, case_cache in full_image_cache.items()
         },
@@ -283,9 +336,19 @@ def main():
         last_completed_idx=None,
     )
 
+    full_image_cache, case_task_channels, excluded_case_ids = filter_case_images_and_task_channels(
+        full_image_cache=full_image_cache,
+        task_channels=exp_config['dataset_level_data_schema']['task_channels'],
+        input_dataset_dir=exp_config['input_dataset_dir'],
+    )
+    if excluded_case_ids:
+        print(f'Excluding {len(excluded_case_ids)} case(s) missing all task channels: {excluded_case_ids}')
+
     if args.preprocess:
         for case_dict in dataloader:
             case_id = case_dict['case_name']
+            if case_id in excluded_case_ids:
+                continue
             case_dir = os.path.join(experiment_dir, case_id)
             img_path = save_triplet(case_dict, case_dir)
             if case_id in full_image_cache:
@@ -296,6 +359,7 @@ def main():
         semantic_id_dict=semantic_id_dict,
         full_image_cache=full_image_cache,
         input_dataset_dir=exp_config['input_dataset_dir'],
+        case_task_channels=case_task_channels,
     )
 
     pkl_path = exp_config['checkpoint_path']
