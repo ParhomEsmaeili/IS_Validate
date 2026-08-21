@@ -3,19 +3,26 @@
 export-napari-config: bundle an experiment configuration for initialising a
 continually adapted method in an interactive front-end.
 
-Given a dataset, experiment config ID, and optional adapted-model checkpoint,
-this script:
+Given a dataset, experiment config ID, a required --sample_group_category, and
+an optional adapted-model checkpoint, this script:
 
   1. Resolves the experiment config from the validation framework's config
-     registry (task configs, prompter configs, metric configs).
+     registry (task configs, prompter configs, metric configs). The case set
+     browsable in the front-end comes from --sample_group_category, not from
+     the experiment's own sample_group_category — those are the cases the
+     experiment was actually trained/adapted on, which the front-end must not
+     expose.
 
   2. Builds a dataset-level schema containing:
        - dataset metadata (channels, spacing)
        - semantic class mapping (e.g. background=0, whole_prostate=1)
-       - full image cache with absolute paths to every case
+       - full image cache with absolute paths to every case in
+         --sample_group_category
 
   3. Checks for an existing algorithm-state checkpoint (.pkl) to determine
-     the default adaptation episode number.
+     the default adaptation episode number, and cross-checks
+     --sample_group_category's cases against the checkpoint's own recorded
+     adaptation-eligible case pool — the export fails if any overlap.
 
   4. Writes everything to config.json with the following fields:
 
@@ -60,7 +67,7 @@ from src.data.utils import init_task_cases
 
 def resolve_experiment_config(
     dataset_name, experiment_conf_id, experiment_basename, run_num,
-    data_root, configs_root, checkpoint_root,
+    data_root, configs_root, checkpoint_root, sample_group_category,
 ):
     input_dataset_dir = os.path.join(data_root, 'datasets', dataset_name)
     exp_conf_dir = os.path.join(configs_root, dataset_name)
@@ -102,6 +109,13 @@ def resolve_experiment_config(
     assert has_path(task_configs, ('infer_info',))
     assert has_path(task_configs, ('seg_problem',))
     assert has_path(task_configs, ('data_transforms', 'semantic_class_mapping'))
+
+    # task_configs['data_sampling']['sample_group_category'] as read from the experiment
+    # manifest is whatever case set the actual experiment/adaptation run trained on. The
+    # front-end needs a case set for interactive testing, which is a genuinely different
+    # thing — the cases it browses must be ones the checkpoint has never adapted on — so
+    # it's a required, separately-specified input here, not read from the manifest.
+    task_configs['data_sampling']['sample_group_category'] = sample_group_category
 
     assert has_path(prompter_configs, ('annotation_conf',))
 
@@ -285,6 +299,12 @@ def main():
                              '(e.g. post_refactor_experiment6)')
     parser.add_argument('--run_num', type=str, default='run1',
                         help='Run number for .pkl filename')
+    parser.add_argument('--sample_group_category', type=str, nargs='+', required=True,
+                        help='Case set to expose in the front-end, as <category> '
+                             '[fold ...] (e.g. "kfold_5_train fold_4", or a single '
+                             '"all_..." category with no folds). Checked against the '
+                             'checkpoint\'s own recorded case pool — the export fails '
+                             'if any case here was ever eligible for adaptation.')
     parser.add_argument('--output', type=str, required=True,
                         help='Root directory for all output files. An experiment-specific '
                              'subdirectory <dataset>/<basename>_<run>/ is created inside, '
@@ -323,6 +343,7 @@ def main():
         data_root=args.data_root,
         configs_root=args.configs_root,
         checkpoint_root=args.continue_exec_root,
+        sample_group_category=args.sample_group_category,
     )
 
     semantic_id_dict, full_image_cache, dataloader = init_task_cases(
@@ -344,6 +365,34 @@ def main():
     if excluded_case_ids:
         print(f'Excluding {len(excluded_case_ids)} case(s) missing all task channels: {excluded_case_ids}')
 
+    # Cross-check against the checkpoint's own recorded case pool — the set of cases
+    # that was actually eligible for adaptation, as recorded in the checkpoint itself
+    # (not re-derived from the experiment manifest, which could drift from what the
+    # checkpoint actually saw). This is the real leakage guard: --sample_group_category
+    # must produce a case set the checkpoint has never had a chance to adapt on.
+    pkl_path = exp_config['checkpoint_path']
+    checkpoint = None
+    if pkl_path and os.path.exists(pkl_path):
+        with open(pkl_path, 'rb') as f:
+            checkpoint = pickle.load(f)
+
+        checkpoint_case_pool = set(
+            checkpoint.get('algorithm_state', {})
+            .get('meta_algorithm_state', {})
+            .get('dataset_level_schema', {})
+            .get('full_image_cache', {})
+            .keys()
+        )
+        leaked_case_ids = set(full_image_cache.keys()) & checkpoint_case_pool
+        if leaked_case_ids:
+            raise ValueError(
+                f'--sample_group_category {args.sample_group_category} includes '
+                f'{len(leaked_case_ids)} case(s) that were eligible for adaptation in '
+                f'checkpoint {pkl_path}: {sorted(leaked_case_ids)[:10]}'
+                f'{"..." if len(leaked_case_ids) > 10 else ""}. '
+                'Pick a case set disjoint from the checkpoint\'s adaptation pool.'
+            )
+
     if args.preprocess:
         for case_dict in dataloader:
             case_id = case_dict['case_name']
@@ -362,13 +411,8 @@ def main():
         case_task_channels=case_task_channels,
     )
 
-    pkl_path = exp_config['checkpoint_path']
     default_episode_number = None
-
-    if pkl_path and os.path.exists(pkl_path):
-        with open(pkl_path, 'rb') as f:
-            checkpoint = pickle.load(f)
-
+    if checkpoint is not None:
         algo_state = checkpoint.get('algorithm_state', {})
         meta_state = algo_state.get('meta_algorithm_state', {})
         adaptation_number = meta_state.get('adaptation_number')
@@ -379,6 +423,7 @@ def main():
         'dataset_level_schema': dataset_level_schema,
         'checkpoint_path': pkl_path,
         'default_episode_number': default_episode_number,
+        'sample_group_category': args.sample_group_category,
     }
 
     config_path = os.path.join(experiment_dir, 'config.json')
@@ -386,6 +431,7 @@ def main():
         json.dump(output, f, indent=2)
 
     print(f'Config written to {config_path}')
+    print(f'Sample group category: {args.sample_group_category} ({len(full_image_cache)} case(s))')
     if default_episode_number is not None:
         print(f'Default episode: {default_episode_number}')
     else:
