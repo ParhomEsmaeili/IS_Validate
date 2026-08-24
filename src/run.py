@@ -632,28 +632,46 @@ def generate_dataset_level_schema(
     ):
     assert experiment_args != None, 'The experiment args must be provided to generate the dataset level schema, please check your input arguments.'
     assert 'dataset_level_data_schema' in experiment_args, 'The dataset level data schema must be provided in the experiment args to generate the dataset level schema'
-    
+
     dataset_level_schema = dict()
-    #Appending the data schema
-    dataset_level_schema['data_schema'] = experiment_args['dataset_level_data_schema']
+
+    # full_image_cache and case_present_channels come straight from init_task_cases (via
+    # experiment_args), which already ran filter_case_images_and_task_channels once;
+    # main() asserts full presence right after that call — no need to recompute or
+    # re-check here.
+
+    # Appending the data schema. task_channels is exposed as {channel_name: canonical_index} —
+    # the dataset-wide vocabulary. Per-sample schemas (see simulation_orchestrator.py's
+    # generate_sample_level_schema) report each case's own present channels against this
+    # superset, rather than echoing it as if every sample were identical.
+    dataset_level_schema['data_schema'] = {
+        **experiment_args['dataset_level_data_schema'],
+        'task_channels': {
+            name: idx for idx, name in enumerate(experiment_args['dataset_level_data_schema']['task_channels'])
+        },
+    }
     #Appending some segmentation task schema.
     dataset_level_schema['segmentation_task_schema'] = {
     'semantic_id_dict': experiment_args['semantic_id_dict']
     }
-    #Now appending the full image cache.
-    # full_image_cache from init_task_cases:
-    #   {case_id: {"images": {ch_name: rel_path, ...}, "labels": None}}
-    # rel paths come from dataset.json — wrap with input_dataset_dir to make absolute.
-    # 'labels' is always None (removed by init_task_cases), so we guard with isinstance.
-    dataset_level_schema['full_image_cache'] = experiment_args['full_image_cache']
-    # dataset_level_schema['data_root'] = os.path.join(experiment_args['input_dataset_dir'])
+    # Now appending the full image cache: absolute paths (rel paths come from dataset.json,
+    # wrapped with input_dataset_dir), plus each case's own present task_channels as computed
+    # by init_task_cases. 'labels' is always None (removed by init_task_cases), so we guard
+    # with isinstance.
     dataset_level_schema['full_image_cache'] = {
-        case_id: {k_1: {
-            k_2: os.path.abspath(os.path.join(experiment_args['input_dataset_dir'], v_2)) for k_2,v_2 in v_1.items()
-        } if isinstance(v_1, dict) else v_1 for k_1,v_1 in case_cache.items()}
+        case_id: {
+            **{
+                k_1: {
+                    k_2: os.path.abspath(os.path.join(experiment_args['input_dataset_dir'], v_2))
+                    for k_2, v_2 in v_1.items()
+                } if isinstance(v_1, dict) else v_1
+                for k_1, v_1 in case_cache.items()
+            },
+            'task_channels': experiment_args['case_present_channels'][case_id],
+        }
         for case_id, case_cache in experiment_args['full_image_cache'].items()
     }
-    #Assigning the dataset level schema. 
+    #Assigning the dataset level schema.
     experiment_args['dataset_level_schema'] = dataset_level_schema
 
     return experiment_args
@@ -1136,7 +1154,7 @@ def main():
     ################################## Configuration and extraction of data-related info.  ######################################################################
     
     #Extraction of the semantic id dictionary, and the initialisation of the dataloader
-    semantic_id_dict, full_image_cache, dataloader = init_task_cases(
+    semantic_id_dict, full_image_cache, task_channels, case_present_channels, fully_missing_case_ids, partially_missing_case_ids, dataloader = init_task_cases(
         dataset_dir=experiment_args['input_dataset_dir'],
         exp_task_configs=experiment_args['task_configs'],
         metric_configs=experiment_args['metrics_configs'],
@@ -1152,6 +1170,19 @@ def main():
     experiment_args['full_image_cache'] = full_image_cache #We store it in the experiment args, however we will
     #NOT carry this forward into the evaluation side, it is just tidier to have it in the dictionary for
     #generating the dataset level schema.
+    experiment_args['case_present_channels'] = case_present_channels
+    # Overwrite with the exact value init_task_cases actually used to compute case_present_channels
+    # (and, internally, im_keys) — this was previously extracted a second, independent time here
+    # (same underlying config, no drift risk, but two computations of the same thing regardless).
+    experiment_args['dataset_level_data_schema']['task_channels'] = task_channels
+    #This pipeline currently requires full, uniform task_channels presence across every case (matching
+    #what MergeImChannels and friends still assume elsewhere) — init_task_cases itself stays neutral on
+    #this, so the fail-loudly decision is made here, once, right after case construction.
+    assert not fully_missing_case_ids and not partially_missing_case_ids, (
+        f'{len(fully_missing_case_ids)} case(s) have none, and {len(partially_missing_case_ids)} case(s) have only '
+        f'some, of the configured task_channels present on disk: {fully_missing_case_ids + partially_missing_case_ids}. '
+        'Check the dataset and experiment config for consistency.'
+    )
 
     #We append the semantic id dict dict to the experiment args. 
     experiment_args['semantic_id_dict'] = semantic_id_dict

@@ -268,6 +268,23 @@ def init_task_cases(
     for case in full_image_cache.keys():
         full_image_cache = dict_path_modif(full_image_cache, (case, 'labels'), None)
 
+    # Restrict each case's images to the dataset's task_channels and record which of those
+    # channels actually exist (both a manifest key AND a file on disk) for that case. This is
+    # the single source of truth for per-case channel presence — create_case_list (below) builds
+    # its image keys straight from case_present_channels instead of re-deriving presence itself, and
+    # callers (run.py's generate_dataset_level_schema, export_napari_config.py) consume the same
+    # computation for their dataset-level schema instead of each calling this again independently.
+    # fully_missing_case_ids / partially_missing_case_ids are returned uninterpreted — whether
+    # either is acceptable is a caller-specific policy, not something this function decides: e.g.
+    # run.py currently requires both empty (full uniform presence, matching what MergeImChannels
+    # and friends still assume everywhere else), while export_napari_config.py tolerates
+    # fully_missing_case_ids as cases to exclude from front-end browsing.
+    task_channels = extractor(exp_task_configs, ('data_sampling', 'image_conf', 'image_channel'))
+    full_image_cache, case_present_channels, fully_missing_case_ids, partially_missing_case_ids = filter_case_images_and_task_channels(
+        full_image_cache=full_image_cache,
+        task_channels=task_channels,
+        input_dataset_dir=dataset_dir,
+    )
 
     #Now we will filter the case list to only include cases after the last completed case, if provided.
     if last_completed_case is not None:
@@ -283,13 +300,15 @@ def init_task_cases(
     #Now we create the case list dictionary which will be used for passing through to the dataloader.
 
     case_list, image_keys, eval_annotation_keys, reference_annotation_keys = create_case_list(
-        dataset_dir=dataset_dir, 
+        dataset_dir=dataset_dir,
         ds_configs=ds_configs,
         sampling_metadata=sampling_metadata,
         exp_task_configs=exp_task_configs,
         prompter_configs=prompter_configs,
         metric_configs=metric_configs,
-        case_list=case_list)
+        case_list=case_list,
+        case_present_channels=case_present_channels,
+        full_image_cache=full_image_cache)
 
     #Create a temporary transforms configs dictionary. It defines the set of parameters required for any downstream function
     #in the dataloaders which is non-default (i.e. loading to RAS orientation, etc.)
@@ -318,7 +337,67 @@ def init_task_cases(
     # common conventions). This is just a temporary hacky fix until we build a proper infrastructure for the dataloading pipeline.
     transforms_configs.update({'non_standard_transfs':{k:v for k,v in exp_task_configs['data_transforms'].items() if k != 'semantic_class_mapping'}})
 
-    return semantic_id_dict, full_image_cache, dataloader_generator(case_list=case_list, image_keys=image_keys, eval_annotation_keys=eval_annotation_keys, reference_annotation_keys=reference_annotation_keys, transforms_configs=transforms_configs)
+    return (
+        semantic_id_dict,
+        full_image_cache,
+        task_channels,
+        case_present_channels,
+        fully_missing_case_ids,
+        partially_missing_case_ids,
+        dataloader_generator(case_list=case_list, image_keys=image_keys, eval_annotation_keys=eval_annotation_keys, reference_annotation_keys=reference_annotation_keys, transforms_configs=transforms_configs),
+    )
+
+
+def filter_case_images_and_task_channels(full_image_cache, task_channels, input_dataset_dir):
+    """For each case: restrict 'images' to only the dataset's task_channels, dropping any
+    other declared channel (e.g. non-task modalities like ADC) — they're never used for
+    inference, so there's no reason to carry them through. Then filter that down further
+    to only channels whose file actually exists on disk (a final safety precaution
+    against dataset.json declaring a file that isn't actually there). The channels that
+    survive both checks become this case's own task_channels — a genuine per-case subset,
+    not just an echo of the dataset-level task_channels default.
+
+    Returns (filtered_full_image_cache, case_present_channels, fully_missing_case_ids,
+    partially_missing_case_ids):
+      filtered_full_image_cache: full_image_cache with 'images' restricted to each
+                                  case's surviving task channels; cases with zero
+                                  present channels removed entirely
+      case_present_channels: {case_id: [present task channels]} for cases with at least
+                           one channel present (i.e. not in fully_missing_case_ids)
+      fully_missing_case_ids: case_ids with none of the task channels present
+      partially_missing_case_ids: case_ids with some but not all of the task channels
+                                   present — distinguished from full presence so a
+                                   caller that currently requires uniform presence
+                                   across every case (e.g. run.py) can enforce that by
+                                   asserting both id lists are empty, while a caller
+                                   that tolerates partial cases (e.g.
+                                   export_napari_config.py) can ignore this list
+    """
+    filtered_cache = {}
+    case_present_channels = {}
+    fully_missing_case_ids = []
+    partially_missing_case_ids = []
+
+    for case_id, case_cache in full_image_cache.items():
+        images = case_cache.get('images', {})
+        present_task_channels = [
+            ch for ch in task_channels
+            if ch in images and os.path.exists(os.path.join(input_dataset_dir, images[ch]))
+        ]
+
+        if not present_task_channels:
+            fully_missing_case_ids.append(case_id)
+            continue
+        if len(present_task_channels) < len(task_channels):
+            partially_missing_case_ids.append(case_id)
+
+        new_case_cache = dict(case_cache)
+        new_case_cache['images'] = {ch: images[ch] for ch in present_task_channels}
+        filtered_cache[case_id] = new_case_cache
+        case_present_channels[case_id] = present_task_channels
+
+    return filtered_cache, case_present_channels, fully_missing_case_ids, partially_missing_case_ids
+
 
 def create_filepath(dataset_dir, relpath):
     #Determining the actual abspath filepaths for the task at hand. 
@@ -343,30 +422,32 @@ def create_filepath(dataset_dir, relpath):
         return filepath  
 
 def create_case_list(
-        dataset_dir, 
+        dataset_dir,
         ds_configs,
         sampling_metadata,
         exp_task_configs,
         prompter_configs,
         metric_configs,
-        case_list):
+        case_list,
+        case_present_channels,
+        full_image_cache):
     '''
     Function which creates the dictionary of cases which will be required for passing through to the dataloader.
 
     Takes input arguments:
-    
+
     dataset_dir: The absolute path to the directory which contains everything relevant to the given dataset in the experiment.
-    
+
     ds_configs: The loaded dataset.json from the give dataset_dir, which will contain all of the relevant information for pathing
     and describing the default configuration of the dataset.
-    
-    sampling_metadata: A dictionary containing the metadata which describes the cases being sampled. 
+
+    sampling_metadata: A dictionary containing the metadata which describes the cases being sampled.
 
     exp_task_configs: A dictionary containing all of the relevant information which could be required for describing the task being performed
-    in the experiment. 
+    in the experiment.
 
-    prompter_configs: A dictionary containing all of the relevant information which could be required for 
-    describing the prompter being used in the experiment, which may also be relevant for describing the 
+    prompter_configs: A dictionary containing all of the relevant information which could be required for
+    describing the prompter being used in the experiment, which may also be relevant for describing the
     source of annotations being used for prompting/adaptation. Will contain the description of the
     annotation strata being used (henceforth this will constitute the reference annotation).
 
@@ -374,7 +455,20 @@ def create_case_list(
     This will also contain the description of the annotation strata which are being used for evaluation, which is relevant for the construction of the case list.
 
     case_list: The list of cases which will need to be constructed according to the configurations of the task.
-    
+
+    case_present_channels: {case_id: [present task channels]}, as computed once by
+    filter_case_images_and_task_channels() before this function runs. Image key
+    construction below reads presence from here rather than re-deriving it, so this
+    function no longer decides whether missing/partial channels are acceptable —
+    that policy lives with whichever caller inspects filter_case_images_and_task_channels's
+    fully_missing_case_ids / partially_missing_case_ids.
+
+    full_image_cache: the filtered image cache returned alongside case_present_channels by
+    that same filter_case_images_and_task_channels() call — image relpaths are read from
+    here, not re-derived from ds_configs, so there is exactly one place that computed them.
+    Only covers images; labels still come from ds_configs via case_manifest_dict below,
+    since full_image_cache never carries annotation data.
+
     Outputs:
 
     A list of case dictionaries, containing filepaths for the subsequent keys:
@@ -426,7 +520,7 @@ def create_case_list(
                
     #Now we load in the full set of dictionaries from the dataset.json for the given "high-level split", and then pick out the
     #the cases in the case list to construct the case_dict.
-    default_case_dict = {case:ds_configs[sampling_metadata['split']][case] for case in case_list}
+    case_manifest_dict = {case:ds_configs[sampling_metadata['split']][case] for case in case_list}
     
 
     #Now we extract the relevant fields which we want according to the image,
@@ -437,39 +531,65 @@ def create_case_list(
     # or the number of annotators are not uniform across the dataset. 
     
 
-    #PLEASE FORGIVE ME FOR THIS MESSY ENTANGLED RECURSIVE CODE. 
+    #PLEASE FORGIVE ME FOR THIS MESSY ENTANGLED RECURSIVE CODE.
     case_list = []
-    im_keys = None #We put this here in case case_list = [] and we never enter the for loop, but we still want to return something to avoid breaking.
+    # im_keys is the canonical, dataset-wide key set MergeImChannels is constructed with once
+    # for the whole Compose pipeline (src/data/utils.py's dataloader_generator) — it must NOT be
+    # derived from any single case's actual presence. A case with partial task_channels present
+    # (case_present_channels[case_name] below) still only gets image_{channel} filepath entries for
+    # what it actually has; if that case happens to be the last one processed, deriving im_keys
+    # from it would silently hand MergeImChannels the wrong (too-short) key set for every OTHER
+    # case too. Computed here, before the per-case loop, from the canonical task_channels
+    # config — independent of which cases exist or what they're missing.
+    # dataloader_generator asserts image_keys is None exactly when case_list is empty (its
+    # dummy-key branch). The output case_list (built below) ends up empty not just when
+    # case_manifest_dict itself is empty, but also when every case in it gets skipped by the
+    # "not in case_present_channels" guard below (e.g. every case in this sample_group_category is
+    # fully missing its task channels) — so the emptiness check has to be "does at least one
+    # case survive that guard", not case_manifest_dict's own truthiness.
+    #
+    # IMPORTANT: checking `if case_present_channels:` alone (ignoring case_manifest_dict entirely)
+    # would NOT be equivalent, and would still be buggy — case_present_channels is computed in
+    # init_task_cases() BEFORE the last_completed_case resume-trim is applied (see the trim
+    # block above this function's call site), so on a resumed run it can still hold entries for
+    # cases already completed in a prior run, which are no longer in case_manifest_dict (that
+    # dict is built from the already-trimmed case_list). So case_present_channels being non-empty
+    # says nothing about whether any case *remaining this run* survives — only cross-referencing
+    # against case_manifest_dict (which IS correctly trimmed) tells you that. Always tie this
+    # kind of "is there anything left to do" check to case_manifest_dict, not case_present_channels
+    # alone, for exactly this reason.
+    any_case_survives = any(case_name in case_present_channels for case_name in case_manifest_dict)
+    if any_case_survives:
+        im_keys = [f'image_{channel}' for channel in image_conf_dict['image_channel']]
+    else:
+        im_keys = None
     eval_annotation_keys = None #We put this here in case case_list = [] and we never enter the for loop, but we still want to return something to avoid breaking.
     reference_annotation_keys = None #We put this here in case case_list = [] and we never enter the for loop, but we still want to return something to avoid breaking.
 
-    for case_name, full_case_dict in default_case_dict.items():
+    for case_name, full_case_dict in case_manifest_dict.items():
+        if case_name not in case_present_channels:
+            continue  # fully missing all task channels — nothing to build for this case at all
+
         subdict = {'case_name':case_name}
         #Monai dataset constructor requires the use of lists, so we must put the case name as a field in the structure.
 
-        #first we extract the image data, we will raise a flag if any channels in the task config are missing, as we will for now assume 
-        #that the number of channels are consistent across all cases and contain a corresponding reference file.
-        
-        #We use an explicit for-loop for readability here, likely needs to be updated in the future.:
-        im_keys = []
-
-        for channel in image_conf_dict['image_channel']:
-            if not channel in full_case_dict['images'].keys():
-                raise KeyError('Attempted to extract a filepath for an image channel which does not even exist in the reference manifest \n' \
-                f'for case {case_name} we currently do not support any missingness in the image channels provided, we currently assume uniformity across all samples in an experiment')
-            elif not full_case_dict['images'][channel].endswith('.nii.gz'):
+        #Image presence (manifest key + on-disk existence) was already verified once, upfront,
+        #by filter_case_images_and_task_channels() — case_present_channels[case_name] is that
+        #verified per-case channel list (non-empty, guaranteed by the continue guard above), so
+        #we build this case's filepath entries straight from it rather than re-deriving presence
+        #here. It may still be a genuine subset of the full task_channels config (partial
+        #presence) — whether that's acceptable is the caller's policy to enforce, not this
+        #function's (see im_keys above for why the canonical key set doesn't shrink to match it).
+        case_images = full_image_cache[case_name]['images']
+        for channel in case_present_channels[case_name]:
+            if not case_images[channel].endswith('.nii.gz'):
                 #Hacky check, will need to modify when we consolidate the utils in the dataset conversion scripts which have some filetype
                 #checking.
                 raise Exception('The filepath which would be read was from a filetype which is not supported (only nii.gz for now)')
             else:
                 im_key = f'image_{channel}'
-                subdict[im_key] = create_filepath(dataset_dir=dataset_dir, relpath=full_case_dict['images'][channel])
-                if not im_key in im_keys:
-                    im_keys.append(f'image_{channel}')
-                #TODO: Will need to amend this to potentially handle cases of missingness in the future.
-                #We use this method instead of a set because the set introduces randomisation to the ordering, and we do not
-                #yet have an appropriate mechanism for preventing this in the dataloader, YET.
-        
+                subdict[im_key] = create_filepath(dataset_dir=dataset_dir, relpath=case_images[channel])
+
 
         #We now do the same for the evaluation annotations, a bit more involved, we will retain the hierarchical structure:
         # -annotator
@@ -594,7 +714,7 @@ def dataloader_generator(
         assert reference_annotation_keys != None, 'If case_list is not empty, then reference_annotation_keys must not be None.'
 
         if eval_annotation_keys == reference_annotation_keys:
-            #In this case then the reference and annotation are the exact same, 
+            #In this case then the reference and annotation are the exact same,
             # so we can just load them in a single time.
             load_keys = image_keys + eval_annotation_keys #We will just use the eval annotation keys for loading, and then merge them together in the transforms.
         else:
@@ -602,20 +722,42 @@ def dataloader_generator(
                 raise ValueError('There is some overlap in the keys for the eval annotations and the reference annotations, but they are not exactly the same. This is not supported as it creates ambiguity in the dataloader transforms.')
             else:
                 load_keys = image_keys + eval_annotation_keys + reference_annotation_keys
+    # label_keys is whatever load_keys ends up being beyond image_keys (load_keys always starts
+    # with image_keys, per both branches above) — preserves the eval==reference dedup logic above
+    # without re-deriving it.
+    label_keys = load_keys[len(image_keys):]
+    # Image-key transforms get allow_missing_keys=True — a case can legitimately lack one of the
+    # canonical task channels (create_case_list already omits that key from such a case's raw
+    # dict; see case_present_channels). Label-key transforms stay at the strict default
+    # (allow_missing_keys=False) deliberately — a missing eval/reference annotation is never
+    # legitimate and should keep hard-failing here, not just rely on create_case_list's own
+    # upstream KeyError checks as the only guard. Split into two transform instances per type
+    # rather than one shared allow_missing_keys setting, so relaxing the check for images can't
+    # silently relax it for labels too.
     #Just the basic load transforms in order to load the files in for our custom transforms.
     if monai_version == '1.4.0':
         load_transforms = [
-            LoadImaged(keys=load_keys, reader="ITKReader", image_only=True),
-            EnsureChannelFirstd(keys=load_keys),
-            Orientationd(keys=load_keys, axcodes='RAS'),
-            EnsureTyped(keys=load_keys, dtype=[torch.float32]*len(image_keys)+[torch.uint8]*(len(load_keys)-len(image_keys))),
+            LoadImaged(keys=image_keys, reader="ITKReader", image_only=True, allow_missing_keys=True),
+            LoadImaged(keys=label_keys, reader="ITKReader", image_only=True),
+            EnsureChannelFirstd(keys=image_keys, allow_missing_keys=True),
+            EnsureChannelFirstd(keys=label_keys),
+            Orientationd(keys=image_keys, axcodes='RAS', allow_missing_keys=True),
+            Orientationd(keys=label_keys, axcodes='RAS'),
+            EnsureTyped(keys=image_keys, dtype=[torch.float32]*len(image_keys), allow_missing_keys=True),
+            EnsureTyped(keys=label_keys, dtype=[torch.uint8]*len(label_keys)),
         ]
     elif monai_version == '0.9.0':
-        load_transforms = [    
-            LoadImaged(keys=load_keys, image_only=False),
-            EnsureChannelFirstd(keys=load_keys),
-            Orientationd(keys=load_keys, axcodes='RAS'),
-            MetaTensorConstructor(keys=load_keys, dtypes=[torch.float32]*len(image_keys)+[torch.uint8]*(len(load_keys)-len(image_keys))),
+        load_transforms = [
+            LoadImaged(keys=image_keys, image_only=False, allow_missing_keys=True),
+            LoadImaged(keys=label_keys, image_only=False),
+            # EnsureChannelFirstd doesn't support allow_missing_keys in 0.9.0 — see
+            # MissingTolerantEnsureChannelFirstd's docstring for why.
+            MissingTolerantEnsureChannelFirstd(keys=image_keys),
+            EnsureChannelFirstd(keys=label_keys),
+            Orientationd(keys=image_keys, axcodes='RAS', allow_missing_keys=True),
+            Orientationd(keys=label_keys, axcodes='RAS'),
+            MetaTensorConstructor(keys=image_keys, dtypes=[torch.float32]*len(image_keys), allow_missing_keys=True),
+            MetaTensorConstructor(keys=label_keys, dtypes=[torch.uint8]*len(label_keys)),
         ]
     else:
         raise Exception('Unknown monai version.')
@@ -690,15 +832,45 @@ class MergeImChannels:
         d = dict(data)
         #Very hacky solution for now, this is not at all MONAI-like, in the sense that it is not going to iterate over
         #the keys as one typically would approach these types of implementations.
-        if len(self.input_keys) == 1:
+
+        # present_keys is derived from d itself — this case's actual, real presence — not from
+        # self.channel_list/self.input_keys (fixed, canonical, set once for the whole dataloader
+        # at construction time). A channel can be absent from d for any reason (create_case_list
+        # never added it because case_present_channels didn't have it, or an upstream
+        # allow_missing_keys=True load tolerated it being missing) — either way, checking d
+        # directly is the ground truth of what's actually available for THIS case, not a re-trust
+        # of case_present_channels (a separately-computed table that could in principle drift).
+        present_keys = [f'image_{channel}' for channel in self.channel_list if f'image_{channel}' in d]
+
+        if not present_keys:
+            raise Exception(
+                'MergeImChannels: none of the configured task channels were present in the loaded '
+                'data for this case — it should have been excluded upstream by create_case_list '
+                '(see its "not in case_present_channels" guard) before ever reaching the dataloader.'
+            )
+        elif len(present_keys) == 1:
+            sole_key = present_keys[0]
             print('Single channel image data, just need to re-name the data-struct.')
-            d[self.output_key] = d[self.input_keys[0]]   #Removing the deepcopy here... #copy.deepcopy(d[self.input_keys[0]]) 
-            #We will handle any stripping of the 
-            #irrelevant or non-permitted meta-information downstream. 
+            d[self.output_key] = d[sole_key]   #Removing the deepcopy here... #copy.deepcopy(d[sole_key])
+            #We will handle any stripping of the
+            #irrelevant or non-permitted meta-information downstream.
+            # Record the real, actually-merged channel order as metadata on the array itself —
+            # this is the ground truth generate_sample_level_schema (simulation_orchestrator.py)
+            # reads, rather than independently re-deriving order from case_present_channels (a
+            # separately-computed table that happens to agree today, but isn't read back from
+            # what this method actually did). data_instance_reformat's retained_keys must include
+            # 'channel_order' or this gets silently wiped before it ever reaches that point.
+            d[self.output_key].meta['channel_order'] = [sole_key[len('image_'):]]
         else:
+            # NOTE for whoever implements multi-channel here: present_keys (above) is already
+            # this case's real, per-case list of available channels, in task_channels order —
+            # use it directly for both the concatenation order and
+            # d[self.output_key].meta['channel_order'], rather than assuming every channel in
+            # channel_list is always present. Concatenation MUST follow task_channels order (the
+            # order filter_case_images_and_task_channels iterates in, inside init_task_cases).
             raise NotImplementedError('Attempted to use a configuration for handling multi-channel image data, which we have not yet configured.')
 
-        return d 
+        return d
     
 class MergeSegmentations:
     #A temporary hack, which will assume single annotator, single instance (or instance as a dummy proxy for semantic seg 
@@ -1166,8 +1338,12 @@ def data_instance_reformat(data_instance:dict):
     if not isinstance(reference_label_tensor, MetaTensor): #or not isinstance(label_tensor, torch.Tensor): 
         raise TypeError('Label tensor was not a MONAI meta-tensor.')
     
-    #Wiping all of the metadictionary outside of the affine and original affine keys. The user should not, and does not, require any of this other information! Bye bye!
-    retained_keys = ('original_affine', 'affine')
+    #Wiping all of the metadictionary outside of the affine, original affine, and channel_order
+    #keys. The user should not, and does not, require any of this other information! Bye bye!
+    #channel_order is set by MergeImChannels on the image tensor only (see src/data/utils.py's
+    #MergeImChannels.__call__) — eval_label/reference_label tensors never have it, so retaining
+    #it here is a no-op for those two.
+    retained_keys = ('original_affine', 'affine', 'channel_order')
 
     im_tensor.meta = {key:val for key, val in im_tensor.meta.items() if key in retained_keys}
     eval_label_tensor.meta = {key:val for key, val in eval_label_tensor.meta.items() if key in retained_keys}    
@@ -1307,11 +1483,37 @@ def read_jsons(dataset_abs_path:str, exp_data_type:str, fold :Union[str, None]):
             raise KeyError('Invalid experiment data set type selected, must be Test or Val.')
         
 
-class MetaTensorConstructor: 
-    #Very old and probably not robust for newer versions of monai, thankfully we won't need it for that anyways at a later point.
-    def __init__(self, keys, dtypes):
+class MissingTolerantEnsureChannelFirstd:
+    #MONAI 0.9.0's EnsureChannelFirstd doesn't take allow_missing_keys — its __call__ does raw
+    #d[key] lookups in a zip(self.keys, ...) loop rather than using MapTransform's key_iterator
+    #(which is what actually honors allow_missing_keys), so passing that kwarg would just be a
+    #TypeError, and even if it accepted it silently, missing keys would still crash. This wraps
+    #it: filter self.keys down to whatever's actually present in d, then delegate to a real
+    #EnsureChannelFirstd built just for those. Only needed for the monai_version == '0.9.0'
+    #image-key branch in dataloader_generator — the 1.4.0 EnsureChannelFirstd supports
+    #allow_missing_keys natively, and label keys are never allowed to be missing in the first
+    #place (create_case_list guarantees that upstream), so this wrapper is never used for labels.
+    def __init__(self, keys):
         self.keys = keys
-        self.dtypes = dtypes 
+
+    def __call__(self, data):
+        d = dict(data)
+        present_keys = [k for k in self.keys if k in d]
+        if not present_keys:
+            return d
+        return EnsureChannelFirstd(keys=present_keys)(d)
+
+
+class MetaTensorConstructor:
+    #Very old and probably not robust for newer versions of monai, thankfully we won't need it for that anyways at a later point.
+    def __init__(self, keys, dtypes, allow_missing_keys=False):
+        self.keys = keys
+        self.dtypes = dtypes
+        #Not a MONAI MapTransform, so allow_missing_keys isn't free here — mirrors MONAI's own
+        #key_iterator semantics by hand: skip a missing key if True, else raise. Needed so this
+        #stays consistent with LoadImaged/EnsureChannelFirstd/Orientationd's allow_missing_keys
+        #split between image keys (tolerant) and label keys (strict) in dataloader_generator.
+        self.allow_missing_keys = allow_missing_keys
     def __call__(self, data):
         if not monai_version == '0.9.0':
             raise Exception('Constructor was only implemented as a temporary stand-in.')
@@ -1319,9 +1521,13 @@ class MetaTensorConstructor:
 
         d = dict(data)
         for idx, key in enumerate(self.keys):
-            im = d[key] 
+            if key not in d:
+                if self.allow_missing_keys:
+                    continue
+                raise KeyError(f'Key `{key}` of transform `{self.__class__.__name__}` was missing in the data and allow_missing_keys==False.')
+            im = d[key]
             meta_dict = d[f'{key}_meta_dict']
-        
+
             modif_im = torch.from_numpy(im).to(dtype=self.dtypes[idx])#torch.float32)
             modif_meta = {
                 'original_affine': torch.from_numpy(meta_dict['original_affine']).to(dtype=torch.float32), 

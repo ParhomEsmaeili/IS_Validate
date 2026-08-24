@@ -87,13 +87,14 @@ class FrontEndSimulator:
         This is intended to provide the app with the necessary context, and conventions for addressing 
         the output arrays. Contains the following fields currently:
             data_schema: A dictionary containing the information regarding the data schema for the current sample, which is generated from the sample data instance and potentially the dataset-level schema. Contains the following fields:
-                task_channels: A dict denoting the channel-modality correspondence in the input image, which is 
-                currently in CHWD format. E.g., {'T1': 0, 'T2': 1, 'FLAIR': 2}. This need not necessarily
-                be contiguous, for now we assume any non-continguous indexing is handled by attaching an 
-                empty channel of zeros in the corresponding position in the input image.
-                 
-                Implicit assumption: The task channel in the dataset-schema is protected. Future versions 
-                may however override this protection. TBD.
+                task_channels: A dict denoting the channel-modality correspondence in the input image, which is
+                currently in CHWD format. Keys are this case's own present channel names (a subset of the
+                dataset-level task_channels vocabulary — a case can be missing a modality another case has);
+                values are that channel's index in *this sample's* array (0-contiguous, in whatever order
+                the array was actually built), not its canonical index in the dataset-level schema. E.g. if
+                the dataset-level vocabulary is {'T1': 0, 'T2': 1, 'FLAIR': 2} but this case is missing T2,
+                the sample-level dict is {'T1': 0, 'FLAIR': 1} — the array here is 2 channels wide, no
+                zero-padding to preserve dataset-level positions.
             semantic_id_dict: A dictionary containing the addressing convention for the arrays to correspond
             to the semantic labels. Presently, this is assumed to align exactly with the dictionary provided at
             dataset level (i.e., the semantic code is locked to a specific class always).
@@ -616,21 +617,43 @@ class FrontEndSimulator:
         This is intended to provide the app with the necessary context, and conventions for addressing the output arrays
         '''
         assert 'image' in request, 'The input request dictionary must contain an "image" key for generating the sample-level data schema.'
-        
-        #We put a temporary assertion until we find a way to pass through the sample-level data schema in the dataloader,
-        #which is that the number of image channels must be FIXED and match the dataset level schema!
-        assert request['image']['metatensor'].ndim == 4, 'The input image must be in CHWD format for the sample-level data schema generation to work, as this is currently dependent on the dataset-level schema which is in CHWD format.'
-        assert request['image']['metatensor'].shape[0] == len(self.args['dataset_level_schema']['data_schema']['task_channels']), 'The number of channels in the input image must match the number of channels in the dataset-level schema for the sample-level data schema generation to work, as this is currently dependent on the dataset-level schema which is in CHWD format.'
-        # TODO: task_channels below is just echoed from the dataset-level schema, not
-        # actually derived from this sample/case. Fine while every case has the same
-        # channels, but if we ever branch out to genuine multi-channel cases (some
-        # samples missing a modality, or varying channel sets per case), this needs to
-        # become a real per-sample channel schema threaded through from the dataloader,
-        # not a pass-through of the dataset-level default. See matching TODO at the
-        # consuming assertion in clopa/app.py's binary_subject_prep().
+
+        # channel_order is ground truth for this sample's actual channel identity/order — set by
+        # MergeImChannels (src/data/utils.py) directly on the array it merged, and threaded
+        # through here via data_instance_reformat's retained_keys. Missing here means either that
+        # whitelist regressed, or MergeImChannels's multi-channel branch was implemented without
+        # setting it (see the comments at both those sites).
+        assert 'meta_dict' in request['image'] and 'channel_order' in request['image']['meta_dict'], (
+            "request['image']['meta_dict'] must contain 'channel_order' — set by MergeImChannels "
+            "on the merged array and threaded through data_instance_reformat's retained_keys."
+        )
+        channel_order = request['image']['meta_dict']['channel_order']
+
+        # Cross-check against case_present_channels — computed independently, upfront, by
+        # filter_case_images_and_task_channels() inside init_task_cases(), and threaded through
+        # dataset_level_schema.full_image_cache. The two should always agree; this is a sanity
+        # assertion catching the two computations drifting apart, not the primary source (that's
+        # channel_order above).
+        case_channels = self.args['dataset_level_schema']['full_image_cache'][self.case_name]['task_channels']
+        assert channel_order == case_channels, (
+            f"Sample-level channel_order {channel_order!r} (from the actual merged array) does not "
+            f"match case_present_channels' precomputed {case_channels!r} for case {self.case_name!r} "
+            "— MergeImChannels and filter_case_images_and_task_channels have diverged."
+        )
+
+        # task_channels here maps each present channel's name to its position in *this sample's*
+        # array, which can differ from its canonical index in the dataset-level task_channels dict.
+        sample_task_channels = {ch: idx for idx, ch in enumerate(channel_order)}
+
+        assert set(sample_task_channels) <= set(self.args['dataset_level_schema']['data_schema']['task_channels']), \
+            'Sample-level task_channels must be a subset of the dataset-level task_channels vocabulary.'
+
+        assert request['image']['metatensor'].ndim == 4, 'The input image must be in CHWD format for the sample-level data schema generation to work.'
+        assert request['image']['metatensor'].shape[0] == len(sample_task_channels), 'The number of channels in the input image must match this case\'s own task_channels.'
+
         return {
             'data_schema': {
-                'task_channels': self.args['dataset_level_schema']['data_schema']['task_channels']
+                'task_channels': sample_task_channels
             },
             'segmentation_task_schema': {
                 'semantic_id_dict': self.args['semantic_id_dict']
