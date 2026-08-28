@@ -1,0 +1,42 @@
+[
+  {
+    "dataset": "Dataset001_BrainTumour",
+    "tolerance_prescribed": 5.0,
+    "tolerance_nnunet": 5.049509756796392
+  },
+  {
+    "dataset": "Dataset003_Liver",
+    "tolerance_prescribed": 7.0,
+    "tolerance_nnunet": 2.7732963954515766
+  },
+  {
+    "dataset": "Dataset004_Hippocampus",
+    "tolerance_prescribed": 1.0,
+    "tolerance_nnunet": 1.0
+  },
+  {
+    "dataset": "Dataset005_Prostate",
+    "tolerance_prescribed": 4.0,
+    "tolerance_nnunet": 3.5999999046325684
+  },
+  {
+    "dataset": "Dataset006_Lung",
+    "tolerance_prescribed": 2.0,
+    "tolerance_nnunet": 2.9135483424885873
+  },
+  {
+    "dataset": "Dataset007_Pancreas",
+    "tolerance_prescribed": 5.0,
+    "tolerance_nnunet": 4.132421789867699
+  },
+  {
+    "dataset": "Dataset008_HepaticVessel",
+    "tolerance_prescribed": 3.0,
+    "tolerance_nnunet": 11.349471682643667
+  },
+  {
+    "dataset": "Dataset010_Colon",
+    "tolerance_prescribed": 4.0,
+    "tolerance_nnunet": 7.032076766747774
+  }
+]

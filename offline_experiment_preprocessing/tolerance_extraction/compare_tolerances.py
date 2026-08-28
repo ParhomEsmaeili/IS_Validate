@@ -229,6 +229,13 @@ def save_comparison_with_manifest(
         json.dump(manifest, f, indent=2)
     print(f"Saved manifest: {manifest_path}")
 
+    # Save the actual tolerance values used to build the plot
+    values_path = config_dir / "tolerance_values.json"
+    values = comparison_df.to_dict(orient="records")
+    with open(values_path, "w") as f:
+        json.dump(values, f, indent=2)
+    print(f"Saved values: {values_path}")
+
     # Save plot
     plot_path = config_dir / f"{config_id}_tolerance_comparison.png"
     plot_comparison(

@@ -1,0 +1,32 @@
+[
+  {
+    "dataset": "Dataset011_Kits23",
+    "tolerance_prescribed": 1.0330772532390826,
+    "tolerance_nnunet": 0.9140623211860657
+  },
+  {
+    "dataset": "Dataset015_Kits23",
+    "tolerance_prescribed": 1.1498198361434828,
+    "tolerance_nnunet": 3.5546875
+  },
+  {
+    "dataset": "Dataset019_Kits23",
+    "tolerance_prescribed": 1.1328796488598762,
+    "tolerance_nnunet": 3.8135665487114507
+  },
+  {
+    "dataset": "Dataset023_Kits23",
+    "tolerance_prescribed": 1.0330772532390826,
+    "tolerance_nnunet": 0.8767107837510906
+  },
+  {
+    "dataset": "Dataset027_Kits23",
+    "tolerance_prescribed": 1.1498198361434828,
+    "tolerance_nnunet": 3.0
+  },
+  {
+    "dataset": "Dataset031_Kits23",
+    "tolerance_prescribed": 1.1328796488598762,
+    "tolerance_nnunet": 3.5364456480074633
+  }
+]
