@@ -41,6 +41,30 @@ def _log_case_event(level, stage, case_name, reason):
     print(f"[{level}][{stage}] case={case_name} reason={reason}")
 
 
+def _drop_page_cache(path):
+    """Advise the kernel to drop cached pages for path (a file, or a directory to recurse into)
+    once we're done reading/writing it. Processing a full dataset means touching hundreds of
+    large NIfTI volumes in one long-running process; without this, page cache charged to this
+    process's cgroup grows unbounded over the run, which can trip memory-pressure limits on
+    constrained machines even though the cache is normally freely reclaimable. This has no effect
+    on the file's actual content — it only evicts the kernel's read/write cache for it."""
+    path = Path(path)
+    if path.is_dir():
+        for child in path.iterdir():
+            _drop_page_cache(child)
+        return
+    if not path.is_file():
+        return
+    try:
+        fd = os.open(str(path), os.O_RDONLY)
+        try:
+            os.posix_fadvise(fd, 0, 0, os.POSIX_FADV_DONTNEED)
+        finally:
+            os.close(fd)
+    except OSError:
+        pass
+
+
 def _assert_not_under_source_case(source_case_dir, candidate_path, case_name, tag):
     source_case_dir = Path(source_case_dir).resolve(strict=False)
     candidate_path = Path(candidate_path).resolve(strict=False)
@@ -486,11 +510,17 @@ def process_single_case(case_dir, output_images_path, output_labels_path, semant
         _assert_not_under_source_case(case_dir, bg_output_file, case_name, f"background_file_from_{key}")
         bg_output_file.parent.mkdir(parents=True, exist_ok=True)
         bg_itk = sitk.GetImageFromArray(background_data)
-        # Apply spacing and orientation from original segmentation file
-        bg_itk.SetSpacing(seg_spacing)
-        bg_itk.SetOrigin(seg_origin)
-        bg_itk.SetDirection(seg_direction)
+        # Copy spacing/origin/direction from the just-loaded seg_itk (already the correctly
+        # cropped file written by save_nifti_images above), not the stale pre-crop seg_* header
+        # captured at the top of this function.
+        bg_itk.CopyInformation(seg_itk)
         sitk.WriteImage(bg_itk, str(bg_output_file))
+
+    # This case's raw input files and everything we just wrote for it are done being touched —
+    # drop their page cache now rather than letting it accumulate across the whole dataset run.
+    _drop_page_cache(case_dir)
+    _drop_page_cache(output_case_images_dir)
+    _drop_page_cache(output_case_labels_dir)
 
     return True
 
