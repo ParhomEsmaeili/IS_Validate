@@ -1015,6 +1015,28 @@ class MergeSegmentations:
     
     def __call__(self, data):
         d = dict(data)
+
+        #Before trusting input_keys[0]'s affine as the template for the merged output, we verify
+        #that every input_key actually agrees on the affine. Without this, a single mislabeled
+        #input (e.g. a background mask whose origin was zeroed by an upstream data bug) would
+        #silently propagate its wrong affine onto the merged result, since only the array values
+        #get overwritten below — the affine never gets revisited.
+        template_key = self.input_keys[0]
+        template_affine = d[template_key].meta['affine']
+        if not isinstance(template_affine, torch.Tensor):
+            template_affine = torch.as_tensor(template_affine)
+        for key in self.input_keys[1:]:
+            key_affine = d[key].meta['affine']
+            if not isinstance(key_affine, torch.Tensor):
+                key_affine = torch.as_tensor(key_affine)
+            if not torch.allclose(template_affine, key_affine):
+                raise ValueError(
+                    f"MergeSegmentations: affine mismatch between input keys for case "
+                    f"{d.get('case_name', '<unknown>')} — {template_key} affine={template_affine} "
+                    f"does not match {key} affine={key_affine}. All input_keys must describe the "
+                    "same physical space before merging."
+                )
+
         copied_metatensor_template = copy.deepcopy(d[self.input_keys[0]])
         #We check that the metatensor_template is actually a metatensor.
         if not isinstance(copied_metatensor_template, MetaTensor):
@@ -1296,8 +1318,28 @@ def iterate_dataloader_check(data_instance):
             raise Exception('The loaded data instance does not contain a meta dictionary')
 
 
-        #TODO: Put back in some checks on the metadata potentially... although i am going to wipe almost all of it anyways.
-        #TODO: Need to expand this to be flexible to multi-instance and multi-annotator setups. 
+        #TODO: Need to expand this to be flexible to multi-instance and multi-annotator setups.
+
+        #We assert that image, eval_label and reference_label all share the same affine, since
+        #downstream code (e.g. MergeSegmentations, CLoPA's WriteImage) assumes they describe the
+        #same physical space. This runs once per sample, on every app, right after the dataloader
+        #yields and before data_instance_reformat wipes the meta dict down to affine/channel_order.
+        im_affine = im_meta_dict['affine']
+        eval_label_affine = eval_label_meta_dict['affine']
+        reference_label_affine = reference_label_meta_dict['affine']
+        if not isinstance(im_affine, torch.Tensor):
+            im_affine = torch.as_tensor(im_affine)
+        if not isinstance(eval_label_affine, torch.Tensor):
+            eval_label_affine = torch.as_tensor(eval_label_affine)
+        if not isinstance(reference_label_affine, torch.Tensor):
+            reference_label_affine = torch.as_tensor(reference_label_affine)
+        if not torch.allclose(im_affine, eval_label_affine) or not torch.allclose(im_affine, reference_label_affine):
+            raise Exception(
+                f"Image, eval_label and reference_label affines do not match for case "
+                f"{data_instance.get('case_name', '<unknown>')}. "
+                f"image affine={im_affine}, eval_label affine={eval_label_affine}, "
+                f"reference_label affine={reference_label_affine}."
+            )
 
         #We assert that the data must be single channel for our current application!
         # if int(im_meta_dict['pixdim[4]']) != 1:
