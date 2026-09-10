@@ -141,10 +141,17 @@ def resolve_experiment_config(
         'spacing_info': spacing_config,
     }
 
-    experiment_name = f'{experiment_basename}_{run_num}'
-    checkpoint_path = os.path.join(
-        checkpoint_root, experiment_name + '.pkl'
-    )
+    # experiment_basename identifies a CLoPA checkpoint (.pkl) run, not the task/dataset
+    # schema — those come entirely from experiment_conf_id above. Generic/base-model exports
+    # (e.g. for the nnInteractive fork) have no checkpoint at all, so this is optional: when
+    # absent, checkpoint_path is None and the caller skips the .pkl-dependent branches below.
+    if experiment_basename is not None:
+        experiment_name = f'{experiment_basename}_{run_num}'
+        checkpoint_path = os.path.join(
+            checkpoint_root, experiment_name + '.pkl'
+        )
+    else:
+        checkpoint_path = None
 
     return {
         'input_dataset_dir': input_dataset_dir,
