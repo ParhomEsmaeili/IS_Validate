@@ -7,7 +7,7 @@
 			],
 			"image_conf": {
 				"image_channel": [
-					"T2w"
+					"t1gd"
 				]
 			}
 		},
@@ -38,7 +38,7 @@
 			],
 			"image_conf": {
 				"image_channel": [
-					"T2w"
+					"t1gd"
 				]
 			}
 		},
@@ -69,7 +69,7 @@
 			],
 			"image_conf": {
 				"image_channel": [
-					"T2w"
+					"t1gd"
 				]
 			}
 		},
@@ -100,7 +100,7 @@
 			],
 			"image_conf": {
 				"image_channel": [
-					"T2w"
+					"t1gd"
 				]
 			}
 		},
@@ -131,7 +131,7 @@
 			],
 			"image_conf": {
 				"image_channel": [
-					"T2w"
+					"t1gd"
 				]
 			}
 		},
@@ -162,7 +162,7 @@
 			],
 			"image_conf": {
 				"image_channel": [
-					"T2w"
+					"t1gd"
 				]
 			}
 		},
@@ -193,7 +193,7 @@
 			],
 			"image_conf": {
 				"image_channel": [
-					"T2w"
+					"t1gd"
 				]
 			}
 		},
@@ -229,7 +229,7 @@
 			],
 			"image_conf": {
 				"image_channel": [
-					"T2w"
+					"t1gd"
 				]
 			}
 		},
@@ -265,7 +265,7 @@
 			],
 			"image_conf": {
 				"image_channel": [
-					"T2w"
+					"t1gd"
 				]
 			}
 		},
@@ -301,7 +301,7 @@
 			],
 			"image_conf": {
 				"image_channel": [
-					"T2w"
+					"t1gd"
 				]
 			}
 		},
@@ -337,7 +337,7 @@
 			],
 			"image_conf": {
 				"image_channel": [
-					"T2w"
+					"t1gd"
 				]
 			}
 		},
@@ -373,7 +373,7 @@
 			],
 			"image_conf": {
 				"image_channel": [
-					"T2w"
+					"t1gd"
 				]
 			}
 		},
@@ -404,7 +404,7 @@
 			],
 			"image_conf": {
 				"image_channel": [
-					"T2w"
+					"t1gd"
 				]
 			}
 		},
@@ -435,7 +435,7 @@
 			],
 			"image_conf": {
 				"image_channel": [
-					"T2w"
+					"t1gd"
 				]
 			}
 		},
@@ -466,7 +466,7 @@
 			],
 			"image_conf": {
 				"image_channel": [
-					"T2w"
+					"t1gd"
 				]
 			}
 		},
@@ -497,7 +497,7 @@
 			],
 			"image_conf": {
 				"image_channel": [
-					"T2w"
+					"t1gd"
 				]
 			}
 		},
@@ -528,7 +528,7 @@
 			],
 			"image_conf": {
 				"image_channel": [
-					"T2w"
+					"t1gd"
 				]
 			}
 		},
@@ -559,7 +559,7 @@
 			],
 			"image_conf": {
 				"image_channel": [
-					"T2w"
+					"t1gd"
 				]
 			}
 		},
@@ -590,7 +590,7 @@
 			],
 			"image_conf": {
 				"image_channel": [
-					"T2w"
+					"t1gd"
 				]
 			}
 		},
@@ -626,7 +626,7 @@
 			],
 			"image_conf": {
 				"image_channel": [
-					"T2w"
+					"t1gd"
 				]
 			}
 		},
@@ -662,7 +662,7 @@
 			],
 			"image_conf": {
 				"image_channel": [
-					"T2w"
+					"t1gd"
 				]
 			}
 		},
@@ -698,7 +698,7 @@
 			],
 			"image_conf": {
 				"image_channel": [
-					"T2w"
+					"t1gd"
 				]
 			}
 		},
@@ -734,7 +734,7 @@
 			],
 			"image_conf": {
 				"image_channel": [
-					"T2w"
+					"t1gd"
 				]
 			}
 		},
@@ -770,7 +770,7 @@
 			],
 			"image_conf": {
 				"image_channel": [
-					"T2w"
+					"t1gd"
 				]
 			}
 		},
