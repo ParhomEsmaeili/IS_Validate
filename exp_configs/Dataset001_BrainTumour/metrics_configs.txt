@@ -39,7 +39,7 @@
 				"ignore_empty": false,
 				"include_per_class_scores": true,
 				"include_background_metric": false,
-				"tolerance_mm": 5.049509756796392
+				"tolerance_mm": 3.8106163923171468
 			}
 		},
 		"data_sampling": {
