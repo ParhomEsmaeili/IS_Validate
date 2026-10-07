@@ -217,7 +217,7 @@ def save_triplet(case_dict, case_staging_dir):
     return img_path
 
 
-def build_dataset_level_schema(dataset_level_data_schema, semantic_id_dict, full_image_cache, input_dataset_dir, case_present_channels):
+def build_dataset_level_schema(dataset_level_data_schema, semantic_id_dict, semantic_class_mapping, full_image_cache, input_dataset_dir, case_present_channels):
     # full_image_cache from init_task_cases (or, with --preprocess, already rewritten
     # to {"merged": path} per case):
     #   {case_id: {"images": {ch_name: rel_path, ...}, "labels": None}}
@@ -231,7 +231,15 @@ def build_dataset_level_schema(dataset_level_data_schema, semantic_id_dict, full
     # remaining here has an entry in case_present_channels.
     schema = {
         'data_schema': dataset_level_data_schema,
-        'segmentation_task_schema': {'semantic_id_dict': semantic_id_dict},
+        # semantic_class_mapping's values are what semantic_id_dict's keys actually merge
+        # together (e.g. 'tumour_core': ['enhancing tumour', 'non-enhancing tumor']) — the
+        # front-end displays this alongside semantic_id_dict so a session shows not just
+        # the final class name but what original labels it absorbed (or didn't — e.g.
+        # 'edema' folded into 'background' rather than ignored).
+        'segmentation_task_schema': {
+            'semantic_id_dict': semantic_id_dict,
+            'semantic_class_mapping': semantic_class_mapping,
+        },
         'full_image_cache': {
             case_id: {
                 **{
@@ -372,6 +380,7 @@ def main():
     dataset_level_schema = build_dataset_level_schema(
         dataset_level_data_schema=exp_config['dataset_level_data_schema'],
         semantic_id_dict=semantic_id_dict,
+        semantic_class_mapping=exp_config['task_configs']['data_transforms']['semantic_class_mapping'],
         full_image_cache=full_image_cache,
         input_dataset_dir=exp_config['input_dataset_dir'],
         case_present_channels=case_present_channels,
