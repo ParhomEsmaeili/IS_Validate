@@ -3,3 +3,5 @@
 triggers:
   - phrase: ""            # e.g. "bug report"
     tags: { type: bug, source: is_validate }
+  - phrase: ""            # e.g. "feature request"
+    tags: { type: feature, source: is_validate }
