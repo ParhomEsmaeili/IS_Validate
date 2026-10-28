@@ -164,6 +164,17 @@ class HeuristicInteractionState(HeuristicSpatialPromptGenerator):
                 'interaction_torch_format':{
                     'interactions': interaction_torch_format,
                     'interactions_labels': interaction_labels_torch_format,
+                    #Generic, type-agnostic per-prompt-type metadata that isn't a class label --
+                    #e.g. scribbles_axes/lassos_axes (the axis a scribble/lasso was drawn constant
+                    #along). Deliberately a separate sibling dict, not stuffed into
+                    #interactions_labels, which downstream consumers assume contains only
+                    #<type>_labels keys. Empty for now since no generator populates it yet
+                    #(scribble/lasso generation are still NotImplementedError stubs) -- once a
+                    #real generator exists, THIS is where it must insert e.g. 'scribbles_axes',
+                    #not interactions_labels. Consumers should read via .get('<type>_axes') with
+                    #no default assumed, since older interaction states won't have this key's
+                    #per-type entries populated either.
+                    'interactions_metadata': {},
                 },
                 'interaction_dict_format': interaction_dict_format,
                 'prev_probs':{
